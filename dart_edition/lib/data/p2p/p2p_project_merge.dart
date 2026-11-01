@@ -4,6 +4,7 @@ import "../../models/base_info_data.dart";
 import "../../models/character_data.dart";
 import "../../models/item_snapshot_data.dart";
 import "../../models/project_data.dart";
+import "../../models/writing_goal_data.dart";
 import "p2p_phrase_merge.dart";
 
 class P2pProjectRemainderSignatures {
@@ -83,6 +84,11 @@ class P2pProjectMergePlan {
     return ProjectData(
       projectUUID: localProject.projectUUID,
       baseInfoData: _baseInfoFromMap(baseInfoValues),
+      writingGoals: ProjectWritingGoals.fromJson({
+        'chapter': baseInfoValues['每章字數目標'],
+        'total': baseInfoValues['全文字數目標'],
+        'recovery': baseInfoValues['目標復原資料'] ?? const <String>[],
+      }),
       segmentsData: remainder.segmentsData,
       outlineData: remainder.outlineData,
       foreshadowData: remainder.foreshadowData,
@@ -153,9 +159,9 @@ class P2pProjectMergeEngine {
       groupType: "project",
       groupLabel: "作品資訊",
       fieldPrefix: "作品資訊",
-      base: _baseInfoToMap(base.baseInfoData),
-      local: _baseInfoToMap(local.baseInfoData),
-      remote: _baseInfoToMap(remote.baseInfoData),
+      base: _projectInfoToMap(base),
+      local: _projectInfoToMap(local),
+      remote: _projectInfoToMap(remote),
     );
     final phraseMerge = P2pPhraseMergePlan.create(
       projectUuid: projectUuid,
@@ -243,8 +249,8 @@ class P2pProjectMergeEngine {
       groupType: "project",
       groupLabel: "作品資訊",
       fieldPrefix: "作品資訊",
-      local: _baseInfoToMap(local.baseInfoData),
-      remote: _baseInfoToMap(remote.baseInfoData),
+      local: _projectInfoToMap(local),
+      remote: _projectInfoToMap(remote),
     );
     final phraseMerge = P2pPhraseMergePlan.create(
       projectUuid: projectUuid,
@@ -788,15 +794,21 @@ Map<String, CharacterEntryData> _charactersByStableId(
   return result;
 }
 
-Map<String, Object?> _baseInfoToMap(BaseInfoData value) => <String, Object?>{
-  "書名": value.bookName,
-  "作者": value.author,
-  "創作目的": value.purpose,
-  "回顧": value.toRecap,
-  "故事類型": value.storyType,
-  "簡介": value.intro,
-  "標籤": List<String>.from(value.tags),
-};
+Map<String, Object?> _projectInfoToMap(ProjectData data) {
+  final value = data.baseInfoData;
+  return <String, Object?>{
+    '每章字數目標': data.writingGoals.chapterWordGoal,
+    '全文字數目標': data.writingGoals.totalWordGoal,
+    '目標復原資料': data.writingGoals.recoveryXml,
+    "書名": value.bookName,
+    "作者": value.author,
+    "創作目的": value.purpose,
+    "回顧": value.toRecap,
+    "故事類型": value.storyType,
+    "簡介": value.intro,
+    "標籤": List<String>.from(value.tags),
+  };
+}
 
 BaseInfoData _baseInfoFromMap(Map<String, Object?> value) => BaseInfoData(
   bookName: value["書名"]! as String,

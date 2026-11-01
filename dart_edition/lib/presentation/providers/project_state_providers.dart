@@ -15,6 +15,7 @@ import "../../models/chapter_selection_data.dart" as chapter_module;
 import "../../models/outline_data.dart" as outline_module;
 import "../../models/plan_data.dart" as plan_module;
 import "../../models/project_data.dart";
+import "../../models/writing_goal_data.dart";
 import "../../features/phrases/phrase_entry.dart";
 import "../../models/project_file.dart";
 import "../../models/timeline_data.dart";
@@ -3211,6 +3212,7 @@ final projectDataProvider = Provider<ProjectData>((ref) {
   final itemWorkspace = ref.watch(itemWorkspaceProvider);
   return ProjectData(
     projectUUID: ref.watch(projectUuidProvider),
+    writingGoals: ref.watch(projectWritingGoalsProvider),
     baseInfoData: ref.watch(baseInfoDataProvider),
     segmentsData: ref.watch(segmentsDataProvider),
     outlineData: ref.watch(outlineDataProvider),
@@ -3236,3 +3238,15 @@ final projectDataProvider = Provider<ProjectData>((ref) {
     phrasesRecoveryPayload: ref.watch(phrasesRecoveryPayloadProvider),
   );
 });
+
+/// File-owned overrides; defaults are resolved separately and never copied here.
+class ProjectWritingGoalsNotifier extends Notifier<ProjectWritingGoals> {
+  @override
+  ProjectWritingGoals build() => const ProjectWritingGoals();
+  void setGoals(ProjectWritingGoals value) {
+    if (state != value) state = value;
+  }
+  void setGoal(WritingGoalKind kind, int? value) => setGoals(state.withGoal(kind, value));
+}
+final projectWritingGoalsProvider = NotifierProvider<ProjectWritingGoalsNotifier, ProjectWritingGoals>(ProjectWritingGoalsNotifier.new);
+final projectWritingSessionProvider = StateProvider<int>((ref) => 0);

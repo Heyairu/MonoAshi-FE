@@ -47,6 +47,7 @@ abstract final class HelpTopicId {
     'pages.copilot',
     'pages.settings',
     'pages.about',
+    home,
   ];
 
   static const commands = <String, String>{
@@ -63,6 +64,9 @@ abstract final class HelpTopicId {
     'undo': 'editor.undo',
     'redo': 'editor.redo',
     'punctuation': punctuation,
+    'phrases.library': phrases,
+    'phrases.insert': phrases,
+    'phrases.saveSelection': phrases,
     'find': search,
     'search.matchCase': 'search.matchCase',
     'search.wholeWord': 'search.wholeWord',

@@ -38,12 +38,6 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    tester
-        .widget<NeonIconButton>(
-          find.byKey(const ValueKey("snapshot-preview-follow")),
-        )
-        .onPressed!();
-    await tester.pumpAndSettle();
     final region = find.byKey(const ValueKey("world-name-ime-location"));
     final field = find.descendant(
       of: region,
@@ -254,12 +248,6 @@ void main() {
     container
         .read(itemWorkspaceProvider.notifier)
         .putClass(ItemClassData(classId: "relic", name: "石碑"));
-    await tester.pumpAndSettle();
-    tester
-        .widget<NeonIconButton>(
-          find.byKey(const ValueKey("snapshot-preview-follow")),
-        )
-        .onPressed!();
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key("location-link-item")));
     await tester.pumpAndSettle();

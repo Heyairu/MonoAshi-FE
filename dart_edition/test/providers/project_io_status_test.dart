@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:monogatari_assistant/application/project_import/selective_project_import.dart';
 import 'package:monogatari_assistant/bin/file.dart';
 import 'package:monogatari_assistant/data/repositories/file_repository.dart';
+import 'package:monogatari_assistant/data/repositories/user_profile_repository.dart';
 import 'package:monogatari_assistant/models/chapter_selection_data.dart';
 import 'package:monogatari_assistant/models/character_data.dart';
 import 'package:monogatari_assistant/models/character_snapshot_data.dart';
@@ -16,8 +17,64 @@ import 'package:monogatari_assistant/presentation/providers/core_providers.dart'
 import 'package:monogatari_assistant/presentation/providers/editor_coordinator_provider.dart';
 import 'package:monogatari_assistant/presentation/providers/project_io_providers.dart';
 import 'package:monogatari_assistant/presentation/providers/project_state_providers.dart';
+import 'package:monogatari_assistant/presentation/providers/global_state_providers.dart';
 
 void main() {
+  test(
+    'new projects use the default pen name without changing existing authors',
+    () async {
+      final profileRepository = _ProfileRepository(
+        const UserProfile(displayName: 'Pen Name', useAsDefaultPenName: true),
+      );
+      final container = ProviderContainer(
+        overrides: [
+          fileRepositoryProvider.overrideWithValue(_BlockingFileRepository()),
+          userProfileRepositoryProvider.overrideWithValue(profileRepository),
+        ],
+      );
+      addTearDown(container.dispose);
+      final controller = container.read(projectIoControllerProvider.notifier);
+      final first = await controller.createNewProject();
+      expect(first.data.baseInfoData.author, 'Pen Name');
+      container
+          .read(baseInfoDataProvider.notifier)
+          .setAuthor('Existing Author');
+      await container
+          .read(userProfileProvider.notifier)
+          .save(
+            const UserProfile(
+              displayName: 'New Pen Name',
+              useAsDefaultPenName: true,
+            ),
+          );
+      expect(container.read(baseInfoDataProvider).author, 'Existing Author');
+      expect(first.data.baseInfoData.author, 'Pen Name');
+      expect(
+        (await controller.createNewProject()).data.baseInfoData.author,
+        'New Pen Name',
+      );
+    },
+  );
+
+  test(
+    'display names without pen name opt-in leave new project authors blank',
+    () async {
+      final container = ProviderContainer(
+        overrides: [
+          fileRepositoryProvider.overrideWithValue(_BlockingFileRepository()),
+          userProfileRepositoryProvider.overrideWithValue(
+            _ProfileRepository(const UserProfile(displayName: 'Display Name')),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      final result = await container
+          .read(projectIoControllerProvider.notifier)
+          .createNewProject();
+      expect(result.data.baseInfoData.author, isEmpty);
+    },
+  );
+
   test('saveProject is operation-specific and does not block editor', () async {
     final repository = _BlockingFileRepository();
     final container = ProviderContainer(
@@ -189,6 +246,34 @@ void main() {
     expect(saveAsPayload.snapshot.projectUUID, isNotEmpty);
     expect(source.projectUUID, originalUuid);
   });
+
+  test(
+    'export awaits the actual result and cancellation does not report success',
+    () async {
+      final repository = _BlockingFileRepository()
+        ..exportCompleter = Completer<bool>();
+      final container = ProviderContainer(
+        overrides: [fileRepositoryProvider.overrideWithValue(repository)],
+      );
+      addTearDown(container.dispose);
+      final controller = container.read(projectIoControllerProvider.notifier);
+      final pending = controller.exportAs(
+        extension: 'txt',
+        currentData: ProjectData.empty(),
+        defaultFileName: 'cancelled',
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(
+        container.read(projectIoControllerProvider).requireValue.isExporting,
+        isTrue,
+      );
+      repository.exportCompleter!.complete(false);
+      expect(await pending, isFalse);
+      final status = container.read(projectIoControllerProvider).requireValue;
+      expect(status.isBusy, isFalse);
+      expect(status.message, isNull);
+    },
+  );
 
   test('first persistence keeps the in-memory collaboration UUID', () {
     final memoryProject = ProjectFile(
@@ -366,42 +451,51 @@ void main() {
     },
   );
 
-  test('selective Markdown includes lossless item snapshot sections', () async {
-    final repository = _BlockingFileRepository();
-    final container = ProviderContainer(
-      overrides: [fileRepositoryProvider.overrideWithValue(repository)],
-    );
-    addTearDown(container.dispose);
-    final data = ProjectData.empty()
-      ..itemClasses = <String, ItemClassData>{
-        'class-map': ItemClassData(classId: 'class-map', name: '地圖'),
-      }
-      ..itemInstanceStateChanges = <ItemInstanceStateChange>[
-        ItemInstanceStateChange(
-          stateChangeId: 'map-change',
-          instanceId: 'map-1',
-          sceneUUID: 'scene-library',
-          patch: ItemStatePatch(status: const StateValue<String>.set('破損')),
-        ),
-      ];
+  test(
+    'selective Markdown renders readable item states without internal IDs',
+    () async {
+      final repository = _BlockingFileRepository();
+      final container = ProviderContainer(
+        overrides: [fileRepositoryProvider.overrideWithValue(repository)],
+      );
+      addTearDown(container.dispose);
+      final data = ProjectData.empty()
+        ..itemClasses = <String, ItemClassData>{
+          'class-map': ItemClassData(classId: 'class-map', name: '地圖'),
+        }
+        ..itemInstances = {
+          'map-1': ItemInstanceData(
+            instanceId: 'map-1',
+            classId: 'class-map',
+            name: '舊地圖',
+          ),
+        }
+        ..itemInstanceStateChanges = <ItemInstanceStateChange>[
+          ItemInstanceStateChange(
+            stateChangeId: 'map-change',
+            instanceId: 'map-1',
+            sceneUUID: 'scene-library',
+            patch: ItemStatePatch(status: const StateValue<String>.set('破損')),
+          ),
+        ];
 
-    await container
-        .read(projectIoControllerProvider.notifier)
-        .exportSelective(
-          currentData: data,
-          defaultFileName: 'items',
-          selectedModules: const <String>{'Items'},
-          format: 'md',
-        );
+      await container
+          .read(projectIoControllerProvider.notifier)
+          .exportSelective(
+            currentData: data,
+            defaultFileName: 'items',
+            selectedModules: const <String>{'Items'},
+            format: 'md',
+          );
 
-    expect(repository.lastExportContent, contains('## ItemClasses'));
-    expect(
-      repository.lastExportContent,
-      contains('## ItemInstanceStateChanges'),
-    );
-    expect(repository.lastExportContent, contains('class-map'));
-    expect(repository.lastExportContent, contains('map-change'));
-  });
+      expect(repository.lastExportContent, contains('## 地圖'));
+      expect(repository.lastExportContent, contains('舊地圖'));
+      expect(repository.lastExportContent, contains('破損'));
+      expect(repository.lastExportContent, isNot(contains('class-map')));
+      expect(repository.lastExportContent, isNot(contains('map-change')));
+      expect(repository.lastExportContent, isNot(contains('```xml')));
+    },
+  );
 
   test(
     'verified remote snapshot overwrites only the known current location',
@@ -447,6 +541,19 @@ void main() {
   );
 }
 
+class _ProfileRepository extends UserProfileRepository {
+  _ProfileRepository(this.profile);
+  UserProfile profile;
+
+  @override
+  Future<UserProfile> load() async => profile;
+
+  @override
+  Future<void> save(UserProfile value) async {
+    profile = value.normalized;
+  }
+}
+
 class _BlockingFileRepository implements FileRepository {
   final Completer<ProjectFile> saveStarted = Completer<ProjectFile>();
   final Completer<ProjectFile> saveCompleter = Completer<ProjectFile>();
@@ -459,6 +566,7 @@ class _BlockingFileRepository implements FileRepository {
   String? lastAutoBackupProjectName;
   String? lastAutoBackupContent;
   String? lastExportContent;
+  Completer<bool>? exportCompleter;
 
   @override
   Future<ProjectFile> createNewProject() {
@@ -549,13 +657,13 @@ class _BlockingFileRepository implements FileRepository {
   }
 
   @override
-  Future<void> exportText({
+  Future<bool> exportText({
     required String content,
     required String fileName,
     required String extension,
   }) {
     lastExportContent = content;
-    return Future.value();
+    return exportCompleter?.future ?? Future.value(true);
   }
 
   @override

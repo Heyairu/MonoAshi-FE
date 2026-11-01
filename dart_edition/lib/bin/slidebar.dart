@@ -23,6 +23,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
 import "../models/navigation_style.dart";
+import "../features/navigation/app_module.dart";
 import "../ui_library/control_shape.dart";
 import "../ui_library/control_size.dart";
 
@@ -35,24 +36,21 @@ class MonogatariNavigationDestination {
 
 // These indexes also identify pages in ContentView. All presentations share
 // this list, including the fixed home and settings/about destinations.
-const monogatariNavigationDestinations = [
-  MonogatariNavigationDestination(Icons.home, "首頁"),
-  MonogatariNavigationDestination(Icons.book, "故事設定"),
-  MonogatariNavigationDestination(Icons.menu_book, "章節選擇"),
-  MonogatariNavigationDestination(Icons.list, "大綱調整"),
-  MonogatariNavigationDestination(Icons.view_timeline_outlined, "時間軸"),
-  MonogatariNavigationDestination(Icons.person, "角色設定"),
-  MonogatariNavigationDestination(Icons.group, "關係設定"),
-  MonogatariNavigationDestination(Icons.public, "世界設定"),
-  MonogatariNavigationDestination(Icons.inventory_2_outlined, "物品設定"),
-  MonogatariNavigationDestination(Icons.assessment_outlined, "計畫規劃"),
-  MonogatariNavigationDestination(Icons.library_books_outlined, "詞語參考"),
-  MonogatariNavigationDestination(Icons.palette_outlined, "文字色票"),
-  MonogatariNavigationDestination(Icons.spellcheck, "文本校正"),
-  MonogatariNavigationDestination(Icons.auto_awesome, "Copilot"),
-  MonogatariNavigationDestination(Icons.settings, "設定"),
-  MonogatariNavigationDestination(Icons.info, "關於"),
-];
+final monogatariNavigationDestinations = List.generate(AppModule.all.length, (
+  index,
+) {
+  final module = AppModule.forNavigation(index);
+  return MonogatariNavigationDestination(module.icon, module.label);
+});
+
+final _scrollingModuleIndexes = AppModule.all
+    .where((module) => module.id != AppModuleId.home && !module.footer)
+    .map((module) => module.navigationIndex)
+    .toList();
+final _footerModuleIndexes = AppModule.all
+    .where((module) => module.footer)
+    .map((module) => module.navigationIndex)
+    .toList();
 
 /// Hover previews cover the content; manual or pinned drawers reserve space.
 /// The child stays at the same tree location as the available width changes.
@@ -67,6 +65,7 @@ class MonogatariNavigationLayout extends StatefulWidget {
     this.modal = false,
     this.selectedLabelTextStyle,
     this.unselectedLabelTextStyle,
+    this.visible = true,
   });
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
@@ -75,6 +74,7 @@ class MonogatariNavigationLayout extends StatefulWidget {
   final bool modal;
   final TextStyle? selectedLabelTextStyle;
   final TextStyle? unselectedLabelTextStyle;
+  final bool visible;
 
   @override
   State<MonogatariNavigationLayout> createState() =>
@@ -87,7 +87,10 @@ class _MonogatariNavigationLayoutState
   final _panelFocus = FocusNode(skipTraversal: true);
   final _toggleFocus = FocusNode();
   final _launcherFocus = FocusNode();
-  final _destinationKeys = List.generate(16, (_) => GlobalKey());
+  final _destinationKeys = List.generate(
+    AppModule.all.length,
+    (_) => GlobalKey(),
+  );
   Timer? _openTimer;
   Timer? _closeTimer;
   bool _expanded = false;
@@ -115,13 +118,16 @@ class _MonogatariNavigationLayoutState
   @override
   void didUpdateWidget(MonogatariNavigationLayout oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.style != widget.style || oldWidget.modal != widget.modal) {
+    if (oldWidget.style != widget.style ||
+        oldWidget.modal != widget.modal ||
+        oldWidget.visible != widget.visible) {
       _cancelTimers();
       _expanded = false;
       _pinned = false;
       _hoverSuppressed = _pointerInside;
     }
-    if (oldWidget.selectedIndex != widget.selectedIndex ||
+    if (oldWidget.visible != widget.visible ||
+        oldWidget.selectedIndex != widget.selectedIndex ||
         oldWidget.style != widget.style) {
       _revealSelection();
     }
@@ -144,7 +150,9 @@ class _MonogatariNavigationLayoutState
 
   void _revealSelection() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || widget.selectedIndex < 1 || widget.selectedIndex > 13) {
+      if (!mounted ||
+          !widget.visible ||
+          !_scrollingModuleIndexes.contains(widget.selectedIndex)) {
         return;
       }
       final itemContext = _destinationKeys[widget.selectedIndex].currentContext;
@@ -257,20 +265,22 @@ class _MonogatariNavigationLayoutState
                         key: const Key("navigation-content-inset"),
                         duration: duration,
                         curve: Curves.easeOutCubic,
-                        width: _expanded && _pinned
+                        width: !widget.visible
+                            ? 0
+                            : _expanded && _pinned
                             ? drawerWidth
                             : railWidth + 1,
                       ),
                     Expanded(
                       child: ExcludeFocus(
-                        excluding: widget.modal && _expanded,
+                        excluding: widget.visible && widget.modal && _expanded,
                         child: widget.child,
                       ),
                     ),
                   ],
                 ),
               ),
-              if (widget.modal)
+              if (widget.visible && widget.modal)
                 Positioned(
                   top: 0,
                   left: 0,
@@ -284,7 +294,7 @@ class _MonogatariNavigationLayoutState
                     ),
                   ),
                 ),
-              if (_expanded && (widget.modal || !_pinned))
+              if (widget.visible && _expanded && (widget.modal || !_pinned))
                 Positioned.fill(
                   child: Semantics(
                     label: "關閉導覽",
@@ -307,49 +317,52 @@ class _MonogatariNavigationLayoutState
                 top: 0,
                 bottom: 0,
                 left: 0,
-                child: Offstage(
-                  offstage: widget.modal && !_expanded,
-                  child: AnimatedContainer(
-                    key: const Key("navigation-surface"),
-                    duration: duration,
-                    curve: Curves.easeOutCubic,
-                    width: _expanded || widget.modal
-                        ? drawerWidth
-                        : railWidth + 1,
-                    clipBehavior: Clip.hardEdge,
-                    decoration: const BoxDecoration(),
-                    // Keep labels at their final width throughout the
-                    // animation; clipping reveals them without reflow.
-                    child: OverflowBox(
-                      alignment: Alignment.topLeft,
-                      minWidth: _expanded || widget.modal
+                child: ExcludeFocus(
+                  excluding: !widget.visible,
+                  child: Offstage(
+                    offstage: !widget.visible || (widget.modal && !_expanded),
+                    child: AnimatedContainer(
+                      key: const Key("navigation-surface"),
+                      duration: duration,
+                      curve: Curves.easeOutCubic,
+                      width: _expanded || widget.modal
                           ? drawerWidth
                           : railWidth + 1,
-                      maxWidth: _expanded || widget.modal
-                          ? drawerWidth
-                          : railWidth + 1,
-                      child: MouseRegion(
-                        onEnter: _onEnter,
-                        onExit: _onExit,
-                        child: FocusTraversalGroup(
-                          child: Focus(
-                            focusNode: _panelFocus,
-                            child: Material(
-                              elevation: _expanded ? 8 : 0,
-                              color: _expanded
-                                  ? colors.surfaceContainerLow
-                                  : colors.surface,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    right: BorderSide(
-                                      color: colors.outlineVariant,
+                      clipBehavior: Clip.hardEdge,
+                      decoration: const BoxDecoration(),
+                      // Keep labels at their final width throughout the
+                      // animation; clipping reveals them without reflow.
+                      child: OverflowBox(
+                        alignment: Alignment.topLeft,
+                        minWidth: _expanded || widget.modal
+                            ? drawerWidth
+                            : railWidth + 1,
+                        maxWidth: _expanded || widget.modal
+                            ? drawerWidth
+                            : railWidth + 1,
+                        child: MouseRegion(
+                          onEnter: _onEnter,
+                          onExit: _onExit,
+                          child: FocusTraversalGroup(
+                            child: Focus(
+                              focusNode: _panelFocus,
+                              child: Material(
+                                elevation: _expanded ? 8 : 0,
+                                color: _expanded
+                                    ? colors.surfaceContainerLow
+                                    : colors.surface,
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      right: BorderSide(
+                                        color: colors.outlineVariant,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                child: _buildPanel(
-                                  context,
-                                  constraints.maxHeight,
+                                  child: _buildPanel(
+                                    context,
+                                    constraints.maxHeight,
+                                  ),
                                 ),
                               ),
                             ),
@@ -387,6 +400,7 @@ class _MonogatariNavigationLayoutState
         key: _destinationKeys[index],
         itemKey: ValueKey("navigation-destination-$index"),
         label: item.label,
+        tooltip: index == 16 ? "說明模組" : null,
         icon: item.icon,
         selected: widget.selectedIndex == index,
         expanded: _expanded,
@@ -420,7 +434,7 @@ class _MonogatariNavigationLayoutState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    for (var index = 1; index <= 13; index++)
+                    for (final index in _scrollingModuleIndexes)
                       destination(index),
                   ],
                 ),
@@ -446,8 +460,7 @@ class _MonogatariNavigationLayoutState
               focusNode: _toggleFocus,
               onPressed: _toggle,
             ),
-          destination(14),
-          destination(15),
+          for (final index in _footerModuleIndexes) destination(index),
         ],
       ),
     );
@@ -455,7 +468,7 @@ class _MonogatariNavigationLayoutState
 
   bool _railLabelsFit(BuildContext context, double height) {
     var fixedHeight = 2.0; // Two separators.
-    for (final index in [0, 14, 15]) {
+    for (final index in [0, ..._footerModuleIndexes]) {
       final style = index == widget.selectedIndex
           ? widget.selectedLabelTextStyle
           : widget.unselectedLabelTextStyle;
@@ -487,11 +500,13 @@ class _NavigationTile extends StatefulWidget {
     required this.minHeight,
     required this.onPressed,
     this.labelTextStyle,
+    this.tooltip,
     this.focusNode,
   });
 
   final Key itemKey;
   final String label;
+  final String? tooltip;
   final IconData icon;
   final bool selected;
   final bool expanded;
@@ -568,7 +583,7 @@ class _NavigationTileState extends State<_NavigationTile> {
         visible: !expanded && !showLabel,
         child: Tooltip(
           key: _tooltipKey,
-          message: label,
+          message: widget.tooltip ?? label,
           excludeFromSemantics: true,
           waitDuration: const Duration(milliseconds: 500),
           triggerMode: expanded || showLabel

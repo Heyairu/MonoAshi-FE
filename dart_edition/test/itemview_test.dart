@@ -1330,6 +1330,12 @@ void main() {
         isFalse,
       );
     }
+    tester
+        .widget<NeonIconButton>(
+          find.byKey(const ValueKey("snapshot-preview-follow")),
+        )
+        .onPressed!();
+    await tester.pumpAndSettle();
     expect(find.text("未分配"), findsOneWidget);
   });
 

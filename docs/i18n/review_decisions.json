@@ -1,0 +1,1835 @@
+{
+  "schemaVersion": 1,
+  "snapshot": "source_manifest.json",
+  "scope": "Strategy review only; no runtime or translation approval",
+  "decisions": [
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:1676",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 52,
+      "text": "未命名",
+      "action": "preserve_filename_policy_separate_from_ui",
+      "note": "Filename fallback is an export policy; do not translate by global text replacement.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:15614",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 436,
+      "text": "衝突",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:15683",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 438,
+      "text": "阻礙",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:15701",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 438,
+      "text": "解決",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:15786",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 441,
+      "text": "關係",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:15876",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 444,
+      "text": "人物",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:15916",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 445,
+      "text": "關係",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:15954",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 446,
+      "text": "內在關係",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:16067",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 450,
+      "text": "組織",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:16140",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 452,
+      "text": "名稱",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:16154",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 452,
+      "text": "說明",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:16240",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 455,
+      "text": "狀態",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:16313",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 457,
+      "text": "名稱",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:16327",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 457,
+      "text": "說明",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:16411",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 460,
+      "text": "持有物",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:16483",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 462,
+      "text": "名稱",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:16497",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 462,
+      "text": "數量",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:16515",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 462,
+      "text": "說明",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:16600",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 465,
+      "text": "自訂欄位",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:20871",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 581,
+      "text": "生活能力",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:20919",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 582,
+      "text": "社交傾向",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:20964",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 583,
+      "text": "處事傾向",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/application/project_export/export_service.dart:21007",
+      "path": "lib/application/project_export/export_service.dart",
+      "line": 584,
+      "text": "性格傾向",
+      "action": "localize_reader_export_heading",
+      "note": "Map labels feed values() in _reference(), not persisted XML schema. Capture output locale when creating export task.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/data/p2p/p2p_project_merge.dart:6236",
+      "path": "lib/data/p2p/p2p_project_merge.dart",
+      "line": 161,
+      "text": "作品資訊",
+      "action": "preserve_conflict_identity_translate_presentation",
+      "note": "fieldPrefix becomes fieldPathSegments and is encoded into conflictId in p2p_sync_models.dart.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/data/p2p/p2p_project_merge.dart:9482",
+      "path": "lib/data/p2p/p2p_project_merge.dart",
+      "line": 251,
+      "text": "作品資訊",
+      "action": "preserve_conflict_identity_translate_presentation",
+      "note": "fieldPrefix becomes fieldPathSegments and is encoded into conflictId in p2p_sync_models.dart.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/data/p2p/p2p_project_merge.dart:12779",
+      "path": "lib/data/p2p/p2p_project_merge.dart",
+      "line": 341,
+      "text": "衝突欄位",
+      "action": "preserve_conflict_identity_translate_presentation",
+      "note": "fieldPrefix becomes fieldPathSegments and is encoded into conflictId in p2p_sync_models.dart.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/data/p2p/p2p_project_merge.dart:14634",
+      "path": "lib/data/p2p/p2p_project_merge.dart",
+      "line": 393,
+      "text": "衝突欄位",
+      "action": "preserve_conflict_identity_translate_presentation",
+      "note": "fieldPrefix becomes fieldPathSegments and is encoded into conflictId in p2p_sync_models.dart.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/models/character_data.dart:810",
+      "path": "lib/models/character_data.dart",
+      "line": 31,
+      "text": "次要配角",
+      "action": "preserve_stored_value_translate_display",
+      "note": "RadioListTile value, CharacterType XML and characterType JSON use the existing Chinese value.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/models/character_data.dart:860",
+      "path": "lib/models/character_data.dart",
+      "line": 34,
+      "text": "主角",
+      "action": "preserve_stored_value_translate_display",
+      "note": "RadioListTile value, CharacterType XML and characterType JSON use the existing Chinese value.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/models/character_data.dart:868",
+      "path": "lib/models/character_data.dart",
+      "line": 35,
+      "text": "重要配角",
+      "action": "preserve_stored_value_translate_display",
+      "note": "RadioListTile value, CharacterType XML and characterType JSON use the existing Chinese value.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/models/character_data.dart:902",
+      "path": "lib/models/character_data.dart",
+      "line": 37,
+      "text": "主要反派",
+      "action": "preserve_stored_value_translate_display",
+      "note": "RadioListTile value, CharacterType XML and characterType JSON use the existing Chinese value.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/models/character_data.dart:912",
+      "path": "lib/models/character_data.dart",
+      "line": 38,
+      "text": "次要反派",
+      "action": "preserve_stored_value_translate_display",
+      "note": "RadioListTile value, CharacterType XML and characterType JSON use the existing Chinese value.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/models/character_data.dart:922",
+      "path": "lib/models/character_data.dart",
+      "line": 39,
+      "text": "其他",
+      "action": "preserve_stored_value_translate_display",
+      "note": "RadioListTile value, CharacterType XML and characterType JSON use the existing Chinese value.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/models/timeline_data.dart:1999",
+      "path": "lib/models/timeline_data.dart",
+      "line": 71,
+      "text": "故事開始",
+      "action": "preserve_existing_authored_label",
+      "note": "originLabel is a model default; do not rename saved timeline labels on locale change.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/models/writing_goal_data.dart:335",
+      "path": "lib/models/writing_goal_data.dart",
+      "line": 11,
+      "text": "請輸入 1 到 999,999,999 的整數",
+      "action": "return_validation_result_localize_in_form",
+      "note": "Used by writing_goal_dialog validator; min/max need numeric formatting.",
+      "status": "strategy_reviewed_translation_pending",
+      "proposedKey": "writingGoalInvalidRange"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:6325",
+      "path": "lib/modules/characterview.dart",
+      "line": 210,
+      "text": "料理",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:6392",
+      "path": "lib/modules/characterview.dart",
+      "line": 213,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:6414",
+      "path": "lib/modules/characterview.dart",
+      "line": 214,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:6491",
+      "path": "lib/modules/characterview.dart",
+      "line": 218,
+      "text": "清潔",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:6558",
+      "path": "lib/modules/characterview.dart",
+      "line": 221,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:6580",
+      "path": "lib/modules/characterview.dart",
+      "line": 222,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:6656",
+      "path": "lib/modules/characterview.dart",
+      "line": 226,
+      "text": "理財",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:6723",
+      "path": "lib/modules/characterview.dart",
+      "line": 229,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:6745",
+      "path": "lib/modules/characterview.dart",
+      "line": 230,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:6821",
+      "path": "lib/modules/characterview.dart",
+      "line": 234,
+      "text": "體能",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:6888",
+      "path": "lib/modules/characterview.dart",
+      "line": 237,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:6910",
+      "path": "lib/modules/characterview.dart",
+      "line": 238,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:6982",
+      "path": "lib/modules/characterview.dart",
+      "line": 242,
+      "text": "藝術",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7049",
+      "path": "lib/modules/characterview.dart",
+      "line": 245,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7071",
+      "path": "lib/modules/characterview.dart",
+      "line": 246,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7145",
+      "path": "lib/modules/characterview.dart",
+      "line": 250,
+      "text": "音樂",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7212",
+      "path": "lib/modules/characterview.dart",
+      "line": 253,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7234",
+      "path": "lib/modules/characterview.dart",
+      "line": 254,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7308",
+      "path": "lib/modules/characterview.dart",
+      "line": 258,
+      "text": "舞蹈",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7375",
+      "path": "lib/modules/characterview.dart",
+      "line": 261,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7397",
+      "path": "lib/modules/characterview.dart",
+      "line": 262,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7476",
+      "path": "lib/modules/characterview.dart",
+      "line": 266,
+      "text": "手工",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7543",
+      "path": "lib/modules/characterview.dart",
+      "line": 269,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7565",
+      "path": "lib/modules/characterview.dart",
+      "line": 270,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7640",
+      "path": "lib/modules/characterview.dart",
+      "line": 274,
+      "text": "社交",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7707",
+      "path": "lib/modules/characterview.dart",
+      "line": 277,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7729",
+      "path": "lib/modules/characterview.dart",
+      "line": 278,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7808",
+      "path": "lib/modules/characterview.dart",
+      "line": 282,
+      "text": "領導",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7875",
+      "path": "lib/modules/characterview.dart",
+      "line": 285,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7897",
+      "path": "lib/modules/characterview.dart",
+      "line": 286,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:7974",
+      "path": "lib/modules/characterview.dart",
+      "line": 290,
+      "text": "分析",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8041",
+      "path": "lib/modules/characterview.dart",
+      "line": 293,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8063",
+      "path": "lib/modules/characterview.dart",
+      "line": 294,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8142",
+      "path": "lib/modules/characterview.dart",
+      "line": 298,
+      "text": "創意",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8209",
+      "path": "lib/modules/characterview.dart",
+      "line": 301,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8231",
+      "path": "lib/modules/characterview.dart",
+      "line": 302,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8306",
+      "path": "lib/modules/characterview.dart",
+      "line": 306,
+      "text": "記憶",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8373",
+      "path": "lib/modules/characterview.dart",
+      "line": 309,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8395",
+      "path": "lib/modules/characterview.dart",
+      "line": 310,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8475",
+      "path": "lib/modules/characterview.dart",
+      "line": 314,
+      "text": "觀察",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8542",
+      "path": "lib/modules/characterview.dart",
+      "line": 317,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8564",
+      "path": "lib/modules/characterview.dart",
+      "line": 318,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8645",
+      "path": "lib/modules/characterview.dart",
+      "line": 322,
+      "text": "應變",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8712",
+      "path": "lib/modules/characterview.dart",
+      "line": 325,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8734",
+      "path": "lib/modules/characterview.dart",
+      "line": 326,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8811",
+      "path": "lib/modules/characterview.dart",
+      "line": 330,
+      "text": "學習",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8878",
+      "path": "lib/modules/characterview.dart",
+      "line": 333,
+      "text": "不擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:8900",
+      "path": "lib/modules/characterview.dart",
+      "line": 334,
+      "text": "擅長",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:9085",
+      "path": "lib/modules/characterview.dart",
+      "line": 344,
+      "text": "內向",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:9106",
+      "path": "lib/modules/characterview.dart",
+      "line": 345,
+      "text": "外向",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:9249",
+      "path": "lib/modules/characterview.dart",
+      "line": 352,
+      "text": "感性",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:9270",
+      "path": "lib/modules/characterview.dart",
+      "line": 353,
+      "text": "理性",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:9409",
+      "path": "lib/modules/characterview.dart",
+      "line": 360,
+      "text": "被動",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:9430",
+      "path": "lib/modules/characterview.dart",
+      "line": 361,
+      "text": "主動",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:9572",
+      "path": "lib/modules/characterview.dart",
+      "line": 368,
+      "text": "保守",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:9593",
+      "path": "lib/modules/characterview.dart",
+      "line": 369,
+      "text": "開放",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:9738",
+      "path": "lib/modules/characterview.dart",
+      "line": 376,
+      "text": "謹慎",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:9759",
+      "path": "lib/modules/characterview.dart",
+      "line": 377,
+      "text": "冒險",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:9905",
+      "path": "lib/modules/characterview.dart",
+      "line": 384,
+      "text": "依賴",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:9926",
+      "path": "lib/modules/characterview.dart",
+      "line": 385,
+      "text": "獨立",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:10069",
+      "path": "lib/modules/characterview.dart",
+      "line": 392,
+      "text": "柔順",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:10090",
+      "path": "lib/modules/characterview.dart",
+      "line": 393,
+      "text": "固執",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:10237",
+      "path": "lib/modules/characterview.dart",
+      "line": 400,
+      "text": "悲觀",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:10258",
+      "path": "lib/modules/characterview.dart",
+      "line": 401,
+      "text": "樂觀",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:10399",
+      "path": "lib/modules/characterview.dart",
+      "line": 408,
+      "text": "嚴肅",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:10420",
+      "path": "lib/modules/characterview.dart",
+      "line": 409,
+      "text": "幽默",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:10557",
+      "path": "lib/modules/characterview.dart",
+      "line": 416,
+      "text": "害羞",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:10578",
+      "path": "lib/modules/characterview.dart",
+      "line": 417,
+      "text": "大方",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:10759",
+      "path": "lib/modules/characterview.dart",
+      "line": 427,
+      "text": "低調",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:10780",
+      "path": "lib/modules/characterview.dart",
+      "line": 428,
+      "text": "高調",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:10922",
+      "path": "lib/modules/characterview.dart",
+      "line": 435,
+      "text": "消極",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:10943",
+      "path": "lib/modules/characterview.dart",
+      "line": 436,
+      "text": "積極",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:11082",
+      "path": "lib/modules/characterview.dart",
+      "line": 443,
+      "text": "狡猾",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:11103",
+      "path": "lib/modules/characterview.dart",
+      "line": 444,
+      "text": "老實",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:11243",
+      "path": "lib/modules/characterview.dart",
+      "line": 451,
+      "text": "幼稚",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:11264",
+      "path": "lib/modules/characterview.dart",
+      "line": 452,
+      "text": "成熟",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:11403",
+      "path": "lib/modules/characterview.dart",
+      "line": 459,
+      "text": "冷靜",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:11424",
+      "path": "lib/modules/characterview.dart",
+      "line": 460,
+      "text": "衝動",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:11567",
+      "path": "lib/modules/characterview.dart",
+      "line": 467,
+      "text": "寡言",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:11588",
+      "path": "lib/modules/characterview.dart",
+      "line": 468,
+      "text": "多話",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:11731",
+      "path": "lib/modules/characterview.dart",
+      "line": 475,
+      "text": "執拗",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:11752",
+      "path": "lib/modules/characterview.dart",
+      "line": 476,
+      "text": "順從",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:11901",
+      "path": "lib/modules/characterview.dart",
+      "line": 483,
+      "text": "奔放",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:11922",
+      "path": "lib/modules/characterview.dart",
+      "line": 484,
+      "text": "自律",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:12064",
+      "path": "lib/modules/characterview.dart",
+      "line": 491,
+      "text": "嚴肅",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:12085",
+      "path": "lib/modules/characterview.dart",
+      "line": 492,
+      "text": "輕浮",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:12224",
+      "path": "lib/modules/characterview.dart",
+      "line": 499,
+      "text": "彆扭",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:12245",
+      "path": "lib/modules/characterview.dart",
+      "line": 500,
+      "text": "坦率",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:12389",
+      "path": "lib/modules/characterview.dart",
+      "line": 507,
+      "text": "淡漠",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:12410",
+      "path": "lib/modules/characterview.dart",
+      "line": 508,
+      "text": "好奇",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:12550",
+      "path": "lib/modules/characterview.dart",
+      "line": 515,
+      "text": "遲鈍",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:12571",
+      "path": "lib/modules/characterview.dart",
+      "line": 516,
+      "text": "敏銳",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:12758",
+      "path": "lib/modules/characterview.dart",
+      "line": 526,
+      "text": "悲觀",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:12779",
+      "path": "lib/modules/characterview.dart",
+      "line": 527,
+      "text": "樂觀",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:12934",
+      "path": "lib/modules/characterview.dart",
+      "line": 534,
+      "text": "面癱",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:12955",
+      "path": "lib/modules/characterview.dart",
+      "line": 535,
+      "text": "生動",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:13099",
+      "path": "lib/modules/characterview.dart",
+      "line": 542,
+      "text": "笨蛋",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:13120",
+      "path": "lib/modules/characterview.dart",
+      "line": 543,
+      "text": "天才",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:13266",
+      "path": "lib/modules/characterview.dart",
+      "line": 550,
+      "text": "單純",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:13287",
+      "path": "lib/modules/characterview.dart",
+      "line": 551,
+      "text": "複雜",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:13451",
+      "path": "lib/modules/characterview.dart",
+      "line": 558,
+      "text": "臉薄",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:13472",
+      "path": "lib/modules/characterview.dart",
+      "line": 559,
+      "text": "厚顏",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:13622",
+      "path": "lib/modules/characterview.dart",
+      "line": 566,
+      "text": "溫和",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:13643",
+      "path": "lib/modules/characterview.dart",
+      "line": 567,
+      "text": "火爆",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:13787",
+      "path": "lib/modules/characterview.dart",
+      "line": 574,
+      "text": "粗魯",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:13808",
+      "path": "lib/modules/characterview.dart",
+      "line": 575,
+      "text": "斯文",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:13956",
+      "path": "lib/modules/characterview.dart",
+      "line": 582,
+      "text": "軟弱",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:13977",
+      "path": "lib/modules/characterview.dart",
+      "line": 583,
+      "text": "堅定",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:14123",
+      "path": "lib/modules/characterview.dart",
+      "line": 590,
+      "text": "無慾",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:14144",
+      "path": "lib/modules/characterview.dart",
+      "line": 591,
+      "text": "強烈",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:14290",
+      "path": "lib/modules/characterview.dart",
+      "line": 598,
+      "text": "膽小",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:14311",
+      "path": "lib/modules/characterview.dart",
+      "line": 599,
+      "text": "勇敢",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:14463",
+      "path": "lib/modules/characterview.dart",
+      "line": 606,
+      "text": "木訥",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:14484",
+      "path": "lib/modules/characterview.dart",
+      "line": 607,
+      "text": "風趣",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:14637",
+      "path": "lib/modules/characterview.dart",
+      "line": 614,
+      "text": "輕信",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:14658",
+      "path": "lib/modules/characterview.dart",
+      "line": 615,
+      "text": "多疑",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:14802",
+      "path": "lib/modules/characterview.dart",
+      "line": 622,
+      "text": "自卑",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:14823",
+      "path": "lib/modules/characterview.dart",
+      "line": 623,
+      "text": "自信",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:14966",
+      "path": "lib/modules/characterview.dart",
+      "line": 630,
+      "text": "退縮",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:14987",
+      "path": "lib/modules/characterview.dart",
+      "line": 631,
+      "text": "果敢",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:15143",
+      "path": "lib/modules/characterview.dart",
+      "line": 638,
+      "text": "陰角",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/modules/characterview.dart:15164",
+      "path": "lib/modules/characterview.dart",
+      "line": 639,
+      "text": "陽角",
+      "action": "translate_trait_display_preserve_xml_keys",
+      "note": "uiTitle/uiLeft/uiRight are display labels; xmlTitle/xmlLeft/xmlRight remain unchanged.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/collections.dart:5888",
+      "path": "lib/ui_library/collections.dart",
+      "line": 186,
+      "text": "重新命名",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/collections.dart:6062",
+      "path": "lib/ui_library/collections.dart",
+      "line": 193,
+      "text": "刪除",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/collections.dart:6868",
+      "path": "lib/ui_library/collections.dart",
+      "line": 221,
+      "text": "重新命名",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/collections.dart:6903",
+      "path": "lib/ui_library/collections.dart",
+      "line": 222,
+      "text": "刪除",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/collections.dart:10067",
+      "path": "lib/ui_library/collections.dart",
+      "line": 318,
+      "text": "尚無資料",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/collections.dart:10980",
+      "path": "lib/ui_library/collections.dart",
+      "line": 347,
+      "text": "尚無資料",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/collections.dart:11785",
+      "path": "lib/ui_library/collections.dart",
+      "line": 373,
+      "text": "尚無資料",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/dialogs.dart:4135",
+      "path": "lib/ui_library/dialogs.dart",
+      "line": 144,
+      "text": "取消",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/dialogs.dart:4167",
+      "path": "lib/ui_library/dialogs.dart",
+      "line": 145,
+      "text": "確定",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/dialogs.dart:5417",
+      "path": "lib/ui_library/dialogs.dart",
+      "line": 187,
+      "text": "取消",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/dialogs.dart:5449",
+      "path": "lib/ui_library/dialogs.dart",
+      "line": 188,
+      "text": "確定",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/dialogs.dart:6210",
+      "path": "lib/ui_library/dialogs.dart",
+      "line": 216,
+      "text": "關閉",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/tables.dart:13614",
+      "path": "lib/ui_library/tables.dart",
+      "line": 470,
+      "text": "（空白）",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/tables.dart:17223",
+      "path": "lib/ui_library/tables.dart",
+      "line": 598,
+      "text": "新增",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/tables.dart:17254",
+      "path": "lib/ui_library/tables.dart",
+      "line": 599,
+      "text": "更新",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/ui_library/tables.dart:17285",
+      "path": "lib/ui_library/tables.dart",
+      "line": 600,
+      "text": "刪除",
+      "action": "resolve_default_copy_at_runtime",
+      "note": "Keep caller override, resolve localized fallback from current UI context rather than a constant parameter.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/utils/welcome_greeting.dart:399",
+      "path": "lib/utils/welcome_greeting.dart",
+      "line": 11,
+      "text": "Morning",
+      "action": "replace_fragment_assembly_with_complete_greeting",
+      "note": "Translate complete time-of-day messages with displayName placeholder; preserve the real user name.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/utils/welcome_greeting.dart:431",
+      "path": "lib/utils/welcome_greeting.dart",
+      "line": 12,
+      "text": "Afternoon",
+      "action": "replace_fragment_assembly_with_complete_greeting",
+      "note": "Translate complete time-of-day messages with displayName placeholder; preserve the real user name.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/utils/welcome_greeting.dart:465",
+      "path": "lib/utils/welcome_greeting.dart",
+      "line": 13,
+      "text": "Evening",
+      "action": "replace_fragment_assembly_with_complete_greeting",
+      "note": "Translate complete time-of-day messages with displayName placeholder; preserve the real user name.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/utils/welcome_greeting.dart:485",
+      "path": "lib/utils/welcome_greeting.dart",
+      "line": 14,
+      "text": "Night",
+      "action": "replace_fragment_assembly_with_complete_greeting",
+      "note": "Translate complete time-of-day messages with displayName placeholder; preserve the real user name.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/utils/welcome_greeting.dart:557",
+      "path": "lib/utils/welcome_greeting.dart",
+      "line": 18,
+      "text": "Good {p1}, \n",
+      "action": "replace_fragment_assembly_with_complete_greeting",
+      "note": "Translate complete time-of-day messages with displayName placeholder; preserve the real user name.",
+      "status": "strategy_reviewed_translation_pending"
+    },
+    {
+      "candidateId": "lib/utils/welcome_greeting.dart:602",
+      "path": "lib/utils/welcome_greeting.dart",
+      "line": 19,
+      "text": "User",
+      "action": "replace_fragment_assembly_with_complete_greeting",
+      "note": "Translate complete time-of-day messages with displayName placeholder; preserve the real user name.",
+      "status": "strategy_reviewed_translation_pending"
+    }
+  ],
+  "sharedKeyProposals": [
+    {
+      "text": "取消",
+      "proposedKey": "commonCancel",
+      "status": "draft_requires_context_review",
+      "candidateIds": [
+        "lib/bin/content.dart:25328",
+        "lib/bin/file.dart:18477",
+        "lib/bin/file.dart:21146",
+        "lib/features/inline_annotations/inline_annotation_edit_dialog.dart:12446",
+        "lib/features/inline_annotations/inline_annotation_relink_dialog.dart:3951",
+        "lib/features/phrases/phrase_library_dialog.dart:5597",
+        "lib/main.dart:150324",
+        "lib/main.dart:175438",
+        "lib/modules/WelcomeView.dart:15321",
+        "lib/modules/WelcomeView.dart:20501",
+        "lib/modules/character_relationship_editor.dart:8520",
+        "lib/modules/character_relationship_graph_view.dart:73513",
+        "lib/modules/characterview.dart:106079",
+        "lib/modules/characterview.dart:126477",
+        "lib/modules/characterview.dart:183975",
+        "lib/modules/characterview.dart:186854",
+        "lib/modules/characterview.dart:189057",
+        "lib/modules/characterview.dart:192146",
+        "lib/modules/copliot.dart:21265",
+        "lib/modules/copliot.dart:22331",
+        "lib/modules/copliot.dart:29636",
+        "lib/modules/copliot.dart:63882",
+        "lib/modules/glossaryview.dart:29822",
+        "lib/modules/itemview.dart:15568",
+        "lib/modules/itemview.dart:19559",
+        "lib/modules/itemview.dart:27518",
+        "lib/modules/itemview.dart:34399",
+        "lib/modules/itemview.dart:40583",
+        "lib/modules/itemview.dart:46952",
+        "lib/modules/itemview.dart:54051",
+        "lib/modules/itemview.dart:62000",
+        "lib/modules/outlineview.dart:97849",
+        "lib/modules/outlineview.dart:102719",
+        "lib/modules/palettesview.dart:29017",
+        "lib/modules/timelineview.dart:36520",
+        "lib/modules/timelineview.dart:48158",
+        "lib/modules/worldsettingsview.dart:37123",
+        "lib/modules/worldsettingsview.dart:41818",
+        "lib/modules/worldsettingsview.dart:54739",
+        "lib/modules/worldsettingsview.dart:57433",
+        "lib/modules/worldsettingsview.dart:104206",
+        "lib/presentation/widgets/module_switcher.dart:5261",
+        "lib/presentation/widgets/project_object_selector.dart:5524",
+        "lib/presentation/widgets/snapshot_timeline_preview.dart:6221",
+        "lib/presentation/widgets/writing_goal_dialog.dart:6812",
+        "lib/ui_library/alias_terms.dart:3363",
+        "lib/ui_library/dialogs.dart:4135",
+        "lib/ui_library/dialogs.dart:5417",
+        "lib/ui_library/forms.dart:20729"
+      ]
+    },
+    {
+      "text": "確定",
+      "proposedKey": "commonConfirm",
+      "status": "draft_requires_context_review",
+      "candidateIds": [
+        "lib/modules/worldsettingsview.dart:83592",
+        "lib/ui_library/dialogs.dart:4167",
+        "lib/ui_library/dialogs.dart:5449"
+      ]
+    },
+    {
+      "text": "完成",
+      "proposedKey": "commonDone",
+      "status": "draft_requires_context_review",
+      "candidateIds": [
+        "packages/material_ribbon/lib/src/material_ribbon_base.dart:4916"
+      ]
+    },
+    {
+      "text": "關閉",
+      "proposedKey": "commonClose",
+      "status": "draft_requires_context_review",
+      "candidateIds": [
+        "lib/features/inline_annotations/inline_annotation_details_dialog.dart:5354",
+        "lib/features/phrases/phrase_library_dialog.dart:15129",
+        "lib/features/revision_tracking/presentation/revision_tracking_panel.dart:23939",
+        "lib/modules/character_relationship_graph_view.dart:45850",
+        "lib/presentation/widgets/project_export/export_dialog.dart:12640",
+        "lib/ui_library/feedback.dart:4688"
+      ]
+    },
+    {
+      "text": "儲存",
+      "proposedKey": "commonSave",
+      "status": "draft_requires_context_review",
+      "candidateIds": [
+        "lib/bin/file.dart:19528",
+        "lib/features/inline_annotations/inline_annotation_edit_dialog.dart:12680",
+        "lib/features/phrases/phrase_library_dialog.dart:33156",
+        "lib/modules/WelcomeView.dart:21738",
+        "lib/modules/character_relationship_editor.dart:8638",
+        "lib/modules/character_relationship_graph_view.dart:57486",
+        "lib/modules/character_relationship_graph_view.dart:73644",
+        "lib/modules/palettesview.dart:28818",
+        "lib/ui_library/alias_terms.dart:3186",
+        "lib/ui_library/forms.dart:20468"
+      ]
+    },
+    {
+      "text": "建立",
+      "proposedKey": "commonCreate",
+      "status": "draft_requires_context_review",
+      "candidateIds": [
+        "lib/features/revision_tracking/presentation/revision_tracking_panel.dart:8251",
+        "lib/modules/character_relationship_graph_view.dart:63150",
+        "lib/modules/characterview.dart:192352"
+      ]
+    },
+    {
+      "text": "新增",
+      "proposedKey": "commonAdd",
+      "status": "draft_requires_context_review",
+      "candidateIds": [
+        "lib/modules/character_relationship_graph_view.dart:36894",
+        "lib/modules/characterview.dart:160375",
+        "lib/modules/characterview.dart:169905",
+        "lib/modules/itemview.dart:57111",
+        "lib/modules/timelineview.dart:36734",
+        "lib/modules/worldsettingsview.dart:26299"
+      ]
+    },
+    {
+      "text": "刪除",
+      "proposedKey": "commonDelete",
+      "status": "draft_requires_context_review",
+      "candidateIds": [
+        "lib/features/phrases/phrase_library_dialog.dart:5738",
+        "lib/features/phrases/phrase_library_dialog.dart:18546",
+        "lib/modules/character_relationship_graph_view.dart:58207",
+        "lib/modules/characterview.dart:106218",
+        "lib/modules/characterview.dart:160704",
+        "lib/modules/characterview.dart:170388",
+        "lib/modules/glossaryview.dart:19882",
+        "lib/ui_library/collections.dart:6062"
+      ]
+    },
+    {
+      "text": "重試",
+      "proposedKey": "commonRetry",
+      "status": "draft_requires_context_review",
+      "candidateIds": [
+        "lib/features/help/help_viewer.dart:5862",
+        "lib/features/oobe/oobe_gate.dart:3067",
+        "lib/modules/glossaryview.dart:67582",
+        "lib/modules/palettesview.dart:11234",
+        "lib/modules/palettesview.dart:12590"
+      ]
+    },
+    {
+      "text": "複製",
+      "proposedKey": "commonCopy",
+      "status": "draft_requires_context_review",
+      "candidateIds": [
+        "lib/bin/appbar.dart:6391",
+        "lib/bin/content.dart:77369",
+        "lib/features/editor/plain_text_quill_editor_poc.dart:44098",
+        "lib/modules/itemview.dart:57118",
+        "lib/modules/worldsettingsview.dart:26306"
+      ]
+    },
+    {
+      "text": "重新命名",
+      "proposedKey": "commonRename",
+      "status": "draft_requires_context_review",
+      "candidateIds": [
+        "lib/modules/timelineview.dart:65219",
+        "lib/ui_library/collections.dart:5888"
+      ]
+    },
+    {
+      "text": "未命名",
+      "proposedKey": "commonUntitled",
+      "status": "draft_requires_context_review",
+      "candidateIds": [
+        "lib/modules/character_relationship_graph_mapper.dart:7152"
+      ]
+    },
+    {
+      "text": "（未命名）",
+      "proposedKey": "commonUntitledParenthesized",
+      "status": "draft_requires_context_review",
+      "candidateIds": [
+        "lib/features/inline_annotations/inline_annotation_relink_dialog.dart:2975",
+        "lib/features/poppin/mosaic_intellisense.dart:23968",
+        "lib/modules/planview.dart:3852",
+        "lib/modules/planview.dart:4253",
+        "lib/modules/planview.dart:36685",
+        "lib/modules/planview.dart:43554"
+      ]
+    },
+    {
+      "text": "復原",
+      "proposedKey": "editorUndo",
+      "status": "draft_requires_context_review",
+      "candidateIds": [
+        "lib/bin/appbar.dart:6563",
+        "lib/features/editor/plain_text_quill_editor_poc.dart:43509"
+      ]
+    },
+    {
+      "text": "重做",
+      "proposedKey": "editorRedo",
+      "status": "draft_requires_context_review",
+      "candidateIds": [
+        "lib/bin/appbar.dart:6604",
+        "lib/features/editor/plain_text_quill_editor_poc.dart:43652"
+      ]
+    }
+  ]
+}

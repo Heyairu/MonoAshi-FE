@@ -17,6 +17,7 @@ import "findreplace.dart";
 class MonogatariTopAppBar extends StatefulWidget
     implements PreferredSizeWidget {
   final ValueChanged<String>? onHelpAction;
+  final Widget? moduleSwitcher;
   final double iconSize;
   final ToolbarMode mode;
   final ToolbarMode? modePreference;
@@ -35,10 +36,20 @@ class MonogatariTopAppBar extends StatefulWidget
   final FindReplaceOptions? searchOptions;
   final String searchQuery;
   final ValueChanged<FindReplaceOption>? onSearchOptionChanged;
+  final bool showNavigation;
+  final bool showSidebar;
+  final bool showDashboard;
+  final VoidCallback? onToggleNavigation;
+  final VoidCallback? onToggleSidebar;
+  final VoidCallback? onToggleDashboard;
+  final Future<void> Function()? onOpenPhraseLibrary;
+  final Future<void> Function()? onInsertPhrase;
+  final VoidCallback? onSaveSelectionAsPhrase;
 
   const MonogatariTopAppBar({
     super.key,
     this.onHelpAction,
+    this.moduleSwitcher,
     required this.iconSize,
     required this.mode,
     required this.modePreference,
@@ -57,6 +68,15 @@ class MonogatariTopAppBar extends StatefulWidget
     this.searchOptions,
     this.searchQuery = "",
     this.onSearchOptionChanged,
+    this.showNavigation = true,
+    this.showSidebar = true,
+    this.showDashboard = true,
+    this.onToggleNavigation,
+    this.onToggleSidebar,
+    this.onToggleDashboard,
+    this.onOpenPhraseLibrary,
+    this.onInsertPhrase,
+    this.onSaveSelectionAsPhrase,
   });
 
   @override
@@ -64,10 +84,10 @@ class MonogatariTopAppBar extends StatefulWidget
       Size.fromHeight(mode == ToolbarMode.full ? 210 : 108);
 
   @override
-  State<MonogatariTopAppBar> createState() => _MonogatariTopAppBarState();
+  State<MonogatariTopAppBar> createState() => MonogatariTopAppBarState();
 }
 
-class _MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
+class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
   static const _ribbonContext = RibbonContext();
   static const _fileIds = [
     "save",
@@ -79,6 +99,23 @@ class _MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
   ];
   static const _editIds = ["selectAll", "cut", "copy", "paste"];
   final _running = <String>{};
+  final _keyTips = RibbonKeyTipController();
+  bool get ownsMenuFocus => _menuOpen;
+
+  void dismissKeyTips() => _keyTips.hide();
+
+  void selectRelativeTab(int delta) {
+    final ids = _tabs(_commands).map((tab) => tab.id).toList();
+    final id = ids[(ids.indexOf(_selectedTabId) + delta) % ids.length];
+    selectTabForNavigation(id);
+  }
+
+  void selectTabForNavigation(String id) {
+    _keyTips.hide();
+    _selectTab(id, openSearch: false);
+    widget.controller?.selectTab(id, requestFocus: false);
+  }
+
   final _scrollController = ScrollController();
   bool _menuOpen = false;
   String _selectedTabId = "home";
@@ -100,6 +137,7 @@ class _MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
 
   @override
   void dispose() {
+    _keyTips.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -174,6 +212,29 @@ class _MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
       command("undo", "復原", Icons.undo),
       command("redo", "重做", Icons.redo),
       command(
+        "phrases.library",
+        "短語庫",
+        Icons.library_books_outlined,
+        enabled: widget.onOpenPhraseLibrary != null,
+        size: RibbonCommandSize.large,
+      ),
+      command(
+        "phrases.insert",
+        "插入短語",
+        Icons.add_comment_outlined,
+        enabled: widget.onInsertPhrase != null,
+        disabledReason: widget.onInsertPhrase == null ? "請先開啟正文編輯頁。" : null,
+      ),
+      command(
+        "phrases.saveSelection",
+        "選取內容存為短語",
+        Icons.bookmark_add_outlined,
+        enabled: widget.onSaveSelectionAsPhrase != null,
+        disabledReason: widget.onSaveSelectionAsPhrase == null
+            ? "請先開啟正文編輯頁。"
+            : null,
+      ),
+      command(
         "punctuation",
         "標點符號",
         Icons.keyboard_alt_outlined,
@@ -184,6 +245,27 @@ class _MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
         "搜尋",
         Icons.search,
         selected: widget.showFindReplaceWindow,
+      ),
+      command(
+        "view.navigation",
+        "導覽列",
+        Icons.navigation_outlined,
+        selected: widget.showNavigation,
+        enabled: widget.onToggleNavigation != null,
+      ),
+      command(
+        "view.sidebar",
+        "側邊欄",
+        Icons.view_sidebar_outlined,
+        selected: widget.showSidebar,
+        enabled: widget.onToggleSidebar != null,
+      ),
+      command(
+        "view.dashboard",
+        "儀表板",
+        Icons.speed_rounded,
+        selected: widget.showDashboard,
+        enabled: widget.onToggleDashboard != null,
       ),
     ];
     final options = widget.searchOptions ?? _defaultSearchOptions;
@@ -232,6 +314,18 @@ class _MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
         widget.onTogglePunctuationPanel();
       } else if (id == "find") {
         widget.onToggleFindReplaceWindow();
+      } else if (id == "view.navigation") {
+        widget.onToggleNavigation?.call();
+      } else if (id == "view.sidebar") {
+        widget.onToggleSidebar?.call();
+      } else if (id == "view.dashboard") {
+        widget.onToggleDashboard?.call();
+      } else if (id == "phrases.library") {
+        await widget.onOpenPhraseLibrary?.call();
+      } else if (id == "phrases.insert") {
+        await widget.onInsertPhrase?.call();
+      } else if (id == "phrases.saveSelection") {
+        widget.onSaveSelectionAsPhrase?.call();
       } else if (id.startsWith("search.")) {
         final option = FindReplaceOption.values.firstWhere(
           (option) => id == "search.${option.name}",
@@ -308,6 +402,25 @@ class _MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
           label: "寫作工具",
           commands: [commands["punctuation"]!, commands["find"]!],
         ),
+        RibbonGroup(
+          id: "phrases",
+          label: "短語",
+          commands: [
+            commands["phrases.library"]!,
+            commands["phrases.insert"]!,
+            commands["phrases.saveSelection"]!,
+          ],
+        ),
+        RibbonGroup(
+          id: "display-blocks",
+          label: "顯示區塊",
+          rows: 3,
+          commands: [
+            commands["view.navigation"]!,
+            commands["view.sidebar"]!,
+            commands["view.dashboard"]!,
+          ],
+        ),
       ],
     ),
     RibbonTab(
@@ -350,11 +463,11 @@ class _MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
     ),
   ];
 
-  void _selectTab(String id) {
+  void _selectTab(String id, {bool openSearch = true}) {
     if (_selectedTabId == id) return;
     setState(() => _selectedTabId = id);
     if (_scrollController.hasClients) _scrollController.jumpTo(0);
-    if (id == "search" && !widget.showFindReplaceWindow) {
+    if (openSearch && id == "search" && !widget.showFindReplaceWindow) {
       widget.onToggleFindReplaceWindow();
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -386,6 +499,8 @@ class _MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
                 MaterialRibbon(
                   key: const Key("toolbar-ribbon"),
                   controller: widget.controller,
+                  keyTipController: _keyTips,
+                  enableAltKeyTips: false,
                   commandWrapperBuilder: (context, command, child) =>
                       HelpTarget(
                         topicId: HelpTopicId.forCommand(command.id),
@@ -401,6 +516,9 @@ class _MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
                   onCollapsedChanged: (_) => widget.onModeChanged(
                     full ? ToolbarMode.concise : ToolbarMode.full,
                   ),
+                  fixedHeaderActions: [
+                    if (widget.moduleSwitcher != null) widget.moduleSwitcher!,
+                  ],
                   headerActions: [
                     _HelpMenu(
                       onAction: widget.onHelpAction,
@@ -482,7 +600,7 @@ class _ToolbarCommandButton extends StatelessWidget {
     return HelpTarget(
       topicId: HelpTopicId.forCommand(command.id),
       child: Semantics(
-        toggled: searchState,
+        toggled: selected,
         child: IconButton(
           key: ValueKey("toolbar-command-${command.id}"),
           tooltip: [

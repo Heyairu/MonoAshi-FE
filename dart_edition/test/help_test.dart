@@ -20,7 +20,7 @@ void main() {
   final catalog = HelpCatalog.parse(source);
 
   test('offline topics cover every page, command and related link', () {
-    expect(HelpTopicId.pages, hasLength(16));
+    expect(HelpTopicId.pages, hasLength(17));
     for (final id in [
       ...HelpTopicId.pages,
       ...HelpTopicId.commands.values,

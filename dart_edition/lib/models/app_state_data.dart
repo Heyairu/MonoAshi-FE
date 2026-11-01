@@ -4,6 +4,7 @@ import "package:freezed_annotation/freezed_annotation.dart";
 import "../bin/settings_manager.dart";
 import "../bin/ui_library.dart";
 import "navigation_style.dart";
+import "../l10n/app_locale.dart";
 
 part "app_state_data.freezed.dart";
 
@@ -12,12 +13,14 @@ class AppThemeStateData with _$AppThemeStateData {
   const factory AppThemeStateData({
     @Default(AppThemeMode.system) AppThemeMode themeMode,
     @Default(Colors.lightBlue) Color themeColor,
+    @Default(AppThemePreset.standard) AppThemePreset themePreset,
   }) = _AppThemeStateData;
 }
 
 @freezed
 class AppSettingsStateData with _$AppSettingsStateData {
   const factory AppSettingsStateData({
+    @Default(AppLocalePreference.system) AppLocalePreference appLocale,
     @Default(NavigationStyle.railLabel) NavigationStyle navigationStyle,
     @Default(true) bool showExitWarning,
     @Default(12.0) double fontSize,

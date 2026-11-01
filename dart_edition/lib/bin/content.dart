@@ -114,10 +114,10 @@ class EditorTextBox extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<EditorTextBox> createState() => _EditorTextBoxState();
+  ConsumerState<EditorTextBox> createState() => EditorTextBoxState();
 }
 
-class _EditorTextBoxState extends ConsumerState<EditorTextBox> {
+class EditorTextBoxState extends ConsumerState<EditorTextBox> {
   static const _intelliSenseEngine = MosaicIntelliSenseEngine();
   static const _targetResolver = InlineAnnotationTargetResolver();
   static const _uuid = Uuid();
@@ -148,6 +148,8 @@ class _EditorTextBoxState extends ConsumerState<EditorTextBox> {
 
   List<MosaicCompletionCandidate>? get _activeCompletionCandidates =>
       _poppin.activeItems;
+
+  bool get hasActiveCompletion => _completionSession != null;
 
   bool get _usesPlainTextQuillEditor => widget.usePlainTextQuillEditor;
 
@@ -1054,6 +1056,22 @@ class _EditorTextBoxState extends ConsumerState<EditorTextBox> {
     if (mounted) _refreshCompletion();
   }
 
+  /// Shared by the Ribbon and the standalone editor's phrase buttons.
+  Future<void> openPhraseLibrary() => _openPhraseLibrary();
+
+  Future<void> insertPhrase() => _showPhrasePicker();
+
+  void saveSelectionAsPhrase() {
+    final selection = widget.controller.selection;
+    if (!selection.isValid || selection.isCollapsed) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('請先選取要存為短語的正文內容')));
+      return;
+    }
+    _saveSelectionAsPhrase();
+  }
+
   void _saveSelectionAsPhrase() {
     final controller = widget.controller;
     if (controller is! MosaicEditingController ||
@@ -1076,10 +1094,21 @@ class _EditorTextBoxState extends ConsumerState<EditorTextBox> {
   }
 
   Future<void> _showPhrasePicker() async {
+    final controller = widget.controller;
+    if (controller is! MosaicEditingController) return;
+    final selection = controller.selection;
+    final revision = controller.rawRevision;
+    _dismissCompletion();
     final phrases = ref
         .read(availablePhrasesProvider)
         .where((phrase) => phrase.enabled)
         .toList();
+    if (phrases.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('尚無可插入的短語，請先在短語庫新增短語')));
+      return;
+    }
     final selected = await showDialog<String>(
       context: context,
       builder: (dialogContext) => HelpTarget(
@@ -1096,7 +1125,21 @@ class _EditorTextBoxState extends ConsumerState<EditorTextBox> {
         ),
       ),
     );
-    if (mounted && selected != null) await _insertPhraseById(selected);
+    if (!mounted) return;
+    if (selected != null) {
+      if (controller != widget.controller ||
+          controller.rawRevision != revision) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('正文已變更，請重新選取短語')));
+        return;
+      }
+      controller.selection = selection.isValid
+          ? selection
+          : TextSelection.collapsed(offset: controller.text.length);
+      await _insertPhraseById(selected);
+    }
+    widget.focusNode.requestFocus();
   }
 
   Widget _phraseActions() => HelpTarget(
@@ -1629,6 +1672,9 @@ class _EditorTextBoxState extends ConsumerState<EditorTextBox> {
         control: !isApple,
         meta: isApple,
       ): const _EditorCutIntent(),
+      if (!isApple)
+        const SingleActivator(LogicalKeyboardKey.keyY, control: true):
+            const _EditorRedoIntent(),
       if (!isComposing && hasCompletionCandidates) ...{
         const SingleActivator(LogicalKeyboardKey.arrowUp):
             const PoppinMoveIntent(-1),

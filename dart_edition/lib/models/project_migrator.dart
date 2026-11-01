@@ -21,7 +21,7 @@ class ProjectMigrationResult {
 /// Owns all project-format upgrades. Module codecs only decode their XML shape;
 /// they never guess which historical project version they received.
 class ProjectMigrator {
-  static const currentVersion = "1.18";
+  static const currentVersion = "1.20";
   static const _legacyMigrationCutoff = "1.08";
   static const _timelineProjectionCutoff = "1.10";
   static const _characterSnapshotCutoff = "1.11";
@@ -139,6 +139,7 @@ class ProjectMigrator {
     return (
       data: ProjectData(
         projectUUID: source.projectUUID,
+        writingGoals: source.writingGoals,
         baseInfoData: source.baseInfoData,
         segmentsData: source.segmentsData,
         outlineData: source.outlineData,
@@ -256,6 +257,7 @@ class ProjectMigrator {
     return (
       data: ProjectData(
         projectUUID: source.projectUUID,
+        writingGoals: source.writingGoals,
         baseInfoData: source.baseInfoData,
         segmentsData: source.segmentsData,
         outlineData: source.outlineData,
@@ -362,6 +364,7 @@ class ProjectMigrator {
     return (
       data: ProjectData(
         projectUUID: source.projectUUID,
+        writingGoals: source.writingGoals,
         baseInfoData: source.baseInfoData,
         segmentsData: source.segmentsData,
         outlineData: source.outlineData,
@@ -507,6 +510,7 @@ class ProjectMigrator {
 
     final migratedData = ProjectData(
       projectUUID: source.projectUUID,
+      writingGoals: source.writingGoals,
       baseInfoData: source.baseInfoData,
       segmentsData: source.segmentsData,
       outlineData: outline,

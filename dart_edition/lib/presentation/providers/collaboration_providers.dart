@@ -1055,6 +1055,7 @@ class CollaborationNotifier extends Notifier<CollaborationState> {
           entry.key: entry.value.text,
       };
       if (changedKinds.contains(ProjectRecordKind.baseInfo)) {
+        ref.read(projectWritingGoalsProvider.notifier).setGoals(ProjectRecordCodec.decodeWritingGoals(_projectRecords));
         ref
             .read(baseInfoDataProvider.notifier)
             .setBaseInfoData(

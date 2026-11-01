@@ -75,9 +75,6 @@ class ChapterSelectionCodec {
   /// 序列化成與 Qt SaveFile() 兼容的 `<Type>` 片段
   static String? saveXML(List<SegmentData> segments) {
     final snapshot = _createSnapshot(segments);
-    if (snapshot.isEmpty || ChapterTree.chapterCount(snapshot) == 0) {
-      return null;
-    }
 
     void writeFolder(xml.XmlBuilder builder, SegmentData folder) {
       builder.element(
@@ -208,12 +205,10 @@ class ChapterSelectionCodec {
 
       segments.addAll(typeElement.findElements("Segment").map(readFolder));
 
-      return segments.isNotEmpty
-          ? ChapterTreeSchema.upgrade(
-              sourceVersion: sourceSchemaVersion,
-              segments: segments,
-            )
-          : null;
+      return ChapterTreeSchema.upgrade(
+        sourceVersion: sourceSchemaVersion,
+        segments: segments,
+      );
     } catch (e) {
       debugPrint("ChapterSelection XML Element Parse Error: $e");
       return null;

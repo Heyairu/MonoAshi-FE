@@ -1,6 +1,6 @@
 # Monogatari Assistant 統一 API 文件
 
-更新日期：2026-10-20
+更新日期：2026-11-01
 
 適用範圍：目前儲存庫已實作的整合與主要開發介面
 
@@ -14,10 +14,10 @@
 | --- | --- | --- | --- |
 | MCP 唯讀工具與 resources | Host ↔ sidecar：stdio MCP | server `0.1.0`，payload `schemaVersion: "1"` | 外部 MCP Host |
 | MCP App bridge | sidecar ↔ App：loopback HTTP | descriptor `version: 1`、`contractVersion: "0.1.0"` | App／sidecar 內部 |
-| 專案檔案 API | Dart use case／repository／FileService | XML `1.18` | App 開發者 |
+| 專案檔案 API | Dart use case／repository／FileService | XML `1.20` | App 開發者 |
 | Rhodanthe | Dart worker → C ABI → UTF-8 JSON | ABI `1`、contract `1` | 編輯器／原生整合 |
 | Copilot provider adapter | App → 設定的 provider：HTTP JSON | 依 adapter 選定的 protocol | App 開發者 |
-| P2P 快照與協作 | LAN TCP、配對與加密 frame | 各 frame 前綴獨立版本；協作 schema `6` | 相容的 App 裝置 |
+| P2P 快照與協作 | LAN TCP、配對與加密 frame | 各 frame 前綴獨立版本；協作 schema `7` | 相容的 App 裝置 |
 
 UTF-8 byte budget 與 UTF-16 offset 是不同單位；`KiB = 1024 bytes`。MCP 的 `schemaVersion` 是字串，Rhodanthe 的 `contractVersion` 是整數。本文 JSON 中的 `session-example`、`chapter-example`、`fingerprint-example` 等是示意值；實際 ID、cursor 與 fingerprint 必須使用前一個回應提供的值。
 
@@ -287,7 +287,7 @@ App 流程透過注入 `FileRepository` 的 `ProjectFileUseCase` 使用檔案服
 | `generateProjectXml(ProjectData data, {bool updateLatestSave = true})` | `Future<String>` | 生成 XML；可保留原 LatestSave |
 | `loadProjectFromXml(ProjectFile projectFile)` | `Future<ProjectData>` | 讀取、解析並遷移資料 |
 | `loadProjectParseResultFromXml(ProjectFile projectFile)` | `Future<ProjectParseResult>` | 同上並保留 metadata／遷移資訊 |
-| `exportText({required String content, required String fileName, required String extension})` | `Future<void>` | 輸出指定文字格式 |
+| `exportText({required String content, required String fileName, required String extension})` | `Future<bool>` | 寫入完成為 true，取消為 false；錯誤拋出例外，不自行重新排版內容 |
 
 ### 3.2 備份 API
 
@@ -341,12 +341,27 @@ Future<ProjectData?> openStory(ProjectFileUseCase files) async {
 
 ### 3.4 XML 格式契約
 
-現行格式由 `ProjectMigrator.currentVersion` 定義為 `1.18`。根為 `Project`，`UUID` 為專案 ID，`ver` 為格式版本；每個模組位於 `Type`，以直屬 `Name` 辨識。
+匯出主入口使用 [ProjectExportService](../dart_edition/lib/application/project_export/export_service.dart) 與 [ExportWriter](../dart_edition/lib/domain/repositories/export_writer.dart)，不再由 ProjectManager 的舊匯出 helper 組合內容。
+
+| 介面 | 契約 |
+| --- | --- |
+| `ExportRequest` | purpose（manuscript／reference／exchange）、format、packaging（singleFile／splitZip）、modules、各模組 selections、作品資訊與標題選項；null selection 為整模組，空 set 不代表全選 |
+| `buildExportSelections(ProjectData)` | 建立章節、大綱、角色、地點、物品的型別化節點；檢查身分重複與樹深度資源限制 |
+| `resolveExportScope(ProjectData, ExportRequest)` | 輸出裁切後快照、所選 key、結構祖先、必要依賴與 warnings；不修改來源 |
+| `ProjectExportService.prepare(ProjectData, ExportRequest)` | 回傳 PreparedExport（bytes、extension、MIME、文件清單、預覽與 warnings）；格式不支援、無效範圍與缺少必要定義拋出 FormatException |
+| `prepareProjectExport((ProjectData, ExportRequest))` | 上述 prepare 的 isolate 入口，UI 透過 compute 執行 |
+| `ExportWriter.save(PreparedExport, String)` | Future<ExportSaveResult>；saved 含目的位置，cancelled 不代表成功；I/O 錯誤拋出例外 |
+
+Word／PDF 的 format enum 已預留但 service 拒絕執行。預覽與 Writer 共用同一份產物；ZIP 只寫一個壓縮檔，內含內容文件、README.txt 與 schemaVersion 1 的 export-manifest.json。桌面以暫存檔完成寫入後替換目標，Android／iOS 以文件選擇器 bytes 流程保存；原生平台行為仍需實機驗收。
+
+細項 XML 的 `ExportScope Version="1"` 與 ChapterTreeVersion 分開演進。manifest 提供 partialModules、structuralModules 與 blockedReplacements；`SelectiveProjectImporter.apply` 預設拒絕細項模組替換，UI 檢視影響並明確選取後才傳入 `allowPartialReplacement: true`。含結構祖先或依賴且目標模組已有內容時仍拒絕；這不是依 ID 合併 API。
+
+現行格式由 `ProjectMigrator.currentVersion` 定義為 `1.20`。根為 `Project`，`UUID` 為專案 ID，`ver` 為格式版本；每個模組位於 `Type`，以直屬 `Name` 辨識。
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <Project UUID="12345678-1234-4234-8234-123456789abc">
-  <ver>1.18</ver>
+  <ver>1.20</ver>
   <Type>
     <Name>BaseInfo</Name>
     <General>
@@ -358,6 +373,18 @@ Future<ProjectData?> openStory(ProjectFileUseCase files) async {
 ```
 
 此為結構示意，其他缺少的模組由讀取預設補上。不要沿用舊文件中 `<Type>BaseInfo</Type>` 加上平行 `<BaseInfo>` 的範例。詳細章節、角色、時間軸、物品與地點 schema 見 [MNPROJ_FILE_STRUCTURE](../dart_edition/MNPROJ_FILE_STRUCTURE.md)；短語另由 [phrase codec](../dart_edition/lib/features/phrases/phrase_library_codec.dart) 管理 payload。
+
+### 3.5 寫作目標與每日進度
+
+`ProjectData.writingGoals` 保存 nullable `chapterWordGoal`／`totalWordGoal`。有效值依檔案覆寫、本機預設及內建初始值解析；`null` 表示動態繼承，與預設相同的明確數字仍是覆寫。`WritingGoalsCodec` 以 `Type Version="1"` 讀寫；無法解析的資料保留在 `recoveryXml`，下次保存輸出 `WritingGoalsRecovery`。
+
+`WritingGoalDefaultsNotifier.setGoal(kind, value)` 先等設定載入，序列保存成功才發布新值；範圍為 `WritingGoalKind.daily/chapter/total`，合法值為 1..999999999。設定 key 為 `writing_goal_defaults_v1`，不進專案 dirty 或歷史；專案覆寫則參與 dirty、Undo、完整保存及備份。
+
+`DailyProgressController` 接收已提交的本機 reader text 變化。每日使用固定 `wordsAndCharacters` 政策，跨作品加總有號增量；組字未提交、載入、匯入及遠端變化不增加成績。`replaceBaseline` 排除外部內容，`checkpoint`／`restoreCheckpoint` 以歷史座標處理 Undo／Redo 與混合來源，`markSaved`／`discardUnsaved` 處理放棄草稿，`flush`／`retry` 回傳保存結果。
+
+帳本位於 Application Support 的 `Data/WritingProgress.json`，schema／countPolicy 均為 1。按當地日期及作品 UUID 保存小計，以 session 序號去重；程序內佇列及跨程序鎖保護讀取、合併、暫存替換。寫入失敗保留待處理事件；損壞先保留原檔並嘗試 `.bak`。異常終止可能遺失尚未落盤的增量，不從開檔差值補算。
+
+即時協作 schema 7 的 BaseInfo record 新增 `writingGoals`，包含明確 null 與復原資料；較舊協作 schema 拒絕套用。三方快照合併逐欄處理每章／全文覆寫及清除，並呈現同欄衝突。本機預設與每日帳本不進 record、快照或局部交換。
 
 ## 4. Rhodanthe 原生 API
 
@@ -533,7 +560,7 @@ timeout 為可選 named `Duration`。事件由 `inboundProbes`、`inboundProject
 
 ### 6.4 即時協作與交易
 
-`CollaborationSchema.currentVersion = 6`。單一 batch 最多 128 operations；單次插入最多 24 KiB，建議文字 chunk 4 KiB；單一刪除 operation 最多 1,000,000 atoms。協作 record／text 操作、vector、presence 與交易欄位由既有 codec 驗證；XML 僅作 checkpoint／持久化，不放入每個即時 operation。
+`CollaborationSchema.currentVersion = 7`。單一 batch 最多 128 operations；單次插入最多 24 KiB，建議文字 chunk 4 KiB；單一刪除 operation 最多 1,000,000 atoms。協作 record／text 操作、vector、presence 與交易欄位由既有 codec 驗證；XML 僅作 checkpoint／持久化，不放入每個即時 operation。
 
 `OperationId` 包含 replicaId 與正整數 sequence。游標 target 可為 chapterText、projectText、projectField；文字游標採 atom anchor 與 fallback offset，不能以畫面投影 offset 直接替換 raw 位置。多筆 record 的同一交易在收齊後一次套用。
 
@@ -620,3 +647,48 @@ Help 不寫入作品、設定或同步 schema。快捷鍵及點選的自動化�
 | `character_collaboration_selection_test.dart` | 1 | 角色切換案例的焦點斷言不符。 |
 
 發布前仍需在 Windows 實機驗證實體 F1／Shift+F1／Ctrl+F1、問號游標、原生對話框邊界及中文 IME。測試數量僅代表此工作目錄於記錄日期的結果。
+
+
+## 10. 工作區模組與快捷鍵導覽
+
+本節為 App 內部 Dart 接線，不是 MCP 或網路 API。使用說明見 [模組切換與鍵盤導覽](GUIDE.md#模組切換與鍵盤導覽)。
+
+| 介面 | 契約 |
+| --- | --- |
+| `AppModule.all` | 18 個固定模組定義與循環順序；`id` 為穩定 enum，包含 `home`、`settings`、`help`、`editor` 與 `about`。 |
+| `AppModule.forNavigation(index)` | 對接現有導覽索引；0–15 保留原意，16 為說明，17 為正文。索引須來自目錄。 |
+| `AppModule.forPage(index)` | 對接既有工作區頁面狀態；正文維持特殊索引 114514，避免同一編輯器在頁面堆疊掛載兩次。 |
+| `AppModule.step(current, delta)` | 依目錄循環取前後模組；不修改作品內容或啟動該模組內的業務操作。 |
+| `WorkspaceNavigationShortcuts` | 限目前工作區焦點與 current route 的按鍵路由。精確處理 Alt＋四方向、模組入口、搜尋及另存組合；不接管一般文字輸入。先檢查 modal、menu、Help、候選、組字與專案載入，忽略重複按鍵。 |
+| `ModuleSwitcher.show(context, current)` | 回傳 `Future<AppModule?>`；選取回傳目標模組，Esc／取消回傳 null。搜尋與鍵盤選取不先切換背景頁面。 |
+| `MonogatariTopAppBarState.selectRelativeTab(delta)` | 共用三種工具列模式，更新 Ribbon 頁籤且保留輸入焦點；不因切到搜尋頁籤而開啟搜尋列。 |
+| `RibbonController.selectTab(id, requestFocus: false)` | 本機套件新增可選參數；預設 true 保留既有互動行為，宿主導覽使用 false。 |
+| `MaterialRibbon.fixedHeaderActions` | 不隨頁籤區捲動的工具列入口，用於固定顯示模組切換按鈕。 |
+| `MaterialRibbon.enableAltKeyTips` | 預設 true 的套件能力；App 設為 false，避免 Alt 組合啟動 KeyTip。F10 保留；獨立套件的單獨 Alt 改於釋放後判斷。 |
+| `HelpViewer(embedded: true)`／`HelpModule` | 共用離線 HelpCatalog、搜尋與文章呈現；模組有獨立 FocusNode、目錄快取與閱讀歷史，不使用 modal 的關閉與輸入阻擋。 |
+| `FindReplaceBarState.focusFind()`／`focusReplace()`／`navigate(forward)` | 搜尋框聚焦／取代展開／結果導覽；組字時不執行結果導覽，搜尋框內導航完成保留輸入焦點。 |
+
+程式來源：[模組目錄](../dart_edition/lib/features/navigation/app_module.dart)、[按鍵作用域](../dart_edition/lib/features/navigation/workspace_navigation_shortcuts.dart)、[模組切換器](../dart_edition/lib/presentation/widgets/module_switcher.dart)、[說明模組](../dart_edition/lib/features/help/help_module.dart)。
+
+一般文字欄位與正文中的 Alt／Option＋方向鍵依產品配置優先執行導覽；Ctrl+Alt／AltGr、額外 Shift／Meta 不匹配。新接線不改專案 XML、P2P 或協作 schema。模組切換沿用工作區的正文同步與導覽歷史；非同步選擇器完成時核對專案 session，避免舊選擇切換到新專案。
+
+## 11. UI 語系與本機偏好
+
+此節為 App 內部 Dart 接線，不是對外 MCP／P2P 契約。語言偏好只保存在裝置，不進入 `.mnproj`、CRDT 或同步快照。
+
+| 介面／值 | 契約 |
+| --- | --- |
+| `AppLocalePreference` | `system`、`traditionalChinese`、`english`、`japanese`；儲存值分別為 `system`、`zh-Hant`、`en`、`ja`，不使用 enum index。 |
+| `SettingsRepository.load().appLocale` | 從 `app_locale` 讀取偏好；接受 `zh_TW`／`zh-TW` 等表示，未知或型別不符的值回到跟隨系統。 |
+| `saveAppLocale(value)` | 保存 canonical 字串；底層寫入回傳 false 或拋例外時視為失敗。 |
+| `SettingsStateNotifier.setAppLocale(value)` | 初次載入後立即更新 UI，寫入序列化。最新要求失敗時只恢復語言欄位到最後成功保存值；不回復其他設定。舊要求失敗不覆蓋較新的選擇；呼叫者捕捉失敗並提供重試。 |
+| `resolveAppLocale(locales, preference: ...)` | 明確偏好優先；否則依完整、有序系統清單匹配 zh／en／ja，中文變體統一使用 `zh-Hant`，沒有匹配時回退繁中。 |
+| `systemLocalesProvider` | 觀察 `WidgetsBindingObserver.didChangeLocales`；釋放 provider 時移除 observer。 |
+| `resolvedAppLocaleProvider` | 與 MaterialApp 使用相同解析邏輯，供 UI 字型與後續非 Widget 顯示使用；手動偏好不受系統變更影響。 |
+| `AppLocalization.delegates`／`resolve` | Splash、初始化失敗與正常 App 共用。跟隨系統時 `MaterialApp.locale` 為 null；明確偏好傳入對應 Locale。 |
+| `AppQuillLocalizationsDelegate` | App 的 canonical `zh-Hant` 只在 Quill 11.6 lookup 時對應 `zh-TW`，防止落入簡中；en／ja 正常派送。 |
+| `AppLanguageSelector` | OOBE／設定頁共用，立即保存、顯示本地化錯誤；語言名稱使用自稱，不儲存在 OOBE 完成草稿。 |
+
+新增文字使用 `lib/l10n/app_zh.arb` 的語意 key，英文與日文需包含相同訊息集合；`app_zh_Hant.arb` 繼承繁中來源。執行 `flutter gen-l10n` 產生 `lib/l10n/generated/`，不用手改生成檔。UI 使用 `context.l10n`，業務及資料層不持有 BuildContext 或翻譯字串。
+
+目前僅語系入口與部分引導／設定文字完成三語；其他 UI 與 Help 保留後續遷移。驗證入口：`app_locale_test.dart`、`locale_preferences_test.dart`、`locale_switching_test.dart`、`oobe_test.dart`。Widget 測試涵蓋系統變更、重啟讀回、寫入競態、失敗回復、Quill draft／selection／undo／focus、IME composing 與開啟中對話框的狀態保留；原生系統 UI 語言與多平台實機行為另行驗收。

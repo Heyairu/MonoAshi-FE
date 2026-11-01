@@ -34,6 +34,7 @@ import "../domain/models/p2p_revision_models.dart";
 import "../domain/models/p2p_snapshot_models.dart";
 import "../presentation/providers/global_state_providers.dart";
 import "../presentation/providers/p2p_sync_providers.dart";
+import "../presentation/widgets/welcome_greeting.dart";
 
 class WelcomeView extends ConsumerStatefulWidget {
   const WelcomeView({
@@ -80,13 +81,12 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
     content: "中國最偉大、最永久的藝術，就是男人扮女人",
     source: "—— 魯迅（1881-1936）",
   );
-  static final Uri _projectRepoUri = Uri.parse(
-    "https://github.com/heyairu/Monogatari-Assistant-FE",
-  );
-  static final Uri _KadoURL = Uri.parse(
-    "https://www.kadokado.com.tw/user/167702",
-  );
+  static final Uri _projectRepoUri = Uri.parse("https://github.com/heyairu/Monogatari-Assistant-FE");
+  static final Uri _KadoURL = Uri.parse("https://www.kadokado.com.tw/user/167702");
   static final Uri _KoFiURL = Uri.parse("https://ko-fi.com/heyairu");
+  static final Uri _GFormsURL = Uri.parse("https://forms.gle/ETkWCe7VUd6yF6Mo8");
+  static final Uri _GitHubIssueURL = Uri.parse("https://github.com/heyairu/Monogatari-Assistant-FE/issues");
+
   static final Random _random = Random();
 
   late Future<_DidYouKnowData> _didYouKnowFuture;
@@ -1036,33 +1036,8 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 標題
-            Text(
-              "Welcome to",
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-            Text(
-              "ものがたり·アシスタント",
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                "—— For Refined Editing. Powered by Heyairu.",
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ),
+            const WelcomeGreeting(),
             const SizedBox(height: 32),
-
             // Start
             AppSectionCard(
               margin: const EdgeInsets.all(4),
@@ -1136,6 +1111,33 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                           Icon(Icons.coffee, size: 18),
                           SizedBox(width: 4),
                           Flexible(child: Text("Heyairu's Ko-fi")),
+                        ],
+                      ),
+                    ),
+                    Divider(height: 24, thickness: 1),
+                    TextButton(
+                      style: TextButtonStyle,
+                      onPressed: () => _openExternalLink(_GFormsURL),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.feedback_rounded, size: 18),
+                          SizedBox(width: 4),
+                          Flexible(
+                            child: Text("Comment (on Google Forms)"),
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton(
+                      style: TextButtonStyle,
+                      onPressed: () => _openExternalLink(_GitHubIssueURL),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.feedback_rounded, size: 18),
+                          SizedBox(width: 4),
+                          Flexible(
+                            child: Text("Comment (on GitHub Issues)"),
+                          ),
                         ],
                       ),
                     ),

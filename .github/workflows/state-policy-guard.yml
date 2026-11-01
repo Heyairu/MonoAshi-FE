@@ -8,6 +8,7 @@ on:
       - "dart_edition/tool/**"
       - "dart_edition/pubspec.yaml"
       - "dart_edition/pubspec.lock"
+      - "dart_edition/l10n.yaml"
       - ".github/workflows/state-policy-guard.yml"
   push:
     branches:
@@ -19,6 +20,7 @@ on:
       - "dart_edition/tool/**"
       - "dart_edition/pubspec.yaml"
       - "dart_edition/pubspec.lock"
+      - "dart_edition/l10n.yaml"
       - ".github/workflows/state-policy-guard.yml"
 
 permissions:
@@ -52,6 +54,9 @@ jobs:
 
       - name: Check formatting
         run: dart format --output=none --set-exit-if-changed lib test tool
+
+      - name: Generate localizations
+        run: flutter gen-l10n
 
       - name: Enforce initState provider assignment policy
         run: dart run tool/check_initstate_provider_assignments.dart

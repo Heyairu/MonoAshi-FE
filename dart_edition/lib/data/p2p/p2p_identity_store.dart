@@ -79,7 +79,7 @@ class P2pIdentityStore {
               seedBase64 is String) {
             final seed = base64Decode(seedBase64);
             if (seed.length == 32) {
-              return _installIdentity(deviceId, seed);
+              return await _installIdentity(deviceId, seed);
             }
           }
         }
@@ -194,7 +194,7 @@ class P2pIdentityStore {
       if (publicKeyBytes.length != 32 || signatureBytes.length != 64) {
         return false;
       }
-      return _signatureAlgorithm.verify(
+      return await _signatureAlgorithm.verify(
         utf8.encode(challenge.canonicalPayload),
         signature: Signature(
           signatureBytes,
@@ -311,7 +311,7 @@ class P2pIdentityStore {
       if (signatureBytes.length != 64 || publicKeyBytes.length != 32) {
         return false;
       }
-      return _signatureAlgorithm.verify(
+      return await _signatureAlgorithm.verify(
         utf8.encode(confirmation.canonicalPayload),
         signature: Signature(
           signatureBytes,

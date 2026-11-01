@@ -6,9 +6,28 @@ import "../../bin/ui_library.dart";
 import "../../models/app_state_data.dart";
 import "../../models/navigation_style.dart";
 import "../../models/toolbar_mode.dart";
+import "../../data/repositories/user_profile_repository.dart";
 import "repository_providers.dart";
+import "../../l10n/app_locale.dart";
 
 export "../../models/app_state_data.dart";
+
+class UserProfileNotifier extends AsyncNotifier<UserProfile> {
+  @override
+  Future<UserProfile> build() => ref.read(userProfileRepositoryProvider).load();
+
+  Future<void> save(UserProfile profile) async {
+    await future;
+    final normalized = profile.normalized;
+    await ref.read(userProfileRepositoryProvider).save(normalized);
+    state = AsyncData(normalized);
+  }
+}
+
+final userProfileProvider =
+    AsyncNotifierProvider<UserProfileNotifier, UserProfile>(
+      UserProfileNotifier.new,
+    );
 
 /// A device-local presentation preference, independent of project state.
 class ToolbarModeNotifier extends AsyncNotifier<ToolbarMode?> {
@@ -36,6 +55,7 @@ class ThemeStateNotifier extends AsyncNotifier<AppThemeStateData> {
     return AppThemeStateData(
       themeMode: snapshot.themeMode,
       themeColor: snapshot.themeColor,
+      themePreset: snapshot.themePreset,
     );
   }
 
@@ -47,8 +67,20 @@ class ThemeStateNotifier extends AsyncNotifier<AppThemeStateData> {
 
   Future<void> setThemeColor(Color color) async {
     final current = state.valueOrNull ?? const AppThemeStateData();
-    state = AsyncData(current.copyWith(themeColor: color));
+    state = AsyncData(
+      current.copyWith(themeColor: color, themePreset: AppThemePreset.standard),
+    );
     await ref.read(themeRepositoryProvider).saveThemeColor(color);
+    await ref
+        .read(themeRepositoryProvider)
+        .saveThemePreset(AppThemePreset.standard);
+  }
+
+  Future<void> setThemePreset(AppThemePreset preset) async {
+    await future;
+    final current = state.requireValue;
+    state = AsyncData(current.copyWith(themePreset: preset));
+    await ref.read(themeRepositoryProvider).saveThemePreset(preset);
   }
 
   Future<void> toggleTheme() async {
@@ -69,13 +101,19 @@ class ThemeStateNotifier extends AsyncNotifier<AppThemeStateData> {
 
 class SettingsStateNotifier extends AsyncNotifier<AppSettingsStateData> {
   static const int _maxRecentProjects = 10;
+  Future<void> _localeSaveTail = Future<void>.value();
+  AppLocalePreference? _persistedLocale;
+  int _localeRequestId = 0;
 
   @override
   Future<AppSettingsStateData> build() async {
     final repository = ref.read(settingsRepositoryProvider);
     final snapshot = await repository.load();
 
+    _persistedLocale = snapshot.appLocale;
+
     return AppSettingsStateData(
+      appLocale: snapshot.appLocale,
       navigationStyle: snapshot.navigationStyle,
       showExitWarning: snapshot.showExitWarning,
       fontSize: snapshot.fontSize,
@@ -95,6 +133,35 @@ class SettingsStateNotifier extends AsyncNotifier<AppSettingsStateData> {
       autoIndentLineStart: snapshot.autoIndentLineStart,
       recentProjects: snapshot.recentProjects,
     );
+  }
+
+  /// Apply immediately, serialize writes, and roll back only the latest
+  /// selection to the last successfully persisted preference on failure.
+  Future<void> setAppLocale(AppLocalePreference value) async {
+    await future;
+    final requestId = ++_localeRequestId;
+    state = AsyncData(state.requireValue.copyWith(appLocale: value));
+    final result = _localeSaveTail.then((_) async {
+      try {
+        await ref.read(settingsRepositoryProvider).saveAppLocale(value);
+        _persistedLocale = value;
+      } catch (_) {
+        if (requestId == _localeRequestId) {
+          state = AsyncData(
+            state.requireValue.copyWith(
+              appLocale: _persistedLocale ?? AppLocalePreference.system,
+            ),
+          );
+        }
+        rethrow;
+      }
+    });
+    // A failed write must not poison the queue for the next selection.
+    _localeSaveTail = result.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    await result;
   }
 
   Future<void> setShowExitWarning(bool value) async {
@@ -277,11 +344,13 @@ final settingsStateProvider =
 class AppThemeSettings {
   final Color color;
   final AppThemeMode mode;
+  final AppThemePreset preset;
   final double fontSize;
 
   const AppThemeSettings({
     required this.color,
     required this.mode,
+    this.preset = AppThemePreset.standard,
     required this.fontSize,
   });
 
@@ -291,11 +360,12 @@ class AppThemeSettings {
         other is AppThemeSettings &&
             other.color == color &&
             other.mode == mode &&
+            other.preset == preset &&
             other.fontSize == fontSize;
   }
 
   @override
-  int get hashCode => Object.hash(color, mode, fontSize);
+  int get hashCode => Object.hash(color, mode, preset, fontSize);
 }
 
 final appThemeSettingsProvider = Provider<AppThemeSettings>((ref) {
@@ -313,6 +383,7 @@ final appThemeSettingsProvider = Provider<AppThemeSettings>((ref) {
   return AppThemeSettings(
     color: theme.themeColor,
     mode: theme.themeMode,
+    preset: theme.themePreset,
     fontSize: fontSize,
   );
 });
@@ -324,5 +395,6 @@ final appInitializationProvider = FutureProvider<void>((ref) async {
     ref.read(themeStateProvider.future),
     ref.read(settingsStateProvider.future),
     ref.read(toolbarModeProvider.future),
+    ref.read(userProfileProvider.future),
   ]);
 });

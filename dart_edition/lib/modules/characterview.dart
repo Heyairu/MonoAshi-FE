@@ -1846,7 +1846,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
 
   SnapshotPreviewMode get _characterPreviewMode =>
       _snapshotPreviewModes[selectedCharacter] ??
-      SnapshotPreviewMode.followTimeline;
+      SnapshotPreviewMode.baseline;
 
   bool get _characterSnapshotReadOnly {
     final id = selectedCharacter;
@@ -3060,8 +3060,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
     final characterId = selectedCharacter!;
     final entries = ref.watch(characterSnapshotTimelineProvider(characterId));
     final mode =
-        _snapshotPreviewModes[characterId] ??
-        SnapshotPreviewMode.followTimeline;
+        _snapshotPreviewModes[characterId] ?? SnapshotPreviewMode.baseline;
     final current = mode == SnapshotPreviewMode.baseline
         ? entries.first.snapshot
         : ref.watch(currentCharacterSnapshotProvider(characterId));
@@ -3092,7 +3091,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                 icon: Icons.auto_stories_outlined,
                 text: mode == SnapshotPreviewMode.baseline
                     ? "故事狀態 · 編輯中：預設資料"
-                    : "故事狀態 · Tick $currentTick · ${event == null ? '唯讀預覽' : '編輯中：${event.label}'}",
+                    : "故事狀態 · Tick $currentTick · ${event == null ? "唯讀預覽；已開啟跟隨時間軸。" : "編輯中：${event.label}"}",
               ),
             ),
           ],

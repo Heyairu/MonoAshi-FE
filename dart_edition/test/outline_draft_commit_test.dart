@@ -65,10 +65,7 @@ void main() {
     await tester.enterText(field("類型 (如：開頭、中段、高潮、結尾)"), "轉");
     await tester.tap(
       find.descendant(
-        of: find.ancestor(
-          of: find.text("第二大箱"),
-          matching: find.byType(ListTile),
-        ),
+        of: find.byKey(const ValueKey("second")),
         matching: find.byIcon(Icons.library_books),
       ),
     );
@@ -77,10 +74,7 @@ void main() {
     expect(container.read(outlineDataProvider).last.storylineType, isEmpty);
     await tester.tap(
       find.descendant(
-        of: find.ancestor(
-          of: find.text("第一大箱"),
-          matching: find.byType(ListTile),
-        ),
+        of: find.byKey(const ValueKey("first")),
         matching: find.byIcon(Icons.library_books),
       ),
     );

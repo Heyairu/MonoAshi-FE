@@ -418,14 +418,11 @@ void main() {
     await tester.pump();
     final setting = find.byKey(const Key("navigation-style-setting"));
     await tester.ensureVisible(setting);
-    final dropdown = find.descendant(
-      of: setting,
-      matching: find.byType(DropdownButtonFormField<NavigationStyle>),
+    final option = find.byKey(
+      const ValueKey("settings-mode-navigation-railTooltip"),
     );
-    await tester.tap(dropdown);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-    await tester.tap(find.text(NavigationStyle.railTooltip.label).last);
+    await tester.ensureVisible(option);
+    await tester.tap(option);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(

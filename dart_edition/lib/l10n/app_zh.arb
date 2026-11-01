@@ -1,0 +1,159 @@
+{
+  "@@locale": "zh",
+  "appTitle": "物語 Assistant",
+  "@appTitle": {
+    "description": "Application title; keep product branding."
+  },
+  "settingsTitle": "設定",
+  "@settingsTitle": {
+    "description": "Settings page heading."
+  },
+  "settingsDescription": "調整適合自己的寫作環境",
+  "@settingsDescription": {
+    "description": "Settings introduction."
+  },
+  "generalSettingsTitle": "一般設定",
+  "@generalSettingsTitle": {
+    "description": "General settings section heading."
+  },
+  "generalSettingsDescription": "退出提示與語言",
+  "@generalSettingsDescription": {
+    "description": "General settings section summary."
+  },
+  "exitWarningTitle": "退出時提示",
+  "@exitWarningTitle": {
+    "description": "Exit confirmation setting."
+  },
+  "exitWarningDescription": "關閉應用前提示儲存未儲存的變更",
+  "@exitWarningDescription": {
+    "description": "Exit warning explanation."
+  },
+  "languageTitle": "顯示語言",
+  "@languageTitle": {
+    "description": "UI language selector title."
+  },
+  "languageSystem": "跟隨系統",
+  "@languageSystem": {
+    "description": "UI language preference that follows the ordered system language list."
+  },
+  "languageHelp": "立即套用並自動儲存。部分功能仍顯示繁體中文。",
+  "@languageHelp": {
+    "description": "Explain immediate persistence and current translation coverage; this foundation does not imply all modules are translated."
+  },
+  "languageSaveFailed": "無法儲存語言設定，已恢復原選擇。請再試一次。",
+  "@languageSaveFailed": {
+    "description": "Preference write failed and rolled back; never expose a raw exception here."
+  },
+  "initializationFailed": "初始化失敗：{error}",
+  "@initializationFailed": {
+    "description": "Startup failure; error is a technical diagnostic kept verbatim.",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Storage unavailable"
+      }
+    }
+  },
+  "oobeStepWelcome": "歡迎",
+  "@oobeStepWelcome": {
+    "description": "First setup step label."
+  },
+  "oobeStepAppearance": "介面偏好",
+  "@oobeStepAppearance": {
+    "description": "Setup step label."
+  },
+  "oobeStepStorage": "儲存與備份",
+  "@oobeStepStorage": {
+    "description": "Setup step label."
+  },
+  "oobeStepName": "名稱設定",
+  "@oobeStepName": {
+    "description": "Setup step label."
+  },
+  "oobeStepWorkspace": "開始使用",
+  "@oobeStepWorkspace": {
+    "description": "Setup step label."
+  },
+  "oobeStepComplete": "完成！",
+  "@oobeStepComplete": {
+    "description": "Final setup step label."
+  },
+  "oobeTitleWelcome": "ヤッホー！歡迎使用 MonoAshi",
+  "@oobeTitleWelcome": {
+    "description": "Welcome setup heading; MonoAshi is a product name."
+  },
+  "oobeTitleAppearance": "主題與操作偏好",
+  "@oobeTitleAppearance": {
+    "description": "Setup page heading."
+  },
+  "oobeTitleStorage": "檔案與自動備份",
+  "@oobeTitleStorage": {
+    "description": "Setup page heading."
+  },
+  "oobeTitleName": "名稱設定",
+  "@oobeTitleName": {
+    "description": "Setup page heading."
+  },
+  "oobeTitleWorkspace": "從第一個故事開始",
+  "@oobeTitleWorkspace": {
+    "description": "Setup page heading."
+  },
+  "oobeTitleComplete": "謝謝您！",
+  "@oobeTitleComplete": {
+    "description": "Final setup heading."
+  },
+  "oobeWelcomeThanks": "感謝您選擇 MonoAshi。",
+  "@oobeWelcomeThanks": {
+    "description": "First welcome paragraph."
+  },
+  "oobeWelcomeTime": "我們需要數分鐘時間設定您的程式。",
+  "@oobeWelcomeTime": {
+    "description": "Welcome introduction."
+  },
+  "oobeWelcomeDescription": "接下來的幾個步驟，將協助您調整介面、選擇儲存偏好，並認識創作工作區。",
+  "@oobeWelcomeDescription": {
+    "description": "Welcome explanation; allow wrapping."
+  },
+  "oobeNext": "下一步  ›",
+  "@oobeNext": {
+    "description": "Next setup button; keep directional decoration separate from meaning."
+  },
+  "oobeBack": "上一步",
+  "@oobeBack": {
+    "description": "Previous setup step button."
+  },
+  "oobeSkip": "略過",
+  "@oobeSkip": {
+    "description": "Skip name step button."
+  },
+  "oobeStart": "開始創作",
+  "@oobeStart": {
+    "description": "Finish setup and open workspace button."
+  },
+  "oobeContinueHint": "如果要繼續，請按「下一步」。",
+  "@oobeContinueHint": {
+    "description": "Setup footer instruction."
+  },
+  "oobeCompleteHint": "設定完成！",
+  "@oobeCompleteHint": {
+    "description": "Final setup footer instruction."
+  },
+  "oobeSaveFailed": "設定尚未儲存完成。請再試一次。",
+  "@oobeSaveFailed": {
+    "description": "Setup completion save error."
+  },
+  "oobeProgressSemantics": "步驟 {step}，{title}",
+  "@oobeProgressSemantics": {
+    "description": "Accessible setup step label.",
+    "placeholders": {
+      "step": {
+        "type": "int",
+        "example": "1"
+      },
+      "title": {
+        "type": "String",
+        "example": "Welcome"
+      }
+    }
+  }
+}

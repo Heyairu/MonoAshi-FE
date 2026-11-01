@@ -2,6 +2,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "../../data/repositories/settings_repository.dart";
 import "../../data/repositories/theme_repository.dart";
+import "../../data/repositories/user_profile_repository.dart";
 
 final themeRepositoryProvider = Provider<ThemeRepository>((ref) {
   return SharedPreferencesThemeRepository();
@@ -10,3 +11,7 @@ final themeRepositoryProvider = Provider<ThemeRepository>((ref) {
 final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
   return SharedPreferencesSettingsRepository();
 });
+
+final userProfileRepositoryProvider = Provider<UserProfileRepository>(
+  (ref) => UserProfileRepository(),
+);

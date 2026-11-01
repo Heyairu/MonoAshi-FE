@@ -12,6 +12,7 @@ import "global_state_providers.dart";
 import "project_io_providers.dart";
 import "project_state_providers.dart";
 import "timeline_providers.dart";
+import "writing_progress_provider.dart";
 
 /// A lightweight aggregated signal provider that changes when any persisted
 /// project provider publishes a new snapshot. Consumers can listen to this
@@ -32,6 +33,7 @@ final projectDataAggregateProvider = Provider<int>((ref) {
   final timelineLinks = ref.watch(outlineChapterLinksProvider);
   final itemWorkspace = ref.watch(itemWorkspaceProvider);
   final phrases = ref.watch(phrasesProvider);
+  final writingGoals = ref.watch(projectWritingGoalsProvider);
 
   return Object.hash(
     projectUuid,
@@ -57,6 +59,7 @@ final projectDataAggregateProvider = Provider<int>((ref) {
     identityHashCode(timelineLinks),
     identityHashCode(itemWorkspace),
     identityHashCode(phrases),
+    writingGoals,
   );
 });
 
@@ -288,6 +291,7 @@ class EditorCoordinatorNotifier extends Notifier<EditorCoordinatorState> {
   }
 
   void markAsSaved() {
+    ref.read(dailyWritingProgressProvider).markSaved();
     final bool nextUnsaved = ProjectManager.markAsSaved();
     state = state.copyWith(
       hasUnsavedChanges: nextUnsaved,
@@ -296,6 +300,7 @@ class EditorCoordinatorNotifier extends Notifier<EditorCoordinatorState> {
   }
 
   void resetAfterProjectLoaded() {
+    ref.read(dailyWritingProgressProvider).markSaved();
     _dirtyTimer?.cancel();
     final bool nextUnsaved = ProjectManager.markAsSaved();
     state = state.copyWith(hasUnsavedChanges: nextUnsaved, lastSavedTime: null);
@@ -424,6 +429,7 @@ class EditorCoordinatorNotifier extends Notifier<EditorCoordinatorState> {
   file_module.ProjectData collectProjectData() {
     return file_module.ProjectData(
       projectUUID: ref.read(projectUuidProvider),
+      writingGoals: ref.read(projectWritingGoalsProvider),
       baseInfoData: ref.read(baseInfoDataProvider),
       segmentsData: ref.read(segmentsDataProvider),
       outlineData: ref.read(outlineDataProvider),
@@ -465,6 +471,12 @@ class EditorCoordinatorNotifier extends Notifier<EditorCoordinatorState> {
     chapter_module.ChapterData.clearAllWordCountCache();
 
     final snapshot = data;
+    ref.read(dailyWritingProgressProvider).replaceBaseline(data.projectUUID, {
+      for (final location in chapter_module.ChapterTree.chaptersDepthFirst(data.segmentsData))
+        location.chapter.chapterUUID: location.chapter.chapterContent,
+    });
+    ref.read(projectWritingSessionProvider.notifier).state++;
+    ref.read(projectWritingGoalsProvider.notifier).setGoals(snapshot.writingGoals);
 
     ref.read(projectUuidProvider.notifier).setProjectUuid(snapshot.projectUUID);
     ref

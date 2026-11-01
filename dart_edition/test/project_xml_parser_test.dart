@@ -59,21 +59,21 @@ void main() {
     final secondSave = FileService.generateProjectXML(loaded.data);
 
     expect(firstSave, contains('<Project UUID="$projectUuid">'));
-    expect(firstSave, contains("<ver>1.18</ver>"));
+    expect(firstSave, contains("<ver>1.20</ver>"));
     expect(loaded.data.projectUUID, projectUuid);
     expect(secondSave, contains('<Project UUID="$projectUuid">'));
   });
 
-  test("1.18 is supported while later project formats are rejected", () {
-    expect(FileService.projectVersion, "1.18");
+  test("1.20 is supported while later project formats are rejected", () {
+    expect(FileService.projectVersion, "1.20");
     expect(FileService.isProjectVersionNewerThanSupported("1.17"), isFalse);
-    expect(FileService.isProjectVersionNewerThanSupported("1.18"), isFalse);
-    expect(FileService.isProjectVersionNewerThanSupported("1.18.0"), isFalse);
-    expect(FileService.isProjectVersionNewerThanSupported("1.19"), isTrue);
+    expect(FileService.isProjectVersionNewerThanSupported("1.20"), isFalse);
+    expect(FileService.isProjectVersionNewerThanSupported("1.20.0"), isFalse);
+    expect(FileService.isProjectVersionNewerThanSupported("1.21"), isTrue);
     expect(FileService.isProjectVersionNewerThanSupported("2.0"), isTrue);
   });
 
-  test("1.17 projects are marked for resave as 1.18", () {
+  test("1.17 projects are marked for resave as 1.20", () {
     const projectUuid = "123e4567-e89b-42d3-a456-426614174001";
     const xml = '<Project UUID="$projectUuid"><ver>1.17</ver></Project>';
 
@@ -83,7 +83,7 @@ void main() {
     expect(result.wasMigrated, isTrue);
     expect(
       FileService.generateProjectXMLWithoutLatestSaveUpdate(result.data),
-      contains("<ver>1.18</ver>"),
+      contains("<ver>1.20</ver>"),
     );
   });
 

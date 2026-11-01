@@ -152,12 +152,12 @@ final class McpBridgeServer {
       final expectedHost = "127.0.0.1:${_server?.port}";
       if (request.headers.value(HttpHeaders.hostHeader) != expectedHost ||
           request.headers.value("origin") != null) {
-        return _reply(request.response, HttpStatus.forbidden);
+        return await _reply(request.response, HttpStatus.forbidden);
       }
       if (request.method == "POST" && request.uri.path == "/v1/handshake") {
         await _drainBounded(request);
         if (!_authorized(request, _bootstrapToken)) {
-          return _reply(request.response, HttpStatus.unauthorized);
+          return await _reply(request.response, HttpStatus.unauthorized);
         }
         _accessToken = _randomSecret(32);
         _bootstrapToken = null;
@@ -173,7 +173,7 @@ final class McpBridgeServer {
             descriptorAvailable: false,
           ),
         );
-        return _json(request.response, <String, Object?>{
+        return await _json(request.response, <String, Object?>{
           "sessionId": _sessionId,
           "generation": _generation,
           "accessToken": _accessToken,
@@ -184,29 +184,29 @@ final class McpBridgeServer {
             request.headers.value("x-monoashi-session") != _sessionId ||
             request.headers.value("x-monoashi-generation") !=
                 _generation.toString()) {
-          return _reply(request.response, HttpStatus.unauthorized);
+          return await _reply(request.response, HttpStatus.unauthorized);
         }
         final snapshot = _snapshot;
         if (snapshot == null) {
-          return _reply(request.response, HttpStatus.gone);
+          return await _reply(request.response, HttpStatus.gone);
         }
         final session = MonoAshiMcpSession.forSnapshot(
           sessionId: _sessionId!,
           generation: _generation,
           snapshot: snapshot,
         );
-        return _json(request.response, <String, Object?>{
+        return await _json(request.response, <String, Object?>{
           "sessionId": session.sessionId,
           "projectId": session.projectId,
           "generation": session.generation,
           "snapshot": McpSnapshotCodec.encode(snapshot),
         }, maxBytes: maxSnapshotBytes);
       }
-      return _reply(request.response, HttpStatus.notFound);
+      return await _reply(request.response, HttpStatus.notFound);
     } on FormatException {
-      return _reply(request.response, HttpStatus.badRequest);
+      return await _reply(request.response, HttpStatus.badRequest);
     } catch (_) {
-      return _reply(request.response, HttpStatus.internalServerError);
+      return await _reply(request.response, HttpStatus.internalServerError);
     } finally {
       _requests--;
     }

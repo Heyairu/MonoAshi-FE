@@ -1,0 +1,100 @@
+{
+  "package": "flutter_quill",
+  "version": "11.6.0",
+  "versionSource": "pubspec.yaml and installed package",
+  "locales": [
+    {
+      "locale": "zh",
+      "keys": 97,
+      "missingFromEnglishBase": [
+        "errorUnexpectedSavingImage",
+        "insertVideo",
+        "openFile",
+        "openFileLocation",
+        "openGallery",
+        "saveImagePermissionDenied",
+        "successImageDownloaded",
+        "successImageSaved",
+        "successImageSavedGallery"
+      ],
+      "examples": {
+        "ok": "确认",
+        "copy": "复制",
+        "save": "保存"
+      }
+    },
+    {
+      "locale": "zh_TW",
+      "keys": 97,
+      "missingFromEnglishBase": [
+        "errorUnexpectedSavingImage",
+        "insertVideo",
+        "openFile",
+        "openFileLocation",
+        "openGallery",
+        "saveImagePermissionDenied",
+        "successImageDownloaded",
+        "successImageSaved",
+        "successImageSavedGallery"
+      ],
+      "examples": {
+        "ok": "確定",
+        "copy": "複製",
+        "save": "儲存"
+      }
+    },
+    {
+      "locale": "en",
+      "keys": 106,
+      "missingFromEnglishBase": [],
+      "examples": {
+        "ok": "Ok",
+        "copy": "Copy",
+        "save": "Save"
+      }
+    },
+    {
+      "locale": "en_US",
+      "keys": 97,
+      "missingFromEnglishBase": [
+        "errorUnexpectedSavingImage",
+        "insertVideo",
+        "openFile",
+        "openFileLocation",
+        "openGallery",
+        "saveImagePermissionDenied",
+        "successImageDownloaded",
+        "successImageSaved",
+        "successImageSavedGallery"
+      ],
+      "examples": {
+        "ok": "Ok",
+        "copy": "Copy",
+        "save": "Save"
+      }
+    },
+    {
+      "locale": "ja",
+      "keys": 97,
+      "missingFromEnglishBase": [
+        "errorUnexpectedSavingImage",
+        "insertVideo",
+        "openFile",
+        "openFileLocation",
+        "openGallery",
+        "saveImagePermissionDenied",
+        "successImageDownloaded",
+        "successImageSaved",
+        "successImageSavedGallery"
+      ],
+      "examples": {
+        "ok": "完了",
+        "copy": "コピー",
+        "save": "保存"
+      }
+    }
+  ],
+  "finding": "zh-Hant without countryCode selects simplified zh; map zh-Hant to zh-TW for the Quill delegate",
+  "source": "lib/src/l10n/generated/quill_localizations.dart",
+  "status": "source inspected; runtime locale integration test pending"
+}

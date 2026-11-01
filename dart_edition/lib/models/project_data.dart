@@ -3,6 +3,7 @@ import "package:uuid/uuid.dart";
 import "../features/phrases/phrase_entry.dart";
 
 import "base_info_data.dart";
+import "writing_goal_data.dart";
 import "chapter_selection_data.dart";
 import "character_data.dart";
 import "character_snapshot_data.dart";
@@ -21,6 +22,7 @@ class ProjectData {
   );
 
   String projectUUID;
+  ProjectWritingGoals writingGoals;
   BaseInfoData baseInfoData;
   List<SegmentData> segmentsData;
   List<StorylineData> outlineData;
@@ -52,6 +54,7 @@ class ProjectData {
 
   ProjectData({
     String? projectUUID,
+    this.writingGoals = const ProjectWritingGoals(),
     required this.baseInfoData,
     required this.segmentsData,
     required this.outlineData,

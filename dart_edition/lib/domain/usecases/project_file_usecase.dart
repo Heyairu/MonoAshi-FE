@@ -73,7 +73,7 @@ class ProjectFileUseCase {
     return fileRepository.openAutoBackupDirectory();
   }
 
-  Future<void> exportText({
+  Future<bool> exportText({
     required String content,
     required String fileName,
     required String extension,

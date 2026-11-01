@@ -16,13 +16,13 @@
  * 
  ************************************************************/
 
-import "dart:ui" as ui;
-
 import "package:flutter/material.dart";
 
 import "../ui_library/spacing.dart";
+import "../ui_library/theme_palette.dart";
 
 class MonogatariStatusBar extends StatelessWidget {
+  final AppThemePreset themePreset;
   final String displayText;
   final String saveTimeText;
   final int cursorLine;
@@ -41,6 +41,7 @@ class MonogatariStatusBar extends StatelessWidget {
 
   const MonogatariStatusBar({
     super.key,
+    this.themePreset = AppThemePreset.standard,
     required this.displayText,
     required this.saveTimeText,
     required this.cursorLine,
@@ -62,7 +63,13 @@ class MonogatariStatusBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusTextStyle = Theme.of(
       context,
-    ).textTheme.labelSmall?.copyWith(height: 1.2);
+    ).textTheme.labelSmall!.copyWith(height: 1.2);
+    // Latin-only and CJK labels must share the same line box and baseline.
+    // Otherwise fallback glyph metrics shift text within centered controls.
+    final statusStrutStyle = StrutStyle.fromTextStyle(
+      statusTextStyle,
+      forceStrutHeight: true,
+    );
     final statusButtonStyle = TextButton.styleFrom(
       textStyle: statusTextStyle,
       minimumSize: const Size(0, 24),
@@ -71,10 +78,6 @@ class MonogatariStatusBar extends StatelessWidget {
       visualDensity: VisualDensity.standard,
     );
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.sm,
-      ),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
         border: Border(
@@ -86,79 +89,144 @@ class MonogatariStatusBar extends StatelessWidget {
           ),
         ),
       ),
-      child: Row(
+      child: Stack(
         children: [
-          Expanded(
-            child: Row(
-              children: [
-                Icon(
-                  Icons.description,
-                  size: iconSize,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: _ScrollingText(
-                    text: displayText,
-                    style: statusTextStyle,
+          if (themePreset.isPride)
+            Positioned.fill(
+              child: PrideEdgeGlow(
+                preset: themePreset,
+                fromBottom: true,
+                saturation: .8,
+                opacity: .4,
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final minimumWidth = MediaQuery.textScalerOf(
+                  context,
+                ).scale(480);
+                final width = constraints.maxWidth < minimumWidth
+                    ? minimumWidth
+                    : constraints.maxWidth;
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: width,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.description,
+                                size: iconSize,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: RepaintBoundary(
+                                  child: ClipRect(
+                                    child: _ScrollingText(
+                                      text: displayText,
+                                      style: statusTextStyle,
+                                      strutStyle: statusStrutStyle,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.access_time,
+                          size: iconSize,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          saveTimeText,
+                          style: statusTextStyle,
+                          strutStyle: statusStrutStyle,
+                        ),
+                        const SizedBox(width: 12),
+                        Icon(
+                          Icons.pin_drop_outlined,
+                          size: iconSize,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          "$cursorLine:$cursorColumn",
+                          style: statusTextStyle,
+                          strutStyle: statusStrutStyle,
+                        ),
+                        const SizedBox(width: 12),
+                        _TabSpacesMenu(
+                          buttonStyle: statusButtonStyle,
+                          labelStrutStyle: statusStrutStyle,
+                          count: tabSpaceCount,
+                          fullWidth: tabFullWidth,
+                          autoIndentLineStart: autoIndentLineStart,
+                          onAutoIndentLineStartChanged:
+                              onAutoIndentLineStartChanged,
+                          onCountChanged: onTabSpaceCountChanged,
+                          onFullWidthChanged: onTabFullWidthChanged,
+                        ),
+                        Tooltip(
+                          message: overwriteMode
+                              ? "Overtype Mode (Ins)"
+                              : "Default Mode (Ins)",
+                          child: Focus(
+                            canRequestFocus: false,
+                            descendantsAreFocusable: false,
+                            child: TextButton(
+                              style: statusButtonStyle,
+                              onPressed: onToggleOverwrite,
+                              // Reserve the larger label's size so toggling does not shift
+                              // this button or the adjacent status items. Both labels still
+                              // follow the theme font and system text scaling.
+                              child: IndexedStack(
+                                index: overwriteMode ? 1 : 0,
+                                alignment: Alignment.center,
+                                children: [
+                                  Text("[DEF]", strutStyle: statusStrutStyle),
+                                  Text("[OVR]", strutStyle: statusStrutStyle),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Container(
+                          padding: AppSpacing.badgePadding,
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            "$currentWords / $totalWords 字",
+                            strutStyle: statusStrutStyle,
+                            style: statusTextStyle.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Icon(
-            Icons.access_time,
-            size: iconSize,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 4),
-          Text(saveTimeText, style: statusTextStyle),
-          const SizedBox(width: 12),
-          Icon(
-            Icons.pin_drop_outlined,
-            size: iconSize,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 4),
-          Text("$cursorLine:$cursorColumn", style: statusTextStyle),
-          const SizedBox(width: 12),
-          _TabSpacesMenu(
-            buttonStyle: statusButtonStyle,
-            count: tabSpaceCount,
-            fullWidth: tabFullWidth,
-            autoIndentLineStart: autoIndentLineStart,
-            onAutoIndentLineStartChanged: onAutoIndentLineStartChanged,
-            onCountChanged: onTabSpaceCountChanged,
-            onFullWidthChanged: onTabFullWidthChanged,
-          ),
-          Tooltip(
-            message: overwriteMode
-                ? "Overtype Mode (Ins)"
-                : "Default Mode (Ins)",
-            child: Focus(
-              canRequestFocus: false,
-              descendantsAreFocusable: false,
-              child: TextButton(
-                style: statusButtonStyle,
-                onPressed: onToggleOverwrite,
-                child: Text(overwriteMode ? "[OVR]" : "[DEF]"),
-              ),
-            ),
-          ),
-          const SizedBox(width: 4),
-          Container(
-            padding: AppSpacing.badgePadding,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              "$currentWords / $totalWords 字",
-              style: statusTextStyle?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-                fontWeight: FontWeight.bold,
-              ),
+                );
+              },
             ),
           ),
         ],
@@ -171,6 +239,7 @@ class MonogatariStatusBar extends StatelessWidget {
 class _TabSpacesMenu extends StatelessWidget {
   const _TabSpacesMenu({
     required this.buttonStyle,
+    required this.labelStrutStyle,
     required this.count,
     required this.fullWidth,
     required this.autoIndentLineStart,
@@ -180,6 +249,7 @@ class _TabSpacesMenu extends StatelessWidget {
   });
 
   final ButtonStyle buttonStyle;
+  final StrutStyle labelStrutStyle;
   final int count;
   final bool fullWidth;
   final bool autoIndentLineStart;
@@ -291,7 +361,10 @@ class _TabSpacesMenu extends StatelessWidget {
         style: buttonStyle,
         onPressed: () =>
             controller.isOpen ? controller.close() : controller.open(),
-        child: Text("[${fullWidth ? '全形' : '半形'}:$count]"),
+        child: Text(
+          "[${fullWidth ? '全形' : '半形'}:$count]",
+          strutStyle: labelStrutStyle,
+        ),
       ),
     ),
   );
@@ -300,8 +373,13 @@ class _TabSpacesMenu extends StatelessWidget {
 class _ScrollingText extends StatefulWidget {
   final String text;
   final TextStyle? style;
+  final StrutStyle strutStyle;
 
-  const _ScrollingText({required this.text, this.style});
+  const _ScrollingText({
+    required this.text,
+    this.style,
+    required this.strutStyle,
+  });
 
   @override
   State<_ScrollingText> createState() => _ScrollingTextState();
@@ -326,7 +404,9 @@ class _ScrollingTextState extends State<_ScrollingText>
   @override
   void didUpdateWidget(_ScrollingText oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.text != widget.text || oldWidget.style != widget.style) {
+    if (oldWidget.text != widget.text ||
+        oldWidget.style != widget.style ||
+        oldWidget.strutStyle != widget.strutStyle) {
       _stopScrolling(resetPosition: true);
       _scheduleScrollCheck();
     }
@@ -421,30 +501,17 @@ class _ScrollingTextState extends State<_ScrollingText>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final textSpan = TextSpan(text: widget.text, style: widget.style);
-        final textPainter = TextPainter(
-          text: textSpan,
-          maxLines: 1,
-          textDirection: ui.TextDirection.ltr,
-        )..layout();
-
-        if (textPainter.size.width <= constraints.maxWidth) {
-          return Text(
-            widget.text,
-            style: widget.style,
-            overflow: TextOverflow.visible,
-          );
-        }
-
-        return SingleChildScrollView(
-          controller: _scrollController,
-          scrollDirection: Axis.horizontal,
-          physics: const NeverScrollableScrollPhysics(),
-          child: Text(widget.text, style: widget.style),
-        );
-      },
+    return SingleChildScrollView(
+      controller: _scrollController,
+      scrollDirection: Axis.horizontal,
+      physics: const NeverScrollableScrollPhysics(),
+      child: Text(
+        widget.text,
+        style: widget.style,
+        strutStyle: widget.strutStyle,
+        textAlign: TextAlign.left,
+        maxLines: 1,
+      ),
     );
   }
 }

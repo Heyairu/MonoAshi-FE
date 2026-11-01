@@ -92,6 +92,7 @@ class ProjectHistoryEntry {
   final String? selectedChapID;
   final int cursorOffset;
   final bool isPageTransition;
+  final Future<int>? writingProgressPosition;
 
   ProjectHistoryEntry._({
     required this.data,
@@ -102,7 +103,21 @@ class ProjectHistoryEntry {
     required this.selectedChapID,
     required this.cursorOffset,
     required this.isPageTransition,
+    this.writingProgressPosition,
   });
+
+  ProjectHistoryEntry withWritingProgressPosition(Future<int> position) =>
+      ProjectHistoryEntry._(
+        data: data,
+        contentDigest: contentDigest,
+        approximateByteSize: approximateByteSize,
+        pageIndex: pageIndex,
+        selectedSegID: selectedSegID,
+        selectedChapID: selectedChapID,
+        cursorOffset: cursorOffset,
+        isPageTransition: isPageTransition,
+        writingProgressPosition: position,
+      );
 
   factory ProjectHistoryEntry({
     required file_module.ProjectData data,
@@ -111,6 +126,7 @@ class ProjectHistoryEntry {
     required String? selectedChapID,
     required int cursorOffset,
     bool isPageTransition = false,
+    Future<int>? writingProgressPosition,
   }) {
     // A history entry owns exactly one immutable project snapshot.
     final file_module.ProjectData snapshot = snapshotProjectData(data);
@@ -120,6 +136,7 @@ class ProjectHistoryEntry {
     // collection with [snapshot] and only replaces BaseInfoData.
     final file_module.ProjectData comparisonView = file_module.ProjectData(
       projectUUID: snapshot.projectUUID,
+      writingGoals: snapshot.writingGoals,
       baseInfoData: snapshot.baseInfoData.copyWith(latestSave: null),
       segmentsData: snapshot.segmentsData,
       outlineData: snapshot.outlineData,
@@ -164,6 +181,7 @@ class ProjectHistoryEntry {
       selectedChapID: selectedChapID,
       cursorOffset: cursorOffset,
       isPageTransition: isPageTransition,
+      writingProgressPosition: writingProgressPosition,
     );
   }
 }
@@ -297,9 +315,17 @@ class ProjectHistoryNotifier extends Notifier<ProjectHistoryState> {
     if (!entry.isPageTransition &&
         currentStack.isNotEmpty &&
         currentStack.last.contentDigest == entry.contentDigest) {
-      if (!identical(currentStack, state.undoStack)) {
+      final updatedStack = entry.writingProgressPosition == null
+          ? currentStack
+          : [
+              ...currentStack.take(currentStack.length - 1),
+              currentStack.last.withWritingProgressPosition(
+                entry.writingProgressPosition!,
+              ),
+            ];
+      if (!identical(updatedStack, state.undoStack)) {
         state = ProjectHistoryState(
-          undoStack: currentStack,
+          undoStack: updatedStack,
           redoStack: state.redoStack,
         );
       }
@@ -322,6 +348,9 @@ class ProjectHistoryNotifier extends Notifier<ProjectHistoryState> {
     final undoStack = [...state.undoStack];
     if (undoStack.last.contentDigest != currentEntry.contentDigest) {
       undoStack.add(currentEntry);
+    } else if (currentEntry.writingProgressPosition case final position?) {
+      undoStack[undoStack.length - 1] = undoStack.last
+          .withWritingProgressPosition(position);
     }
 
     if (undoStack.length <= 1) {
@@ -352,6 +381,9 @@ class ProjectHistoryNotifier extends Notifier<ProjectHistoryState> {
     if (undoStack.isEmpty ||
         undoStack.last.contentDigest != currentEntry.contentDigest) {
       undoStack.add(currentEntry);
+    } else if (currentEntry.writingProgressPosition case final position?) {
+      undoStack[undoStack.length - 1] = undoStack.last
+          .withWritingProgressPosition(position);
     }
     undoStack.add(target);
 

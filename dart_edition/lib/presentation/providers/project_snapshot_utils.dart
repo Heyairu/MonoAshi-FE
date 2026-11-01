@@ -212,6 +212,7 @@ ProjectData snapshotProjectData(
 }) {
   return ProjectData(
     projectUUID: source.projectUUID,
+      writingGoals: source.writingGoals,
     baseInfoData: snapshotBaseInfoData(baseInfoOverride ?? source.baseInfoData),
     segmentsData: snapshotSegmentsData(source.segmentsData),
     outlineData: snapshotOutlineData(source.outlineData),

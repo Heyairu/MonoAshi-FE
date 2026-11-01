@@ -19,14 +19,16 @@
 import "features/help/help_controller.dart";
 import "features/help/help_scope.dart";
 import "features/help/help_topic.dart";
+import "features/phrases/phrase_library_dialog.dart";
+import "features/oobe/oobe_gate.dart";
+import "features/oobe/oobe_state.dart";
 import "dart:math";
 import "dart:async"; // Added for Timer
 import "dart:convert";
 
 import "package:flutter/material.dart";
-import "package:flutter_localizations/flutter_localizations.dart";
-import "package:flutter_quill/flutter_quill.dart"
-    show FlutterQuillLocalizations;
+import "l10n/app_localization.dart";
+import "presentation/providers/locale_providers.dart";
 import "package:flutter/services.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -46,6 +48,11 @@ import "bin/punctuation_panel.dart";
 import "bin/ui_library.dart";
 import "bin/settings_manager.dart";
 import "application/project_import/selective_project_import.dart";
+import "application/project_export/export_models.dart";
+import "application/project_export/export_selection.dart";
+import "application/project_export/export_service.dart";
+import "presentation/providers/project_export_providers.dart";
+import "presentation/widgets/project_export/export_dialog.dart";
 import "data/p2p/p2p_snapshot_quarantine.dart";
 import "domain/collaboration/collaborative_text.dart";
 import "domain/collaboration/collaboration_operation.dart"
@@ -70,6 +77,10 @@ import "features/inline_annotations/inline_annotation_projection.dart";
 import "features/inline_annotations/mosaic_editing_controller.dart";
 import "features/inline_annotations/alias_mention_updates.dart";
 import "features/editor/plain_text_quill_editor_poc.dart";
+import "features/navigation/app_module.dart";
+import "features/navigation/workspace_navigation_shortcuts.dart";
+import "features/help/help_module.dart";
+import "presentation/widgets/module_switcher.dart";
 import "features/editor/plain_text_quill_render_range.dart";
 import "features/revision_tracking/presentation/revision_tracking_panel.dart";
 import "features/revision_tracking/application/revision_review_service.dart";
@@ -81,14 +92,17 @@ import "presentation/providers/editor_coordinator_provider.dart";
 import "presentation/providers/global_state_providers.dart";
 import "presentation/providers/project_io_providers.dart";
 import "presentation/providers/project_history_provider.dart";
+import "presentation/providers/writing_progress_provider.dart";
 import "presentation/providers/p2p_sync_providers.dart";
 import "presentation/widgets/p2p_conflict_resolution_dialog.dart";
 import "presentation/widgets/splash_screen.dart";
+import "presentation/widgets/radial_gauge_dashboard.dart";
 import "presentation/providers/project_snapshot_utils.dart";
 import "presentation/providers/project_state_providers.dart";
 import "presentation/providers/revision_tracking_provider.dart";
 import "presentation/providers/timeline_providers.dart";
 import "presentation/providers/word_count_providers.dart";
+import "presentation/providers/gauge_dashboard_provider.dart";
 import "utils/text_change_debouncer.dart";
 import "utils/text_position_index.dart";
 import "services/word_count_service.dart";
@@ -155,7 +169,7 @@ void main(List<String> arguments) async {
     await _DesktopSplashWindowController.prepare();
   }
 
-  runApp(const ProviderScope(child: MainApp()));
+  runApp(ProviderScope(child: MainApp(startupArguments: arguments)));
 }
 
 bool get _isDesktopPlatform =>
@@ -204,7 +218,9 @@ class _DesktopSplashWindowController {
 }
 
 class MainApp extends ConsumerStatefulWidget {
-  const MainApp({super.key});
+  const MainApp({super.key, this.startupArguments = const []});
+
+  final List<String> startupArguments;
 
   @override
   ConsumerState<MainApp> createState() => _MainAppState();
@@ -250,12 +266,18 @@ class _MainAppState extends ConsumerState<MainApp> {
   @override
   Widget build(BuildContext context) {
     final bootstrap = ref.watch(appInitializationProvider);
+    final localePreference = ref.watch(appLocalePreferenceProvider);
+    final resolvedLocale = ref.watch(resolvedAppLocaleProvider);
 
     final keepDesktopSplashVisible =
         _isDesktopPlatform && !_minimumSplashElapsed;
     if (bootstrap.isLoading || keepDesktopSplashVisible) {
       return MaterialApp(
         debugShowCheckedModeBanner: false,
+        locale: localePreference.locale,
+        supportedLocales: supportedAppLocales,
+        localeListResolutionCallback: AppLocalization.resolve,
+        localizationsDelegates: AppLocalization.delegates,
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6750A4)),
@@ -271,11 +293,19 @@ class _MainAppState extends ConsumerState<MainApp> {
 
     if (bootstrap.hasError) {
       return MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Text("初始化失敗：${bootstrap.error}"),
+        locale: localePreference.locale,
+        supportedLocales: supportedAppLocales,
+        localeListResolutionCallback: AppLocalization.resolve,
+        localizationsDelegates: AppLocalization.delegates,
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Text(
+                  context.l10n.initializationFailed('${bootstrap.error}'),
+                ),
+              ),
             ),
           ),
         ),
@@ -285,27 +315,46 @@ class _MainAppState extends ConsumerState<MainApp> {
     final theme = ref.watch(appThemeSettingsProvider);
 
     return MaterialApp(
-      title: "物語Assistant",
+      onGenerateTitle: (context) => context.l10n.appTitle,
       navigatorKey: _helpNavigatorKey,
-      builder: (context, child) =>
-          AppHelpHost(navigatorKey: _helpNavigatorKey, child: child!),
-      theme: AppTheme.getLightTheme(theme.fontSize, theme.color),
-      darkTheme: AppTheme.getDarkTheme(theme.fontSize, theme.color),
+      builder: (context, child) => AppHelpHost(
+        navigatorKey: _helpNavigatorKey,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            child!,
+            if (theme.preset.isPride)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 6,
+                child: PrideEdgeGlow(preset: theme.preset),
+              ),
+          ],
+        ),
+      ),
+      theme: AppTheme.getLightTheme(
+        theme.fontSize,
+        theme.color,
+        preset: theme.preset,
+        locale: resolvedLocale,
+      ),
+      darkTheme: AppTheme.getDarkTheme(
+        theme.fontSize,
+        theme.color,
+        preset: theme.preset,
+        locale: resolvedLocale,
+      ),
       themeMode: _convertThemeMode(theme.mode),
-      localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        FlutterQuillLocalizations.delegate,
-      ],
-      supportedLocales: const <Locale>[
-        Locale("en"),
-        Locale("zh"),
-        Locale("zh", "TW"),
-        Locale("ja"),
-        Locale("ko"),
-      ],
-      home: const ContentView(),
+      locale: localePreference.locale,
+      localizationsDelegates: AppLocalization.delegates,
+      supportedLocales: supportedAppLocales,
+      localeListResolutionCallback: AppLocalization.resolve,
+      home: OobeGate(
+        options: OobeLaunchOptions.parse(widget.startupArguments),
+        builder: (_) => const ContentView(),
+      ),
     );
   }
 }
@@ -336,6 +385,23 @@ class OpenFileIntent extends Intent {
 
 class SaveFileIntent extends Intent {
   const SaveFileIntent();
+}
+
+class SaveAsFileIntent extends Intent {
+  const SaveAsFileIntent();
+}
+
+class ReplaceIntent extends Intent {
+  const ReplaceIntent();
+}
+
+class SearchResultIntent extends Intent {
+  const SearchResultIntent(this.forward);
+  final bool forward;
+}
+
+class CloseSearchIntent extends Intent {
+  const CloseSearchIntent();
 }
 
 class FindIntent extends Intent {
@@ -477,6 +543,9 @@ class _EditorStatusBarState extends ConsumerState<_EditorStatusBar> {
     final cursor = _positionIndex.lineColumnFromOffset(status.cursorOffset);
 
     return MonogatariStatusBar(
+      themePreset: ref.watch(
+        appThemeSettingsProvider.select((theme) => theme.preset),
+      ),
       displayText: displayText,
       saveTimeText: saveTimeText,
       cursorLine: cursor.line,
@@ -554,7 +623,7 @@ class _WindowResizeViewport extends StatelessWidget {
 class _ContentViewState extends ConsumerState<ContentView>
     with WindowListener, WidgetsBindingObserver {
   // 狀態變數
-  int slidePageCounts = 16;
+  final int slidePageCounts = AppModule.pageCount;
   int slidePageIndexCurrent = 0;
   int slidePageIndexNow = 0;
   int _projectSessionVersion = 0;
@@ -574,12 +643,17 @@ class _ContentViewState extends ConsumerState<ContentView>
   Widget? _stableResizeBody;
   Size? _stableResizeBodySize;
   double _sidebarWidthRatio = 0.25; // Default sidebar width ratio (25%)
-  bool _showRevisionPanel = false;
-  double _revisionPanelWidth = 320;
+  bool _showNavigation = true;
+  bool _showSidebar = true;
+  bool _revisionDialogOpen = false;
+  bool _showRevisionDetails = false;
+  double _revisionSidebarWidth = 320;
+  bool _showGaugeDashboard = true;
 
   static const Duration _windowResizeSettleDelay = Duration(milliseconds: 40);
 
   final WordCountService _wordCountService = WordCountService.instance;
+  late final VoidCallback _stopWritingProgressClock;
 
   // 主編輯器文字
   String get contentText => ref.read(editorContentProvider);
@@ -618,6 +692,130 @@ class _ContentViewState extends ConsumerState<ContentView>
   final TextEditingController replaceController = TextEditingController();
   final FindReplaceOptions findReplaceOptions = FindReplaceOptions();
   final RibbonController _ribbonController = RibbonController();
+  final _bodyEditorKey = GlobalKey<EditorTextBoxState>();
+  final _findBarKey = GlobalKey<FindReplaceBarState>();
+  bool _fileCommandRunning = false;
+  final _topAppBarKey = GlobalKey<MonogatariTopAppBarState>();
+  final _workspaceFocus = FocusNode(debugLabel: "Workspace");
+  final _moduleFocus = <AppModuleId, FocusNode>{};
+  AppModule _lastFunctionModule = AppModule.all.first;
+  bool _moduleSwitcherOpen = false;
+  bool _moduleNavigationInProgress = false;
+
+  AppModule get _currentModule => AppModule.forPage(slidePageIndexNow);
+
+  bool get _navigationBlocked {
+    final help = HelpController.maybeOf(context);
+    final focus = FocusManager.instance.primaryFocus;
+    final composing = focus?.context
+        ?.findAncestorStateOfType<EditableTextState>()
+        ?.widget
+        .controller
+        .value
+        .composing;
+    return !mounted ||
+        (composing != null && composing.isValid && !composing.isCollapsed) ||
+        _moduleSwitcherOpen ||
+        _fileCommandRunning ||
+        _isProjectSwitching ||
+        _isExitConfirmationInProgress ||
+        _isApplyingProjectHistory ||
+        ModalRoute.of(context)?.isCurrent == false ||
+        help?.ownsFocus == true ||
+        _topAppBarKey.currentState?.ownsMenuFocus == true ||
+        (ref.read(projectIoControllerProvider).valueOrNull?.blocksEditor ??
+            false) ||
+        (editorFocusNode.hasFocus &&
+            (_bodyEditorKey.currentState?.hasActiveCompletion == true ||
+                (textController.value.composing.isValid &&
+                    !textController.value.composing.isCollapsed)));
+  }
+
+  void _selectModule(AppModule module) {
+    if (_navigationBlocked) return;
+    _topAppBarKey.currentState?.dismissKeyTips();
+    if (module.id == _currentModule.id) return;
+    final origin = FocusManager.instance.primaryFocus;
+    if (origin != null &&
+        origin != _workspaceFocus &&
+        origin.context?.findAncestorWidgetOfExactType<MonogatariTopAppBar>() ==
+            null) {
+      _moduleFocus[_currentModule.id] = origin;
+    }
+    if (_currentModule.id != AppModuleId.editor) {
+      _lastFunctionModule = _currentModule;
+    }
+    _moduleNavigationInProgress = true;
+    _syncEditorToSelectedChapter();
+    _recordPageTransitionIfNeeded(module.pageIndex);
+    setState(() => slidePageIndexNow = module.pageIndex);
+    final session = _projectSessionVersion;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (session == _projectSessionVersion && _currentModule.id == module.id) {
+        final target = module.id == AppModuleId.editor
+            ? editorFocusNode
+            : _moduleFocus[module.id];
+        if (target?.context?.mounted == true && target!.canRequestFocus) {
+          target.requestFocus();
+        } else {
+          _workspaceFocus.requestFocus();
+        }
+      }
+      _moduleNavigationInProgress = false;
+    });
+  }
+
+  Future<void> _openModuleSwitcher() async {
+    if (_navigationBlocked) return;
+    _topAppBarKey.currentState?.dismissKeyTips();
+    final origin = FocusManager.instance.primaryFocus;
+    if (origin != null &&
+        origin != _workspaceFocus &&
+        origin.context?.findAncestorWidgetOfExactType<MonogatariTopAppBar>() ==
+            null) {
+      _moduleFocus[_currentModule.id] = origin;
+    }
+    final session = _projectSessionVersion;
+    _moduleSwitcherOpen = true;
+    try {
+      final selected = await ModuleSwitcher.show(context, _currentModule);
+      if (!mounted || session != _projectSessionVersion) return;
+      _moduleSwitcherOpen = false;
+      if (selected != null) _selectModule(selected);
+    } finally {
+      _moduleSwitcherOpen = false;
+    }
+  }
+
+  Widget _buildModuleSwitcherButton() {
+    final label = "切換模組，目前為${_currentModule.label}";
+    return Tooltip(
+      message:
+          "$label（${Theme.of(context).platform == TargetPlatform.macOS ? "⌘⇧M" : "Ctrl+Shift+M"}）",
+      child: MediaQuery.sizeOf(context).width < 1000
+          ? IconButton(
+              key: const Key("module-switcher-button"),
+              tooltip: label,
+              onPressed: _openModuleSwitcher,
+              icon: Icon(_currentModule.icon),
+            )
+          : TextButton.icon(
+              key: const Key("module-switcher-button"),
+              onPressed: _openModuleSwitcher,
+              icon: Icon(_currentModule.icon),
+              label: SizedBox(
+                width: 110,
+                child: Text(
+                  "${_currentModule.label} ▾",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+    );
+  }
+
   int _findOptionsRevision = 0;
   String _ribbonSearchQuery = "";
   final FocusNode editorFocusNode = FocusNode();
@@ -666,6 +864,7 @@ class _ContentViewState extends ConsumerState<ContentView>
   );
   static const Set<int> _ignoredPageTransitionIndexes = {
     0, // Welcome
+    16, // Help
     9, // Glossary
     10, // Palettes
     11, // Proofreading
@@ -715,10 +914,18 @@ class _ContentViewState extends ConsumerState<ContentView>
   void _onFocusChange() {
     // Help temporarily owns focus without changing editor selection/history.
     final help = HelpController.maybeOf(context);
-    if (help?.ownsFocus == true) {
+    if (help?.ownsFocus == true ||
+        _moduleSwitcherOpen ||
+        _moduleNavigationInProgress) {
       return;
     }
     final node = WidgetsBinding.instance.focusManager.primaryFocus;
+    // Moving between modules can temporarily focus the workspace itself.
+    // Preserve the old module's selection instead of clearing every controller.
+    if (node == _workspaceFocus) {
+      _lastFocusedEditableNode = null;
+      return;
+    }
     final previousEditableNode = _lastFocusedEditableNode;
     final focusChangedFromEditable =
         previousEditableNode != null && previousEditableNode != node;
@@ -863,6 +1070,20 @@ class _ContentViewState extends ConsumerState<ContentView>
       if (ref.read(editorContentProvider) != initialContent) {
         editorContentNotifier.setContent(initialContent);
       }
+
+      // The initial unsaved workspace can be edited before choosing New File.
+      // Seed its personal counter without treating existing text as new writing.
+      ref
+          .read(dailyWritingProgressProvider)
+          .replaceBaseline(ref.read(projectUuidProvider), {
+            for (final location in ChapterModule.ChapterTree.chaptersDepthFirst(
+              segments,
+            ))
+              location.chapter.chapterUUID:
+                  location.chapter.chapterUUID == selectedChapID
+                  ? initialContent
+                  : location.chapter.chapterContent,
+          });
 
       // Seed the raw snapshot first so projection publication is not mistaken
       // for a local collaborative edit during startup.
@@ -1366,6 +1587,9 @@ class _ContentViewState extends ConsumerState<ContentView>
       unawaited(ref.read(p2pSyncProvider.notifier).initialize());
       _publishLocalP2pProjectStatusNow();
     });
+    final writingProgress = ref.read(dailyWritingProgressProvider);
+    writingProgress.startClock();
+    _stopWritingProgressClock = writingProgress.stopClock;
     _projectIoSession = _projectIoCoordinator.beginSession("");
     _wordCountService.addListener(_handleWordCountServiceChanged);
 
@@ -1416,6 +1640,14 @@ class _ContentViewState extends ConsumerState<ContentView>
           !_isSyncing && _lastObservedEditorText != currentText;
       final chapterId = selectedChapID;
       final composing = textController.value.composing;
+      if (!_isSyncing &&
+          chapterId != null &&
+          !ref.read(editorCoordinatorProvider).isApplyingProjectData &&
+          (!composing.isValid || composing.isCollapsed)) {
+        ref
+            .read(dailyWritingProgressProvider)
+            .observeChapter(chapterId, currentText);
+      }
       if (chapterId != null &&
           (!composing.isValid || composing.isCollapsed) &&
           ref.read(revisionTrackingProvider).baseline != null) {
@@ -1626,10 +1858,37 @@ class _ContentViewState extends ConsumerState<ContentView>
           return;
         }
 
-        if (ref.read(editorCoordinatorProvider).isApplyingProjectData) {
-          return;
+        final progress = ref.read(dailyWritingProgressProvider);
+        final before = {
+          for (final location in ChapterModule.ChapterTree.chaptersDepthFirst(
+            previous,
+          ))
+            location.chapter.chapterUUID: location.chapter.chapterContent,
+        };
+        final after = {
+          for (final location in ChapterModule.ChapterTree.chaptersDepthFirst(
+            next,
+          ))
+            location.chapter.chapterUUID: location.chapter.chapterContent,
+        };
+        final applying = ref
+            .read(editorCoordinatorProvider)
+            .isApplyingProjectData;
+        for (final id in {...before.keys, ...after.keys}) {
+          if (before[id] == after[id]) continue;
+          final composing = textController.value.composing;
+          if (!applying &&
+              id == selectedChapID &&
+              composing.isValid &&
+              !composing.isCollapsed)
+            continue;
+          progress.observeChapter(
+            id,
+            after[id] ?? "",
+            counted: !applying && !_isApplyingProjectHistory,
+          );
         }
-
+        if (applying) return;
         _updateAllWordCounts();
       }),
     );
@@ -1734,9 +1993,14 @@ class _ContentViewState extends ConsumerState<ContentView>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed) return;
+    final progress = ref.read(dailyWritingProgressProvider);
+    if (state != AppLifecycleState.resumed) {
+      unawaited(progress.flush().catchError((Object _) {}));
+      return;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      progress.refreshDate();
       unawaited(ref.read(p2pSyncProvider.notifier).handleAppResumed());
     });
   }
@@ -1750,6 +2014,7 @@ class _ContentViewState extends ConsumerState<ContentView>
 
   @override
   void dispose() {
+    _stopWritingProgressClock();
     DesktopProjectLaunch.unbind();
     WidgetsBinding.instance.removeObserver(this);
     CharacterDraftSessionCoordinator.instance.flushAndClose(
@@ -1788,6 +2053,7 @@ class _ContentViewState extends ConsumerState<ContentView>
     findController.dispose();
     replaceController.dispose();
     editorFocusNode.dispose();
+    _workspaceFocus.dispose();
     super.dispose();
   }
 
@@ -1799,7 +2065,7 @@ class _ContentViewState extends ConsumerState<ContentView>
         subscription.close();
       } catch (error, stackTrace) {
         debugPrint(
-          'Failed to close provider subscription: $error\n$stackTrace',
+          "Failed to close provider subscription: $error\n$stackTrace",
         );
       }
     }
@@ -1918,6 +2184,9 @@ class _ContentViewState extends ConsumerState<ContentView>
       final session = _projectIoSession;
       final revision = _projectDataRevision;
       final currentData = _collectProjectData();
+      final savedProgressPosition = ref
+          .read(dailyWritingProgressProvider)
+          .checkpoint();
       ProjectIoPayload? persistedPayload;
       final runResult = await _projectIoCoordinator.run(session, () async {
         final payload = await _sharedProjectIoPayload(
@@ -1945,6 +2214,9 @@ class _ContentViewState extends ConsumerState<ContentView>
       if (_projectDataRevision == revision) {
         _markAsSaved();
       }
+      ref
+          .read(dailyWritingProgressProvider)
+          .markSaved(position: savedProgressPosition);
       await _recordP2pPersistedRevision(persistedPayload);
       await _editorCoordinatorNotifier.recordRecentProject(savedProject);
     } catch (error, stackTrace) {
@@ -2060,6 +2332,9 @@ class _ContentViewState extends ConsumerState<ContentView>
       selectedChapID: selection.selectedChapID,
       cursorOffset: cursorOffset,
       isPageTransition: isPageTransition,
+      writingProgressPosition: ref
+          .read(dailyWritingProgressProvider)
+          .checkpoint(),
     );
   }
 
@@ -2162,6 +2437,9 @@ class _ContentViewState extends ConsumerState<ContentView>
     _projectHistoryRecordTimer?.cancel();
     _projectHistoryRecordTimer = null;
     _isApplyingProjectHistory = true;
+    if (entry.writingProgressPosition case final position?) {
+      ref.read(dailyWritingProgressProvider).restoreCheckpoint(position);
+    }
     final initialState = _initialStateForHistoryEntry(entry);
     final historyData = snapshotProjectData(entry.data)
       ..projectUUID = ref.read(projectUuidProvider)
@@ -2363,6 +2641,8 @@ class _ContentViewState extends ConsumerState<ContentView>
   // MARK: 主體建構方法
   @override
   Widget build(BuildContext context) {
+    // Keep personal tracking alive even while the dashboard is hidden.
+    ref.watch(dailyWritingProgressProvider.notifier);
     final fontSize = ref.watch(
       settingsStateProvider.select(
         (state) => state.valueOrNull?.fontSize ?? 14.0,
@@ -2402,118 +2682,238 @@ class _ContentViewState extends ConsumerState<ContentView>
       slidePageIndexNow,
     );
 
-    return Shortcuts(
-      shortcuts: <ShortcutActivator, Intent>{
-        SingleActivator(
-          LogicalKeyboardKey.keyN,
-          control: !isApple,
-          meta: isApple,
-        ): const NewFileIntent(),
-        SingleActivator(
-          LogicalKeyboardKey.keyO,
-          control: !isApple,
-          meta: isApple,
-        ): const OpenFileIntent(),
-        SingleActivator(
-          LogicalKeyboardKey.keyS,
-          control: !isApple,
-          meta: isApple,
-        ): const SaveFileIntent(),
-        SingleActivator(
-          LogicalKeyboardKey.keyF,
-          control: !isApple,
-          meta: isApple,
-        ): const FindIntent(),
-        SingleActivator(
-          LogicalKeyboardKey.keyZ,
-          control: !isApple,
-          meta: isApple,
-        ): const UndoProjectIntent(),
-        SingleActivator(
-          LogicalKeyboardKey.keyZ,
-          control: !isApple,
-          meta: isApple,
-          shift: true,
-        ): const RedoProjectIntent(),
+    return WorkspaceNavigationShortcuts(
+      focusNode: _workspaceFocus,
+      isBlocked: () => _navigationBlocked,
+      onRibbonStep: (delta) =>
+          _topAppBarKey.currentState?.selectRelativeTab(delta),
+      onModuleStep: (delta) =>
+          _selectModule(AppModule.step(_currentModule, delta)),
+      onOpenSwitcher: _openModuleSwitcher,
+      onOpenModule: _selectModule,
+      onSaveAs: () => _handleFileAction("saveAs"),
+      onFind: _openFindReplace,
+      onReplace: () => _openFindReplace(replace: true),
+      onSearchResult: (forward) {
+        if (showFindReplaceWindow) {
+          unawaited(
+            _findBarKey.currentState?.navigate(forward) ?? Future<void>.value(),
+          );
+        }
       },
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          NewFileIntent: CallbackAction<NewFileIntent>(
-            onInvoke: (intent) => _newProject(),
+      child: Shortcuts(
+        shortcuts: <ShortcutActivator, Intent>{
+          SingleActivator(
+            LogicalKeyboardKey.keyS,
+            control: !isApple,
+            meta: isApple,
+            shift: true,
+            includeRepeats: false,
+          ): const SaveAsFileIntent(),
+          SingleActivator(
+            isApple ? LogicalKeyboardKey.keyF : LogicalKeyboardKey.keyH,
+            control: !isApple,
+            meta: isApple,
+            alt: isApple,
+            includeRepeats: false,
+          ): const ReplaceIntent(),
+          SingleActivator(
+            isApple ? LogicalKeyboardKey.keyG : LogicalKeyboardKey.f3,
+            meta: isApple,
+            includeRepeats: false,
+          ): const SearchResultIntent(
+            true,
           ),
-          OpenFileIntent: CallbackAction<OpenFileIntent>(
-            onInvoke: (intent) => _openProject(),
+          SingleActivator(
+            isApple ? LogicalKeyboardKey.keyG : LogicalKeyboardKey.f3,
+            meta: isApple,
+            shift: true,
+            includeRepeats: false,
+          ): const SearchResultIntent(
+            false,
           ),
-          SaveFileIntent: CallbackAction<SaveFileIntent>(
-            onInvoke: (intent) => _saveProject(),
-          ),
-          FindIntent: CallbackAction<FindIntent>(
-            onInvoke: (intent) {
-              _toggleFindReplaceWindow();
-              return null;
-            },
-          ),
-          UndoProjectIntent: CallbackAction<UndoProjectIntent>(
-            onInvoke: (intent) {
-              _undoProjectHistory();
-              return null;
-            },
-          ),
-          RedoProjectIntent: CallbackAction<RedoProjectIntent>(
-            onInvoke: (intent) {
-              _redoProjectHistory();
-              return null;
-            },
-          ),
+          if (!isApple)
+            const SingleActivator(LogicalKeyboardKey.keyY, control: true):
+                const RedoProjectIntent(),
+          if (showFindReplaceWindow)
+            const SingleActivator(
+              LogicalKeyboardKey.escape,
+              includeRepeats: false,
+            ): const CloseSearchIntent(),
+
+          SingleActivator(
+            LogicalKeyboardKey.keyN,
+            control: !isApple,
+            meta: isApple,
+            includeRepeats: false,
+          ): const NewFileIntent(),
+          SingleActivator(
+            LogicalKeyboardKey.keyO,
+            control: !isApple,
+            meta: isApple,
+            includeRepeats: false,
+          ): const OpenFileIntent(),
+          SingleActivator(
+            LogicalKeyboardKey.keyS,
+            control: !isApple,
+            meta: isApple,
+            includeRepeats: false,
+          ): const SaveFileIntent(),
+          SingleActivator(
+            LogicalKeyboardKey.keyF,
+            control: !isApple,
+            meta: isApple,
+            includeRepeats: false,
+          ): const FindIntent(),
+          SingleActivator(
+            LogicalKeyboardKey.keyZ,
+            control: !isApple,
+            meta: isApple,
+          ): const UndoProjectIntent(),
+          SingleActivator(
+            LogicalKeyboardKey.keyZ,
+            control: !isApple,
+            meta: isApple,
+            shift: true,
+          ): const RedoProjectIntent(),
         },
-        child: PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (bool didPop, dynamic result) async {
-            if (didPop) return;
-
-            final shouldPop = await _requestExit();
-            if (!shouldPop || !context.mounted) return;
-
-            if (_isAndroidPlatform) {
-              // Popping the Flutter route leaves the Android Activity in its
-              // task. Ask the platform to finish it so Back exits directly.
-              await SystemNavigator.pop();
-            } else {
-              Navigator.of(context).maybePop();
-            }
-          },
-          child: Scaffold(
-            appBar: MonogatariTopAppBar(
-              iconSize: fontSize + 8,
-              mode: toolbarMode,
-              controller: _ribbonController,
-              searchOptions: findReplaceOptions.copy(),
-              searchQuery: _ribbonSearchQuery,
-              onSearchOptionChanged: _changeFindOption,
-              modePreference: toolbarPreference,
-              onModeChanged: (value) =>
-                  ref.read(toolbarModeProvider.notifier).setMode(value),
-              isProjectIoBusy: projectIoBusy,
-              statusIndicator: const _ProjectIoBusyIndicator(),
-              showPunctuationPanel: showPunctuationPanel,
-              showFindReplaceWindow: showFindReplaceWindow,
-              onFileAction: _handleFileAction,
-              onEditorAction: _performEditorAction,
-              onEditorActionPointerDown: _prepareEditorToolbarAction,
-              onEditorActionInteractionEnd: _finishEditorToolbarAction,
-              onTogglePunctuationPanel: _togglePunctuationPanel,
-              onToggleFindReplaceWindow: _toggleFindReplaceWindow,
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            SaveAsFileIntent: CallbackAction<SaveAsFileIntent>(
+              onInvoke: (_) => _handleFileAction("saveAs"),
             ),
-            body: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: _clearEditableFocus,
-              child: LayoutBuilder(
-                builder: (context, constraints) => _buildResizeStabilizedBody(
-                  constraints: constraints,
-                  fontSize: fontSize,
-                  wordCountMode: wordCountMode,
-                  hasUnsavedChanges: hasUnsavedChanges,
-                  lastSavedTime: lastSavedTime,
+            ReplaceIntent: CallbackAction<ReplaceIntent>(
+              onInvoke: (_) {
+                _openFindReplace(replace: true);
+                return null;
+              },
+            ),
+            SearchResultIntent: CallbackAction<SearchResultIntent>(
+              onInvoke: (intent) {
+                if (!_navigationBlocked && showFindReplaceWindow) {
+                  unawaited(
+                    _findBarKey.currentState?.navigate(intent.forward) ??
+                        Future<void>.value(),
+                  );
+                }
+                return null;
+              },
+            ),
+            CloseSearchIntent: CallbackAction<CloseSearchIntent>(
+              onInvoke: (_) {
+                if (!_navigationBlocked) _closeFindReplace();
+                return null;
+              },
+            ),
+            NewFileIntent: CallbackAction<NewFileIntent>(
+              onInvoke: (intent) => _handleFileAction("new"),
+            ),
+            OpenFileIntent: CallbackAction<OpenFileIntent>(
+              onInvoke: (intent) => _handleFileAction("open"),
+            ),
+            SaveFileIntent: CallbackAction<SaveFileIntent>(
+              onInvoke: (intent) => _handleFileAction("save"),
+            ),
+            FindIntent: CallbackAction<FindIntent>(
+              onInvoke: (intent) {
+                _openFindReplace();
+                return null;
+              },
+            ),
+            UndoProjectIntent: CallbackAction<UndoProjectIntent>(
+              onInvoke: (intent) {
+                _undoProjectHistory();
+                return null;
+              },
+            ),
+            RedoProjectIntent: CallbackAction<RedoProjectIntent>(
+              onInvoke: (intent) {
+                _redoProjectHistory();
+                return null;
+              },
+            ),
+          },
+          child: PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (bool didPop, dynamic result) async {
+              if (didPop) return;
+
+              final shouldPop = await _requestExit();
+              if (!shouldPop || !context.mounted) return;
+
+              if (_isAndroidPlatform) {
+                // Popping the Flutter route leaves the Android Activity in its
+                // task. Ask the platform to finish it so Back exits directly.
+                await SystemNavigator.pop();
+              } else {
+                Navigator.of(context).maybePop();
+              }
+            },
+            child: Scaffold(
+              appBar: MonogatariTopAppBar(
+                key: _topAppBarKey,
+                moduleSwitcher: _buildModuleSwitcherButton(),
+                iconSize: fontSize + 8,
+                mode: toolbarMode,
+                controller: _ribbonController,
+                searchOptions: findReplaceOptions.copy(),
+                searchQuery: _ribbonSearchQuery,
+                onSearchOptionChanged: _changeFindOption,
+                modePreference: toolbarPreference,
+                onModeChanged: (value) =>
+                    ref.read(toolbarModeProvider.notifier).setMode(value),
+                isProjectIoBusy: projectIoBusy || _fileCommandRunning,
+                statusIndicator: const _ProjectIoBusyIndicator(),
+                showPunctuationPanel: showPunctuationPanel,
+                showFindReplaceWindow: showFindReplaceWindow,
+                showNavigation: _showNavigation,
+                showSidebar: _showSidebar,
+                showDashboard: _showGaugeDashboard,
+                onToggleNavigation: MediaQuery.sizeOf(context).width < 800
+                    ? null
+                    : () => setState(() => _showNavigation = !_showNavigation),
+                onToggleSidebar: MediaQuery.sizeOf(context).width < 800
+                    ? null
+                    : () => setState(() => _showSidebar = !_showSidebar),
+                onToggleDashboard: MediaQuery.sizeOf(context).width < 800
+                    ? null
+                    : () => setState(
+                        () => _showGaugeDashboard = !_showGaugeDashboard,
+                      ),
+                onFileAction: _handleFileAction,
+                onEditorAction: _performEditorAction,
+                onOpenPhraseLibrary: () async {
+                  final editor = _bodyEditorKey.currentState;
+                  if (editor != null) {
+                    await editor.openPhraseLibrary();
+                  } else {
+                    await PhraseLibraryDialog.show(context: context);
+                  }
+                },
+                onInsertPhrase: () async {
+                  if (MediaQuery.sizeOf(context).width < 800) {
+                    setState(() => slidePageIndexNow = 114514);
+                  }
+                  await _bodyEditorKey.currentState?.insertPhrase();
+                },
+                onSaveSelectionAsPhrase: () =>
+                    _bodyEditorKey.currentState?.saveSelectionAsPhrase(),
+                onEditorActionPointerDown: _prepareEditorToolbarAction,
+                onEditorActionInteractionEnd: _finishEditorToolbarAction,
+                onTogglePunctuationPanel: _togglePunctuationPanel,
+                onToggleFindReplaceWindow: _toggleFindReplaceWindow,
+              ),
+              body: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: _clearEditableFocus,
+                child: LayoutBuilder(
+                  builder: (context, constraints) => _buildResizeStabilizedBody(
+                    constraints: constraints,
+                    fontSize: fontSize,
+                    wordCountMode: wordCountMode,
+                    hasUnsavedChanges: hasUnsavedChanges,
+                    lastSavedTime: lastSavedTime,
+                  ),
                 ),
               ),
             ),
@@ -2622,22 +3022,54 @@ class _ContentViewState extends ConsumerState<ContentView>
     });
   }
 
-  void _toggleFindReplaceWindow() {
-    if (showFindReplaceWindow) {
-      cancelFindAllMatches(textController);
-      cancelReplaceAll(textController);
+  void _openFindReplace({bool replace = false}) {
+    if (_navigationBlocked) return;
+    if (MediaQuery.sizeOf(context).width < 800 &&
+        _currentModule.id != AppModuleId.editor) {
+      _selectModule(AppModule.forNavigation(17));
     }
     setState(() {
-      if (slidePageIndexNow < slidePageCounts) {
-        slidePageIndexNow = 114514;
-        showFindReplaceWindow = true;
+      showFindReplaceWindow = true;
+    });
+    _topAppBarKey.currentState?.selectTabForNavigation("search");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !showFindReplaceWindow) return;
+      if (replace) {
+        _findBarKey.currentState?.focusReplace();
       } else {
-        if (!showFindReplaceWindow) {
-          _currentMatchIndex = -1;
-        }
-        showFindReplaceWindow = !showFindReplaceWindow;
+        _findBarKey.currentState?.focusFind();
       }
     });
+  }
+
+  void _closeFindReplace() {
+    if (!showFindReplaceWindow) return;
+    cancelFindAllMatches(textController);
+    cancelReplaceAll(textController);
+    setState(() {
+      showFindReplaceWindow = false;
+      _searchMatches = [];
+      _currentMatchIndex = -1;
+      textController.clearAllHighlights();
+      textController.clearRhodantheRenderPlan(notify: false);
+    });
+    _quillSearchController.clearSearchResults();
+    _quillSearchController.clearProofreadingRanges();
+    editorFocusNode.requestFocus();
+  }
+
+  void _toggleFindReplaceWindow() {
+    if (_navigationBlocked) return;
+    if (showFindReplaceWindow) {
+      _closeFindReplace();
+    } else {
+      if (MediaQuery.sizeOf(context).width < 800 &&
+          _currentModule.id != AppModuleId.editor) {
+        _selectModule(AppModule.forNavigation(17));
+      }
+      setState(() => showFindReplaceWindow = true);
+      _topAppBarKey.currentState?.selectTabForNavigation("search");
+    }
   }
 
   // 手機佈局（使用 BottomNavigationBar）
@@ -2660,19 +3092,9 @@ class _ContentViewState extends ConsumerState<ContentView>
         hasUnsavedChanges: hasUnsavedChanges,
         lastSavedTime: lastSavedTime,
       ),
-      onDestinationSelected: (index) {
-        _syncEditorToSelectedChapter();
-
-        setState(() {
-          if (index == 0) {
-            if (slidePageIndexNow > (slidePageCounts - 1)) {
-              slidePageIndexNow = 0;
-            }
-          } else {
-            slidePageIndexNow = 114514;
-          }
-        });
-      },
+      onDestinationSelected: (index) => _selectModule(
+        index == 0 ? _lastFunctionModule : AppModule.forNavigation(17),
+      ),
     );
   }
 
@@ -2703,14 +3125,13 @@ class _ContentViewState extends ConsumerState<ContentView>
         });
       },
       pageCount: slidePageCounts,
-      selectedIndex: slidePageIndexNow,
+      selectedIndex: _currentModule.id == AppModuleId.editor
+          ? _lastFunctionModule.navigationIndex
+          : slidePageIndexNow,
       fontSize: fontSize,
       onBeforePageSwitch: _syncEditorToSelectedChapter,
       onPageSelected: (index) {
-        _recordPageTransitionIfNeeded(index);
-        setState(() {
-          slidePageIndexNow = index;
-        });
+        _selectModule(AppModule.forNavigation(index));
       },
       pageBuilder: _buildSpecificPageContent,
     );
@@ -2771,6 +3192,9 @@ class _ContentViewState extends ConsumerState<ContentView>
       case 15:
         page = _buildAboutView();
         break;
+      case 16:
+        page = const HelpModule();
+        break;
       default:
         page = Center(child: Text("Page ${pageIndex + 1}"));
     }
@@ -2801,6 +3225,7 @@ class _ContentViewState extends ConsumerState<ContentView>
       children: [
         Expanded(
           child: MonogatariNavigationLayout(
+            visible: _showNavigation,
             style: ref.watch(
               settingsStateProvider.select(
                 (state) =>
@@ -2810,17 +3235,30 @@ class _ContentViewState extends ConsumerState<ContentView>
             ),
             selectedIndex: _getNavigationIndex(),
             onDestinationSelected: (index) {
-              _syncEditorToSelectedChapter();
-              _recordPageTransitionIfNeeded(index);
-              setState(() {
-                slidePageIndexNow = index;
-              });
+              _selectModule(AppModule.forNavigation(index));
             },
             selectedLabelTextStyle: Theme.of(context).textTheme.labelTiny,
             unselectedLabelTextStyle: Theme.of(context).textTheme.labelTiny,
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final double maxWidth = constraints.maxWidth;
+                // Reserve the dashboard before sizing the sidebar and editor.
+                final canShowDashboardInline =
+                    constraints.maxWidth >=
+                    RadialGaugeDashboard.panelWidth +
+                        1 +
+                        360 +
+                        (_showSidebar ? 408 : 0);
+                final showDashboardInline =
+                    _showGaugeDashboard && canShowDashboardInline;
+                final dashboardWidth = !_showGaugeDashboard
+                    ? 0.0
+                    : showDashboardInline
+                    ? RadialGaugeDashboard.panelWidth
+                    : RadialGaugeDashboard.collapsedWidth;
+                final double maxWidth =
+                    constraints.maxWidth -
+                    dashboardWidth -
+                    (_showGaugeDashboard ? 1 : 0);
                 // 計算側邊欄寬度，並限制在 400px - 40% 之間
                 final double minSidebarWidth = max(maxWidth * 0.2, 400);
                 final double maxSidebarWidth = max(maxWidth * 0.4, 400);
@@ -2837,98 +3275,143 @@ class _ContentViewState extends ConsumerState<ContentView>
                   ),
                   max(240, maxWidth - 360),
                 );
-                final bool inlineRevision =
-                    _showRevisionPanel &&
-                    maxWidth >=
-                        sidebarWidth + 8 + 40 + _revisionPanelWidth + 480;
-
+                final editorAreaWidth =
+                    maxWidth - (_showSidebar ? sidebarWidth + 8 : 0);
+                final showRevisionDetails =
+                    _showGaugeDashboard && _showRevisionDetails;
+                final inlineRevision =
+                    showRevisionDetails &&
+                    editorAreaWidth >= _revisionSidebarWidth + 8 + 360;
                 return Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // 左側內容區域
-                    SizedBox(
-                      width: sidebarWidth,
-                      child: Container(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.surfaceContainerLowest,
-                        child: _buildPageContent(),
-                      ),
-                    ),
-
-                    MonogatariResizeDivider(
-                      onPanUpdate: (details) {
-                        setState(() {
-                          double currentWidth = sidebarWidth;
-                          double newWidth = currentWidth + details.delta.dx;
-
-                          double newRatio = newWidth / maxWidth;
-                          double minRatio = minSidebarWidth / maxWidth;
-                          double maxRatio = effectiveMaxWidth / maxWidth;
-
-                          _sidebarWidthRatio = newRatio.clamp(
-                            minRatio,
-                            maxRatio,
-                          );
-                        });
-                      },
-                    ),
-
-                    SizedBox(
-                      width: 40,
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: IconButton(
-                          tooltip: _showRevisionPanel ? '收合修訂追蹤' : '開啟修訂追蹤',
-                          icon: Icon(
-                            _showRevisionPanel
-                                ? Icons.rate_review
-                                : Icons.rate_review_outlined,
+                    ExcludeFocus(
+                      excluding: !_showSidebar,
+                      child: Offstage(
+                        offstage: !_showSidebar,
+                        child: SizedBox(
+                          width: sidebarWidth,
+                          child: Container(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerLowest,
+                            child: _buildPageContent(),
                           ),
-                          onPressed: () => setState(() {
-                            _showRevisionPanel = !_showRevisionPanel;
-                          }),
                         ),
                       ),
                     ),
 
-                    if (inlineRevision) ...[
-                      SizedBox(
-                        width: _revisionPanelWidth,
-                        child: _buildRevisionPanel(),
-                      ),
-                      MonogatariResizeDivider(
-                        onPanUpdate: (details) => setState(
-                          () => _revisionPanelWidth =
-                              (_revisionPanelWidth + details.delta.dx).clamp(
-                                280.0,
-                                480.0,
-                              ),
-                        ),
-                      ),
-                    ],
+                    Offstage(
+                      offstage: !_showSidebar,
+                      child: MonogatariResizeDivider(
+                        onPanUpdate: (details) {
+                          setState(() {
+                            double currentWidth = sidebarWidth;
+                            double newWidth = currentWidth + details.delta.dx;
 
+                            double newRatio = newWidth / maxWidth;
+                            double minRatio = minSidebarWidth / maxWidth;
+                            double maxRatio = effectiveMaxWidth / maxWidth;
+
+                            _sidebarWidthRatio = newRatio.clamp(
+                              minRatio,
+                              maxRatio,
+                            );
+                          });
+                        },
+                      ),
+                    ),
                     // 右側編輯器
                     Expanded(
+                      key: const ValueKey("editor-pane"),
                       child: Stack(
                         children: [
                           Positioned.fill(child: _buildEditor()),
-                          if (_showRevisionPanel && !inlineRevision)
+                          if (showRevisionDetails && !inlineRevision)
                             Positioned(
+                              key: const ValueKey("revision-sidebar-overlay"),
                               top: 0,
                               bottom: 0,
-                              left: 0,
+                              right: 0,
                               width: min(
-                                _revisionPanelWidth,
-                                max(160, maxWidth - sidebarWidth - 56),
+                                _revisionSidebarWidth,
+                                editorAreaWidth,
                               ),
                               child: Material(
                                 elevation: 8,
-                                child: _buildRevisionPanel(),
+                                child: _buildRevisionPanel(
+                                  onClose: () => setState(
+                                    () => _showRevisionDetails = false,
+                                  ),
+                                ),
                               ),
                             ),
                         ],
                       ),
                     ),
+                    if (inlineRevision) ...[
+                      MonogatariResizeDivider(
+                        onPanUpdate: (details) => setState(() {
+                          _revisionSidebarWidth =
+                              (_revisionSidebarWidth - details.delta.dx).clamp(
+                                280.0,
+                                min(480.0, editorAreaWidth - 368),
+                              );
+                        }),
+                      ),
+                      SizedBox(
+                        key: const ValueKey("revision-sidebar-inline"),
+                        width: _revisionSidebarWidth,
+                        child: _buildRevisionPanel(
+                          onClose: () =>
+                              setState(() => _showRevisionDetails = false),
+                        ),
+                      ),
+                    ],
+                    if (_showGaugeDashboard) ...[
+                      const VerticalDivider(width: 1, thickness: 1),
+                      SizedBox(
+                        key: const ValueKey("dashboard-column"),
+                        width: dashboardWidth,
+                        child: showDashboardInline
+                            ? RadialGaugeDashboard(
+                                onStartRevision: _startRevisionTracking,
+                                onOpenRevision: _openRevisionDetails,
+                                onClose: () =>
+                                    setState(() => _showGaugeDashboard = false),
+                              )
+                            : Material(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerLow,
+                                child: Align(
+                                  alignment: Alignment.topCenter,
+                                  child: IconButton(
+                                    key: const ValueKey(
+                                      "gauge-dashboard-toggle",
+                                    ),
+                                    tooltip: "開啟儀表板",
+                                    icon: const Icon(Icons.speed_rounded),
+                                    onPressed: () {
+                                      if (canShowDashboardInline) {
+                                        setState(
+                                          () => _showGaugeDashboard = true,
+                                        );
+                                      } else {
+                                        RadialGaugeDashboard.show(
+                                          context,
+                                          onStartRevision:
+                                              _startRevisionTracking,
+                                          onOpenRevision: _openRevisionDetails,
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
+                      ),
+                    ],
                   ],
                 );
               },
@@ -2964,26 +3447,62 @@ class _ContentViewState extends ConsumerState<ContentView>
     );
   }
 
-  Widget _buildRevisionPanel() => RevisionTrackingPanel(
-    onStart: () {
-      _syncEditorToSelectedChapter();
-      ref
-          .read(revisionEditorDraftProvider.notifier)
-          .update(
-            ref.read(projectUuidProvider),
-            selectedChapID,
-            textController.rawText,
-          );
-      ref.read(revisionTrackingProvider.notifier).start();
-    },
-    onClose: () => setState(() => _showRevisionPanel = false),
+  void _startRevisionTracking() {
+    _syncEditorToSelectedChapter();
+    ref
+        .read(revisionEditorDraftProvider.notifier)
+        .update(
+          ref.read(projectUuidProvider),
+          selectedChapID,
+          textController.rawText,
+        );
+    ref.read(revisionTrackingProvider.notifier).start();
+  }
+
+  Future<void> _openRevisionDetails() async {
+    if (!mounted) return;
+    if (MediaQuery.sizeOf(context).width >= 800) {
+      setState(() {
+        _showRevisionDetails = true;
+        _showGaugeDashboard = true;
+      });
+      return;
+    }
+    if (_revisionDialogOpen) return;
+    _revisionDialogOpen = true;
+    try {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => Dialog(
+          clipBehavior: Clip.antiAlias,
+          child: SizedBox(
+            width: 880,
+            height: min(760, MediaQuery.sizeOf(dialogContext).height - 80),
+            child: _buildRevisionPanel(
+              onClose: () => Navigator.of(dialogContext).pop(),
+              onNavigate: () => Navigator.of(dialogContext).pop(),
+            ),
+          ),
+        ),
+      );
+    } finally {
+      _revisionDialogOpen = false;
+    }
+  }
+
+  Widget _buildRevisionPanel({
+    required VoidCallback onClose,
+    VoidCallback? onNavigate,
+  }) => RevisionTrackingPanel(
+    onStart: _startRevisionTracking,
+    onClose: onClose,
     onRejectTextScope: (selection) {
       _syncEditorToSelectedChapter();
       final tracking = ref.read(revisionTrackingProvider);
       if (tracking.baseline?.readOnly != false ||
           tracking.status != RevisionComparisonStatus.complete ||
           !ref.read(revisionTrackingProvider.notifier).comparisonIsFresh()) {
-        _showMessage('正文已變更，請等待修訂重新計算後再批次拒絕。');
+        _showMessage("正文已變更，請等待修訂重新計算後再批次拒絕。");
         return;
       }
       final updates = <String, ({String folderId, String content})>{};
@@ -2992,7 +3511,7 @@ class _ContentViewState extends ConsumerState<ContentView>
           final text = entry.key;
           if (tracking.comparison?.texts.contains(text) != true ||
               !text.hunks.toSet().containsAll(entry.value)) {
-            throw StateError('Stale text selection');
+            throw StateError("Stale text selection");
           }
           final location = ChapterModule.ChapterTree.findChapter(
             ref.read(segmentsDataProvider),
@@ -3003,14 +3522,14 @@ class _ContentViewState extends ConsumerState<ContentView>
           if (location == null ||
               expected == null ||
               location.chapter.chapterContent != expected) {
-            throw StateError('Changed chapter');
+            throw StateError("Changed chapter");
           }
           updates[text.chapterId] = (
             folderId: location.folder.segmentUUID,
             content: RevisionReviewService.rejectTextHunks(
               before:
                   tracking.baseline!.snapshot.chapterTexts[text.chapterId] ??
-                  '',
+                  "",
               after: expected,
               diff: text,
               hunks: entry.value,
@@ -3018,7 +3537,7 @@ class _ContentViewState extends ConsumerState<ContentView>
           );
         }
       } catch (_) {
-        _showMessage('批次拒絕的來源已變更；請重新計算差異。');
+        _showMessage("批次拒絕的來源已變更；請重新計算差異。");
         return;
       }
       _recordProjectHistorySnapshot();
@@ -3051,11 +3570,11 @@ class _ContentViewState extends ConsumerState<ContentView>
           current == null ||
           expected == null ||
           current.chapter.chapterContent != expected) {
-        _showMessage('正文已變更，請等待修訂重新計算後再拒絕。');
+        _showMessage("正文已變更，請等待修訂重新計算後再拒絕。");
         return;
       }
       final original =
-          tracking.baseline!.snapshot.chapterTexts[text.chapterId] ?? '';
+          tracking.baseline!.snapshot.chapterTexts[text.chapterId] ?? "";
       try {
         final restored = RevisionReviewService.rejectTextHunk(
           before: original,
@@ -3076,7 +3595,7 @@ class _ContentViewState extends ConsumerState<ContentView>
             );
         _recordProjectHistorySnapshot();
       } catch (_) {
-        _showMessage('此區塊位置已失效，請重新計算差異。');
+        _showMessage("此區塊位置已失效，請重新計算差異。");
       }
     },
     onRejectRecord: (record, field) {
@@ -3088,17 +3607,17 @@ class _ContentViewState extends ConsumerState<ContentView>
       if (tracking.status != RevisionComparisonStatus.complete ||
           tracking.comparison?.records.contains(record) != true ||
           !ref.read(revisionTrackingProvider.notifier).comparisonIsFresh()) {
-        _showMessage('欄位已變更，請等待修訂重新計算。');
+        _showMessage("欄位已變更，請等待修訂重新計算。");
         return;
       }
       final name = field.target.fieldPath.single;
       final currentRecord = RevisionSnapshotBuilder.capture(
         ref.read(projectDataProvider),
-        version: 'review-check',
+        version: "review-check",
       ).records[record.key];
       final currentValue = currentRecord?.fields[name];
       if (currentValue != field.newValue) {
-        _showMessage('欄位已變更，請等待修訂重新計算。');
+        _showMessage("欄位已變更，請等待修訂重新計算。");
         return;
       }
       _recordProjectHistorySnapshot();
@@ -3107,17 +3626,17 @@ class _ContentViewState extends ConsumerState<ContentView>
         case ProjectRecordKind.baseInfo:
           final notifier = ref.read(baseInfoDataProvider.notifier);
           switch (name) {
-            case 'bookName':
+            case "bookName":
               notifier.setBookName(oldValue);
-            case 'author':
+            case "author":
               notifier.setAuthor(oldValue);
-            case 'purpose':
+            case "purpose":
               notifier.setPurpose(oldValue);
-            case 'toRecap':
+            case "toRecap":
               notifier.setToRecap(oldValue);
-            case 'storyType':
+            case "storyType":
               notifier.setStoryType(oldValue);
-            case 'intro':
+            case "intro":
               notifier.setIntro(oldValue);
           }
         case ProjectRecordKind.chapterFolder:
@@ -3143,9 +3662,9 @@ class _ContentViewState extends ConsumerState<ContentView>
               .updateLocationById(
                 record.key.recordId,
                 (current) => switch (name) {
-                  'name' => current.copyWith(localName: oldValue),
-                  'localType' => current.copyWith(localType: oldValue),
-                  'note' => current.copyWith(note: oldValue),
+                  "name" => current.copyWith(localName: oldValue),
+                  "localType" => current.copyWith(localType: oldValue),
+                  "note" => current.copyWith(note: oldValue),
                   _ => current,
                 },
               );
@@ -3153,32 +3672,32 @@ class _ContentViewState extends ConsumerState<ContentView>
           final current = ref.read(characterDataProvider)[record.key.recordId];
           if (current == null) return;
           final updated = switch (name) {
-            'displayName' => current.withDisplayName(oldValue),
-            'roleOrOccupation' => current.copyWith(roleOrOccupation: oldValue),
-            'age' => current.copyWith(age: oldValue),
-            'gender' => current.copyWith(gender: oldValue),
-            'appearanceSummary' => current.copyWith(
+            "displayName" => current.withDisplayName(oldValue),
+            "roleOrOccupation" => current.copyWith(roleOrOccupation: oldValue),
+            "age" => current.copyWith(age: oldValue),
+            "gender" => current.copyWith(gender: oldValue),
+            "appearanceSummary" => current.copyWith(
               appearanceSummary: oldValue,
             ),
-            'personalitySummary' => current.copyWith(
+            "personalitySummary" => current.copyWith(
               personalitySummary: oldValue,
             ),
-            'speechStyle' => current.copyWith(speechStyle: oldValue),
-            'motivation' => current.copyWith(motivation: oldValue),
-            'goal' => current.copyWith(goal: oldValue),
-            'valuesAndBeliefs' => current.copyWith(valuesAndBeliefs: oldValue),
-            'fear' => current.copyWith(fear: oldValue),
-            'relationshipSummary' => current.copyWith(
+            "speechStyle" => current.copyWith(speechStyle: oldValue),
+            "motivation" => current.copyWith(motivation: oldValue),
+            "goal" => current.copyWith(goal: oldValue),
+            "valuesAndBeliefs" => current.copyWith(valuesAndBeliefs: oldValue),
+            "fear" => current.copyWith(fear: oldValue),
+            "relationshipSummary" => current.copyWith(
               relationshipSummary: oldValue,
             ),
-            'notes' => current.copyWith(notes: oldValue),
+            "notes" => current.copyWith(notes: oldValue),
             _ => current,
           };
           ref
               .read(characterDataProvider.notifier)
               .setCharacterEntry(
                 characterId: record.key.recordId,
-                entry: name == 'displayName'
+                entry: name == "displayName"
                     ? updated
                     : updated.withTextField(name, oldValue),
               );
@@ -3190,10 +3709,10 @@ class _ContentViewState extends ConsumerState<ContentView>
                   for (final storyline in source)
                     if (storyline.chapterUUID == record.key.recordId)
                       switch (name) {
-                        'name' => storyline.copyWith(storylineName: oldValue),
-                        'type' => storyline.copyWith(storylineType: oldValue),
-                        'memo' => storyline.copyWith(memo: oldValue),
-                        'conflictPoint' => storyline.copyWith(
+                        "name" => storyline.copyWith(storylineName: oldValue),
+                        "type" => storyline.copyWith(storylineType: oldValue),
+                        "memo" => storyline.copyWith(memo: oldValue),
+                        "conflictPoint" => storyline.copyWith(
                           conflictPoint: oldValue,
                         ),
                         _ => storyline,
@@ -3213,9 +3732,9 @@ class _ContentViewState extends ConsumerState<ContentView>
                         for (final event in storyline.scenes)
                           if (event.storyEventUUID == record.key.recordId)
                             switch (name) {
-                              'event' => event.copyWith(storyEvent: oldValue),
-                              'memo' => event.copyWith(memo: oldValue),
-                              'conflictPoint' => event.copyWith(
+                              "event" => event.copyWith(storyEvent: oldValue),
+                              "memo" => event.copyWith(memo: oldValue),
+                              "conflictPoint" => event.copyWith(
                                 conflictPoint: oldValue,
                               ),
                               _ => event,
@@ -3240,20 +3759,20 @@ class _ContentViewState extends ConsumerState<ContentView>
                               for (final scene in event.scenes)
                                 if (scene.sceneUUID == record.key.recordId)
                                   switch (name) {
-                                    'name' => scene.copyWith(
+                                    "name" => scene.copyWith(
                                       sceneName: oldValue,
                                     ),
-                                    'time' => scene.copyWith(time: oldValue),
-                                    'location' => scene.copyWith(
+                                    "time" => scene.copyWith(time: oldValue),
+                                    "location" => scene.copyWith(
                                       location: oldValue,
                                     ),
-                                    'focusPoint' => scene.copyWith(
+                                    "focusPoint" => scene.copyWith(
                                       focusPoint: oldValue,
                                     ),
-                                    'conflictPoint' => scene.copyWith(
+                                    "conflictPoint" => scene.copyWith(
                                       conflictPoint: oldValue,
                                     ),
-                                    'memo' => scene.copyWith(memo: oldValue),
+                                    "memo" => scene.copyWith(memo: oldValue),
                                     _ => scene,
                                   }
                                 else
@@ -3270,18 +3789,18 @@ class _ContentViewState extends ConsumerState<ContentView>
               .itemClasses[record.key.recordId];
           if (current == null) return;
           final updated = switch (name) {
-            'name' => current.copyWith(
+            "name" => current.copyWith(
               name: oldValue,
               defaultState: current.defaultState.copyWith(name: oldValue),
             ),
-            'description' => current.copyWith(
+            "description" => current.copyWith(
               description: oldValue,
               defaultState: current.defaultState.copyWith(
                 description: oldValue,
               ),
             ),
-            'category' => current.copyWith(category: oldValue),
-            'unit' => current.copyWith(unit: oldValue),
+            "category" => current.copyWith(category: oldValue),
+            "unit" => current.copyWith(unit: oldValue),
             _ => current,
           };
           ref.read(itemWorkspaceProvider.notifier).putClass(updated);
@@ -3304,9 +3823,10 @@ class _ContentViewState extends ConsumerState<ContentView>
           .read(editorCoordinatorProvider.notifier)
           .navigateToChapter(text.chapterId);
       if (!opened) {
-        _showMessage('章節已刪除；可在修訂窗格查看舊內容。');
+        _showMessage("章節已刪除；可在修訂窗格查看舊內容。");
         return;
       }
+      onNavigate?.call();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || selectedChapID != text.chapterId) return;
         final position = hunk.newOffset.clamp(0, textController.rawText.length);
@@ -3319,6 +3839,8 @@ class _ContentViewState extends ConsumerState<ContentView>
     },
     onNavigateRecord: (record, field) {
       _syncEditorToSelectedChapter();
+      setState(() => _showSidebar = true);
+      onNavigate?.call();
       switch (record.key.kind) {
         case ProjectRecordKind.baseInfo:
           setState(() => slidePageIndexNow = 1);
@@ -3354,7 +3876,7 @@ class _ContentViewState extends ConsumerState<ContentView>
                 .read(outlineSelectionRequestProvider.notifier)
                 .requestTarget(
                   record.key.kind == ProjectRecordKind.outlineChapterLink
-                      ? (record.after?.fields['sceneUUID'] as String? ??
+                      ? (record.after?.fields["sceneUUID"] as String? ??
                             record.key.recordId)
                       : record.key.recordId,
                 );
@@ -3367,20 +3889,20 @@ class _ContentViewState extends ConsumerState<ContentView>
         case ProjectRecordKind.itemInstanceStateChange:
           final fields = (record.after ?? record.before)?.fields;
           final workspace = ref.read(itemWorkspaceProvider);
-          final itemId = fields == null ? null : fields['itemId'] as String?;
-          final itemKind = fields == null ? null : fields['itemKind'];
+          final itemId = fields == null ? null : fields["itemId"] as String?;
+          final itemKind = fields == null ? null : fields["itemKind"];
           final classId = switch (record.key.kind) {
             ProjectRecordKind.itemClass => record.key.recordId,
             ProjectRecordKind.itemInstance =>
-              fields == null ? null : fields['classId'] as String?,
+              fields == null ? null : fields["classId"] as String?,
             ProjectRecordKind.itemClassStateChange =>
-              fields == null ? null : fields['classId'] as String?,
+              fields == null ? null : fields["classId"] as String?,
             ProjectRecordKind.itemInstanceStateChange =>
               workspace
-                  .itemInstances[fields == null ? null : fields['instanceId']]
+                  .itemInstances[fields == null ? null : fields["instanceId"]]
                   ?.classId,
             ProjectRecordKind.itemRelation =>
-              itemKind == 'itemClass'
+              itemKind == "itemClass"
                   ? itemId
                   : workspace.itemInstances[itemId]?.classId,
             _ => null,
@@ -3399,9 +3921,7 @@ class _ContentViewState extends ConsumerState<ContentView>
 
   // 獲取 NavigationRail 的選中索引
   int _getNavigationIndex() {
-    return slidePageIndexNow > (slidePageCounts - 1)
-        ? 0
-        : slidePageIndexNow.clamp(0, (slidePageCounts - 1));
+    return _currentModule.navigationIndex;
   }
 
   // 頁面內容
@@ -3415,8 +3935,8 @@ class _ContentViewState extends ConsumerState<ContentView>
   // 頁面視圖
   Widget _buildPageView() {
     final int pageIndex = slidePageIndexNow > (slidePageCounts - 1)
-        ? 0
-        : slidePageIndexNow; // 如果在編輯器模式，預設顯示第一頁
+        ? _lastFunctionModule.navigationIndex
+        : slidePageIndexNow; // 編輯器模式保留上次功能模組
 
     return IndexedStack(
       index: pageIndex.clamp(0, slidePageCounts - 1),
@@ -3453,6 +3973,7 @@ class _ContentViewState extends ConsumerState<ContentView>
               HelpTarget(
                 topicId: HelpTopicId.search,
                 child: FindReplaceBar(
+                  key: _findBarKey,
                   findController: findController,
                   replaceController: replaceController,
                   options: findReplaceOptions,
@@ -3575,28 +4096,16 @@ class _ContentViewState extends ConsumerState<ContentView>
                       _ribbonController.selectTab("search"),
                   optionsRevision: _findOptionsRevision,
                   onSearchChanged: _refreshSearchResults,
-                  onClose: () {
-                    cancelFindAllMatches(textController);
-                    cancelReplaceAll(textController);
-                    setState(() {
-                      showFindReplaceWindow = false;
-                      // 清除搜尋高亮，但保留編輯器的光標位置和選擇狀態
-                      _searchMatches = [];
-                      _currentMatchIndex = -1;
-                      textController.clearAllHighlights();
-                      textController.clearRhodantheRenderPlan(notify: false);
-                      // 不清除編輯器的選擇，讓用戶可以繼續從當前位置編輯
-                    });
-                    _quillSearchController.clearSearchResults();
-                    _quillSearchController.clearProofreadingRanges();
-                  },
+                  onClose: _closeFindReplace,
                 ),
               ),
 
             // 文本編輯器 - 使用 Expanded 填充剩餘空間
             Expanded(
               child: EditorTextBox(
+                key: _bodyEditorKey,
                 controller: textController,
+                showPhraseActions: false,
                 focusNode: editorFocusNode,
                 onUndo: _undoProjectHistory,
                 onRedo: _redoProjectHistory,
@@ -3739,13 +4248,13 @@ class _ContentViewState extends ConsumerState<ContentView>
 
   Future<bool> _compareVerifiedP2pSnapshot(P2pVerifiedSnapshot snapshot) async {
     if (!mounted || !_isCurrentP2pComparisonSnapshot(snapshot)) {
-      _showError('遠端版本已失效，請重新下載完整 snapshot。');
+      _showError("遠端版本已失效，請重新下載完整 snapshot。");
       return false;
     }
     if (FileService.isProjectVersionNewerThanSupported(
       snapshot.manifest.formatVersion,
     )) {
-      _showError('遠端專案格式較新，無法安全比較。');
+      _showError("遠端專案格式較新，無法安全比較。");
       return false;
     }
     _syncEditorToSelectedChapter();
@@ -3759,7 +4268,7 @@ class _ContentViewState extends ConsumerState<ContentView>
       if (parsed.sourceProjectUuid?.trim().toLowerCase() !=
               snapshot.manifest.projectUuid ||
           parsed.data.projectUUID.trim().toLowerCase() != currentId) {
-        _showError('遠端版本屬於另一個專案，未加入比較。');
+        _showError("遠端版本屬於另一個專案，未加入比較。");
         return false;
       }
       ref
@@ -3768,13 +4277,17 @@ class _ContentViewState extends ConsumerState<ContentView>
             parsed.data,
             revisionId: snapshot.manifest.revisionId,
             label:
-                'P2P ${snapshot.manifest.revisionId.length > 8 ? snapshot.manifest.revisionId.substring(0, 8) : snapshot.manifest.revisionId}',
+                "P2P ${snapshot.manifest.revisionId.length > 8 ? snapshot.manifest.revisionId.substring(0, 8) : snapshot.manifest.revisionId}",
           );
-      setState(() => _showRevisionPanel = true);
-      _showMessage('已載入完整遠端版本供唯讀比較。');
+      ref
+          .read(gaugeDashboardProvider.notifier)
+          .setVisible(DashboardMetric.revisionTracking, true);
+      setState(() => _showGaugeDashboard = true);
+      unawaited(_openRevisionDetails());
+      _showMessage("已載入完整遠端版本供唯讀比較。");
       return true;
     } catch (error) {
-      if (mounted) _showError('無法比較遠端版本：$error');
+      if (mounted) _showError("無法比較遠端版本：$error");
       return false;
     }
   }
@@ -4361,31 +4874,52 @@ class _ContentViewState extends ConsumerState<ContentView>
 
   // 檔案操作處理
   Future<void> _handleFileAction(String action) async {
-    switch (action) {
-      case "new":
-        await _newProject();
-        break;
-      case "open":
-        await _openProject();
-        break;
-      case "save":
-        await _saveProject();
-        break;
-      case "saveAs":
-        await _saveProjectAs();
-        break;
-      case "export_selective":
-        await _showExportDialog();
-        break;
-      case "import_selective":
-        await _importSelective();
-        break;
-      case "export_txt":
-        await _exportAs("txt");
-        break;
-      case "export_md":
-        await _exportAs("md");
-        break;
+    if (_fileCommandRunning ||
+        !mounted ||
+        ModalRoute.of(context)?.isCurrent == false ||
+        HelpController.maybeOf(context)?.ownsFocus == true ||
+        (ref.read(projectIoControllerProvider).valueOrNull?.isBusy ?? false)) {
+      return;
+    }
+    final node = FocusManager.instance.primaryFocus;
+    final value = node == null
+        ? null
+        : _findEditableForFocusNode(node)?.widget.controller.value;
+    if (value != null &&
+        value.composing.isValid &&
+        !value.composing.isCollapsed) {
+      return;
+    }
+    setState(() => _fileCommandRunning = true);
+    try {
+      switch (action) {
+        case "new":
+          await _newProject();
+          break;
+        case "open":
+          await _openProject();
+          break;
+        case "save":
+          await _saveProject();
+          break;
+        case "saveAs":
+          await _saveProjectAs();
+          break;
+        case "export_selective":
+          await _showExportDialog();
+          break;
+        case "import_selective":
+          await _importSelective();
+          break;
+        case "export_txt":
+          await _exportAs("txt");
+          break;
+        case "export_md":
+          await _exportAs("md");
+          break;
+      }
+    } finally {
+      if (mounted) setState(() => _fileCommandRunning = false);
     }
   }
 
@@ -4417,7 +4951,22 @@ class _ContentViewState extends ConsumerState<ContentView>
       }
 
       final currentBeforeImport = _collectProjectData();
-      final selected = <SelectiveProjectModule>{...manifest.availableModules};
+      final currentTrees = buildExportSelections(currentBeforeImport);
+      final sourceTrees = buildExportSelections(loaded.data);
+      int itemCount(
+        Map<SelectiveProjectModule, List<ExportSelectionNode>> trees,
+        SelectiveProjectModule module,
+      ) =>
+          trees[module]?.fold<int>(
+            0,
+            (count, root) => count + root.selectableKeys.length,
+          ) ??
+          0;
+      final blocked = manifest.blockedReplacements(currentBeforeImport);
+      final selected = <SelectiveProjectModule>{...manifest.availableModules}
+        ..removeAll(manifest.partialModules);
+      final importSession = _projectIoSession;
+      final importRevision = _projectDataRevision;
       final chosen = await AppDialog.showCustom<Set<SelectiveProjectModule>>(
         context: context,
         builder: (dialogContext) => StatefulBuilder(
@@ -4429,6 +4978,7 @@ class _ContentViewState extends ConsumerState<ContentView>
                 source: loaded.data,
                 manifest: manifest,
                 selectedModules: selected,
+                allowPartialReplacement: true,
               );
             }
             return HelpTarget(
@@ -4446,23 +4996,42 @@ class _ContentViewState extends ConsumerState<ContentView>
                         Text("來源：${sourceFile.fullFileName}"),
                         const SizedBox(height: 8),
                         const Text("勾選的模組會取代目前專案中的對應資料。"),
+                        if (manifest.partialModules.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          const Text(
+                            "這是細項匯出檔：匯入不會逐項合併，未附的目標資料可能被移除。請先備份，再明確勾選要替換的模組。",
+                          ),
+                          if (blocked.isNotEmpty)
+                            Text(
+                              "${blocked.map((m) => m.label).join("、")}含必要祖先／依賴，目前已有資料，請改匯入空白專案。",
+                            ),
+                        ],
                         const SizedBox(height: 12),
                         for (final module in SelectiveProjectModule.values)
                           if (manifest.availableModules.contains(module))
                             CheckboxListTile(
                               key: Key("selective-import-${module.id}"),
-                              title: Text(module.label),
+                              title: Text(
+                                "${module.label}${manifest.partialModules.contains(module) ? "（細項，替換整個模組）" : ""}",
+                              ),
+                              subtitle: manifest.partialModules.contains(module)
+                                  ? Text(
+                                      "目前 ${itemCount(currentTrees, module)} 項 → 匯入後 ${itemCount(sourceTrees, module)} 項（含結構節點）",
+                                    )
+                                  : null,
                               value: selected.contains(module),
                               dense: true,
                               controlAffinity: ListTileControlAffinity.leading,
                               contentPadding: EdgeInsets.zero,
-                              onChanged: (value) => setDialogState(() {
-                                if (value == true) {
-                                  selected.add(module);
-                                } else {
-                                  selected.remove(module);
-                                }
-                              }),
+                              onChanged: blocked.contains(module)
+                                  ? null
+                                  : (value) => setDialogState(() {
+                                      if (value == true) {
+                                        selected.add(module);
+                                      } else {
+                                        selected.remove(module);
+                                      }
+                                    }),
                             ),
                         if (preview != null && preview.warnings.isNotEmpty) ...[
                           const Divider(),
@@ -4507,6 +5076,11 @@ class _ContentViewState extends ConsumerState<ContentView>
         ),
       );
       if (!mounted || chosen == null) return;
+      if (!_projectIoCoordinator.isCurrent(importSession) ||
+          _projectDataRevision != importRevision) {
+        _showError("確認期間作品已變更，請重新開始匯入。");
+        return;
+      }
 
       _recordProjectHistorySnapshot();
       final imported = const SelectiveProjectImporter().apply(
@@ -4514,6 +5088,7 @@ class _ContentViewState extends ConsumerState<ContentView>
         source: loaded.data,
         manifest: manifest,
         selectedModules: chosen,
+        allowPartialReplacement: true,
       );
       final initialState = ref
           .read(editorCoordinatorProvider.notifier)
@@ -4536,149 +5111,51 @@ class _ContentViewState extends ConsumerState<ContentView>
     }
   }
 
-  Future<void> _showExportDialog() async {
-    final Set<String> selectedModules = {
-      "BaseInfo",
-      "Chapters",
-      "Outline",
-      "Plans",
-      "WorldSettings",
-      "Characters",
-      "Items",
-      "Phrases",
-    };
-    String selectedFormat = "xml";
+  bool _exportDialogOpen = false;
 
-    await AppDialog.showCustom(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return HelpTarget(
-              topicId: HelpTopicId.exportFiles,
-              child: AppDialog(
-                title: "匯出選項",
-                icon: Icons.ios_share_outlined,
-                content: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "選擇匯出格式：",
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      Row(
-                        children: [
-                          Radio<String>(
-                            value: "xml",
-                            groupValue: selectedFormat,
-                            onChanged: (val) =>
-                                setDialogState(() => selectedFormat = val!),
-                          ),
-                          const Text("XML"),
-                          const SizedBox(width: 16),
-                          Radio<String>(
-                            value: "md",
-                            groupValue: selectedFormat,
-                            onChanged: (val) =>
-                                setDialogState(() => selectedFormat = val!),
-                          ),
-                          const Text("Markdown"),
-                        ],
-                      ),
-                      const Divider(),
-                      Text(
-                        "選擇匯出模組：",
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      const SizedBox(height: 8),
-                      // Modules checkboxes
-                      ...[
-                        "BaseInfo",
-                        "Chapters",
-                        "Outline",
-                        "Plans",
-                        "WorldSettings",
-                        "Characters",
-                        "Items",
-                        "Phrases",
-                      ].map((module) {
-                        final displayNames = {
-                          "BaseInfo": "故事設定",
-                          "Chapters": "章節內容",
-                          "Outline": "大綱",
-                          "Plans": "更新計畫與伏筆",
-                          "WorldSettings": "世界設定",
-                          "Characters": "角色設定",
-                          "Items": "物品設定與快照",
-                          "Phrases": "短語庫",
-                        };
-                        return CheckboxListTile(
-                          title: Text(displayNames[module] ?? module),
-                          value: selectedModules.contains(module),
-                          onChanged: (bool? value) {
-                            setDialogState(() {
-                              if (value == true) {
-                                selectedModules.add(module);
-                              } else {
-                                if (selectedModules.length > 1) {
-                                  selectedModules.remove(module);
-                                }
-                              }
-                            });
-                          },
-                          dense: true,
-                          controlAffinity: ListTileControlAffinity.leading,
-                          contentPadding: EdgeInsets.zero,
-                        );
-                      }).toList(),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text("取消"),
-                  ),
-                  FilledButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _exportSelective(selectedModules, selectedFormat);
-                    },
-                    child: const Text("匯出"),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-
-    if (!mounted) {
-      return;
-    }
-  }
-
-  Future<void> _exportSelective(Set<String> modules, String format) async {
-    _syncEditorToSelectedChapter();
-    final currentData = _collectProjectData();
-    final defaultName =
-        currentProject?.nameWithoutExtension ?? "MonogatariExport";
-
+  Future<void> _showExportDialog({
+    ExportFormat initialFormat = ExportFormat.markdown,
+  }) async {
+    if (_exportDialogOpen) return;
+    _exportDialogOpen = true;
+    final session = _projectIoSession;
     try {
-      await ref
-          .read(projectIoControllerProvider.notifier)
-          .exportSelective(
-            currentData: currentData,
-            defaultFileName: defaultName,
-            selectedModules: modules,
-            format: format,
-          );
-      _showMessage("匯出成功！");
-    } catch (e) {
-      _showError("匯出檔案失敗：${e.toString()}");
+      _syncEditorToSelectedChapter();
+      final data = _collectProjectData();
+      buildExportSelections(data);
+      final snapshot = snapshotProjectData(data);
+      final fileName =
+          currentProject?.nameWithoutExtension ?? "MonogatariExport";
+      final result = await AppDialog.showCustom<ExportSaveResult>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => ProjectExportDialog(
+          snapshot: snapshot,
+          prepare: (request) =>
+              compute(prepareProjectExport, (snapshot, request)),
+          initialFormat: initialFormat,
+          currentChapterId: selectedChapID,
+          isCurrent: () => mounted && _projectIoCoordinator.isCurrent(session),
+          save: (output) => ref
+              .read(exportWriterProvider)
+              .save(
+                output,
+                fileName,
+                canWrite: () =>
+                    mounted && _projectIoCoordinator.isCurrent(session),
+              ),
+        ),
+      );
+      if (!mounted || result?.status != ExportSaveStatus.saved) return;
+      if (_projectIoCoordinator.isCurrent(session)) {
+        _showMessage("匯出完成：${result!.destination ?? fileName}");
+      }
+    } catch (error) {
+      if (mounted && _projectIoCoordinator.isCurrent(session)) {
+        _showError("匯出失敗：$error");
+      }
+    } finally {
+      _exportDialogOpen = false;
     }
   }
 
@@ -4935,7 +5412,7 @@ class _ContentViewState extends ConsumerState<ContentView>
     final newText = controller.text.replaceRange(
       selection.start,
       selection.end,
-      '',
+      "",
     );
 
     // 使用 updateEditingValue 更新，確保 UI 正確更新
@@ -4956,8 +5433,8 @@ class _ContentViewState extends ConsumerState<ContentView>
   ) async {
     debugPrint("[DEBUG] Paste Starting paste operation");
     try {
-      final clipboardData = await Clipboard.getData('text/plain');
-      final pastedText = clipboardData?.text ?? '';
+      final clipboardData = await Clipboard.getData("text/plain");
+      final pastedText = clipboardData?.text ?? "";
 
       debugPrint(
         "[DEBUG] Paste: clipboard length=${pastedText.length} UTF-16 units",
@@ -5025,7 +5502,7 @@ class _ContentViewState extends ConsumerState<ContentView>
 
   /// 處理退出請求
   Future<bool> _handleExit() async {
-    return ProjectManager.handleExit(
+    final shouldExit = await ProjectManager.handleExit(
       context,
       showExitWarning: _settingsState.showExitWarning,
       hasUnsavedChanges: _hasUnsavedChanges(),
@@ -5038,6 +5515,20 @@ class _ContentViewState extends ConsumerState<ContentView>
         if (_hasUnsavedChanges()) throw Exception("Save cancelled or failed");
       },
     );
+    if (shouldExit) {
+      final progress = ref.read(dailyWritingProgressProvider);
+      final beforeDiscard = progress.checkpoint();
+      final discarded = _hasUnsavedChanges();
+      if (discarded) progress.discardUnsaved();
+      try {
+        await progress.flush();
+      } catch (error) {
+        if (discarded) progress.restoreCheckpoint(beforeDiscard);
+        if (mounted) _showMessage("$error");
+        return false;
+      }
+    }
+    return shouldExit;
   }
 
   Future<bool> _requestExit() async {
@@ -5053,6 +5544,11 @@ class _ContentViewState extends ConsumerState<ContentView>
 
   // 檔案操作方法
   void _resetProjectSessionUiState() {
+    final writingProgress = ref.read(dailyWritingProgressProvider);
+    if (ref.read(editorCoordinatorProvider).hasUnsavedChanges) {
+      writingProgress.discardUnsaved();
+    }
+    writingProgress.endSession();
     _hasUnpersistedRemoteDraft = false;
     CharacterDraftSessionCoordinator.instance.flushAndClose(
       _projectSessionVersion,
@@ -5327,14 +5823,14 @@ class _ContentViewState extends ConsumerState<ContentView>
     }
 
     // Bookmark payload from native: BKMK::<base64Bookmark>::PATH::<originalPath>
-    if (normalizedPath.startsWith('BKMK::')) {
+    if (normalizedPath.startsWith("BKMK::")) {
       try {
-        final marker = 'BKMK::';
-        final sep = '::PATH::';
+        final marker = "BKMK::";
+        final sep = "::PATH::";
         final rest = normalizedPath.substring(marker.length);
         final idx = rest.indexOf(sep);
         final bookmark = idx >= 0 ? rest.substring(0, idx) : rest;
-        final origPath = idx >= 0 ? rest.substring(idx + sep.length) : '';
+        final origPath = idx >= 0 ? rest.substring(idx + sep.length) : "";
         final parts = origPath.split(RegExp(r"[/\\]"));
         final fileName = parts.isEmpty || parts.last.isEmpty
             ? "未命名.mnproj"
@@ -5554,6 +6050,9 @@ class _ContentViewState extends ConsumerState<ContentView>
     final session = _projectIoSession;
     final revision = _projectDataRevision;
     final currentData = _collectProjectData();
+    final savedProgressPosition = ref
+        .read(dailyWritingProgressProvider)
+        .checkpoint();
     ProjectIoPayload? persistedPayload;
 
     try {
@@ -5587,6 +6086,9 @@ class _ContentViewState extends ConsumerState<ContentView>
       if (_projectIdentity(savedProject) != session.projectIdentity) {
         _beginProjectIoSession(savedProject);
       }
+      ref
+          .read(dailyWritingProgressProvider)
+          .markSaved(position: savedProgressPosition);
       await _recordP2pPersistedRevision(persistedPayload);
       await _editorCoordinatorNotifier.recordRecentProject(savedProject);
       if (!mounted) {
@@ -5604,6 +6106,9 @@ class _ContentViewState extends ConsumerState<ContentView>
     final session = _projectIoSession;
     final revision = _projectDataRevision;
     final currentData = _collectProjectData();
+    final savedProgressPosition = ref
+        .read(dailyWritingProgressProvider)
+        .checkpoint();
     ProjectIoPayload? saveAsPayload;
 
     try {
@@ -5641,6 +6146,9 @@ class _ContentViewState extends ConsumerState<ContentView>
         ref
             .read(projectUuidProvider.notifier)
             .setProjectUuid(adoptedProjectUuid);
+        ref
+            .read(dailyWritingProgressProvider)
+            .adoptProjectIdentity(adoptedProjectUuid);
         if (beganApplying) {
           _editorCoordinatorNotifier.endApplyingProjectData();
         }
@@ -5651,6 +6159,9 @@ class _ContentViewState extends ConsumerState<ContentView>
         _editorCoordinatorNotifier.markAsModified();
       }
       _beginProjectIoSession(savedProject);
+      ref
+          .read(dailyWritingProgressProvider)
+          .markSaved(position: savedProgressPosition);
       await _recordP2pPersistedRevision(saveAsPayload);
       await _editorCoordinatorNotifier.recordRecentProject(savedProject);
       if (!mounted) {
@@ -5662,25 +6173,11 @@ class _ContentViewState extends ConsumerState<ContentView>
     }
   }
 
-  Future<void> _exportAs(String extension) async {
-    _syncEditorToSelectedChapter();
-    final currentData = _collectProjectData();
-    final defaultName =
-        currentProject?.nameWithoutExtension ?? "MonogatariExport";
-
-    try {
-      await ref
-          .read(projectIoControllerProvider.notifier)
-          .exportAs(
-            extension: extension,
-            currentData: currentData,
-            defaultFileName: defaultName,
-          );
-      _showMessage("匯出 $extension 檔案成功！");
-    } catch (e) {
-      _showError("匯出檔案失敗：${e.toString()}");
-    }
-  }
+  Future<void> _exportAs(String extension) => _showExportDialog(
+    initialFormat: extension == "txt"
+        ? ExportFormat.txt
+        : ExportFormat.markdown,
+  );
 
   // 同步編輯器內容到選中的章節（先存的部分）
   void _syncEditorToSelectedChapter() {

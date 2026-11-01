@@ -17,7 +17,9 @@ class HelpViewer extends StatefulWidget {
     required this.loadCatalog,
     required this.retryCatalog,
     required this.onTopic,
+    this.embedded = false,
   });
+  final bool embedded;
   final ValueListenable<String> topic;
   final FocusNode focusNode;
   final Future<HelpCatalog> Function() loadCatalog;
@@ -79,14 +81,20 @@ class _HelpViewerState extends State<HelpViewer> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) => _buildViewer(context, constraints),
+  );
+
+  Widget _buildViewer(BuildContext context, BoxConstraints constraints) {
+    final size = widget.embedded
+        ? constraints.biggest
+        : MediaQuery.sizeOf(context);
     final fullscreen = size.width < 700;
     final body = HelpScope(
       topicId: HelpTopicId.usingHelp,
       child: Focus(
         focusNode: widget.focusNode,
-        autofocus: true,
+        autofocus: !widget.embedded,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -97,11 +105,12 @@ class _HelpViewerState extends State<HelpViewer> {
                   const Expanded(
                     child: Text('說明中心', style: TextStyle(fontSize: 22)),
                   ),
-                  IconButton(
-                    tooltip: '關閉說明（Esc）',
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
-                  ),
+                  if (!widget.embedded)
+                    IconButton(
+                      tooltip: '關閉說明（Esc）',
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close),
+                    ),
                 ],
               ),
               Wrap(
@@ -191,6 +200,7 @@ class _HelpViewerState extends State<HelpViewer> {
         ),
       ),
     );
+    if (widget.embedded) return body;
     return fullscreen
         ? Dialog.fullscreen(child: SafeArea(child: body))
         : Dialog(

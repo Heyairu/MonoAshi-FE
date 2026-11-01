@@ -19,6 +19,7 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$AppThemeStateData {
   AppThemeMode get themeMode => throw _privateConstructorUsedError;
   Color get themeColor => throw _privateConstructorUsedError;
+  AppThemePreset get themePreset => throw _privateConstructorUsedError;
 
   /// Create a copy of AppThemeStateData
   /// with the given fields replaced by the non-null parameter values.
@@ -34,7 +35,11 @@ abstract class $AppThemeStateDataCopyWith<$Res> {
     $Res Function(AppThemeStateData) then,
   ) = _$AppThemeStateDataCopyWithImpl<$Res, AppThemeStateData>;
   @useResult
-  $Res call({AppThemeMode themeMode, Color themeColor});
+  $Res call({
+    AppThemeMode themeMode,
+    Color themeColor,
+    AppThemePreset themePreset,
+  });
 }
 
 /// @nodoc
@@ -51,7 +56,11 @@ class _$AppThemeStateDataCopyWithImpl<$Res, $Val extends AppThemeStateData>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? themeMode = null, Object? themeColor = null}) {
+  $Res call({
+    Object? themeMode = null,
+    Object? themeColor = null,
+    Object? themePreset = null,
+  }) {
     return _then(
       _value.copyWith(
             themeMode: null == themeMode
@@ -62,6 +71,10 @@ class _$AppThemeStateDataCopyWithImpl<$Res, $Val extends AppThemeStateData>
                 ? _value.themeColor
                 : themeColor // ignore: cast_nullable_to_non_nullable
                       as Color,
+            themePreset: null == themePreset
+                ? _value.themePreset
+                : themePreset // ignore: cast_nullable_to_non_nullable
+                      as AppThemePreset,
           )
           as $Val,
     );
@@ -77,7 +90,11 @@ abstract class _$$AppThemeStateDataImplCopyWith<$Res>
   ) = __$$AppThemeStateDataImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({AppThemeMode themeMode, Color themeColor});
+  $Res call({
+    AppThemeMode themeMode,
+    Color themeColor,
+    AppThemePreset themePreset,
+  });
 }
 
 /// @nodoc
@@ -93,7 +110,11 @@ class __$$AppThemeStateDataImplCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? themeMode = null, Object? themeColor = null}) {
+  $Res call({
+    Object? themeMode = null,
+    Object? themeColor = null,
+    Object? themePreset = null,
+  }) {
     return _then(
       _$AppThemeStateDataImpl(
         themeMode: null == themeMode
@@ -104,6 +125,10 @@ class __$$AppThemeStateDataImplCopyWithImpl<$Res>
             ? _value.themeColor
             : themeColor // ignore: cast_nullable_to_non_nullable
                   as Color,
+        themePreset: null == themePreset
+            ? _value.themePreset
+            : themePreset // ignore: cast_nullable_to_non_nullable
+                  as AppThemePreset,
       ),
     );
   }
@@ -115,6 +140,7 @@ class _$AppThemeStateDataImpl implements _AppThemeStateData {
   const _$AppThemeStateDataImpl({
     this.themeMode = AppThemeMode.system,
     this.themeColor = Colors.lightBlue,
+    this.themePreset = AppThemePreset.standard,
   });
 
   @override
@@ -123,10 +149,13 @@ class _$AppThemeStateDataImpl implements _AppThemeStateData {
   @override
   @JsonKey()
   final Color themeColor;
+  @override
+  @JsonKey()
+  final AppThemePreset themePreset;
 
   @override
   String toString() {
-    return 'AppThemeStateData(themeMode: $themeMode, themeColor: $themeColor)';
+    return 'AppThemeStateData(themeMode: $themeMode, themeColor: $themeColor, themePreset: $themePreset)';
   }
 
   @override
@@ -137,11 +166,14 @@ class _$AppThemeStateDataImpl implements _AppThemeStateData {
             (identical(other.themeMode, themeMode) ||
                 other.themeMode == themeMode) &&
             (identical(other.themeColor, themeColor) ||
-                other.themeColor == themeColor));
+                other.themeColor == themeColor) &&
+            (identical(other.themePreset, themePreset) ||
+                other.themePreset == themePreset));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, themeMode, themeColor);
+  int get hashCode =>
+      Object.hash(runtimeType, themeMode, themeColor, themePreset);
 
   /// Create a copy of AppThemeStateData
   /// with the given fields replaced by the non-null parameter values.
@@ -159,12 +191,15 @@ abstract class _AppThemeStateData implements AppThemeStateData {
   const factory _AppThemeStateData({
     final AppThemeMode themeMode,
     final Color themeColor,
+    final AppThemePreset themePreset,
   }) = _$AppThemeStateDataImpl;
 
   @override
   AppThemeMode get themeMode;
   @override
   Color get themeColor;
+  @override
+  AppThemePreset get themePreset;
 
   /// Create a copy of AppThemeStateData
   /// with the given fields replaced by the non-null parameter values.
@@ -176,6 +211,7 @@ abstract class _AppThemeStateData implements AppThemeStateData {
 
 /// @nodoc
 mixin _$AppSettingsStateData {
+  AppLocalePreference get appLocale => throw _privateConstructorUsedError;
   NavigationStyle get navigationStyle => throw _privateConstructorUsedError;
   bool get showExitWarning => throw _privateConstructorUsedError;
   double get fontSize => throw _privateConstructorUsedError;
@@ -211,6 +247,7 @@ abstract class $AppSettingsStateDataCopyWith<$Res> {
   ) = _$AppSettingsStateDataCopyWithImpl<$Res, AppSettingsStateData>;
   @useResult
   $Res call({
+    AppLocalePreference appLocale,
     NavigationStyle navigationStyle,
     bool showExitWarning,
     double fontSize,
@@ -249,6 +286,7 @@ class _$AppSettingsStateDataCopyWithImpl<
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? appLocale = null,
     Object? navigationStyle = null,
     Object? showExitWarning = null,
     Object? fontSize = null,
@@ -269,6 +307,10 @@ class _$AppSettingsStateDataCopyWithImpl<
   }) {
     return _then(
       _value.copyWith(
+            appLocale: null == appLocale
+                ? _value.appLocale
+                : appLocale // ignore: cast_nullable_to_non_nullable
+                      as AppLocalePreference,
             navigationStyle: null == navigationStyle
                 ? _value.navigationStyle
                 : navigationStyle // ignore: cast_nullable_to_non_nullable
@@ -355,6 +397,7 @@ abstract class _$$AppSettingsStateDataImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
+    AppLocalePreference appLocale,
     NavigationStyle navigationStyle,
     bool showExitWarning,
     double fontSize,
@@ -389,6 +432,7 @@ class __$$AppSettingsStateDataImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? appLocale = null,
     Object? navigationStyle = null,
     Object? showExitWarning = null,
     Object? fontSize = null,
@@ -409,6 +453,10 @@ class __$$AppSettingsStateDataImplCopyWithImpl<$Res>
   }) {
     return _then(
       _$AppSettingsStateDataImpl(
+        appLocale: null == appLocale
+            ? _value.appLocale
+            : appLocale // ignore: cast_nullable_to_non_nullable
+                  as AppLocalePreference,
         navigationStyle: null == navigationStyle
             ? _value.navigationStyle
             : navigationStyle // ignore: cast_nullable_to_non_nullable
@@ -487,6 +535,7 @@ class __$$AppSettingsStateDataImplCopyWithImpl<$Res>
 
 class _$AppSettingsStateDataImpl implements _AppSettingsStateData {
   const _$AppSettingsStateDataImpl({
+    this.appLocale = AppLocalePreference.system,
     this.navigationStyle = NavigationStyle.railLabel,
     this.showExitWarning = true,
     this.fontSize = 12.0,
@@ -507,6 +556,9 @@ class _$AppSettingsStateDataImpl implements _AppSettingsStateData {
         const <RecentProjectEntry>[],
   }) : _recentProjects = recentProjects;
 
+  @override
+  @JsonKey()
+  final AppLocalePreference appLocale;
   @override
   @JsonKey()
   final NavigationStyle navigationStyle;
@@ -566,7 +618,7 @@ class _$AppSettingsStateDataImpl implements _AppSettingsStateData {
 
   @override
   String toString() {
-    return 'AppSettingsStateData(navigationStyle: $navigationStyle, showExitWarning: $showExitWarning, fontSize: $fontSize, wordCountMode: $wordCountMode, autoSaveEnabled: $autoSaveEnabled, autoSaveIntervalMinutes: $autoSaveIntervalMinutes, autoBackupEnabled: $autoBackupEnabled, autoBackupIntervalMinutes: $autoBackupIntervalMinutes, autoBackupMaxSizeMb: $autoBackupMaxSizeMb, allowSingleDevicePairingConfirmation: $allowSingleDevicePairingConfirmation, allowPersistentP2pVerification: $allowPersistentP2pVerification, poppinEnabled: $poppinEnabled, overwriteModeEnabled: $overwriteModeEnabled, tabSpaceCount: $tabSpaceCount, tabFullWidth: $tabFullWidth, autoIndentLineStart: $autoIndentLineStart, recentProjects: $recentProjects)';
+    return 'AppSettingsStateData(appLocale: $appLocale, navigationStyle: $navigationStyle, showExitWarning: $showExitWarning, fontSize: $fontSize, wordCountMode: $wordCountMode, autoSaveEnabled: $autoSaveEnabled, autoSaveIntervalMinutes: $autoSaveIntervalMinutes, autoBackupEnabled: $autoBackupEnabled, autoBackupIntervalMinutes: $autoBackupIntervalMinutes, autoBackupMaxSizeMb: $autoBackupMaxSizeMb, allowSingleDevicePairingConfirmation: $allowSingleDevicePairingConfirmation, allowPersistentP2pVerification: $allowPersistentP2pVerification, poppinEnabled: $poppinEnabled, overwriteModeEnabled: $overwriteModeEnabled, tabSpaceCount: $tabSpaceCount, tabFullWidth: $tabFullWidth, autoIndentLineStart: $autoIndentLineStart, recentProjects: $recentProjects)';
   }
 
   @override
@@ -574,6 +626,8 @@ class _$AppSettingsStateDataImpl implements _AppSettingsStateData {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$AppSettingsStateDataImpl &&
+            (identical(other.appLocale, appLocale) ||
+                other.appLocale == appLocale) &&
             (identical(other.navigationStyle, navigationStyle) ||
                 other.navigationStyle == navigationStyle) &&
             (identical(other.showExitWarning, showExitWarning) ||
@@ -629,6 +683,7 @@ class _$AppSettingsStateDataImpl implements _AppSettingsStateData {
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    appLocale,
     navigationStyle,
     showExitWarning,
     fontSize,
@@ -663,6 +718,7 @@ class _$AppSettingsStateDataImpl implements _AppSettingsStateData {
 
 abstract class _AppSettingsStateData implements AppSettingsStateData {
   const factory _AppSettingsStateData({
+    final AppLocalePreference appLocale,
     final NavigationStyle navigationStyle,
     final bool showExitWarning,
     final double fontSize,
@@ -682,6 +738,8 @@ abstract class _AppSettingsStateData implements AppSettingsStateData {
     final List<RecentProjectEntry> recentProjects,
   }) = _$AppSettingsStateDataImpl;
 
+  @override
+  AppLocalePreference get appLocale;
   @override
   NavigationStyle get navigationStyle;
   @override

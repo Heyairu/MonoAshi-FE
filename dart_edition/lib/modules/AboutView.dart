@@ -57,7 +57,7 @@ class AboutView extends StatelessWidget {
             const SizedBox(height: 8),
 
             // 應用名稱
-            Text("物語Assistant", style: Theme.of(context).textTheme.titleLarge),
+            Text("MonoAshi v1 RC1", style: Theme.of(context).textTheme.titleLarge),
 
             const SizedBox(height: 8),
 
@@ -68,10 +68,10 @@ class AboutView extends StatelessWidget {
             ),
 
             // 版本狀態
-            Text("Beta 9", style: Theme.of(context).textTheme.titleSmall),
+            // Text("RC1", style: Theme.of(context).textTheme.titleSmall),
 
             // Version
-            Text("Ver 0.9.31", style: Theme.of(context).textTheme.labelLarge),
+            Text("Ver 0.9.63", style: Theme.of(context).textTheme.labelLarge),
 
             const SizedBox(height: 32),
 
@@ -79,7 +79,7 @@ class AboutView extends StatelessWidget {
             Container(
               constraints: const BoxConstraints(maxWidth: 600),
               child: Text(
-                "物語Assistant 是一個專為作家和創作者設計的寫作輔助工具。"
+                "MonoAshi 是一個專為作家和創作者設計的寫作輔助工具。"
                 "它提供了完整的故事管理功能，包括章節管理、角色設定、世界觀建構等，"
                 "讓您能夠更輕鬆地組織和創作您的故事。",
                 style: Theme.of(context).textTheme.labelMedium,

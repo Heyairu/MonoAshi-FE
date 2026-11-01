@@ -95,9 +95,17 @@ publication, project reset, panel rendering and card selection.
 
 ## Desktop behavior and remaining stages
 
-The desktop layout places a 40 px revision toggle between Sidebar and editor.
-When space allows, the panel is an adjustable 280–480 px column; on narrower
-desktop windows it overlays the editor. The panel has all/text/settings filters,
+The desktop Ribbon's Home tab includes a display-block group for navigation,
+sidebar and dashboard visibility. Revision tracking is a dashboard gauge:
+its outer ring counts additions and its inner ring counts revisions/removals.
+A modified setting record increments both counts once; text replacements count
+their added and removed logical lines. Both ring lengths show their share of
+the combined count, with exact counts and percentages in the tooltip. Tracking
+controls are available from the gauge's popup. Full review details open in a
+resizable sidebar immediately to the left of the dashboard. On narrow desktop
+windows the sidebar overlays the editor's trailing edge. Navigation to a change
+keeps the sidebar open; phone layouts use a review dialog.
+Hiding the gauge does not stop tracking. The review panel has all/text/settings filters,
 current chapter/page versus whole-project scope, change counts and previous/
 next navigation. Starting tracking synchronizes the current editor draft into
 the chapter model before capturing its fixed baseline. Ordinary saves preserve

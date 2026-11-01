@@ -1,0 +1,1489 @@
+{
+  "method": "explicit metadata/title fields and natural language literals",
+  "limitation": "native_review may include logs, build errors or brands",
+  "scannedFiles": [
+    "../nsExec/Installer.nsi",
+    "android/app/src/main/AndroidManifest.xml",
+    "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+    "android/app/src/main/res/drawable/launch_background.xml",
+    "android/app/src/main/res/drawable-v21/launch_background.xml",
+    "android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+    "android/app/src/main/res/values/colors.xml",
+    "android/app/src/main/res/values/styles.xml",
+    "android/app/src/main/res/values-night/styles.xml",
+    "ios/Runner/AppDelegate.swift",
+    "ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json",
+    "ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json",
+    "ios/Runner/Info.plist",
+    "linux/packaging/com.heyairu.monogatari_assistant.desktop",
+    "linux/packaging/com.heyairu.monogatari_assistant.xml",
+    "linux/runner/main.cc",
+    "linux/runner/my_application.cc",
+    "macos/Runner/AppDelegate.swift",
+    "macos/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json",
+    "macos/Runner/Base.lproj/MainMenu.xib",
+    "macos/Runner/Configs/AppInfo.xcconfig",
+    "macos/Runner/Configs/Debug.xcconfig",
+    "macos/Runner/Configs/Release.xcconfig",
+    "macos/Runner/Configs/Warnings.xcconfig",
+    "macos/Runner/Info.plist",
+    "macos/Runner/MainFlutterWindow.swift",
+    "web/index.html",
+    "web/manifest.json",
+    "windows/runner/Runner.rc",
+    "windows/runner/flutter_window.cpp",
+    "windows/runner/main.cpp",
+    "windows/runner/utils.cpp",
+    "windows/runner/win32_window.cpp"
+  ],
+  "entries": [
+    {
+      "path": "../nsExec/Installer.nsi",
+      "line": 6,
+      "text": "Monogatari Assistant",
+      "category": "native_review",
+      "context": "!define APP_NAME \"Monogatari Assistant\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "../nsExec/Installer.nsi",
+      "line": 11,
+      "text": "Monogatari Assistant Project",
+      "category": "native_review",
+      "context": "!define PROJECT_FILE_DESCRIPTION \"Monogatari Assistant Project\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "../nsExec/Installer.nsi",
+      "line": 13,
+      "text": "Monogatari Assistant",
+      "category": "native_review",
+      "context": "Name \"Monogatari Assistant\" ; 安裝程式名稱",
+      "status": "needs_review"
+    },
+    {
+      "path": "../nsExec/Installer.nsi",
+      "line": 14,
+      "text": "Monogatari Assistant Installer.exe",
+      "category": "native_review",
+      "context": "OutFile \"Monogatari Assistant Installer.exe\" ; 輸出檔名",
+      "status": "needs_review"
+    },
+    {
+      "path": "../nsExec/Installer.nsi",
+      "line": 20,
+      "text": "Heyairu(2025-2026) All rights reserved.",
+      "category": "native_review",
+      "context": "BrandingText \"Heyairu(2025-2026) All rights reserved.\" ; 安裝程式底部的版權訊息",
+      "status": "needs_review"
+    },
+    {
+      "path": "../nsExec/Installer.nsi",
+      "line": 56,
+      "text": "偵測到 ${APP_EXE} 正在執行，是否強制關閉後繼續安裝？",
+      "category": "native_review",
+      "context": "MessageBox MB_ICONQUESTION|MB_YESNO \"偵測到 ${APP_EXE} 正在執行，是否強制關閉後繼續安裝？\" IDYES forceClose IDNO cancelInstall",
+      "status": "needs_review"
+    },
+    {
+      "path": "../nsExec/Installer.nsi",
+      "line": 61,
+      "text": "無法關閉 ${APP_EXE}，請先手動關閉後再重試。",
+      "category": "native_review",
+      "context": "MessageBox MB_ICONSTOP \"無法關閉 ${APP_EXE}，請先手動關閉後再重試。\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "../nsExec/Installer.nsi",
+      "line": 79,
+      "text": "Install",
+      "category": "native_review",
+      "context": "Section \"Install\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "../nsExec/Installer.nsi",
+      "line": 85,
+      "text": "Source folder '${APP_SOURCE_DIR}' not found. Please put build output in ${APP_SOURCE_DIR}.",
+      "category": "native_review",
+      "context": "!error \"Source folder '${APP_SOURCE_DIR}' not found. Please put build output in ${APP_SOURCE_DIR}.\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "../nsExec/Installer.nsi",
+      "line": 106,
+      "text": "Monogatari Assistant",
+      "category": "native_review",
+      "context": "WriteRegStr HKLM \"${UNINSTALL_REG_KEY}\" \"DisplayName\" \"Monogatari Assistant\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "../nsExec/Installer.nsi",
+      "line": 115,
+      "text": "Uninstall",
+      "category": "native_review",
+      "context": "Section \"Uninstall\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/AndroidManifest.xml",
+      "line": 16,
+      "text": "物語Assistant",
+      "category": "native_metadata",
+      "context": "label_or_mime_description",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 90,
+      "text": "未命名.mnproj",
+      "category": "native_review",
+      "context": "} ?: \"未命名.mnproj\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 96,
+      "text": "Document provider returned no input stream",
+      "category": "native_review",
+      "context": "} ?: throw IOException(\"Document provider returned no input stream\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 139,
+      "text": "Failed to request background execution permission: ${error.message}",
+      "category": "native_review",
+      "context": "\"Failed to request background execution permission: ${error.message}\",",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 149,
+      "text": "Project file name or content is invalid",
+      "category": "native_review",
+      "context": "result.error(\"INVALID_ARGS\", \"Project file name or content is invalid\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 153,
+      "text": "A project save request is already active",
+      "category": "native_review",
+      "context": "result.error(\"REQUEST_ACTIVE\", \"A project save request is already active\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 166,
+      "text": "No document provider can save project files",
+      "category": "native_review",
+      "context": "result.error(\"NO_FILE_MANAGER\", \"No document provider can save project files\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 177,
+      "text": "Failed to open project save dialog: ${error.message}",
+      "category": "native_review",
+      "context": "result.error(\"SAVE_DIALOG_ERROR\", \"Failed to open project save dialog: ${error.message}\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 203,
+      "text": "A local network permission request is already active",
+      "category": "native_review",
+      "context": "result.error(\"REQUEST_ACTIVE\", \"A local network permission request is already active\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 222,
+      "text": "The peer closed before returning a complete P2P probe response",
+      "category": "native_review",
+      "context": "\"The peer closed before returning a complete P2P probe response\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 232,
+      "text": "The peer P2P probe response exceeded the size limit",
+      "category": "native_review",
+      "context": "\"The peer P2P probe response exceeded the size limit\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 249,
+      "text": "The P2P request line is invalid",
+      "category": "native_review",
+      "context": "\"The P2P request line is invalid\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 262,
+      "text": "No active Wi-Fi or Ethernet network is available",
+      "category": "native_review",
+      "context": "\"No active Wi-Fi or Ethernet network is available\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 293,
+      "text": "TCP connected over Wi-Fi, but the peer did not answer the P2P probe",
+      "category": "native_review",
+      "context": "\"TCP connected over Wi-Fi, but the peer did not answer the P2P probe\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 295,
+      "text": "TCP could not connect over the active Wi-Fi network",
+      "category": "native_review",
+      "context": "\"TCP could not connect over the active Wi-Fi network\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 303,
+      "text": "The Wi-Fi P2P probe failed while reading the peer response",
+      "category": "native_review",
+      "context": "\"The Wi-Fi P2P probe failed while reading the peer response\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 305,
+      "text": "TCP could not connect over the active Wi-Fi network",
+      "category": "native_review",
+      "context": "\"TCP could not connect over the active Wi-Fi network\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 314,
+      "text": "TCP could not connect over any active local network",
+      "category": "native_review",
+      "context": "\"TCP could not connect over any active local network\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 334,
+      "text": "The P2P request line batch is invalid",
+      "category": "native_review",
+      "context": "\"The P2P request line batch is invalid\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 347,
+      "text": "No active Wi-Fi or Ethernet network is available",
+      "category": "native_review",
+      "context": "\"No active Wi-Fi or Ethernet network is available\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 380,
+      "text": "TCP connected over Wi-Fi, but the peer did not answer the P2P exchange",
+      "category": "native_review",
+      "context": "\"TCP connected over Wi-Fi, but the peer did not answer the P2P exchange\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 382,
+      "text": "TCP could not connect over the active Wi-Fi network",
+      "category": "native_review",
+      "context": "\"TCP could not connect over the active Wi-Fi network\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 392,
+      "text": "The Wi-Fi P2P exchange failed while reading the peer response",
+      "category": "native_review",
+      "context": "\"The Wi-Fi P2P exchange failed while reading the peer response\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 394,
+      "text": "TCP could not connect over the active Wi-Fi network",
+      "category": "native_review",
+      "context": "\"TCP could not connect over the active Wi-Fi network\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 405,
+      "text": "TCP could not connect over any active local network",
+      "category": "native_review",
+      "context": "\"TCP could not connect over any active local network\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 426,
+      "text": "The target is not a compatible Monogatari Assistant P2P endpoint",
+      "category": "native_review",
+      "context": "\"The target is not a compatible Monogatari Assistant P2P endpoint\"",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 437,
+      "text": "Host or port is invalid",
+      "category": "native_review",
+      "context": "result.error(\"INVALID_ENDPOINT\", \"Host or port is invalid\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 451,
+      "text": "Android Wi-Fi P2P probe failed",
+      "category": "native_review",
+      "context": "error.message ?: \"Android Wi-Fi P2P probe failed\",",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 469,
+      "text": "Wi-Fi line exchange arguments are invalid",
+      "category": "native_review",
+      "context": "result.error(\"INVALID_ENDPOINT\", \"Wi-Fi line exchange arguments are invalid\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 490,
+      "text": "Android Wi-Fi P2P exchange failed",
+      "category": "native_review",
+      "context": "error.message ?: \"Android Wi-Fi P2P exchange failed\",",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 509,
+      "text": "Wi-Fi line exchange arguments are invalid",
+      "category": "native_review",
+      "context": "result.error(\"INVALID_ENDPOINT\", \"Wi-Fi line exchange arguments are invalid\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 530,
+      "text": "Android Wi-Fi P2P batch exchange failed",
+      "category": "native_review",
+      "context": "error.message ?: \"Android Wi-Fi P2P batch exchange failed\",",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 619,
+      "text": "Failed to create $BACKUP_FOLDER_NAME directory",
+      "category": "native_review",
+      "context": ") ?: throw IllegalStateException(\"Failed to create $BACKUP_FOLDER_NAME directory\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 629,
+      "text": "A backup directory selection is already active",
+      "category": "native_review",
+      "context": "result.error(\"REQUEST_ACTIVE\", \"A backup directory selection is already active\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 649,
+      "text": "No folder picker is available on this device",
+      "category": "native_review",
+      "context": "result.error(\"NO_FILE_MANAGER\", \"No folder picker is available on this device\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 655,
+      "text": "AutoBackup directory is not selected",
+      "category": "native_review",
+      "context": "?: throw IllegalStateException(\"AutoBackup directory is not selected\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 663,
+      "text": "Failed to create backup file",
+      "category": "native_review",
+      "context": ") ?: throw IllegalStateException(\"Failed to create backup file\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 667,
+      "text": "Failed to open backup file for writing",
+      "category": "native_review",
+      "context": "} ?: throw IllegalStateException(\"Failed to open backup file for writing\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 710,
+      "text": "AutoBackup directory is not selected",
+      "category": "native_review",
+      "context": "?: throw IllegalStateException(\"AutoBackup directory is not selected\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 758,
+      "text": "Document provider did not grant persistent read/write access",
+      "category": "native_review",
+      "context": "throw SecurityException(\"Document provider did not grant persistent read/write access\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 762,
+      "text": "Document provider returned no output stream",
+      "category": "native_review",
+      "context": "?: throw IOException(\"Document provider returned no output stream\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 769,
+      "text": "Failed to persist project file: ${error.message}",
+      "category": "native_review",
+      "context": "pendingResult.error(\"SAVE_PROJECT_ERROR\", \"Failed to persist project file: ${error.message}\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 797,
+      "text": "Failed to persist backup directory permission: ${e.message}",
+      "category": "native_review",
+      "context": "pendingResult.error(\"PERMISSION_ERROR\", \"Failed to persist backup directory permission: ${e.message}\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 851,
+      "text": "Project URI cannot be null or blank",
+      "category": "native_review",
+      "context": "result.error(\"INVALID_ARGS\", \"Project URI cannot be null or blank\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 857,
+      "text": "Failed to read project file: ${e.message}",
+      "category": "native_review",
+      "context": "result.error(\"OPEN_PROJECT_ERROR\", \"Failed to read project file: ${e.message}\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 868,
+      "text": "Document provider returned no output stream",
+      "category": "native_review",
+      "context": "?: throw IOException(\"Document provider returned no output stream\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 875,
+      "text": "Failed to write to URI: ${e.message}",
+      "category": "native_review",
+      "context": "result.error(\"WRITE_ERROR\", \"Failed to write to URI: ${e.message}\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 878,
+      "text": "URI or content cannot be null",
+      "category": "native_review",
+      "context": "result.error(\"INVALID_ARGS\", \"URI or content cannot be null\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 885,
+      "text": "URI cannot be null or blank",
+      "category": "native_review",
+      "context": "result.error(\"INVALID_ARGS\", \"URI cannot be null or blank\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 896,
+      "text": "Failed to persist URI permission: ${e.message}",
+      "category": "native_review",
+      "context": "result.error(\"PERMISSION_ERROR\", \"Failed to persist URI permission: ${e.message}\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 906,
+      "text": "Failed to resolve backup directory: ${e.message}",
+      "category": "native_review",
+      "context": "result.error(\"BACKUP_DIRECTORY_ERROR\", \"Failed to resolve backup directory: ${e.message}\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 916,
+      "text": "Failed to open backup directory: ${e.message}",
+      "category": "native_review",
+      "context": "result.error(\"OPEN_DIRECTORY_ERROR\", \"Failed to open backup directory: ${e.message}\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 923,
+      "text": "File name or content cannot be null",
+      "category": "native_review",
+      "context": "result.error(\"INVALID_ARGS\", \"File name or content cannot be null\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 932,
+      "text": "Failed to write backup file: ${e.message}",
+      "category": "native_review",
+      "context": "result.error(\"WRITE_BACKUP_ERROR\", \"Failed to write backup file: ${e.message}\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 939,
+      "text": "Failed to list backup files: ${e.message}",
+      "category": "native_review",
+      "context": "result.error(\"LIST_BACKUP_ERROR\", \"Failed to list backup files: ${e.message}\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 945,
+      "text": "Backup URI cannot be blank",
+      "category": "native_review",
+      "context": "result.error(\"INVALID_ARGS\", \"Backup URI cannot be blank\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/heyairu/monogatari_assistant_fe/MainActivity.kt",
+      "line": 951,
+      "text": "Failed to delete backup: ${e.message}",
+      "category": "native_review",
+      "context": "result.error(\"DELETE_BACKUP_ERROR\", \"Failed to delete backup: ${e.message}\", null)",
+      "status": "needs_review"
+    },
+    {
+      "path": "ios/Runner/Info.plist",
+      "line": 7,
+      "text": "物語Assistant",
+      "category": "native_metadata",
+      "context": "CFBundleDisplayName",
+      "status": "needs_review"
+    },
+    {
+      "path": "ios/Runner/Info.plist",
+      "line": 15,
+      "text": "物語Assistant",
+      "category": "native_metadata",
+      "context": "CFBundleName",
+      "status": "needs_review"
+    },
+    {
+      "path": "ios/Runner/Info.plist",
+      "line": 27,
+      "text": "用於連線同一區域網路內已由你指定的物語 Assistant 裝置。",
+      "category": "native_metadata",
+      "context": "NSLocalNetworkUsageDescription",
+      "status": "needs_review"
+    },
+    {
+      "path": "linux/packaging/com.heyairu.monogatari_assistant.desktop",
+      "line": 3,
+      "text": "Monogatari Assistant",
+      "category": "native_metadata",
+      "context": "Name",
+      "status": "needs_review"
+    },
+    {
+      "path": "linux/packaging/com.heyairu.monogatari_assistant.desktop",
+      "line": 4,
+      "text": "Structured writing assistant",
+      "category": "native_metadata",
+      "context": "Comment",
+      "status": "needs_review"
+    },
+    {
+      "path": "linux/packaging/com.heyairu.monogatari_assistant.xml",
+      "line": 4,
+      "text": "Monogatari Assistant project",
+      "category": "native_metadata",
+      "context": "label_or_mime_description",
+      "status": "needs_review"
+    },
+    {
+      "path": "linux/runner/my_application.cc",
+      "line": 26,
+      "text": "Failed to resolve executable path: %s",
+      "category": "native_review",
+      "context": "g_warning(\"Failed to resolve executable path: %s\", error->message);",
+      "status": "needs_review"
+    },
+    {
+      "path": "linux/runner/my_application.cc",
+      "line": 54,
+      "text": "Failed to load application icon from %s: %s",
+      "category": "native_review",
+      "context": "g_warning(\"Failed to load application icon from %s: %s\", icon_path,",
+      "status": "needs_review"
+    },
+    {
+      "path": "linux/runner/my_application.cc",
+      "line": 87,
+      "text": "GNOME Shell",
+      "category": "native_review",
+      "context": "if (g_strcmp0(wm_name, \"GNOME Shell\") != 0) {",
+      "status": "needs_review"
+    },
+    {
+      "path": "linux/runner/my_application.cc",
+      "line": 133,
+      "text": "Failed to register: %s",
+      "category": "native_review",
+      "context": "g_warning(\"Failed to register: %s\", error->message);",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/AppDelegate.swift",
+      "line": 21,
+      "text": "AppDelegate openFiles: \\(filenames)",
+      "category": "native_review",
+      "context": "NSLog(\"AppDelegate openFiles: \\(filenames)\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/AppDelegate.swift",
+      "line": 27,
+      "text": "AppDelegate openFile: \\(filename)",
+      "category": "native_review",
+      "context": "NSLog(\"AppDelegate openFile: \\(filename)\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/AppDelegate.swift",
+      "line": 35,
+      "text": "AppDelegate open urls: \\(paths)",
+      "category": "native_review",
+      "context": "NSLog(\"AppDelegate open urls: \\(paths)\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/AppDelegate.swift",
+      "line": 44,
+      "text": "AppleEvent open documents had no direct object",
+      "category": "native_review",
+      "context": "NSLog(\"AppleEvent open documents had no direct object\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/AppDelegate.swift",
+      "line": 59,
+      "text": "AppleEvent open documents paths: \\(paths)",
+      "category": "native_review",
+      "context": "NSLog(\"AppleEvent open documents paths: \\(paths)\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 23,
+      "text": "Main Menu",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 25,
+      "text": "APP_NAME",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 27,
+      "text": "APP_NAME",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 29,
+      "text": "About APP_NAME",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 36,
+      "text": "Preferences…",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 38,
+      "text": "Services",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 40,
+      "text": "Services",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 43,
+      "text": "Hide APP_NAME",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 48,
+      "text": "Hide Others",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 54,
+      "text": "Show All",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 61,
+      "text": "Quit APP_NAME",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 69,
+      "text": "Edit",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 71,
+      "text": "Edit",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 73,
+      "text": "Undo",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 78,
+      "text": "Redo",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 84,
+      "text": "Cut",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 89,
+      "text": "Copy",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 94,
+      "text": "Paste",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 99,
+      "text": "Paste and Match Style",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 105,
+      "text": "Delete",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 111,
+      "text": "Select All",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 117,
+      "text": "Find",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 119,
+      "text": "Find",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 121,
+      "text": "Find…",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 126,
+      "text": "Find and Replace…",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 132,
+      "text": "Find Next",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 137,
+      "text": "Find Previous",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 142,
+      "text": "Use Selection for Find",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 147,
+      "text": "Jump to Selection",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 155,
+      "text": "Spelling and Grammar",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 157,
+      "text": "Spelling",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 159,
+      "text": "Show Spelling and Grammar",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 164,
+      "text": "Check Document Now",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 170,
+      "text": "Check Spelling While Typing",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 176,
+      "text": "Check Grammar With Spelling",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 182,
+      "text": "Correct Spelling Automatically",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 191,
+      "text": "Substitutions",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 193,
+      "text": "Substitutions",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 195,
+      "text": "Show Substitutions",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 202,
+      "text": "Smart Copy/Paste",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 208,
+      "text": "Smart Quotes",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 214,
+      "text": "Smart Dashes",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 220,
+      "text": "Smart Links",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 226,
+      "text": "Data Detectors",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 232,
+      "text": "Text Replacement",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 241,
+      "text": "Transformations",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 243,
+      "text": "Transformations",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 245,
+      "text": "Make Upper Case",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 251,
+      "text": "Make Lower Case",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 257,
+      "text": "Capitalize",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 266,
+      "text": "Speech",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 268,
+      "text": "Speech",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 270,
+      "text": "Start Speaking",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 276,
+      "text": "Stop Speaking",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 288,
+      "text": "View",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 290,
+      "text": "View",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 292,
+      "text": "Enter Full Screen",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 301,
+      "text": "Window",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 303,
+      "text": "Window",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 305,
+      "text": "Minimize",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 310,
+      "text": "Zoom",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 317,
+      "text": "Bring All to Front",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 326,
+      "text": "Help",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 328,
+      "text": "Help",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Base.lproj/MainMenu.xib",
+      "line": 333,
+      "text": "APP_NAME",
+      "category": "native_menu",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Configs/AppInfo.xcconfig",
+      "line": 8,
+      "text": "物語Assistant",
+      "category": "native_metadata",
+      "context": "NAME",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Configs/AppInfo.xcconfig",
+      "line": 14,
+      "text": "Copyright © 2025 com.heyairu. All rights reserved.",
+      "category": "native_metadata",
+      "context": "COPYRIGHT",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Info.plist",
+      "line": 15,
+      "text": "$(PRODUCT_NAME)",
+      "category": "native_metadata",
+      "context": "CFBundleName",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Info.plist",
+      "line": 27,
+      "text": "用於連線同一區域網路內已由你指定的物語 Assistant 裝置。",
+      "category": "native_metadata",
+      "context": "NSLocalNetworkUsageDescription",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Info.plist",
+      "line": 40,
+      "text": "Monogatari Assistant Project",
+      "category": "native_metadata",
+      "context": "CFBundleTypeName",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/Info.plist",
+      "line": 63,
+      "text": "Monogatari Assistant Project",
+      "category": "native_metadata",
+      "context": "UTTypeDescription",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 27,
+      "text": "DropView: no file URLs in pasteboard",
+      "category": "native_review",
+      "context": "NSLog(\"DropView: no file URLs in pasteboard\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 32,
+      "text": "DropView.performDragOperation received paths: \\(paths)",
+      "category": "native_review",
+      "context": "NSLog(\"DropView.performDragOperation received paths: \\(paths)\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 49,
+      "text": "MainFlutterWindow.openProjectFiles called with \\(paths)",
+      "category": "native_review",
+      "context": "NSLog(\"MainFlutterWindow.openProjectFiles called with \\(paths)\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 53,
+      "text": "Filtered projectPaths: \\(projectPaths)",
+      "category": "native_review",
+      "context": "NSLog(\"Filtered projectPaths: \\(projectPaths)\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 55,
+      "text": "No projectPaths to open",
+      "category": "native_review",
+      "context": "NSLog(\"No projectPaths to open\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 77,
+      "text": "Could not read project file content immediately for \\(path): \\(error)",
+      "category": "native_review",
+      "context": "NSLog(\"Could not read project file content immediately for \\(path): \\(error)\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 88,
+      "text": "Could not create security-scoped bookmark for project file \\(path): \\(error)",
+      "category": "native_review",
+      "context": "NSLog(\"Could not create security-scoped bookmark for project file \\(path): \\(error)\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 117,
+      "text": "File channel set up: \\(fileChannelName)",
+      "category": "native_review",
+      "context": "NSLog(\"File channel set up: \\(fileChannelName)\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 121,
+      "text": "Window was released",
+      "category": "native_review",
+      "context": "result(FlutterError(code: \"WINDOW_DEALLOCATED\", message: \"Window was released\", details: nil))",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 147,
+      "text": "path is required",
+      "category": "native_review",
+      "context": "result(FlutterError(code: \"INVALID_ARGS\", message: \"path is required\", details: nil))",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 164,
+      "text": "bookmark is required",
+      "category": "native_review",
+      "context": "result(FlutterError(code: \"INVALID_ARGS\", message: \"bookmark is required\", details: nil))",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 184,
+      "text": "fileChannel nil, queued project file payloads: \\(payloads)",
+      "category": "native_review",
+      "context": "NSLog(\"fileChannel nil, queued project file payloads: \\(payloads)\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 188,
+      "text": "Invoking openProjectFile with payload: \\(payload)",
+      "category": "native_review",
+      "context": "NSLog(\"Invoking openProjectFile with payload: \\(payload)\")",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 208,
+      "text": "Bookmark data is invalid",
+      "category": "native_review",
+      "context": "userInfo: [NSLocalizedDescriptionKey: \"Bookmark data is invalid\"]",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 224,
+      "text": "Cannot access security-scoped file",
+      "category": "native_review",
+      "context": "userInfo: [NSLocalizedDescriptionKey: \"Cannot access security-scoped file\"]",
+      "status": "needs_review"
+    },
+    {
+      "path": "macos/Runner/MainFlutterWindow.swift",
+      "line": 236,
+      "text": "File content is not UTF-8 text",
+      "category": "native_review",
+      "context": "userInfo: [NSLocalizedDescriptionKey: \"File content is not UTF-8 text\"]",
+      "status": "needs_review"
+    },
+    {
+      "path": "web/index.html",
+      "line": 21,
+      "text": "A new Flutter project.",
+      "category": "native_metadata",
+      "context": "description",
+      "status": "needs_review"
+    },
+    {
+      "path": "web/index.html",
+      "line": 26,
+      "text": "dart_edition",
+      "category": "native_metadata",
+      "context": "apple-mobile-web-app-title",
+      "status": "needs_review"
+    },
+    {
+      "path": "web/index.html",
+      "line": 32,
+      "text": "dart_edition",
+      "category": "native_metadata",
+      "context": "title",
+      "status": "needs_review"
+    },
+    {
+      "path": "web/manifest.json",
+      "line": 2,
+      "text": "dart_edition",
+      "category": "native_metadata",
+      "context": "name",
+      "status": "needs_review"
+    },
+    {
+      "path": "web/manifest.json",
+      "line": 3,
+      "text": "dart_edition",
+      "category": "native_metadata",
+      "context": "short_name",
+      "status": "needs_review"
+    },
+    {
+      "path": "web/manifest.json",
+      "line": 8,
+      "text": "A new Flutter project.",
+      "category": "native_metadata",
+      "context": "description",
+      "status": "needs_review"
+    },
+    {
+      "path": "windows/runner/Runner.rc",
+      "line": 92,
+      "text": "com.example",
+      "category": "native_metadata",
+      "context": "CompanyName",
+      "status": "needs_review"
+    },
+    {
+      "path": "windows/runner/Runner.rc",
+      "line": 93,
+      "text": "dart_edition",
+      "category": "native_metadata",
+      "context": "FileDescription",
+      "status": "needs_review"
+    },
+    {
+      "path": "windows/runner/Runner.rc",
+      "line": 96,
+      "text": "Copyright (C) 2025 com.example. All rights reserved.",
+      "category": "native_metadata",
+      "context": "LegalCopyright",
+      "status": "needs_review"
+    },
+    {
+      "path": "windows/runner/Runner.rc",
+      "line": 98,
+      "text": "dart_edition",
+      "category": "native_metadata",
+      "context": "ProductName",
+      "status": "needs_review"
+    },
+    {
+      "path": "windows/runner/main.cpp",
+      "line": 30,
+      "text": "Monogatari Assistant",
+      "category": "native_review",
+      "context": "if (!window.Create(L\"Monogatari Assistant\", origin, size)) {",
+      "status": "needs_review"
+    }
+  ]
+}

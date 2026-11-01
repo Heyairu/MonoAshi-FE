@@ -24,6 +24,14 @@ void main() {
     );
     await tester.pump();
 
+    final section = find.byKey(
+      const PageStorageKey("settings-section-editing"),
+    );
+    await tester.ensureVisible(section);
+    await tester.tap(find.text("編輯與輸入"));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
     final setting = find.byKey(const Key("poppin-enabled-setting"));
     expect(setting, findsOneWidget);
     await tester.ensureVisible(setting);

@@ -1,6 +1,6 @@
 # 參考文件索引
 
-更新日期：2026-10-20
+更新日期：2026-11-01
 
 [文件中心](README.md) · [統一說明文件](GUIDE.md) · [統一 API 文件](API.md)
 
@@ -14,7 +14,7 @@
 
 `MNPROJ_FILE_STRUCTURE.md` 是 App 使用的內建 asset，維持原路徑。授權、商標及平台資源說明亦保留。
 
-目前有 **4** 份統一入口文件與 **47** 份參考文件，共 **51** 份 Markdown。
+目前有 **4** 份統一入口文件與 **53** 份參考文件，共 **57** 份 Markdown。
 
 ## 專題規格與開發參考
 
@@ -32,6 +32,8 @@
 | [QUILL_PLAIN_TEXT_EDITOR_PHASE0.md](../dart_edition/QUILL_PLAIN_TEXT_EDITOR_PHASE0.md) | Quill 純文字正文編輯器：Phase 0 規格 |
 | [RHODANTHE_SPEC.md](../dart_edition/RHODANTHE_SPEC.md) | MonoAshi™ Rhodanthe* 即時 RichText 引擎規格 |
 | [SLIDER_I18N_MAPPING.md](../dart_edition/SLIDER_I18N_MAPPING.md) | 滑桿標籤國際化對照表 |
+| [I18N_COPY_INVENTORY.md](I18N_COPY_INVENTORY.md) | 三語文案盤點：來源清冊、資料／協定邊界、內容與原生資源及優先順序 |
+| [I18N_TERMINOLOGY.md](I18N_TERMINOLOGY.md) | 共用操作、模組與寫作術語的繁中／英文／日文草案（待審校） |
 | [RHODANTHE.md](../dart_edition/benchmark/RHODANTHE.md) | Rhodanthe benchmarks |
 | [README.md](../dart_edition/lib/features/revision_tracking/README.md) | Revision tracking |
 | [README.md](../dart_edition/lib/infrastructure/rhodanthe/README.md) | Rhodanthe Dart infrastructure |
@@ -50,6 +52,10 @@
 
 | 文件 | 內容 |
 | --- | --- |
+| [I18N_LOCALIZATION_PLAN.md](I18N_LOCALIZATION_PLAN.md) | 繁中／英文／日文國際化：P1 語系基礎已實作；其餘介面與 Help 遷移、格式化及發布驗收規劃 |
+| [WRITING_GOALS_IMPLEMENTATION_PLAN.md](WRITING_GOALS_IMPLEMENTATION_PLAN.md) | 每日跨作品淨增字數、預設／檔案專屬目標、1.20 格式與分階段驗收（提案） |
+| [KEYBOARD_SHORTCUT_IMPLEMENTATION_PLAN.md](KEYBOARD_SHORTCUT_IMPLEMENTATION_PLAN.md) | 快捷鍵現況、跨平台配置、命令派送、作用域、個人化與分階段驗收（提案） |
+| [EXPORT_REWRITE_PLAN.md](EXPORT_REWRITE_PLAN.md) | 匯出功能重寫：細項勾選、無限層章節存放、分檔 ZIP、Word／PDF 預留與驗收 |
 | [BETA8_DEVELOPMENT_PLAN.md](../dart_edition/BETA8_DEVELOPMENT_PLAN.md) | Monogatari Assistant Beta 8 開發計畫 |
 | [CHARACTER_RELATIONSHIP_GRAPH_PLAN.md](../dart_edition/CHARACTER_RELATIONSHIP_GRAPH_PLAN.md) | 人物關係圖頁面功能分析與實作規劃 |
 | [CHARACTER_RELATIONSHIP_LAYOUT_OPTIMIZATION_PLAN.md](../dart_edition/CHARACTER_RELATIONSHIP_LAYOUT_OPTIMIZATION_PLAN.md) | 角色關係圖：四條線與排列優化實作步驟 |

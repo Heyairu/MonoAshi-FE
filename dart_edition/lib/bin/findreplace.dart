@@ -18,6 +18,7 @@ import "../features/help/help_scope.dart";
 import "../features/help/help_topic.dart";
 import "package:flutter/foundation.dart" show kIsWeb;
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import 'dart:async';
 
 import "ui_library.dart";
@@ -2763,10 +2764,86 @@ class FindReplaceBar extends StatefulWidget {
   });
 
   @override
-  State<FindReplaceBar> createState() => _FindReplaceBarState();
+  State<FindReplaceBar> createState() => FindReplaceBarState();
 }
 
-class _FindReplaceBarState extends State<FindReplaceBar> {
+class FindReplaceBarState extends State<FindReplaceBar> {
+  late final _findFocus = FocusNode(onKeyEvent: _onFindKey);
+  late final _replaceFocus = FocusNode(onKeyEvent: _onReplaceKey);
+  bool _navigating = false;
+
+  void focusFind() {
+    _findFocus.requestFocus();
+    widget.findController.selection = TextSelection(
+      baseOffset: 0,
+      extentOffset: widget.findController.text.length,
+    );
+  }
+
+  void focusReplace() {
+    setState(() => _isExpanded = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _replaceFocus.requestFocus();
+      widget.replaceController.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: widget.replaceController.text.length,
+      );
+    });
+  }
+
+  Future<void> navigate(bool forward) async {
+    if (_navigating || widget.findController.text.isEmpty) return;
+    final composing = widget.findController.value.composing;
+    if (composing.isValid && !composing.isCollapsed) return;
+    final origin = FocusManager.instance.primaryFocus;
+    final retainInput = _findFocus.hasFocus || _replaceFocus.hasFocus;
+    _navigating = true;
+    try {
+      await (forward ? widget.onFindNext : widget.onFindPrevious)?.call(
+        widget.findController.text,
+        widget.replaceController.text,
+        widget.options,
+      );
+      if (mounted && retainInput && origin?.context?.mounted == true) {
+        origin!.requestFocus();
+      }
+    } finally {
+      _navigating = false;
+    }
+  }
+
+  KeyEventResult _onFindKey(FocusNode _, KeyEvent event) =>
+      _onInputKey(event, widget.findController, find: true);
+  KeyEventResult _onReplaceKey(FocusNode _, KeyEvent event) =>
+      _onInputKey(event, widget.replaceController, find: false);
+
+  KeyEventResult _onInputKey(
+    KeyEvent event,
+    TextEditingController controller, {
+    required bool find,
+  }) {
+    final composing = controller.value.composing;
+    if (composing.isValid && !composing.isCollapsed) {
+      return KeyEventResult.ignored;
+    }
+    final keyboard = HardwareKeyboard.instance;
+    if (keyboard.isAltPressed ||
+        keyboard.isControlPressed ||
+        keyboard.isMetaPressed) {
+      return KeyEventResult.ignored;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.escape) {
+      if (event is KeyDownEvent) widget.onClose?.call();
+      return KeyEventResult.handled;
+    }
+    if (find && event.logicalKey == LogicalKeyboardKey.enter) {
+      if (event is KeyDownEvent) unawaited(navigate(!keyboard.isShiftPressed));
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
   bool _isExpanded = false;
   bool _showOptions = false;
   Timer? _debounceTimer;
@@ -2795,6 +2872,8 @@ class _FindReplaceBarState extends State<FindReplaceBar> {
   void dispose() {
     widget.findController.removeListener(_onFindTextChanged);
     _debounceTimer?.cancel();
+    _findFocus.dispose();
+    _replaceFocus.dispose();
     super.dispose();
   }
 
@@ -2902,6 +2981,7 @@ class _FindReplaceBarState extends State<FindReplaceBar> {
                         topicId: HelpTopicId.findInput,
                         child: AppTextField(
                           controller: widget.findController,
+                          focusNode: _findFocus,
                           decoration: InputDecoration(
                             labelText: "搜尋……",
                             contentPadding: const EdgeInsets.symmetric(
@@ -3050,6 +3130,7 @@ class _FindReplaceBarState extends State<FindReplaceBar> {
                           topicId: HelpTopicId.replaceInput,
                           child: AppTextField(
                             controller: widget.replaceController,
+                            focusNode: _replaceFocus,
                             decoration: InputDecoration(
                               labelText: "取代為……",
                               contentPadding: const EdgeInsets.symmetric(

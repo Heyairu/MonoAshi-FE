@@ -1862,7 +1862,7 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       );
       if (baseXml == null) return null;
       final targetBytes = delta.applyTo(utf8.encode(baseXml));
-      return verifyP2pSnapshotBytes(manifest, targetBytes);
+      return await verifyP2pSnapshotBytes(manifest, targetBytes);
     } catch (error) {
       if (!_disposed) {
         state = state.copyWith(

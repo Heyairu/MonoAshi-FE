@@ -284,7 +284,9 @@ class RibbonController extends ChangeNotifier {
   Future<void> Function(String id)? _scrollToTab;
   Future<void> Function(String groupId, String? tabId)? _scrollToGroup;
   String? get selectedTabId => _selectedTabId;
-  void selectTab(String id) {
+  bool _requestFocus = true;
+  void selectTab(String id, {bool requestFocus = true}) {
+    _requestFocus = requestFocus;
     if (_selectedTabId == id) return;
     _selectedTabId = id;
     notifyListeners();
@@ -1620,9 +1622,11 @@ class MaterialRibbon extends StatefulWidget {
     this.backstageLabel = 'Backstage',
     this.backstageIcon = Icons.description_outlined,
     this.headerActions = const [],
+    this.fixedHeaderActions = const [],
     this.commandWrapperBuilder,
     this.controller,
     this.keyTipController,
+    this.enableAltKeyTips = true,
     this.selectedTabId,
     this.onSelectedTabChanged,
     this.onCommandInvoked,
@@ -1679,6 +1683,9 @@ class MaterialRibbon extends StatefulWidget {
   /// Custom actions placed before the tabs in their shared horizontal scroll area.
   final List<Widget> headerActions;
 
+  /// Actions that stay visible while the tab strip scrolls.
+  final List<Widget> fixedHeaderActions;
+
   /// Decorates command controls without changing their invocation or focus.
   /// Applied to regular commands, Quick Access and its overflow menu items.
   final Widget Function(
@@ -1689,6 +1696,9 @@ class MaterialRibbon extends StatefulWidget {
   commandWrapperBuilder;
   final RibbonController? controller;
   final RibbonKeyTipController? keyTipController;
+
+  /// Disable bare Alt when the host reserves Alt combinations for navigation.
+  final bool enableAltKeyTips;
   final String? selectedTabId;
   final ValueChanged<String>? onSelectedTabChanged;
   final RibbonCommandHandler? onCommandInvoked;
@@ -1754,7 +1764,9 @@ class _MaterialRibbonState extends State<MaterialRibbon> {
 
   void _onControllerChanged() {
     final id = widget.controller?.selectedTabId;
-    if (id != null) _selectTab(id);
+    if (id != null) {
+      _selectTab(id, requestFocus: widget.controller!._requestFocus);
+    }
   }
 
   Future<void> _load() async {
@@ -1853,7 +1865,11 @@ class _MaterialRibbonState extends State<MaterialRibbon> {
     await widget.personalizationStore?.save(next);
   }
 
-  void _selectTab(String id, {bool showCommands = false}) {
+  void _selectTab(
+    String id, {
+    bool showCommands = false,
+    bool requestFocus = true,
+  }) {
     if (!_visibleTabs.any((tab) => tab.id == id)) return;
     if (_selectedTabId != id) {
       setState(() => _selectedTabId = id);
@@ -1863,7 +1879,7 @@ class _MaterialRibbonState extends State<MaterialRibbon> {
       }
     }
     if (showCommands) _keyTips.showCommands(id);
-    _focusNode.requestFocus();
+    if (requestFocus) _focusNode.requestFocus();
   }
 
   void _selectTabAt(int index, {bool showCommands = false}) {
@@ -2000,23 +2016,57 @@ class _MaterialRibbonState extends State<MaterialRibbon> {
       ),
     ),
   );
+  bool _altKeyTipPending = false;
+
   KeyEventResult _onKey(FocusNode _, KeyEvent event) {
+    final keyboard = HardwareKeyboard.instance;
+    final altKey =
+        event.logicalKey == LogicalKeyboardKey.altLeft ||
+        event.logicalKey == LogicalKeyboardKey.altRight;
+    if (altKey) {
+      if (!widget.enableAltKeyTips) return KeyEventResult.ignored;
+      if (event is KeyDownEvent) {
+        _altKeyTipPending =
+            !keyboard.isControlPressed &&
+            !keyboard.isMetaPressed &&
+            !keyboard.isShiftPressed;
+      } else if (event is KeyUpEvent) {
+        if (_altKeyTipPending) {
+          _keyTips.value.level == RibbonKeyTipLevel.hidden
+              ? _keyTips.showHeader()
+              : _keyTips.hide();
+        }
+        _altKeyTipPending = false;
+      }
+      return KeyEventResult.handled;
+    }
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    _altKeyTipPending = false;
     if (event.logicalKey == LogicalKeyboardKey.f1 &&
-        HardwareKeyboard.instance.isControlPressed &&
-        !HardwareKeyboard.instance.isShiftPressed &&
-        !HardwareKeyboard.instance.isAltPressed &&
-        !HardwareKeyboard.instance.isMetaPressed) {
+        keyboard.isControlPressed &&
+        !keyboard.isShiftPressed &&
+        !keyboard.isAltPressed &&
+        !keyboard.isMetaPressed) {
       widget.onCollapsedChanged?.call(!widget.collapsed);
       return KeyEventResult.handled;
     }
-    if (event.logicalKey == LogicalKeyboardKey.altLeft ||
-        event.logicalKey == LogicalKeyboardKey.altRight ||
-        event.logicalKey == LogicalKeyboardKey.f10) {
+    if (event.logicalKey == LogicalKeyboardKey.f10 &&
+        !keyboard.isControlPressed &&
+        !keyboard.isAltPressed &&
+        !keyboard.isShiftPressed &&
+        !keyboard.isMetaPressed) {
       _keyTips.value.level == RibbonKeyTipLevel.hidden
           ? _keyTips.showHeader()
           : _keyTips.hide();
       return KeyEventResult.handled;
+    }
+    final focusContext = FocusManager.instance.primaryFocus?.context;
+    if (focusContext?.findAncestorStateOfType<EditableTextState>() != null) {
+      return KeyEventResult.ignored;
+    }
+    // Alt navigation belongs to the host; do not reinterpret it as plain arrows.
+    if (keyboard.isAltPressed || keyboard.isMetaPressed) {
+      return KeyEventResult.ignored;
     }
     if (event.logicalKey == LogicalKeyboardKey.escape &&
         _keyTips.value.level != RibbonKeyTipLevel.hidden) {
@@ -2025,7 +2075,9 @@ class _MaterialRibbonState extends State<MaterialRibbon> {
           : _keyTips.hide();
       return KeyEventResult.handled;
     }
-    if (event.logicalKey == LogicalKeyboardKey.arrowLeft ||
+    if ((event.logicalKey == LogicalKeyboardKey.arrowLeft &&
+            !keyboard.isControlPressed &&
+            !keyboard.isShiftPressed) ||
         (event.logicalKey == LogicalKeyboardKey.tab &&
             HardwareKeyboard.instance.isControlPressed &&
             HardwareKeyboard.instance.isShiftPressed)) {
@@ -2033,7 +2085,9 @@ class _MaterialRibbonState extends State<MaterialRibbon> {
       _moveTab(-1);
       return KeyEventResult.handled;
     }
-    if (event.logicalKey == LogicalKeyboardKey.arrowRight ||
+    if ((event.logicalKey == LogicalKeyboardKey.arrowRight &&
+            !keyboard.isControlPressed &&
+            !keyboard.isShiftPressed) ||
         (event.logicalKey == LogicalKeyboardKey.tab &&
             HardwareKeyboard.instance.isControlPressed)) {
       widget.onNavigationIntent?.call(RibbonNavigationIntent.nextTab);
@@ -2214,6 +2268,7 @@ class _MaterialRibbonState extends State<MaterialRibbon> {
                               onPressed: _showCustomizationDialog,
                               icon: const Icon(Icons.tune),
                             ),
+                          ...widget.fixedHeaderActions,
                           Expanded(
                             child: Semantics(
                               container: true,
@@ -3066,6 +3121,10 @@ class _CommandButton extends StatelessWidget {
     final selected =
         command.type == RibbonCommandType.toggle &&
         state == RibbonCheckState.checked;
+    final colors = Theme.of(buildContext).colorScheme;
+    // Selected surfaces must use their paired foreground, including when the
+    // host theme uses dark containers in light mode (or the reverse).
+    final selectedForeground = selected ? colors.onSecondaryContainer : null;
     if (command.size == RibbonCommandSize.large && !compact) {
       return SizedBox(
         width: 76,
@@ -3075,9 +3134,10 @@ class _CommandButton extends StatelessWidget {
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
             alignment: Alignment.center,
-            backgroundColor: selected
-                ? Theme.of(buildContext).colorScheme.secondaryContainer
-                : null,
+            backgroundColor: selected ? colors.secondaryContainer : null,
+            foregroundColor: selectedForeground,
+            iconColor: selectedForeground,
+            disabledForegroundColor: selectedForeground?.withValues(alpha: .38),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -3113,15 +3173,26 @@ class _CommandButton extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             visualDensity: VisualDensity.standard,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            backgroundColor: selected
-                ? Theme.of(buildContext).colorScheme.secondaryContainer
-                : null,
+            backgroundColor: selected ? colors.secondaryContainer : null,
+            foregroundColor: selectedForeground,
+            iconColor: selectedForeground,
+            disabledForegroundColor: selectedForeground?.withValues(alpha: .38),
           ),
         ),
       );
     }
     return IconButton(
-      style: _controlIconStyle,
+      style: _controlIconStyle.merge(
+        selected
+            ? IconButton.styleFrom(
+                backgroundColor: colors.secondaryContainer,
+                foregroundColor: colors.onSecondaryContainer,
+                disabledForegroundColor: colors.onSecondaryContainer.withValues(
+                  alpha: .38,
+                ),
+              )
+            : null,
+      ),
       onPressed: enabled ? action : null,
       icon: icon,
       isSelected: selected,

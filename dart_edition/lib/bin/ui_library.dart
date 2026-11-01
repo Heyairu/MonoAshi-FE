@@ -23,6 +23,7 @@ import "package:flutter/scheduler.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 import "../ui_library/spacing.dart";
+import "../ui_library/theme_palette.dart";
 import "../ui_library/control_shape.dart";
 import "../ui_library/control_size.dart";
 import "../ui_library/surface_shape.dart";
@@ -32,6 +33,7 @@ import "../ui_library/list_style.dart";
 import "../ui_library/neon_icon_button.dart";
 import "../ui_library/neon_ui_theme.dart";
 
+export "../ui_library/theme_palette.dart";
 export "../ui_library/collections.dart";
 export "../ui_library/control_shape.dart";
 export "../ui_library/control_size.dart";
@@ -184,6 +186,47 @@ class UILibrary extends ChangeNotifier {
 
 /// 主題配色方案
 class AppTheme {
+  static ThemeData _finishTheme(ThemeData theme, AppThemePreset preset) {
+    final base = theme.copyWith(listTileTheme: AppListStyle.themeFor(theme));
+    if (preset != AppThemePreset.highContrast) return base;
+    final colors = base.colorScheme;
+    // Outlines deliberately match the foreground in high contrast. Progress
+    // tracks need a separate middle tone so an empty gauge is not read as full.
+    final progressTrack = base.brightness == Brightness.dark
+        ? const Color(0xFF757575)
+        : const Color(0xFF858585);
+    return base.copyWith(
+      progressIndicatorTheme: base.progressIndicatorTheme.copyWith(
+        circularTrackColor: progressTrack,
+        linearTrackColor: progressTrack,
+      ),
+      focusColor: colors.primary.withValues(alpha: .25),
+      dividerTheme: DividerThemeData(color: colors.outline, thickness: 1.5),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: base.outlinedButtonTheme.style?.copyWith(
+          side: WidgetStateProperty.resolveWith(
+            (states) => BorderSide(
+              color: states.contains(WidgetState.disabled)
+                  ? colors.onSurface.withValues(alpha: .38)
+                  : colors.outline,
+              width: states.contains(WidgetState.focused) ? 3 : 2,
+            ),
+          ),
+        ),
+      ),
+      inputDecorationTheme: base.inputDecorationTheme.copyWith(
+        enabledBorder: OutlineInputBorder(
+          borderRadius: AppControlShape.borderRadius,
+          borderSide: BorderSide(color: colors.outline, width: 2),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: AppControlShape.borderRadius,
+          borderSide: BorderSide(color: colors.primary, width: 3),
+        ),
+      ),
+    );
+  }
+
   static const _controlShape = RoundedRectangleBorder(
     borderRadius: AppControlShape.borderRadius,
   );
@@ -208,13 +251,13 @@ class AppTheme {
     ),
   );
 
-  /// 根據當前系統語言決定字體
-  static String get _primaryFontFamily {
-    final locale = ui.PlatformDispatcher.instance.locale;
+  /// UI font follows the resolved application locale, including script code.
+  static String fontFamilyForLocale(Locale locale) {
     final lang = locale.languageCode;
     final country = locale.countryCode;
 
     if (lang == "zh") {
+      if (locale.scriptCode == 'Hant') return 'NotoSansTC';
       if (country == "HK") return "NotoSansHK";
       if (country == "TW" || country == "MO") return "NotoSansTC";
       return "NotoSansSC";
@@ -291,41 +334,26 @@ class AppTheme {
   }
 
   /// 獲取淺色主題
-  static ThemeData getLightTheme(double baseFontSize, Color seedColor) {
-    ColorScheme colorScheme;
-
-    // 特殊處理灰色：手動構建灰階 ColorScheme
-    if (seedColor.value == Colors.grey.value) {
-      colorScheme = const ColorScheme.light(
-        primary: Color(0xFF616161),
-        onPrimary: Colors.white,
-        primaryContainer: Color(0xFFE0E0E0),
-        onPrimaryContainer: Color(0xFF212121),
-        secondary: Color(0xFF757575),
-        onSecondary: Colors.white,
-        secondaryContainer: Color(0xFFEEEEEE),
-        onSecondaryContainer: Color(0xFF212121),
-        tertiary: Color(0xFF9E9E9E),
-        onTertiary: Colors.black,
-        tertiaryContainer: Color(0xFFF5F5F5),
-        onTertiaryContainer: Color(0xFF212121),
-        surface: Color(0xFFFAFAFA),
-        onSurface: Color(0xFF212121),
-        surfaceContainerHighest: Color(0xFFE0E0E0),
-      );
-    } else {
-      colorScheme = ColorScheme.fromSeed(
-        seedColor: seedColor,
-        brightness: Brightness.light,
-      );
-    }
+  static ThemeData getLightTheme(
+    double baseFontSize,
+    Color seedColor, {
+    AppThemePreset preset = AppThemePreset.standard,
+    Locale? locale,
+  }) {
+    final colorScheme = AppThemePalette.scheme(
+      seedColor,
+      Brightness.light,
+      preset,
+    );
 
     final buttonStyle = _buttonStyle(baseFontSize);
     final theme = ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: colorScheme,
-      fontFamily: _primaryFontFamily,
+      fontFamily: fontFamilyForLocale(
+        locale ?? ui.PlatformDispatcher.instance.locale,
+      ),
       fontFamilyFallback: _fontFamilyFallback,
       textTheme: _buildTextTheme(baseFontSize),
       iconTheme: IconThemeData(
@@ -405,45 +433,30 @@ class AppTheme {
         ),
       ),
     );
-    return theme.copyWith(listTileTheme: AppListStyle.themeFor(theme));
+    return _finishTheme(theme, preset);
   }
 
   /// 獲取深色主題
-  static ThemeData getDarkTheme(double baseFontSize, Color seedColor) {
-    ColorScheme colorScheme;
-
-    // 特殊處理灰色：手動構建灰階 ColorScheme
-    if (seedColor.value == Colors.grey.value) {
-      colorScheme = const ColorScheme.dark(
-        primary: Color(0xFFE0E0E0),
-        onPrimary: Color(0xFF212121),
-        primaryContainer: Color(0xFF424242),
-        onPrimaryContainer: Color(0xFFE0E0E0),
-        secondary: Color(0xFFBDBDBD),
-        onSecondary: Color(0xFF212121),
-        secondaryContainer: Color(0xFF616161),
-        onSecondaryContainer: Color(0xFFEEEEEE),
-        tertiary: Color(0xFF9E9E9E),
-        onTertiary: Colors.black,
-        tertiaryContainer: Color(0xFF757575),
-        onTertiaryContainer: Color(0xFFEEEEEE),
-        surface: Color(0xFF121212),
-        onSurface: Color(0xFFE0E0E0),
-        surfaceContainerHighest: Color(0xFF424242),
-      );
-    } else {
-      colorScheme = ColorScheme.fromSeed(
-        seedColor: seedColor,
-        brightness: Brightness.dark,
-      );
-    }
+  static ThemeData getDarkTheme(
+    double baseFontSize,
+    Color seedColor, {
+    AppThemePreset preset = AppThemePreset.standard,
+    Locale? locale,
+  }) {
+    final colorScheme = AppThemePalette.scheme(
+      seedColor,
+      Brightness.dark,
+      preset,
+    );
 
     final buttonStyle = _buttonStyle(baseFontSize);
     final theme = ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: colorScheme,
-      fontFamily: _primaryFontFamily,
+      fontFamily: fontFamilyForLocale(
+        locale ?? ui.PlatformDispatcher.instance.locale,
+      ),
       fontFamilyFallback: _fontFamilyFallback,
       textTheme: _buildTextTheme(baseFontSize),
       iconTheme: IconThemeData(
@@ -523,7 +536,7 @@ class AppTheme {
         ),
       ),
     );
-    return theme.copyWith(listTileTheme: AppListStyle.themeFor(theme));
+    return _finishTheme(theme, preset);
   }
 }
 

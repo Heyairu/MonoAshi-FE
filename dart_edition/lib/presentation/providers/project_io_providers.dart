@@ -1,20 +1,12 @@
+import "dart:convert";
+import "../../application/project_export/export_models.dart";
+import "../../application/project_export/export_service.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "../../bin/file.dart";
-import "../../features/inline_annotations/inline_annotation_projection.dart";
 import "../../modules/baseinfoview.dart" as base_info_module;
-import "../../modules/chapterselectionview.dart" as chapter_module;
-import "../../modules/characterview.dart";
-import "../../modules/outlineview.dart" as outline_module;
-import "../../modules/planview.dart" as plan_module;
-import "../../modules/worldsettingsview.dart";
-import "../../models/codecs/character_snapshot_codec.dart";
-import "../../models/codecs/character_state_codec.dart";
-import "../../models/codecs/item_codec.dart";
-import "../../models/codecs/item_snapshot_codec.dart";
-import "../../models/codecs/location_snapshot_codec.dart";
-import "../../models/codecs/timeline_codec.dart";
 import "core_providers.dart";
+import "global_state_providers.dart";
 import "project_snapshot_utils.dart";
 
 /// A first save binds the in-memory collaboration project to a path and must
@@ -23,6 +15,11 @@ import "project_snapshot_utils.dart";
 bool shouldRegenerateProjectUuidForSaveAs(ProjectFile? currentProject) {
   return currentProject != null && !currentProject.isNewFile;
 }
+
+final projectIoControllerProvider =
+    AsyncNotifierProvider<ProjectIoController, ProjectIoStatus>(
+      ProjectIoController.new,
+    );
 
 enum ProjectIoOperation {
   idle,
@@ -155,6 +152,10 @@ class ProjectIoController extends AsyncNotifier<ProjectIoStatus> {
       final useCase = ref.read(projectFileUseCaseProvider);
       final projectFile = await useCase.createNewProject();
       final data = snapshotProjectData(ProjectData.empty());
+      final profile = await ref.read(userProfileProvider.future);
+      data.baseInfoData = data.baseInfoData.copyWith(
+        author: profile.defaultPenName,
+      );
       state = const AsyncData(
         ProjectIoStatus(
           operation: ProjectIoOperation.newProject,
@@ -543,426 +544,63 @@ class ProjectIoController extends AsyncNotifier<ProjectIoStatus> {
     }
   }
 
-  Future<void> exportAs({
+  Future<bool> exportAs({
     required String extension,
     required ProjectData currentData,
     required String defaultFileName,
-  }) async {
-    state = const AsyncData(
-      ProjectIoStatus(
-        operation: ProjectIoOperation.exportText,
-        isExporting: true,
-      ),
-    );
-    try {
-      final snapshotData = snapshotProjectData(currentData);
-      final buffer = StringBuffer();
-      String heading(int depth) => List.filled(depth, "#").join();
-      void writeFolder(chapter_module.SegmentData folder, int depth) {
-        buffer.writeln("${heading(depth)} ${folder.segmentName}");
-        buffer.writeln();
-        for (final chapter in folder.chapters) {
-          buffer.writeln("${heading(depth + 1)} ${chapter.chapterName}");
-          buffer.writeln();
-          buffer.writeln(
-            InlineAnnotationProjection.readerTextFromRaw(
-              chapter.chapterContent,
-            ),
-          );
-          buffer.writeln();
-        }
-        for (final child in folder.childSegments) {
-          writeFolder(child, depth + 1);
-        }
-      }
+  }) => _exportPrepared(
+    currentData: currentData,
+    defaultFileName: defaultFileName,
+    operation: ProjectIoOperation.exportText,
+    request: ExportRequest(
+      purpose: ExportPurpose.manuscript,
+      format: extension == "txt" ? ExportFormat.txt : ExportFormat.markdown,
+    ),
+  );
 
-      for (final folder in snapshotData.segmentsData) {
-        writeFolder(folder, 1);
-      }
-
-      await ref
-          .read(projectFileUseCaseProvider)
-          .exportText(
-            content: buffer.toString(),
-            fileName: defaultFileName,
-            extension: extension == "txt" ? ".txt" : ".md",
-          );
-
-      state = AsyncData(
-        ProjectIoStatus(
-          operation: ProjectIoOperation.exportText,
-          message: "匯出 $extension 檔案成功！",
-        ),
-      );
-    } catch (error, stackTrace) {
-      state = AsyncError(error, stackTrace);
-      rethrow;
-    }
-  }
-
-  Future<void> exportSelective({
+  Future<bool> exportSelective({
     required ProjectData currentData,
     required String defaultFileName,
     required Set<String> selectedModules,
     required String format,
+  }) => _exportPrepared(
+    currentData: currentData,
+    defaultFileName: defaultFileName,
+    operation: ProjectIoOperation.exportSelective,
+    request: ExportRequest(
+      purpose: format == "xml"
+          ? ExportPurpose.exchange
+          : ExportPurpose.reference,
+      format: format == "xml" ? ExportFormat.xml : ExportFormat.markdown,
+      modules: SelectiveProjectModule.values
+          .where((m) => selectedModules.contains(m.id))
+          .toSet(),
+    ),
+  );
+
+  Future<bool> _exportPrepared({
+    required ProjectData currentData,
+    required String defaultFileName,
+    required ProjectIoOperation operation,
+    required ExportRequest request,
   }) async {
-    state = const AsyncData(
-      ProjectIoStatus(
-        operation: ProjectIoOperation.exportSelective,
-        isExporting: true,
-      ),
-    );
+    state = AsyncData(ProjectIoStatus(operation: operation, isExporting: true));
     try {
-      final snapshotData = snapshotProjectData(currentData);
-      final buffer = StringBuffer();
-
-      if (format == "xml") {
-        buffer.writeln("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-        buffer.writeln('<Project UUID="${snapshotData.projectUUID}">');
-        buffer.writeln("<ver>${FileService.projectVersion}</ver>");
-        _writeSelectiveExportManifest(buffer, selectedModules);
-
-        if (selectedModules.contains("BaseInfo")) {
-          final baseInfoSnapshot =
-              base_info_module.BaseInfoCodec.createSaveSnapshot(
-                data: snapshotData.baseInfoData,
-                contentText: snapshotData.contentText,
-                updateLatestSave: false,
-              );
-          final xml = base_info_module.BaseInfoCodec.saveXML(
-            data: snapshotData.baseInfoData,
-            totalWords: snapshotData.totalWords,
-            contentText: snapshotData.contentText,
-            updateLatestSave: false,
-            snapshot: baseInfoSnapshot,
-          );
-          if (xml != null) buffer.writeln(xml);
-        }
-
-        if (selectedModules.contains("Chapters")) {
-          final xml = chapter_module.ChapterSelectionCodec.saveXML(
-            snapshotData.segmentsData,
-          );
-          if (xml != null) buffer.writeln(xml);
-        }
-
-        if (selectedModules.contains("Outline")) {
-          final xml = outline_module.OutlineCodec.saveXML(
-            snapshotData.outlineData,
-          );
-          if (xml != null) buffer.writeln(xml);
-          final timelineXml = TimelineCodec.saveXML(
-            snapshotData.timelineDocument,
-            snapshotData.outlineChapterLinks,
-          );
-          if (timelineXml != null) buffer.writeln(timelineXml);
-        }
-
-        if (selectedModules.contains("Plans")) {
-          final xml = plan_module.PlanCodec.saveXML(
-            snapshotData.foreshadowData,
-            snapshotData.updatePlanData,
-          );
-          if (xml != null) buffer.writeln(xml);
-        }
-
-        if (selectedModules.contains("WorldSettings")) {
-          final xml = WorldSettingsCodec.saveXML(
-            snapshotData.worldSettingsData,
-          );
-          if (xml != null) buffer.writeln(xml);
-          final locationChangesXml = LocationSnapshotCodec.saveChanges(
-            snapshotData.locationStateChanges,
-          );
-          if (locationChangesXml != null) buffer.writeln(locationChangesXml);
-        }
-
-        if (selectedModules.contains("Characters")) {
-          final xml = CharacterCodec.saveXML(snapshotData.characterData);
-          if (xml != null) buffer.writeln(xml);
-          for (final section in <String?>[
-            CharacterStateCodec.saveXML(snapshotData.characterStates),
-            CharacterSnapshotCodec.saveBaselines(
-              snapshotData.characterStateBaselines,
-            ),
-            CharacterSnapshotCodec.saveChanges(
-              snapshotData.characterStateChanges,
-            ),
-          ]) {
-            if (section != null) buffer.writeln(section);
-          }
-        }
-
-        if (selectedModules.contains("Items")) {
-          for (final section in <String?>[
-            ItemCodec.saveClasses(snapshotData.itemClasses),
-            ItemCodec.saveInstances(snapshotData.itemInstances),
-            ItemCodec.saveRelations(snapshotData.itemRelations),
-            ItemSnapshotCodec.saveClassChanges(
-              snapshotData.itemClassStateChanges,
-            ),
-            ItemSnapshotCodec.saveInstanceChanges(
-              snapshotData.itemInstanceStateChanges,
-            ),
-          ]) {
-            if (section != null) buffer.writeln(section);
-          }
-        }
-
-        buffer.writeln("</Project>");
-      } else {
-        final readerSegments = _projectSegmentsForReader(
-          snapshotData.segmentsData,
-        );
-        if (selectedModules.contains("BaseInfo")) {
-          final readerContent = InlineAnnotationProjection.readerTextFromRaw(
-            snapshotData.contentText,
-          );
-          final baseInfoSnapshot =
-              base_info_module.BaseInfoCodec.createSaveSnapshot(
-                data: snapshotData.baseInfoData,
-                contentText: readerContent,
-                updateLatestSave: false,
-              );
-          final xml = base_info_module.BaseInfoCodec.saveXML(
-            data: snapshotData.baseInfoData,
-            totalWords: snapshotData.totalWords,
-            contentText: readerContent,
-            updateLatestSave: false,
-            snapshot: baseInfoSnapshot,
-          );
-          buffer.writeln("## BaseInfo");
-          buffer.writeln();
-          if (xml != null) {
-            buffer.writeln("```xml");
-            buffer.writeln(xml);
-            buffer.writeln("```");
-          }
-          buffer.writeln();
-          buffer.writeln("---");
-          buffer.writeln();
-        }
-
-        if (selectedModules.contains("Chapters")) {
-          final xml = chapter_module.ChapterSelectionCodec.saveXML(
-            readerSegments,
-          );
-          buffer.writeln("## Chapters");
-          buffer.writeln();
-          if (xml != null) {
-            buffer.writeln("```xml");
-            buffer.writeln(xml);
-            buffer.writeln("```");
-          }
-          buffer.writeln();
-          buffer.writeln("---");
-          buffer.writeln();
-        }
-
-        if (selectedModules.contains("Outline")) {
-          final xml = outline_module.OutlineCodec.saveXML(
-            snapshotData.outlineData,
-          );
-          buffer.writeln("## Outline");
-          buffer.writeln();
-          if (xml != null) {
-            buffer.writeln("```xml");
-            buffer.writeln(xml);
-            buffer.writeln("```");
-          }
-          buffer.writeln();
-          buffer.writeln("---");
-          buffer.writeln();
-          final timelineXml = TimelineCodec.saveXML(
-            snapshotData.timelineDocument,
-            snapshotData.outlineChapterLinks,
-          );
-          buffer.writeln("## Timeline");
-          buffer.writeln();
-          if (timelineXml != null) {
-            buffer.writeln("```xml");
-            buffer.writeln(timelineXml);
-            buffer.writeln("```");
-          }
-          buffer.writeln();
-          buffer.writeln("---");
-          buffer.writeln();
-        }
-
-        if (selectedModules.contains("Plans")) {
-          _writeMarkdownXmlSection(
-            buffer,
-            "Plans",
-            plan_module.PlanCodec.saveXML(
-              snapshotData.foreshadowData,
-              snapshotData.updatePlanData,
-            ),
-          );
-        }
-
-        if (selectedModules.contains("WorldSettings")) {
-          final xml = WorldSettingsCodec.saveXML(
-            snapshotData.worldSettingsData,
-          );
-          buffer.writeln("## WorldSettings");
-          buffer.writeln();
-          if (xml != null) {
-            buffer.writeln("```xml");
-            buffer.writeln(xml);
-            buffer.writeln("```");
-          }
-          buffer.writeln();
-          buffer.writeln("---");
-          buffer.writeln();
-          _writeMarkdownXmlSection(
-            buffer,
-            "LocationStateChanges",
-            LocationSnapshotCodec.saveChanges(
-              snapshotData.locationStateChanges,
-            ),
-          );
-        }
-
-        if (selectedModules.contains("Characters")) {
-          final xml = CharacterCodec.saveXML(snapshotData.characterData);
-          buffer.writeln("## Characters");
-          buffer.writeln();
-          if (xml != null) {
-            buffer.writeln("```xml");
-            buffer.writeln(xml);
-            buffer.writeln("```");
-          }
-          buffer.writeln();
-          buffer.writeln("---");
-          buffer.writeln();
-          _writeMarkdownXmlSection(
-            buffer,
-            "CharacterStates",
-            CharacterStateCodec.saveXML(snapshotData.characterStates),
-          );
-          _writeMarkdownXmlSection(
-            buffer,
-            "CharacterStateBaselines",
-            CharacterSnapshotCodec.saveBaselines(
-              snapshotData.characterStateBaselines,
-            ),
-          );
-          _writeMarkdownXmlSection(
-            buffer,
-            "CharacterStateChanges",
-            CharacterSnapshotCodec.saveChanges(
-              snapshotData.characterStateChanges,
-            ),
-          );
-        }
-
-        if (selectedModules.contains("Items")) {
-          _writeMarkdownXmlSection(
-            buffer,
-            "ItemClasses",
-            ItemCodec.saveClasses(snapshotData.itemClasses),
-          );
-          _writeMarkdownXmlSection(
-            buffer,
-            "ItemInstances",
-            ItemCodec.saveInstances(snapshotData.itemInstances),
-          );
-          _writeMarkdownXmlSection(
-            buffer,
-            "ItemRelations",
-            ItemCodec.saveRelations(snapshotData.itemRelations),
-          );
-          _writeMarkdownXmlSection(
-            buffer,
-            "ItemClassStateChanges",
-            ItemSnapshotCodec.saveClassChanges(
-              snapshotData.itemClassStateChanges,
-            ),
-          );
-          _writeMarkdownXmlSection(
-            buffer,
-            "ItemInstanceStateChanges",
-            ItemSnapshotCodec.saveInstanceChanges(
-              snapshotData.itemInstanceStateChanges,
-            ),
-          );
-        }
-      }
-
-      await ref
+      final output = const ProjectExportService().prepare(currentData, request);
+      final saved = await ref
           .read(projectFileUseCaseProvider)
           .exportText(
-            content: buffer.toString(),
+            content: utf8.decode(output.bytes),
             fileName: defaultFileName,
-            extension: format == "xml" ? ".xml" : ".md",
+            extension: ".${output.extension}",
           );
-
-      state = const AsyncData(
-        ProjectIoStatus(
-          operation: ProjectIoOperation.exportSelective,
-          message: "匯出成功！",
-        ),
+      state = AsyncData(
+        ProjectIoStatus(operation: operation, message: saved ? "匯出完成！" : null),
       );
+      return saved;
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
       rethrow;
     }
   }
 }
-
-void _writeMarkdownXmlSection(StringBuffer buffer, String title, String? xml) {
-  if (xml == null) return;
-  buffer.writeln("## $title");
-  buffer.writeln();
-  buffer.writeln("```xml");
-  buffer.writeln(xml);
-  buffer.writeln("```");
-  buffer.writeln();
-  buffer.writeln("---");
-  buffer.writeln();
-}
-
-void _writeSelectiveExportManifest(
-  StringBuffer buffer,
-  Set<String> selectedModules,
-) {
-  const supported = <String>{
-    "BaseInfo",
-    "Chapters",
-    "Outline",
-    "Plans",
-    "WorldSettings",
-    "Characters",
-    "Items",
-  };
-  final modules = selectedModules.where(supported.contains).toList()..sort();
-  buffer.writeln("<SelectiveExport>");
-  for (final module in modules) {
-    buffer.writeln("  <Module>$module</Module>");
-  }
-  buffer.writeln("</SelectiveExport>");
-}
-
-List<chapter_module.SegmentData> _projectSegmentsForReader(
-  List<chapter_module.SegmentData> segments,
-) {
-  return [
-    for (final segment in segments)
-      segment.copyWith(
-        chapters: [
-          for (final chapter in segment.chapters)
-            chapter.copyWith(
-              chapterContent: InlineAnnotationProjection.readerTextFromRaw(
-                chapter.chapterContent,
-              ),
-            ),
-        ],
-        childSegments: _projectSegmentsForReader(segment.childSegments),
-      ),
-  ];
-}
-
-final projectIoControllerProvider =
-    AsyncNotifierProvider<ProjectIoController, ProjectIoStatus>(
-      ProjectIoController.new,
-    );

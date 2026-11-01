@@ -2038,8 +2038,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
     }
     final tick = ref.watch(timelineViewProvider).currentTick;
     final previewMode =
-        _locationPreviewModes[location.id] ??
-        SnapshotPreviewMode.followTimeline;
+        _locationPreviewModes[location.id] ?? SnapshotPreviewMode.baseline;
     final snapshot = previewMode == SnapshotPreviewMode.baseline
         ? LocationSnapshotState(
             name: location.localName,
@@ -2216,8 +2215,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
     }
     final tick = ref.watch(timelineViewProvider).currentTick;
     final previewMode =
-        _locationPreviewModes[location.id] ??
-        SnapshotPreviewMode.followTimeline;
+        _locationPreviewModes[location.id] ?? SnapshotPreviewMode.baseline;
     if (location.nodeType == WorldNodeType.location &&
         previewMode == SnapshotPreviewMode.followTimeline) {
       final event = snapshotEventAtTick(

@@ -2,7 +2,7 @@
 
 本文件整理 Monogatari Assistant 專案檔（`.mnproj`）的目前儲存格式，供開發、除錯與資料匯入／匯出時參考。
 
-> 此儲存庫沒有提交實際的 `.mnproj` 範例檔；本文件依目前的讀寫實作整理。現行格式版本為 **1.18**。
+> 此儲存庫沒有提交實際的 `.mnproj` 範例檔；本文件依目前的讀寫實作整理。現行格式版本為 **1.20**。
 
 ## 格式概覽
 
@@ -10,7 +10,7 @@
 - 內容：UTF-8 XML
 - 根節點：`Project`
 - 專案識別：`Project@UUID`，標準 UUID（v4）字串
-- 格式版本：`Project > ver`，目前輸出 `1.18`
+- 格式版本：`Project > ver`，目前輸出 `1.20`
 - 資料單位：每個功能模組以一個 `Type` 節點儲存，並使用其直屬 `Name` 子節點辨識模組。
 - 文字欄位會由 XML codec 處理跳脫與換行編碼；請透過程式 codec 修改，不要以字串取代方式直接編輯。
 
@@ -19,7 +19,8 @@
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <Project UUID="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
-  <ver>1.18</ver>
+  <ver>1.20</ver>
+  <Type Version="1"> <Name>WritingGoals</Name> … </Type>
 
   <Type> <Name>BaseInfo</Name> … </Type>
   <Type ChapterTreeVersion="3"> <Name>ChapterSelection</Name> … </Type>
@@ -46,6 +47,7 @@
 
 | `Type > Name` | 用途 | 主要節點／屬性 |
 |---|---|---|
+| `WritingGoals` | 檔案專屬字數目標 | 選填 `ChapterWordGoal`、`TotalWordGoal`；`Version=1` |
 | `BaseInfo` | 作品基本資料 | `General`、`Tags`、`Stats` |
 | `ChapterSelection` | 資料夾、章節與正文 | `Segment`、`Chapter`；`ChapterTreeVersion` |
 | `Outline` | 故事線、事件、場景大綱 | `Storyline`、`Event`、`Scene` |
@@ -64,6 +66,22 @@
 | `LocationStateChanges` | 地點快照異動 | `Change`、具型別的 `Field` |
 
 ## 各模組結構
+
+### WritingGoals（1.20）
+
+```xml
+<Type Version="1">
+  <Name>WritingGoals</Name>
+  <ChapterWordGoal>3000</ChapterWordGoal>
+  <TotalWordGoal>120000</TotalWordGoal>
+</Type>
+```
+
+只保存「僅限本檔案」覆寫，欄位為 1 到 999,999,999 的整數；缺少欄位即動態繼承本機預設，兩者均未覆寫時省略整個 Type。每章目標供本作品所有章節共用。舊檔升級不會把預設值補寫成覆寫。
+
+重複、無效或不支援的區塊會產生 `writing-goals-recovery` 警告，原始 XML 以 `WritingGoalsRecovery` Type 的 Base64 UTF-8 `Data` 保留。使用者修正目標後仍保留復原資料，避免無聲遺失未知欄位。
+
+App 預設目標、每日目標與跨作品每日帳本只存本機，不在專案 XML。局部匯出不夾帶目標，局部匯入保留接收作品覆寫；完整保存、備份及同步會保存覆寫。舊版 App 可能忽略新增 Type 並在重存時遺失覆寫。
 
 ### BaseInfo
 
@@ -101,6 +119,26 @@
 ```
 
 `Segment` 可遞迴巢狀，並可與 `Chapter` 交錯排列；檔案中的順序即是 UI 的同層排序。`ChapterTreeVersion` 現行為 `3`。
+
+隱藏根 `chapter-tree-root` 不持久化為使用者資料夾；根下儲存 Segment，Segment 下可交錯存放任意層的 Segment 與 Chapter。資料夾／文稿 UUID 在章節樹內唯一，改名、移動與匯出皆保留 UUID。記憶體中的 `childNodeOrder` 僅列直接子項 ID，XML 以實際子元素順序表達相同排序。空資料夾與明確空的 ChapterSelection 亦須保留，不能與缺少該 Type 混為一談。
+
+舊兩層資料直接視為根下資料夾與文稿；v0／v1／v2 沒有混合排序時沿用直接文稿在前、子資料夾在後的順序，v3 以實際元素排列為準。資料模型不設固定業務深度，現行匯出準備有 256 層資源檢查，超出會報錯而非截斷。
+
+細項交換裁切未選兄弟並保留必要祖先鏈與原 ID；根層可附以下獨立 scope，不能以 ChapterTreeVersion 代替其版本：
+
+```xml
+<SelectiveExport><Module>Chapters</Module></SelectiveExport>
+<ExportScope Version="1">
+  <Module Id="Chapters" Mode="partial">
+    <Selected Key="chapter:chapter-uuid"/>
+    <Structural Key="folder:segment-uuid"/>
+  </Module>
+</ExportScope>
+```
+
+`Selected` 是型別化來源 key，`Structural` 是只附結構的祖先，`Dependency` 是必要實體定義（例如物品實例的 class）。整模組輸出可省略 ExportScope。未知 scope 版本必須拒絕匯入；細項匯入仍為模組替換，需明確確認，含祖先或依賴時禁止替換已有內容的模組。舊版 App 可能忽略 scope，不能宣稱能逐項安全合併。
+
+分檔 ZIP 不改專案 XML 結構。正文一篇文稿一檔，目錄對應原資料夾階層，同層混合順序共同編號；深層／過長路徑改用 `documents/` 短路徑，封裝層 `export-manifest.json`（schemaVersion 1）記錄相對 entry、順序、完整名稱鏈與 pathMode。閱讀封裝不含內部 UUID；交換封裝可含細項 scope。ZIP 整包匯入尚未提供。
 
 ### Outline
 
@@ -262,7 +300,7 @@
 ## 載入、相容性與安全注意事項
 
 - 根節點 `UUID` 缺失或無效時，程式會建立新 UUID，並將專案視為已遷移。
-- 讀取到高於支援版本的檔案時，UI 會顯示相容性警告；目前版本為 `1.18`。
+- 讀取到高於支援版本的檔案時，UI 會顯示相容性警告；目前版本為 `1.20`。
 - 舊檔會經 `ProjectMigrator` 升級。重要切點包括：章節樹結構、時間軸投影、角色快照與專案 UUID。
 - 完全無法解析的 XML 會回退為預設空專案；但物品／地點快照區塊解析失敗會明確報錯，不會靜默遺失資料。
 - 選擇性 XML 匯出會額外寫入 `SelectiveExport > Module` 宣告；它是匯出描述，不是一般 `.mnproj` 必要結構。

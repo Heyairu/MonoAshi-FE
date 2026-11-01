@@ -23,7 +23,7 @@ abstract class FileRepository {
   Future<String> selectAutoBackupDirectory();
   Future<String> resetAutoBackupDirectory();
   Future<String> openAutoBackupDirectory();
-  Future<void> exportText({
+  Future<bool> exportText({
     required String content,
     required String fileName,
     required String extension,

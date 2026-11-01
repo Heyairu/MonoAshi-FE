@@ -29,12 +29,18 @@ import "../bin/ui_library.dart";
 import "../bin/settings_manager.dart";
 import "../models/navigation_style.dart";
 import "../models/toolbar_mode.dart";
+import "../presentation/widgets/settings/settings_cards.dart";
+import "../presentation/widgets/writing_goal_dialog.dart";
+import "../presentation/widgets/settings/settings_color_picker.dart";
+import "../presentation/widgets/settings/settings_mode_preview.dart";
 import "../presentation/providers/core_providers.dart";
 import "../presentation/providers/global_state_providers.dart";
 import "../presentation/providers/mcp_providers.dart";
 import "../presentation/providers/p2p_sync_providers.dart";
 import "../features/mcp/application/mcp_bridge_server.dart";
 import "../services/android_background_execution.dart";
+import "../l10n/app_localization.dart";
+import "../presentation/widgets/settings/app_language_selector.dart";
 
 class SettingView extends ConsumerStatefulWidget {
   const SettingView({super.key});
@@ -139,12 +145,14 @@ class _SettingViewState extends ConsumerState<SettingView>
     });
   }
 
-  ({AppThemeMode themeMode, Color themeColor}) get _themeViewState => ref.watch(
+  ({AppThemeMode themeMode, Color themeColor, AppThemePreset themePreset})
+  get _themeViewState => ref.watch(
     themeStateProvider.select((state) {
       final theme = state.valueOrNull;
       return (
         themeMode: theme?.themeMode ?? AppThemeMode.system,
         themeColor: theme?.themeColor ?? Colors.lightBlue,
+        themePreset: theme?.themePreset ?? AppThemePreset.standard,
       );
     }),
   );
@@ -184,7 +192,6 @@ class _SettingViewState extends ConsumerState<SettingView>
     }),
   );
 
-  // MARK: - UI 介面建構
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -192,219 +199,204 @@ class _SettingViewState extends ConsumerState<SettingView>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 標題
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
-              child: LargeTitle(icon: Icons.settings, text: "設定"),
-            ),
-            const SizedBox(height: 32),
-            // 主題設定卡片
-            AppSectionCard(
-              padding: EdgeInsets.zero,
-              useSectionLayout: false,
-              elevation: 0,
-              color: Theme.of(context).colorScheme.surfaceContainerLow,
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 主題設定標題
-                    const LargeTitle(icon: Icons.palette, text: "外觀設定"),
-                    const SizedBox(height: 24),
-
-                    // 主題模式選擇
-                    _buildThemeModeSetting(),
-
-                    const SizedBox(height: 24),
-                    _buildNavigationStyleSetting(),
-
-                    const SizedBox(height: 24),
-                    HelpTarget(
-                      topicId: HelpTopicId.toolbarMode,
-                      child: _buildToolbarModeSetting(),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // 字體大小設定
-                    _buildFontSizeSetting(),
-
-                    const SizedBox(height: 24),
-
-                    // 主題顏色設定
-                    _buildColorSetting(),
-
-                    const SizedBox(height: 16),
-                    const Divider(),
-                    const SizedBox(height: 16),
-
-                    // 當前主題預覽
-                    _buildThemePreview(),
-                  ],
-                ),
+              child: LargeTitle(
+                icon: Icons.settings,
+                text: context.l10n.settingsTitle,
               ),
             ),
-
+            const SizedBox(height: 8),
+            Text(
+              context.l10n.settingsDescription,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
             const SizedBox(height: 24),
-
-            // 其他設定卡片
-            AppSectionCard(
-              padding: EdgeInsets.zero,
-              useSectionLayout: false,
-              elevation: 0,
-              color: Theme.of(context).colorScheme.surfaceContainerLow,
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const LargeTitle(icon: Icons.tune, text: "其他設定"),
-                    const SizedBox(height: 16),
-                    SwitchWithIconTitle(
-                      title: "退出時提示",
-                      icon: Icons.warning,
-                      subtitle: "關閉應用前提示儲存未儲存的變更",
-                      value: _settingsViewState.showExitWarning,
-                      onChanged: (value) async {
-                        await ref
-                            .read(settingsStateProvider.notifier)
-                            .setShowExitWarning(value);
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    SwitchWithIconTitle(
-                      key: const Key("poppin-enabled-setting"),
-                      title: "啟用 Poppin IntelliSense",
-                      icon: Icons.auto_awesome_outlined,
-                      subtitle: "輸入標記類型、/ 或 \\ 時顯示游標旁候選清單",
-                      value: _settingsViewState.poppinEnabled,
-                      onChanged: (value) async {
-                        await ref
-                            .read(settingsStateProvider.notifier)
-                            .setPoppinEnabled(value);
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    SwitchWithIconTitle(
-                      key: const Key("overwrite-mode-enabled-setting"),
-                      title: "啟用覆寫模式",
-                      icon: Icons.edit_outlined,
-                      subtitle: "允許使用 Ins 或狀態列切換覆寫模式；關閉時使用插入模式",
-                      value:
-                          ref
-                              .watch(settingsStateProvider)
-                              .valueOrNull
-                              ?.overwriteModeEnabled ??
-                          true,
-                      onChanged: (value) => ref
-                          .read(settingsStateProvider.notifier)
-                          .setOverwriteModeEnabled(value),
-                    ),
-                    const SizedBox(height: 16),
-                    const LargeTitle(icon: Icons.space_bar, text: "空格控制"),
-                    const SizedBox(height: 8),
-                    ListTile(
-                      title: const Text("Tab 空格數量"),
-                      subtitle: const Text("按 Tab 或自動留空時插入的空格數"),
-                      trailing: DropdownButton<int>(
-                        key: const Key("tab-space-count-setting"),
-                        value:
-                            ref
-                                .watch(settingsStateProvider)
-                                .valueOrNull
-                                ?.tabSpaceCount ??
-                            2,
-                        items: [
-                          for (var count = 1; count <= 8; count++)
-                            DropdownMenuItem(
-                              value: count,
-                              child: Text("$count"),
-                            ),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            ref
-                                .read(settingsStateProvider.notifier)
-                                .setTabSpaceCount(value);
-                          }
-                        },
-                      ),
-                    ),
-                    SwitchWithIconTitle(
-                      key: const Key("tab-full-width-setting"),
-                      title: "使用全形空格",
-                      icon: Icons.space_bar,
-                      subtitle: "關閉時使用半形空格",
-                      value:
-                          ref
-                              .watch(settingsStateProvider)
-                              .valueOrNull
-                              ?.tabFullWidth ??
-                          true,
-                      onChanged: (value) => ref
-                          .read(settingsStateProvider.notifier)
-                          .setTabFullWidth(value),
-                    ),
-                    const SizedBox(height: 8),
-                    SwitchWithIconTitle(
-                      key: const Key("auto-indent-line-start-setting"),
-                      title: "行首自動留空",
-                      icon: Icons.keyboard_return,
-                      subtitle: "Enter 換行後插入設定的空格；Shift+Enter 僅換行",
-                      value:
-                          ref
-                              .watch(settingsStateProvider)
-                              .valueOrNull
-                              ?.autoIndentLineStart ??
-                          false,
-                      onChanged: (value) => ref
-                          .read(settingsStateProvider.notifier)
-                          .setAutoIndentLineStart(value),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildWordCountSetting(),
-                    const SizedBox(height: 16),
-                    SwitchWithIconTitle(
-                      key: const Key("alias-mention-updates-setting"),
-                      title: "修改別名時更新正文 Mention",
-                      icon: Icons.sync,
-                      subtitle: "更新同角色且顯示文字等於原別名的標記",
-                      value:
-                          ref
-                              .watch(aliasMentionUpdatesEnabledProvider)
-                              .valueOrNull ??
-                          true,
-                      onChanged: (value) => ref
-                          .read(aliasMentionUpdatesEnabledProvider.notifier)
-                          .setEnabled(value),
-                    ),
-                    const SizedBox(height: 16),
-                    HelpTarget(
-                      topicId: HelpTopicId.autoSave,
-                      child: _buildAutoSaveSetting(),
-                    ),
-                    const SizedBox(height: 16),
-                    HelpTarget(
-                      topicId: HelpTopicId.backup,
-                      child: _buildAutoBackupSetting(),
-                    ),
-                    const SizedBox(height: 8),
-                    _buildAndroidBackgroundExecutionSetting(),
-                    _buildPlaceholderSetting("語言設定", Icons.language),
-                    _buildP2pSyncSetting(),
-                    const SizedBox(height: 16),
-                    _buildMcpSetting(),
-                    _buildPlaceholderSetting("工具列項目編輯", Icons.bento_outlined),
-                  ],
+            SettingsSectionCard(
+              id: "appearance",
+              title: "外觀與介面",
+              subtitle: "主題、導覽、工具列與字體",
+              icon: Icons.palette_outlined,
+              initiallyExpanded: true,
+              children: [
+                _buildThemeModeSetting(),
+                _buildNavigationStyleSetting(),
+                HelpTarget(
+                  topicId: HelpTopicId.toolbarMode,
+                  child: _buildToolbarModeSetting(),
                 ),
-              ),
+                _buildFontSizeSetting(),
+                _buildColorSetting(),
+                _buildThemePreview(),
+                _buildPlaceholderSetting("工具列項目編輯", Icons.bento_outlined),
+              ],
+            ),
+            SettingsSectionCard(
+              id: "editing",
+              title: "編輯與輸入",
+              subtitle: "智慧候選、覆寫、縮排與字數統計",
+              icon: Icons.edit_note_outlined,
+              children: [_buildEditingSettings()],
+            ),
+            const SettingsSectionCard(
+              id: 'writing-goals',
+              title: '寫作目標',
+              subtitle: '每日進度與每章、全文預設目標',
+              icon: Icons.flag_outlined,
+              children: [WritingGoalSettings()],
+            ),
+            SettingsSectionCard(
+              id: "storage",
+              title: "儲存與備份",
+              subtitle: "自動儲存、備份排程與容量",
+              icon: Icons.save_outlined,
+              children: [
+                HelpTarget(
+                  topicId: HelpTopicId.autoSave,
+                  child: _buildAutoSaveSetting(),
+                ),
+                HelpTarget(
+                  topicId: HelpTopicId.backup,
+                  child: _buildAutoBackupSetting(),
+                ),
+              ],
+            ),
+            SettingsSectionCard(
+              id: "sync",
+              title: "同步與連線",
+              subtitle: "裝置配對、持久驗證與背景執行",
+              icon: Icons.sync_outlined,
+              children: [
+                _buildP2pSyncSetting(),
+                _buildAndroidBackgroundExecutionSetting(),
+              ],
+            ),
+            SettingsSectionCard(
+              id: "general",
+              title: context.l10n.generalSettingsTitle,
+              subtitle: context.l10n.generalSettingsDescription,
+              icon: Icons.tune_outlined,
+              children: [
+                SwitchWithIconTitle(
+                  title: context.l10n.exitWarningTitle,
+                  icon: Icons.warning,
+                  subtitle: context.l10n.exitWarningDescription,
+                  value: _settingsViewState.showExitWarning,
+                  onChanged: (value) async {
+                    await ref
+                        .read(settingsStateProvider.notifier)
+                        .setShowExitWarning(value);
+                  },
+                ),
+
+                const AppLanguageSelector(),
+              ],
+            ),
+            SettingsSectionCard(
+              id: "integrations",
+              title: "外部整合",
+              subtitle: "MCP 專案唯讀存取與授權",
+              icon: Icons.hub_outlined,
+              children: [_buildMcpSetting()],
             ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildEditingSettings() => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      SwitchWithIconTitle(
+        key: const Key("poppin-enabled-setting"),
+        title: "啟用 Poppin IntelliSense",
+        icon: Icons.auto_awesome_outlined,
+        subtitle: "輸入標記類型、/ 或 \\ 時顯示游標旁候選清單",
+        value: _settingsViewState.poppinEnabled,
+        onChanged: (value) async {
+          await ref
+              .read(settingsStateProvider.notifier)
+              .setPoppinEnabled(value);
+        },
+      ),
+      const SizedBox(height: 16),
+      SwitchWithIconTitle(
+        key: const Key("overwrite-mode-enabled-setting"),
+        title: "啟用覆寫模式",
+        icon: Icons.edit_outlined,
+        subtitle: "允許使用 Ins 或狀態列切換覆寫模式；關閉時使用插入模式",
+        value:
+            ref
+                .watch(settingsStateProvider)
+                .valueOrNull
+                ?.overwriteModeEnabled ??
+            true,
+        onChanged: (value) => ref
+            .read(settingsStateProvider.notifier)
+            .setOverwriteModeEnabled(value),
+      ),
+      const SizedBox(height: 16),
+      Text("空格與縮排", style: Theme.of(context).textTheme.titleMedium),
+      const SizedBox(height: 8),
+      ListTile(
+        title: const Text("Tab 空格數量"),
+        subtitle: const Text("按 Tab 或自動留空時插入的空格數"),
+        trailing: DropdownButton<int>(
+          key: const Key("tab-space-count-setting"),
+          value:
+              ref.watch(settingsStateProvider).valueOrNull?.tabSpaceCount ?? 2,
+          items: [
+            for (var count = 1; count <= 8; count++)
+              DropdownMenuItem(value: count, child: Text("$count")),
+          ],
+          onChanged: (value) {
+            if (value != null) {
+              ref.read(settingsStateProvider.notifier).setTabSpaceCount(value);
+            }
+          },
+        ),
+      ),
+      SwitchWithIconTitle(
+        key: const Key("tab-full-width-setting"),
+        title: "使用全形空格",
+        icon: Icons.space_bar,
+        subtitle: "關閉時使用半形空格",
+        value:
+            ref.watch(settingsStateProvider).valueOrNull?.tabFullWidth ?? true,
+        onChanged: (value) =>
+            ref.read(settingsStateProvider.notifier).setTabFullWidth(value),
+      ),
+      const SizedBox(height: 8),
+      SwitchWithIconTitle(
+        key: const Key("auto-indent-line-start-setting"),
+        title: "行首自動留空",
+        icon: Icons.keyboard_return,
+        subtitle: "Enter 換行後插入設定的空格；Shift+Enter 僅換行",
+        value:
+            ref.watch(settingsStateProvider).valueOrNull?.autoIndentLineStart ??
+            false,
+        onChanged: (value) => ref
+            .read(settingsStateProvider.notifier)
+            .setAutoIndentLineStart(value),
+      ),
+      const SizedBox(height: 16),
+      _buildWordCountSetting(),
+      const SizedBox(height: 16),
+      SwitchWithIconTitle(
+        key: const Key("alias-mention-updates-setting"),
+        title: "修改別名時更新正文 Mention",
+        icon: Icons.sync,
+        subtitle: "更新同角色且顯示文字等於原別名的標記",
+        value:
+            ref.watch(aliasMentionUpdatesEnabledProvider).valueOrNull ?? true,
+        onChanged: (value) => ref
+            .read(aliasMentionUpdatesEnabledProvider.notifier)
+            .setEnabled(value),
+      ),
+      const SizedBox(height: 16),
+    ],
+  );
 
   Widget _buildMcpSetting() {
     final bridge = ref.watch(mcpBridgeProvider);
@@ -578,88 +570,19 @@ class _SettingViewState extends ConsumerState<SettingView>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: AppSpacing.formPadding,
-          child: Text(
-            "主題顏色",
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-          ),
-        ),
+        Text("主題顏色", style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 5,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.0,
-          ),
-          itemCount: UILibrary.supportedColors.length,
-          itemBuilder: (context, index) {
-            final entry = UILibrary.supportedColors.entries.elementAt(index);
-            final isSelected =
-                _themeViewState.themeColor.toARGB32() == entry.value.toARGB32();
-
-            return Center(
-              child: InkWell(
-                onTap: () => ref
-                    .read(themeStateProvider.notifier)
-                    .setThemeColor(entry.value),
-                borderRadius: BorderRadius.circular(50),
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: entry.value,
-                    shape: BoxShape.circle,
-                    border: isSelected
-                        ? Border.all(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            width: 2.5,
-                          )
-                        : Border.all(
-                            color: Theme.of(context).colorScheme.outlineVariant,
-                            width: 1,
-                          ),
-                    boxShadow: [
-                      if (isSelected)
-                        BoxShadow(
-                          color: entry.value.withOpacity(0.4),
-                          blurRadius: 8,
-                          spreadRadius: 2,
-                        ),
-                    ],
-                  ),
-                  child: isSelected
-                      ? Icon(
-                          Icons.check,
-                          color: entry.value.computeLuminance() > 0.5
-                              ? Colors.black
-                              : Colors.white,
-                          size: 20,
-                        )
-                      : entry.key == "Auto"
-                      ? Icon(
-                          Icons.auto_awesome,
-                          color: entry.value.computeLuminance() > 0.5
-                              ? Colors.black45
-                              : Colors.white54,
-                          size: 16,
-                        )
-                      : null,
-                ),
-              ),
-            );
-          },
+        SettingsColorPicker(
+          selectedColor: _themeViewState.themeColor,
+          preset: _themeViewState.themePreset,
+          onPresetChanged: ref.read(themeStateProvider.notifier).setThemePreset,
+          onChanged: (color) =>
+              ref.read(themeStateProvider.notifier).setThemeColor(color),
         ),
       ],
     );
   }
 
-  // MARK: - 主題模式設定
   Widget _buildNavigationStyleSetting() {
     final style = ref.watch(
       settingsStateProvider.select(
@@ -667,31 +590,44 @@ class _SettingViewState extends ConsumerState<SettingView>
             state.valueOrNull?.navigationStyle ?? NavigationStyle.railLabel,
       ),
     );
+    final labels = {
+      NavigationStyle.railTooltip: "僅圖示",
+      NavigationStyle.railLabel: "圖示與名稱",
+      NavigationStyle.railButtonDrawer: "點擊展開",
+      NavigationStyle.railHoverDrawer: "懸停展開",
+    };
     return Column(
       key: const Key("navigation-style-setting"),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("導覽樣式", style: Theme.of(context).textTheme.titleMedium),
+        Text("導覽模式", style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
-        AppDropdownField<NavigationStyle>(
-          value: style,
-          labelText: "導覽樣式",
+        SettingsModePicker(
+          compactRow: true,
           options: [
             for (final option in NavigationStyle.values)
-              DropdownOption(value: option, label: option.label),
+              SettingsModeOption(
+                id: "navigation-${option.name}",
+                label: labels[option]!,
+                description: option.description,
+                preview: SettingsModePreview(
+                  accent: _themeViewState.themePreset.accent(
+                    _themeViewState.themeColor,
+                  ),
+                  navigationStyle: option,
+                ),
+                selected: style == option,
+                onSelected: () => ref
+                    .read(settingsStateProvider.notifier)
+                    .setNavigationStyle(option),
+              ),
           ],
-          onChanged: (value) async {
-            if (value == null) return;
-            await ref
-                .read(settingsStateProvider.notifier)
-                .setNavigationStyle(value);
-          },
         ),
         const SizedBox(height: 8),
         Text(style.description, style: Theme.of(context).textTheme.bodySmall),
         const SizedBox(height: 4),
         Text(
-          "首頁固定頂端；設定、關於固定底端。Drawer 模式提供展開／固定按鈕，窄視窗使用按鈕開啟導覽。",
+          "首頁固定頂端；設定、關於固定底端。窄視窗使用按鈕開啟導覽。",
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
@@ -710,27 +646,31 @@ class _SettingViewState extends ConsumerState<SettingView>
       children: [
         Text("工具列模式", style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
-        AppDropdownField<String>(
-          value: preference?.name ?? "automatic",
-          labelText: "工具列模式",
+        SettingsModePicker(
+          compactRow: true,
           options: [
-            const DropdownOption(
-              value: "automatic",
-              label: "自動（桌面 Full／手機 Moderate）",
-            ),
-            for (final mode in ToolbarMode.values)
-              DropdownOption(value: mode.name, label: mode.label),
+            for (final mode in [...ToolbarMode.values, null])
+              SettingsModeOption(
+                id: "toolbar-${mode?.name ?? 'automatic'}",
+                label: mode?.label ?? "自動",
+                description: mode?.description ?? "依裝置選擇：桌面 Full，手機 Moderate。",
+                preview: SettingsModePreview(
+                  accent: _themeViewState.themePreset.accent(
+                    _themeViewState.themeColor,
+                  ),
+                  toolbarMode: mode,
+                ),
+                selected: preference == mode,
+                onSelected: () =>
+                    ref.read(toolbarModeProvider.notifier).setMode(mode),
+              ),
           ],
-          onChanged: (value) async {
-            if (value == null) return;
-            await ref
-                .read(toolbarModeProvider.notifier)
-                .setMode(ToolbarMode.fromPreference(value));
-          },
         ),
         const SizedBox(height: 8),
         Text(
-          resolved.description,
+          preference == null
+              ? "自動使用 ${resolved.label}：${resolved.description}"
+              : resolved.description,
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
@@ -738,29 +678,36 @@ class _SettingViewState extends ConsumerState<SettingView>
   }
 
   Widget _buildThemeModeSetting() {
+    final labels = {
+      AppThemeMode.light: "淺色",
+      AppThemeMode.dark: "深色",
+      AppThemeMode.system: "自動",
+    };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text("主題模式", style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
-        AppDropdownField<AppThemeMode>(
-          value: _themeViewState.themeMode,
-          labelText: "主題模式",
-          options: const [
-            DropdownOption<AppThemeMode>(
-              value: AppThemeMode.light,
-              label: "淺色",
-            ),
-            DropdownOption<AppThemeMode>(value: AppThemeMode.dark, label: "深色"),
-            DropdownOption<AppThemeMode>(
-              value: AppThemeMode.system,
-              label: "自動",
-            ),
+        SettingsModePicker(
+          options: [
+            for (final mode in AppThemeMode.values)
+              SettingsModeOption(
+                id: "theme-${mode.name}",
+                label: labels[mode]!,
+                description: mode == AppThemeMode.system
+                    ? "跟隨系統的淺色或深色外觀。"
+                    : "使用${labels[mode]}外觀。",
+                preview: SettingsModePreview(
+                  accent: _themeViewState.themePreset.accent(
+                    _themeViewState.themeColor,
+                  ),
+                  themeMode: mode,
+                ),
+                selected: _themeViewState.themeMode == mode,
+                onSelected: () =>
+                    ref.read(themeStateProvider.notifier).setThemeMode(mode),
+              ),
           ],
-          onChanged: (value) async {
-            if (value == null) return;
-            await ref.read(themeStateProvider.notifier).setThemeMode(value);
-          },
         ),
       ],
     );
@@ -888,8 +835,7 @@ class _SettingViewState extends ConsumerState<SettingView>
               min: 0,
               max: 120,
               divisions: 24,
-              layout: LabeledSliderLayout.inline,
-              inlineTitleWidth: 96,
+              layout: LabeledSliderLayout.stacked,
               valueLabelBuilder: (value) => "${value.round()} 分鐘",
               onChanged: (value) async {
                 await ref
@@ -935,8 +881,7 @@ class _SettingViewState extends ConsumerState<SettingView>
               min: 0,
               max: 120,
               divisions: 24,
-              layout: LabeledSliderLayout.inline,
-              inlineTitleWidth: 96,
+              layout: LabeledSliderLayout.stacked,
               valueLabelBuilder: (value) => "${value.round()} 分鐘",
               onChanged: (value) async {
                 await ref

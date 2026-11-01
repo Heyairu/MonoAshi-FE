@@ -49,11 +49,15 @@ void main() {
       await tester.tap(find.text("Second Character"));
       await tester.pumpAndSettle();
       final nameField = _findTextFieldByLabel(tester, "姓名（必填）：");
+      await tester.ensureVisible(nameField);
+      await tester.pumpAndSettle();
       await tester.tap(nameField);
       await tester.pump();
       expect(tester.widget<TextField>(nameField).focusNode?.hasFocus, isTrue);
       recorder.edits.clear();
 
+      await tester.ensureVisible(find.text("First Character"));
+      await tester.pumpAndSettle();
       await tester.tap(find.text("First Character"));
       await tester.pumpAndSettle();
 

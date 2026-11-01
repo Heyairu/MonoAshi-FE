@@ -2114,7 +2114,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
     final tick = ref.watch(timelineViewProvider).currentTick;
     final previewMode =
         _classPreviewModes[itemClass.classId] ??
-        SnapshotPreviewMode.followTimeline;
+        SnapshotPreviewMode.baseline;
     final snapshot = previewMode == SnapshotPreviewMode.baseline
         ? itemClass.defaultState
         : ref.watch(
@@ -2264,7 +2264,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
             ...instances.map((instance) {
               final instanceMode =
                   _instancePreviewModes[instance.instanceId] ??
-                  SnapshotPreviewMode.followTimeline;
+                  SnapshotPreviewMode.baseline;
               final changes = orderedItemInstanceStateChanges(
                 instanceId: instance.instanceId,
                 changes: workspace.itemInstanceStateChanges,
@@ -2567,7 +2567,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
     final tick = ref.watch(timelineViewProvider).currentTick;
     final previewMode =
         _classPreviewModes[itemClass.classId] ??
-        SnapshotPreviewMode.followTimeline;
+        SnapshotPreviewMode.baseline;
     final snapshot = previewMode == SnapshotPreviewMode.baseline
         ? itemClass.defaultState
         : ref.watch(

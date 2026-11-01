@@ -81,12 +81,12 @@ class DefaultFileRepository implements FileRepository {
   }
 
   @override
-  Future<void> exportText({
+  Future<bool> exportText({
     required String content,
     required String fileName,
     required String extension,
   }) {
-    return FileService.exportText(
+    return FileService.exportTextWithResult(
       content: content,
       fileName: fileName,
       extension: extension,

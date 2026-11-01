@@ -3,8 +3,10 @@ import "package:shared_preferences/shared_preferences.dart";
 import "../../bin/settings_manager.dart";
 import "../../models/navigation_style.dart";
 import "../../models/toolbar_mode.dart";
+import "../../l10n/app_locale.dart";
 
 class SettingsSnapshot {
+  final AppLocalePreference appLocale;
   final NavigationStyle navigationStyle;
   final ToolbarMode? toolbarMode;
   final bool showExitWarning;
@@ -25,6 +27,7 @@ class SettingsSnapshot {
   final List<RecentProjectEntry> recentProjects;
 
   const SettingsSnapshot({
+    this.appLocale = AppLocalePreference.system,
     this.navigationStyle = NavigationStyle.railLabel,
     this.toolbarMode,
     required this.showExitWarning,
@@ -48,6 +51,8 @@ class SettingsSnapshot {
 
 abstract class SettingsRepository {
   Future<SettingsSnapshot> load();
+
+  Future<void> saveAppLocale(AppLocalePreference value);
 
   Future<void> saveNavigationStyle(NavigationStyle value);
 
@@ -85,6 +90,7 @@ abstract class SettingsRepository {
 }
 
 class SharedPreferencesSettingsRepository implements SettingsRepository {
+  static const String appLocaleKey = 'app_locale';
   static const String _showExitWarningKey = "show_exit_warning";
   static const String _fontSizeKey = "app_font_size";
   static const String _wordCountModeKey = "word_count_mode";
@@ -173,6 +179,7 @@ class SharedPreferencesSettingsRepository implements SettingsRepository {
         : recentProjects;
 
     return SettingsSnapshot(
+      appLocale: AppLocalePreference.fromPreference(prefs.get(appLocaleKey)),
       navigationStyle: NavigationStyle.fromPreference(
         prefs.getString("navigation_style"),
       ),
@@ -197,6 +204,25 @@ class SharedPreferencesSettingsRepository implements SettingsRepository {
           prefs.getBool("editor_auto_indent_line_start") ?? false,
       recentProjects: trimmedProjects,
     );
+  }
+
+  @override
+  Future<void> saveAppLocale(AppLocalePreference value) async {
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      if (!await prefs.setString(appLocaleKey, value.preferenceValue)) {
+        throw StateError('Unable to save the UI language preference.');
+      }
+    } catch (_) {
+      // Legacy SharedPreferences updates its cache before the native write.
+      // A rejected write must not appear saved to a fresh provider container.
+      try {
+        await prefs.reload();
+      } catch (_) {
+        // Preserve the original write failure if storage is unavailable.
+      }
+      rethrow;
+    }
   }
 
   @override

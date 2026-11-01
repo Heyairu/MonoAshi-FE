@@ -104,7 +104,9 @@ void main() {
       findsOneWidget,
     );
 
-    final actionContext = tester.element(find.byTooltip("檔案"));
+    final actionContext = tester.element(
+      find.byKey(const Key("toolbar-ribbon")),
+    );
     final result = Actions.invoke(actionContext, const NewFileIntent());
     await tester.pump();
     if (result is Future<void>) {

@@ -146,6 +146,15 @@ void main() {
       final guard = find.byKey(
         const ValueKey("character-snapshot-editor-guard"),
       );
+      expect(tester.widget<SnapshotEditorGuard>(guard).enabled, isTrue);
+      final follow = find.byKey(const ValueKey("snapshot-preview-follow"));
+      expect(tester.widget<NeonIconButton>(follow).selected, isFalse);
+      container.read(timelineViewProvider.notifier).setCurrentTick(79);
+      await tester.pumpAndSettle();
+      expect(tester.widget<SnapshotEditorGuard>(guard).enabled, isTrue);
+      expect(find.text("故事狀態 · 編輯中：預設資料"), findsOneWidget);
+      tester.widget<NeonIconButton>(follow).onPressed!();
+      await tester.pumpAndSettle();
       expect(tester.widget<SnapshotEditorGuard>(guard).enabled, isFalse);
       container.read(timelineViewProvider.notifier).setCurrentTick(20);
       await tester.pumpAndSettle();
@@ -256,6 +265,27 @@ void main() {
             .onTap!();
         await tester.pumpAndSettle();
       }
+      final preview = find.byWidgetPredicate(
+        (widget) =>
+            widget is SnapshotTimelinePreview &&
+            widget.subject.id ==
+                switch (page) {
+                  "location" => "home",
+                  "class" => "weapons",
+                  _ => "sword",
+                },
+      );
+      expect(
+        tester.widget<SnapshotTimelinePreview>(preview).mode,
+        SnapshotPreviewMode.baseline,
+      );
+      final follow = find.descendant(
+        of: preview,
+        matching: find.byKey(const ValueKey("snapshot-preview-follow")),
+      );
+      expect(tester.widget<NeonIconButton>(follow).selected, isFalse);
+      tester.widget<NeonIconButton>(follow).onPressed!();
+      await tester.pumpAndSettle();
       final editorPrefix = switch (page) {
         "location" => "location-editor-home",
         "class" => "item-class-editor-weapons",

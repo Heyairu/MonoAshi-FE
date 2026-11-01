@@ -5,6 +5,7 @@ import "package:monogatari_assistant/data/p2p/p2p_project_merge_service.dart";
 import "package:monogatari_assistant/domain/models/p2p_revision_models.dart";
 import "package:monogatari_assistant/domain/models/p2p_sync_models.dart";
 import "package:monogatari_assistant/models/character_data.dart";
+import "package:monogatari_assistant/models/writing_goal_data.dart";
 import "package:monogatari_assistant/models/chapter_selection_data.dart";
 import "package:monogatari_assistant/models/item_data.dart";
 import "package:monogatari_assistant/models/item_snapshot_data.dart";
@@ -66,6 +67,58 @@ void main() {
     clock: const <String, int>{_baseDevice: 1, _remoteDevice: 1},
     parents: <String>[baseRevision.revisionId],
   );
+
+  test('P2P merges independent word goals and explicit inheritance', () {
+    final base = ProjectData.empty(projectUUID: _projectUuid)
+      ..writingGoals = const ProjectWritingGoals(chapterWordGoal: 2000);
+    final local = ProjectData.empty(projectUUID: _projectUuid)
+      ..writingGoals = const ProjectWritingGoals();
+    final remote = ProjectData.empty(projectUUID: _projectUuid)
+      ..writingGoals = const ProjectWritingGoals(
+        chapterWordGoal: 2000,
+        totalWordGoal: 120000,
+      );
+    final plan = const P2pProjectMergeEngine().createPlan(
+      sessionId: 'goal-merge',
+      baseRevision: baseRevision,
+      localRevision: localRevision,
+      remoteRevision: remoteRevision,
+      base: base,
+      local: local,
+      remote: remote,
+    );
+    expect(plan.conflicts, isEmpty);
+    expect(
+      plan.apply(P2pConflictResolutionResult({})).writingGoals,
+      const ProjectWritingGoals(totalWordGoal: 120000),
+    );
+  });
+
+  test('P2P reports conflicting chapter word goals', () {
+    final base = ProjectData.empty(projectUUID: _projectUuid);
+    final local = ProjectData.empty(projectUUID: _projectUuid)
+      ..writingGoals = const ProjectWritingGoals(chapterWordGoal: 3000);
+    final remote = ProjectData.empty(projectUUID: _projectUuid)
+      ..writingGoals = const ProjectWritingGoals(chapterWordGoal: 4000);
+    final plan = const P2pProjectMergeEngine().createPlan(
+      sessionId: 'goal-conflict',
+      baseRevision: baseRevision,
+      localRevision: localRevision,
+      remoteRevision: remoteRevision,
+      base: base,
+      local: local,
+      remote: remote,
+    );
+    expect(plan.conflicts, hasLength(1));
+    final conflict = plan.conflicts.single;
+    expect(conflict.fieldPath, contains('每章字數目標'));
+    final merged = plan.apply(
+      P2pConflictResolutionResult({
+        conflict.conflictId: P2pConflictSide.remote,
+      }),
+    );
+    expect(merged.writingGoals.chapterWordGoal, 4000);
+  });
 
   test('P2P merge keeps independent project phrase additions', () {
     final base = ProjectData.empty(projectUUID: _projectUuid);

@@ -27,11 +27,15 @@ class SelectiveProjectImportManifest {
   final Set<String> typeNames;
   final Set<SelectiveProjectModule> declaredModules;
   final Set<SelectiveProjectModule> availableModules;
+  final Set<SelectiveProjectModule> partialModules;
+  final Set<SelectiveProjectModule> structuralModules;
 
   SelectiveProjectImportManifest._(
     this.typeNames,
     this.declaredModules,
     this.availableModules,
+    this.partialModules,
+    this.structuralModules,
   );
 
   factory SelectiveProjectImportManifest.fromXml(String sourceXml) {
@@ -86,14 +90,90 @@ class SelectiveProjectImportManifest {
       "ItemInstanceStateChanges",
     ]);
     addWhen(SelectiveProjectModule.phrases, const <String>["Phrases"]);
+    final partial = <SelectiveProjectModule>{};
+    final structural = <SelectiveProjectModule>{};
+    final scopes = root.findElements('ExportScope').toList();
+    if (scopes.length > 1) throw const FormatException('重複的細項匯出範圍。');
+    for (final scope in scopes) {
+      if (scope.getAttribute('Version') != '1') {
+        throw const FormatException('此細項匯出版本尚未支援，請更新 App。');
+      }
+      for (final entry in scope.findElements('Module')) {
+        final matching = SelectiveProjectModule.values
+            .where((m) => m.id == entry.getAttribute('Id'))
+            .toList();
+        if (matching.isEmpty ||
+            entry.getAttribute('Mode') != 'partial' ||
+            !declared.contains(matching.first) ||
+            !partial.add(matching.first) ||
+            entry.findElements('Selected').isEmpty) {
+          throw const FormatException('細項匯出範圍不完整或無法辨識。');
+        }
+        if (entry.findElements('Structural').isNotEmpty ||
+            entry.findElements('Dependency').isNotEmpty) {
+          structural.add(matching.first);
+        }
+      }
+    }
     return SelectiveProjectImportManifest._(
       Set<String>.unmodifiable(names),
       Set<SelectiveProjectModule>.unmodifiable(declared),
       Set<SelectiveProjectModule>.unmodifiable(modules),
+      Set<SelectiveProjectModule>.unmodifiable(partial),
+      Set<SelectiveProjectModule>.unmodifiable(structural),
     );
   }
 
   bool containsType(String name) => typeNames.contains(name);
+
+  /// Ancestor shells/dependency definitions must not erase existing fields.
+  Set<SelectiveProjectModule> blockedReplacements(ProjectData target) => {
+    for (final module in structuralModules)
+      if (switch (module) {
+        SelectiveProjectModule.chapters =>
+          target.segmentsData.isNotEmpty &&
+              !(target.segmentsData.length == 1 &&
+                  target.segmentsData.first.segmentName == 'Folder 1' &&
+                  target.segmentsData.first.childSegments.isEmpty &&
+                  target.segmentsData.first.chapters.length == 1 &&
+                  target.segmentsData.first.chapters.first.chapterName ==
+                      'Chapter 1' &&
+                  target
+                      .segmentsData
+                      .first
+                      .chapters
+                      .first
+                      .chapterContent
+                      .isEmpty),
+        SelectiveProjectModule.outline =>
+          target.outlineData.any(
+                (l) =>
+                    l.scenes.isNotEmpty ||
+                    l.memo.isNotEmpty ||
+                    l.conflictPoint.isNotEmpty ||
+                    l.people.isNotEmpty ||
+                    l.item.isNotEmpty ||
+                    l.storylineType != '開場' ||
+                    l.storylineName != '序章',
+              ) ||
+              target.outlineData.length > 1,
+        SelectiveProjectModule.worldSettings =>
+          target.worldSettingsData.any(
+                (l) =>
+                    l.child.isNotEmpty ||
+                    l.customVal.isNotEmpty ||
+                    l.note.isNotEmpty ||
+                    l.localType.isNotEmpty ||
+                    l.nodeType != WorldNodeType.location ||
+                    l.localName != '主要場景',
+              ) ||
+              target.worldSettingsData.length > 1,
+        SelectiveProjectModule.items =>
+          target.itemClasses.isNotEmpty || target.itemInstances.isNotEmpty,
+        _ => false,
+      })
+        module,
+  };
 }
 
 class SelectiveProjectImportWarning {
@@ -124,6 +204,7 @@ class SelectiveProjectImporter {
     required ProjectData source,
     required SelectiveProjectImportManifest manifest,
     required Set<SelectiveProjectModule> selectedModules,
+    bool allowPartialReplacement = false,
   }) {
     if (selectedModules.isEmpty) {
       throw const FormatException("至少選擇一個匯入模組。");
@@ -134,6 +215,15 @@ class SelectiveProjectImporter {
         "來源檔不包含：${unavailable.map((item) => item.label).join('、')}。",
       );
     }
+    if (selectedModules.intersection(manifest.partialModules).isNotEmpty &&
+        !allowPartialReplacement) {
+      throw const FormatException('細項匯入會替換整個模組，請先檢視影響並明確確認。');
+    }
+    if (selectedModules
+        .intersection(manifest.blockedReplacements(current))
+        .isNotEmpty) {
+      throw const FormatException('此細項含必要祖先或依賴，不能替換已有資料的模組；請改匯入空白專案。');
+    }
     bool selected(SelectiveProjectModule module) =>
         selectedModules.contains(module);
     bool use(String type, SelectiveProjectModule module) =>
@@ -143,11 +233,16 @@ class SelectiveProjectImporter {
 
     final result = ProjectData(
       projectUUID: current.projectUUID,
+      writingGoals: current.writingGoals,
       baseInfoData: use("BaseInfo", SelectiveProjectModule.baseInfo)
           ? source.baseInfoData
           : current.baseInfoData,
       segmentsData: use("ChapterSelection", SelectiveProjectModule.chapters)
-          ? List.unmodifiable(source.segmentsData)
+          ? List.unmodifiable(
+              manifest.containsType('ChapterSelection')
+                  ? source.segmentsData
+                  : const [],
+            )
           : List.unmodifiable(current.segmentsData),
       outlineData: use("Outline", SelectiveProjectModule.outline)
           ? List.unmodifiable(source.outlineData)
@@ -160,7 +255,11 @@ class SelectiveProjectImporter {
           : List.unmodifiable(current.updatePlanData),
       worldSettingsData:
           use("WorldSettings", SelectiveProjectModule.worldSettings)
-          ? List.unmodifiable(source.worldSettingsData)
+          ? List.unmodifiable(
+              manifest.containsType('WorldSettings')
+                  ? source.worldSettingsData
+                  : const [],
+            )
           : List.unmodifiable(current.worldSettingsData),
       itemClasses: use("ItemClasses", SelectiveProjectModule.items)
           ? Map.unmodifiable(source.itemClasses)
@@ -249,7 +348,8 @@ Iterable<SelectiveProjectImportWarning> _referenceWarnings(
         message: "短語 ${phrase.name} 來自其他專案，Mention 插入前需確認目標。",
       );
     }
-    for (final annotation in phraseValidator.validate(phrase.body).annotations) {
+    for (final annotation
+        in phraseValidator.validate(phrase.body).annotations) {
       if (annotation.targetId == null) continue;
       if (resolver.resolve(
             annotation: annotation,
@@ -259,9 +359,11 @@ Iterable<SelectiveProjectImportWarning> _referenceWarnings(
             foreshadows: project.foreshadowData,
             plans: project.updatePlanData,
             itemClasses: project.itemClasses,
-          ) == null) {
+          ) ==
+          null) {
         yield SelectiveProjectImportWarning(
-          code: "missing-phrase-target:${phrase.id}:${annotation.sourceRange.start}",
+          code:
+              "missing-phrase-target:${phrase.id}:${annotation.sourceRange.start}",
           message: "短語 ${phrase.name} 的 Mention 找不到目標，插入前需重新連結。",
         );
       }

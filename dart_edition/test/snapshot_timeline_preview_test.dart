@@ -435,6 +435,7 @@ void main() {
         container,
         SnapshotTimelinePreview(
           subject: subject,
+          mode: SnapshotPreviewMode.followTimeline,
           onEventSelected: (value) => selection = value,
         ),
       ),
@@ -738,9 +739,16 @@ void main() {
       final before = container.read(characterStateChangesProvider);
       final mini = find.byType(TimelineMiniView);
       expect(mini, findsOneWidget);
+      expect(
+        tester.widget<SnapshotTimelinePreview>(
+          find.byType(SnapshotTimelinePreview),
+        ).mode,
+        SnapshotPreviewMode.baseline,
+      );
+      expect(find.text("故事狀態 · 編輯中：預設資料"), findsOneWidget);
       tester.widget<TimelineMiniView>(mini).onTickChanged!(5);
       await tester.pumpAndSettle();
-      expect(find.text("故事狀態 · Tick 5 · 唯讀預覽"), findsOneWidget);
+      expect(find.text("故事狀態 · Tick 5 · 唯讀預覽；已開啟跟隨時間軸。"), findsOneWidget);
       expect(find.text("編輯預設"), findsNothing);
       expect(
         tester
@@ -748,7 +756,7 @@ void main() {
               find.byKey(const ValueKey("snapshot-preview-hint")),
             )
             .message,
-        contains("此 Tick 無快照"),
+        contains("若要編輯預設資料，請關閉「跟隨時間軸」。"),
       );
       expect(
         find.byKey(const ValueKey("character-snapshot-preview-alice")),

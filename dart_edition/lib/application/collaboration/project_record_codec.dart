@@ -3,6 +3,7 @@ import "dart:convert";
 import "../../domain/collaboration/collaboration_operation.dart";
 import "../../domain/collaboration/typed_operation_log.dart";
 import "../../models/base_info_data.dart";
+import "../../models/writing_goal_data.dart";
 import "../../models/chapter_selection_data.dart";
 import "../../models/character_data.dart";
 import "../../models/character_snapshot_data.dart";
@@ -61,6 +62,7 @@ abstract final class ProjectRecordCodec {
         "storyType": baseInfo.storyType,
         "intro": baseInfo.intro,
         "tags": baseInfo.tags,
+        "writingGoals": data.writingGoals.toJson(),
       },
     );
 
@@ -480,15 +482,29 @@ abstract final class ProjectRecordCodec {
     );
   }
 
+  static ProjectWritingGoals decodeWritingGoals(
+    Map<ProjectRecordKey, ProjectRecordOperation> records,
+  ) {
+    final fields = _requiredRecord(
+      records,
+      ProjectRecordKind.baseInfo,
+      baseInfoRecordId,
+    ).fields;
+    final raw = fields["writingGoals"];
+    if (raw == null) return const ProjectWritingGoals();
+    if (raw is! Map) throw const FormatException("writingGoals 必須是 object");
+    return ProjectWritingGoals.fromJson(Map<String, Object?>.from(raw));
+  }
+
   static List<PhraseEntry> decodePhrases(
     Map<ProjectRecordKey, ProjectRecordOperation> records,
   ) {
     final entries = _recordsOf(records, ProjectRecordKind.phrase)
         .map((record) {
           final fields = Map<String, Object?>.from(record.fields)
-            ..remove('schemaVersion');
-          if (fields['id'] != record.recordId) {
-            throw const FormatException('phrase record ID mismatch');
+            ..remove("schemaVersion");
+          if (fields["id"] != record.recordId) {
+            throw const FormatException("phrase record ID mismatch");
           }
           return PhraseEntry.fromJson(fields);
         })

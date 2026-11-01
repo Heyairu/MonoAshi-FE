@@ -45,7 +45,7 @@ class SnapshotTimelinePreview extends ConsumerStatefulWidget {
   const SnapshotTimelinePreview({
     super.key,
     required this.subject,
-    this.mode = SnapshotPreviewMode.followTimeline,
+    this.mode = SnapshotPreviewMode.baseline,
     this.localTick,
     this.onModeChanged,
     this.onTickChanged,
@@ -283,7 +283,7 @@ class _SnapshotTimelinePreviewState
             ? widget.mode == SnapshotPreviewMode.baseline
                   ? "目前編輯預設資料；開啟「跟隨時間軸」可預覽指定 Tick。"
                   : selected == null
-                  ? "此 Tick 無快照，僅供預覽；新增快照後即可編輯。"
+                  ? "此 Tick 無快照，僅供預覽；新增快照後即可編輯。若要編輯預設資料，請關閉「跟隨時間軸」。"
                   : selected.inherited
                   ? "此 Tick 僅有 Class 繼承狀態，僅供預覽；新增單件快照後即可編輯。"
                   : "目前編輯此 Tick 的快照，變更只會儲存至此事件。"
