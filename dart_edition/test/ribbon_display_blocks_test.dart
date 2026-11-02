@@ -67,6 +67,29 @@ void main() {
               .expand((group) => group.commands)
               .singleWhere((command) => command.label == label);
           expect(command.stateFor(const RibbonContext()), expected);
+          if (mode != ToolbarMode.full) {
+            final button = find.byKey(
+              ValueKey('toolbar-command-${command.id}'),
+            );
+            final colors = Theme.of(tester.element(button)).colorScheme;
+            final selected = expected == RibbonCheckState.checked;
+            final foreground = selected
+                ? colors.onSecondaryContainer
+                : colors.onSurfaceVariant;
+            expect(tester.widget<IconButton>(button).isSelected, selected);
+            final icon = find.descendant(
+              of: button,
+              matching: find.byType(Icon),
+            );
+            expect(IconTheme.of(tester.element(icon)).color, foreground);
+            if (mode == ToolbarMode.moderate) {
+              final text = find.descendant(
+                of: button,
+                matching: find.text(label),
+              );
+              expect(tester.widget<Text>(text).style?.color, foreground);
+            }
+          }
           expect(tester.takeException(), isNull);
         }
       }

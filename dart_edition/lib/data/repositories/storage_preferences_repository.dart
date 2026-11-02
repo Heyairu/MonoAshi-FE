@@ -1,9 +1,9 @@
-import 'dart:io';
+import "dart:io";
 
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import "package:file_picker/file_picker.dart";
+import "package:flutter/foundation.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
 class StorageDirectories {
   const StorageDirectories({this.backupDirectory});
@@ -13,7 +13,7 @@ class StorageDirectories {
 
 /// Device-local backup location, shared by OOBE and the backup writer.
 class StoragePreferencesRepository {
-  static const backupDirectoryKey = 'custom_auto_backup_directory';
+  static const backupDirectoryKey = "custom_auto_backup_directory";
 
   bool get supportsDirectorySelection =>
       !kIsWeb && (Platform.isMacOS || Platform.isWindows || Platform.isLinux);
@@ -31,7 +31,7 @@ class StoragePreferencesRepository {
     final saved = value == null || value.isEmpty
         ? await prefs.remove(backupDirectoryKey)
         : await prefs.setString(backupDirectoryKey, value);
-    if (!saved) throw StateError('無法保存備份位置，請重試。');
+    if (!saved) throw StateError("無法保存備份位置，請重試。");
   }
 
   Future<String?> pickDirectory({

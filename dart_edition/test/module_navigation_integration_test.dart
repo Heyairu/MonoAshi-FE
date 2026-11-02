@@ -58,10 +58,7 @@ void main() {
             ),
           );
           await tester.pump(const Duration(seconds: 1));
-          expect(
-            find.byKey(const Key('module-switcher-button')),
-            findsOneWidget,
-          );
+          expect(find.byKey(const Key('module-switcher-button')), findsNothing);
 
           // Body focus is the same editor mounted before and after module changes.
           await chord(
@@ -191,7 +188,11 @@ void main() {
           );
           expect(find.byType(HelpModule), findsOneWidget);
 
-          await tester.tap(find.byKey(const Key('module-switcher-button')));
+          await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+          await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+          await tester.sendKeyEvent(LogicalKeyboardKey.keyM);
+          await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+          await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
           await tester.pump(const Duration(milliseconds: 400));
           expect(find.byType(ModuleSwitcher), findsOneWidget);
           await tester.enterText(

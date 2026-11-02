@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 
 import "control_size.dart";
 import "spacing.dart";
+import "mobile_editor_insets.dart";
 
 enum ResponsiveSplitViewCompactMode { vertical, primaryOnly, secondaryOnly }
 
@@ -40,7 +41,10 @@ class AppPageScrollView extends StatelessWidget {
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) => SingleChildScrollView(
       controller: controller,
-      padding: AppLayoutSpacing.pageForWidth(constraints.maxWidth),
+      padding: MobileModuleInsets.scrollPaddingOf(
+        context,
+        AppLayoutSpacing.pageForWidth(constraints.maxWidth),
+      ),
       child: child,
     ),
   );

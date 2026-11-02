@@ -16,7 +16,8 @@
  * 
  ************************************************************/
 
-import 'package:monogatari_assistant/l10n/app_localization.dart';
+import "../ui_library/mobile_editor_insets.dart";
+import "package:monogatari_assistant/l10n/app_localization.dart";
 import "dart:math" as math;
 
 import "package:flutter/material.dart";
@@ -876,7 +877,8 @@ class _CharacterRelationshipGraphViewState
                 child: SizedBox(
                   key: const ValueKey("relationship-graph-canvas"),
                   width: canvasSize.width,
-                  height: canvasSize.height,
+                  height:
+                      canvasSize.height + MobileModuleInsets.bottomOf(context),
                   child: Stack(
                     children: [
                       Positioned.fill(
@@ -1181,6 +1183,7 @@ class _CharacterRelationshipGraphViewState
           child: Card(
             elevation: 10,
             child: SingleChildScrollView(
+              padding: MobileModuleInsets.scrollPaddingOf(context),
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Column(
@@ -1371,7 +1374,7 @@ class _CharacterRelationshipGraphViewState
             dense: true,
             key: ValueKey("relationship-neighbor-${related.id}"),
             title: Text(
-              "${graph.nodeById(related.sourceCharacterId)?.localizedLabel(context.l10n)} ${related.isBidirectional ? '↔' : '→'} ${graph.nodeById(related.targetNodeId)?.localizedLabel(context.l10n)}",
+              "${graph.nodeById(related.sourceCharacterId)?.localizedLabel(context.l10n)} ${related.isBidirectional ? "↔" : "→"} ${graph.nodeById(related.targetNodeId)?.localizedLabel(context.l10n)}",
             ),
             subtitle: Text(
               "${context.l10n.legacyLabel(related.layerLabel)}：${related.description}",
@@ -2147,7 +2150,7 @@ extension CharacterGraphNodeLocalization on CharacterRelationshipGraphNode {
   /// exactly as authored and graph IDs/layout ordering remain independent.
   String localizedLabel(AppLocalizations l10n) {
     if (!isUnresolved) return label;
-    final name = unresolvedPerson?.trim() ?? '';
+    final name = unresolvedPerson?.trim() ?? "";
     if (unresolvedKind == CharacterRelationshipResolutionKind.ambiguous) {
       return l10n.relationshipAmbiguousName(name);
     }

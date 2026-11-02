@@ -89,18 +89,19 @@ void main() {
           final selected = options.valueFor(option);
           expect(tester.widget<IconButton>(button).isSelected, selected);
           expect(
-            find.descendant(
-              of: button,
-              matching: find.byIcon(selected ? Icons.check : Icons.close),
-            ),
+            find.descendant(of: button, matching: find.byType(Icon)),
             findsOneWidget,
           );
           expect(
             find.descendant(
               of: button,
-              matching: find.text(selected ? "開" : "關"),
+              matching: find.byWidgetPredicate(
+                (widget) =>
+                    widget is Icon &&
+                    (widget.icon == Icons.check || widget.icon == Icons.close),
+              ),
             ),
-            mode == ToolbarMode.moderate ? findsOneWidget : findsNothing,
+            findsNothing,
           );
         }
       }

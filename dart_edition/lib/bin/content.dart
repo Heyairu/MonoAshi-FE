@@ -58,6 +58,7 @@ import "../presentation/providers/revision_tracking_provider.dart";
 import "../features/editor/editor_input_rules.dart";
 import "../features/editor/plain_text_quill_mention_overlay.dart";
 import "../ui_library/forms.dart";
+import "../ui_library/mobile_editor_insets.dart";
 
 /// Defaults to the plain-text Quill editor. Set
 /// `--dart-define=MONOGATARI_PLAIN_TEXT_QUILL_EDITOR=false` to return to the
@@ -1481,6 +1482,14 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
                 children: <Widget>[
                   Positioned.fill(
                     child: PlainTextQuillEditorPoc(
+                      padding: EdgeInsets.fromLTRB(
+                        16,
+                        16,
+                        16,
+                        MediaQuery.sizeOf(context).width < 800
+                            ? MobileEditorInsets.bottomClearance
+                            : 16,
+                      ),
                       key: const ValueKey<String>(
                         "main-plain-text-quill-editor",
                       ),

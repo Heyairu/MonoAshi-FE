@@ -1,8 +1,8 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
+import "dart:convert";
+import "dart:io";
+import "package:path/path.dart" as path;
+import "package:path_provider/path_provider.dart";
+import "package:uuid/uuid.dart";
 
 class WritingProgressLedger {
   final Map<String, Map<String, int>> days;
@@ -20,12 +20,12 @@ class WritingProgressLedger {
 
   factory WritingProgressLedger.decode(String source) {
     final json = jsonDecode(source) as Map;
-    if (json['schemaVersion'] != 1 || json['countPolicyVersion'] != 1) {
-      throw UnsupportedError('每日統計的格式版本不受支援，原始檔案已保留。');
+    if (json["schemaVersion"] != 1 || json["countPolicyVersion"] != 1) {
+      throw UnsupportedError("每日統計的格式版本不受支援，原始檔案已保留。");
     }
     return WritingProgressLedger(
       days: Map.unmodifiable(
-        (json['days'] as Map).map(
+        (json["days"] as Map).map(
           (day, values) => MapEntry(
             day as String,
             Map<String, int>.unmodifiable((values as Map).cast<String, int>()),
@@ -33,16 +33,16 @@ class WritingProgressLedger {
         ),
       ),
       sequences: Map<String, int>.unmodifiable(
-        (json['sequences'] as Map).cast<String, int>(),
+        (json["sequences"] as Map).cast<String, int>(),
       ),
     );
   }
 
   String encode() => jsonEncode({
-    'schemaVersion': 1,
-    'countPolicyVersion': 1,
-    'days': days,
-    'sequences': sequences,
+    "schemaVersion": 1,
+    "countPolicyVersion": 1,
+    "days": days,
+    "sequences": sequences,
   });
 
   WritingProgressLedger applying({
@@ -75,12 +75,12 @@ class WritingProgressRepository {
     : directory = directory ?? getApplicationSupportDirectory;
 
   Future<T> _locked<T>(Future<T> Function(File file) operation) async {
-    final folder = Directory(path.join((await directory()).path, 'Data'));
+    final folder = Directory(path.join((await directory()).path, "Data"));
     await folder.create(recursive: true);
-    final file = File(path.join(folder.path, 'WritingProgress.json'));
+    final file = File(path.join(folder.path, "WritingProgress.json"));
     final previous = _queues[file.path] ?? Future<void>.value();
     final task = previous.then((_) async {
-      final lock = await File('${file.path}.lock').open(mode: FileMode.append);
+      final lock = await File("${file.path}.lock").open(mode: FileMode.append);
       var locked = false;
       try {
         await lock.lock(FileLock.blockingExclusive);
@@ -102,7 +102,7 @@ class WritingProgressRepository {
   }
 
   Future<WritingProgressLedger> _read(File file) async {
-    final backup = File('${file.path}.bak');
+    final backup = File("${file.path}.bak");
     if (!await file.exists() && !await backup.exists()) {
       return const WritingProgressLedger();
     }
@@ -112,17 +112,17 @@ class WritingProgressRepository {
       rethrow;
     } catch (_) {
       // Do not destroy evidence or turn an unreadable ledger into zero.
-      if (!await backup.exists()) throw StateError('每日統計無法讀取，原始檔案已保留。');
+      if (!await backup.exists()) throw StateError("每日統計無法讀取，原始檔案已保留。");
       final restored = WritingProgressLedger.decode(
         await backup.readAsString(),
       );
       if (await file.exists()) {
-        await file.rename('${file.path}.corrupt.${const Uuid().v4()}');
+        await file.rename("${file.path}.corrupt.${const Uuid().v4()}");
       }
       return WritingProgressLedger(
         days: restored.days,
         sequences: restored.sequences,
-        warning: '每日統計已從備份恢復，最近一次記錄可能遺失。',
+        warning: "每日統計已從備份恢復，最近一次記錄可能遺失。",
       );
     }
   }
@@ -145,10 +145,10 @@ class WritingProgressRepository {
       delta: delta,
     );
     if (identical(current, next)) return current;
-    final temporary = File('${file.path}.${const Uuid().v4()}.tmp');
+    final temporary = File("${file.path}.${const Uuid().v4()}.tmp");
     try {
       await temporary.writeAsString(next.encode(), flush: true);
-      if (await file.exists()) await file.copy('${file.path}.bak');
+      if (await file.exists()) await file.copy("${file.path}.bak");
       await temporary.rename(file.path);
     } finally {
       if (await temporary.exists()) await temporary.delete();

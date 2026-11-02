@@ -67,7 +67,8 @@ void main() {
             await tester.tap(
               find.widgetWithText(TextButton, overwrite ? "[OVR]" : "[DEF]"),
             );
-            await tester.pumpAndSettle();
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 300));
             final currentButton = find.widgetWithText(TextButton, label);
             expect(tester.getRect(currentButton), initialBounds);
             expect(
@@ -118,5 +119,57 @@ void main() {
         },
       );
     }
+  }
+
+  for (final scale in [1.0, 1.5, 2.0]) {
+    testWidgets("mobile row matches desktop height at scale $scale", (
+      tester,
+    ) async {
+      Widget bar({required bool compact}) => MonogatariStatusBar(
+        key: ValueKey(compact ? "mobile-statusbar" : "desktop-statusbar"),
+        compact: compact,
+        displayText: "文件",
+        saveTimeText: "12:00",
+        cursorLine: 12,
+        cursorColumn: 23,
+        currentWords: 446,
+        totalWords: 446,
+        iconSize: 14,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(14, Colors.lightBlue),
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: TextScaler.linear(scale)),
+            child: child!,
+          ),
+          home: Scaffold(
+            body: Align(
+              alignment: Alignment.bottomCenter,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [bar(compact: false), bar(compact: true)],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      final desktop = find.byKey(const ValueKey("desktop-statusbar"));
+      final mobile = find.byKey(const ValueKey("mobile-statusbar"));
+      final desktopHeight = tester.getSize(desktop).height;
+      expect(tester.getSize(mobile).height, closeTo(desktopHeight, .001));
+      await tester.tap(find.byKey(const Key("statusbar-expand")));
+      await tester.pump();
+      expect(tester.getSize(mobile).height, closeTo(desktopHeight * 2, .001));
+      expect(
+        tester.getSize(find.byKey(const Key("statusbar-summary-row"))).height,
+        tester.getSize(find.byKey(const Key("statusbar-secondary-row"))).height,
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
   }
 }

@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import "../ui_library/mobile_editor_insets.dart";
 import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "package:file_picker/file_picker.dart";
@@ -1772,6 +1773,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
           return SingleChildScrollView(
             controller: _pageScrollController,
             primary: false,
+            padding: MobileModuleInsets.scrollPaddingOf(context),
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: Padding(

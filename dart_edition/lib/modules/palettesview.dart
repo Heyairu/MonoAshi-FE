@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import "../ui_library/mobile_editor_insets.dart";
 import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "dart:async";
 import "dart:convert";
@@ -581,7 +582,9 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
             ),
           ),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+        SliverToBoxAdapter(
+          child: SizedBox(height: 24 + MobileModuleInsets.bottomOf(context)),
+        ),
       ],
     );
   }
@@ -951,6 +954,9 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
       );
     }
     return ListView.separated(
+      padding: MobileModuleInsets.bottomOf(context) == 0
+          ? null
+          : MobileModuleInsets.scrollPaddingOf(context),
       itemCount: hits.length,
       separatorBuilder: (_, __) => const Divider(height: 1),
       itemBuilder: (BuildContext context, int index) {

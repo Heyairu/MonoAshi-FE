@@ -14,7 +14,9 @@ void main() {
     bool isBusy = false,
     double textScale = 1,
     ValueChanged<ToolbarMode?>? onModeChanged,
+    ThemeData? theme,
   }) => MaterialApp(
+    theme: theme,
     builder: (context, child) => MediaQuery(
       data: MediaQuery.of(
         context,
@@ -78,6 +80,72 @@ void main() {
   });
 
   for (final mode in ToolbarMode.values) {
+    testWidgets("${mode.name} keeps QAT and hides mode picker on mobile", (
+      tester,
+    ) async {
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      for (final width in [1440.0, 390.0, 799.0, 800.0]) {
+        await tester.binding.setSurfaceSize(Size(width, 800));
+        await tester.pumpWidget(app(mode));
+        await tester.pumpAndSettle();
+        final ribbon = find.byType(MaterialRibbon);
+        for (final label in ["儲存檔案", "復原", "重做"]) {
+          expect(
+            find.descendant(
+              of: ribbon,
+              matching: find.byWidgetPredicate(
+                (widget) => widget is IconButton && widget.tooltip == label,
+              ),
+            ),
+            findsOneWidget,
+          );
+        }
+        expect(
+          find.byTooltip("工具列模式"),
+          width < 800 ? findsNothing : findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      }
+    });
+  }
+
+  for (final mode in [ToolbarMode.moderate, ToolbarMode.concise]) {
+    for (final brightness in Brightness.values) {
+      testWidgets("${mode.name} ${brightness.name} selected disabled colors", (
+        tester,
+      ) async {
+        await tester.binding.setSurfaceSize(const Size(1600, 800));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final colors =
+            ColorScheme.fromSeed(
+              seedColor: Colors.blue,
+              brightness: brightness,
+            ).copyWith(
+              secondaryContainer: const Color(0xFF4A1738),
+              onSecondaryContainer: const Color(0xFFFFDAEE),
+            );
+        await tester.pumpWidget(
+          app(mode, theme: ThemeData(colorScheme: colors)),
+        );
+        final button = find.byKey(
+          const ValueKey("toolbar-command-view.navigation"),
+        );
+        await tester.ensureVisible(button);
+        await tester.pumpAndSettle();
+        expect(tester.widget<IconButton>(button).isSelected, isTrue);
+        expect(tester.widget<IconButton>(button).onPressed, isNull);
+        final icon = find.descendant(of: button, matching: find.byType(Icon));
+        final foreground = colors.onSecondaryContainer.withValues(alpha: .38);
+        expect(IconTheme.of(tester.element(icon)).color, foreground);
+        if (mode == ToolbarMode.moderate) {
+          final label = find.descendant(of: button, matching: find.text("導覽列"));
+          expect(tester.widget<Text>(label).style?.color, foreground);
+        }
+      });
+    }
+  }
+
+  for (final mode in ToolbarMode.values) {
     testWidgets("${mode.name} fits a narrow viewport with large text", (
       tester,
     ) async {
@@ -96,7 +164,7 @@ void main() {
         await tester.pump();
         expect(tester.takeException(), isNull);
       }
-      expect(find.byTooltip("工具列模式"), findsOneWidget);
+      expect(find.byTooltip("工具列模式"), findsNothing);
     });
   }
 

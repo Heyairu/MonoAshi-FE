@@ -1,4 +1,5 @@
 import 'package:monogatari_assistant/l10n/app_localization.dart';
+import "../ui_library/mobile_editor_insets.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:uuid/uuid.dart";
@@ -1990,6 +1991,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                     controller: _pageScrollController,
                     child: SingleChildScrollView(
                       key: const Key("item-narrow-sections"),
+                      padding: MobileModuleInsets.scrollPaddingOf(context),
                       controller: _pageScrollController,
                       primary: false,
                       child: SnapshotWorkspaceLayout(

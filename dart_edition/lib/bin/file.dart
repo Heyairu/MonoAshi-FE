@@ -1337,7 +1337,7 @@ class _ProjectMerger {
     final buffer = StringBuffer();
 
     buffer.writeln("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-    buffer.writeln('<Project UUID="${data.projectUUID}">');
+    buffer.writeln("<Project UUID=\"${data.projectUUID}\">");
     buffer.writeln("<ver>${FileService.projectVersion}</ver>");
 
     buffer.writeln(WritingGoalsCodec.encode(data.writingGoals));

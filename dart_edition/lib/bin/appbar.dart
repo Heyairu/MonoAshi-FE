@@ -19,7 +19,6 @@ import "findreplace.dart";
 class MonogatariTopAppBar extends StatefulWidget
     implements PreferredSizeWidget {
   final ValueChanged<String>? onHelpAction;
-  final Widget? moduleSwitcher;
   final double iconSize;
   final ToolbarMode mode;
   final ToolbarMode? modePreference;
@@ -51,7 +50,6 @@ class MonogatariTopAppBar extends StatefulWidget
   const MonogatariTopAppBar({
     super.key,
     this.onHelpAction,
-    this.moduleSwitcher,
     required this.iconSize,
     required this.mode,
     required this.modePreference,
@@ -517,98 +515,108 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
     final tabs = _tabs(commands);
     final selectedTab = tabs.firstWhere((tab) => tab.id == _selectedTabId);
     final full = widget.mode == ToolbarMode.full;
-    return HelpScope(
-      topicId: HelpTopicId.toolbar,
-      child: Listener(
-        onPointerDown: (_) => widget.onEditorActionPointerDown(),
-        onPointerUp: (_) => _endInteraction(),
-        onPointerCancel: (_) => _endInteraction(),
-        child: SafeArea(
-          bottom: false,
-          child: Material(
-            key: Key("toolbar-${widget.mode.name}"),
-            color: Theme.of(context).colorScheme.surfaceContainerLow,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                MaterialRibbon(
-                  key: const Key("toolbar-ribbon"),
-                  controller: widget.controller,
-                  keyTipController: _keyTips,
-                  enableAltKeyTips: false,
-                  commandWrapperBuilder: (context, command, child) =>
-                      HelpTarget(
-                        topicId: HelpTopicId.forCommand(command.id),
-                        child: child,
-                      ),
-                  compact: false,
-                  collapsed: !full,
-                  context: _ribbonContext,
-                  localizations: localizedRibbon(
-                    context.l10n,
-                    Theme.of(context).platform,
-                  ),
-                  selectedTabId: _selectedTabId,
-                  onSelectedTabChanged: _selectTab,
-                  bodyScrollController: _scrollController,
-                  onCollapsedChanged: (_) => widget.onModeChanged(
-                    full ? ToolbarMode.concise : ToolbarMode.full,
-                  ),
-                  fixedHeaderActions: [
-                    if (widget.moduleSwitcher != null) widget.moduleSwitcher!,
-                  ],
-                  headerActions: [
-                    _HelpMenu(
-                      onAction: widget.onHelpAction,
-                      onOpened: _openMenu,
-                      onClosed: _closeMenu,
+    return LayoutBuilder(
+      builder: (context, constraints) => HelpScope(
+        topicId: HelpTopicId.toolbar,
+        child: Listener(
+          onPointerDown: (_) => widget.onEditorActionPointerDown(),
+          onPointerUp: (_) => _endInteraction(),
+          onPointerCancel: (_) => _endInteraction(),
+          child: SafeArea(
+            bottom: false,
+            child: Material(
+              key: Key("toolbar-${widget.mode.name}"),
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  MaterialRibbon(
+                    key: const Key("toolbar-ribbon"),
+                    controller: widget.controller,
+                    keyTipController: _keyTips,
+                    enableAltKeyTips: false,
+                    commandWrapperBuilder: (context, command, child) =>
+                        HelpTarget(
+                          topicId: HelpTopicId.forCommand(command.id),
+                          child: child,
+                        ),
+                    compact: false,
+                    collapsed: !full,
+                    context: _ribbonContext,
+                    localizations: localizedRibbon(
+                      context.l10n,
+                      Theme.of(context).platform,
                     ),
-                    if (widget.statusIndicator != null) widget.statusIndicator!,
-                    HelpTarget(
-                      topicId: HelpTopicId.toolbarMode,
-                      child: _ToolbarModeMenu(
-                        preference: widget.modePreference,
-                        onChanged: widget.onModeChanged,
+                    selectedTabId: _selectedTabId,
+                    onSelectedTabChanged: _selectTab,
+                    bodyScrollController: _scrollController,
+                    onCollapsedChanged: (_) => widget.onModeChanged(
+                      full ? ToolbarMode.concise : ToolbarMode.full,
+                    ),
+                    headerActions: [
+                      _HelpMenu(
+                        onAction: widget.onHelpAction,
                         onOpened: _openMenu,
                         onClosed: _closeMenu,
                       ),
-                    ),
-                  ],
-                  quickAccessCommands: [
-                    commands["save"]!,
-                    commands["undo"]!,
-                    commands["redo"]!,
-                  ],
-                  tabs: tabs,
-                ),
-                if (!full)
-                  SizedBox(
-                    height: 56,
-                    child: Scrollbar(
-                      controller: _scrollController,
-                      child: SingleChildScrollView(
-                        key: const Key("toolbar-command-scroll"),
+                      if (widget.statusIndicator != null)
+                        widget.statusIndicator!,
+                      if (constraints.maxWidth >= 800)
+                        HelpTarget(
+                          topicId: HelpTopicId.toolbarMode,
+                          child: _ToolbarModeMenu(
+                            preference: widget.modePreference,
+                            onChanged: widget.onModeChanged,
+                            onOpened: _openMenu,
+                            onClosed: _closeMenu,
+                          ),
+                        ),
+                    ],
+                    quickAccessCommands: [
+                      commands["save"]!,
+                      commands["undo"]!,
+                      commands["redo"]!,
+                    ],
+                    tabs: tabs,
+                  ),
+                  if (!full)
+                    SizedBox(
+                      height: 56,
+                      child: Scrollbar(
                         controller: _scrollController,
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Row(
-                          children: [
-                            for (final group in selectedTab.groups)
-                              for (final command in group.commands)
-                                _ToolbarCommandButton(
-                                  command: command,
-                                  showLabel:
-                                      widget.mode == ToolbarMode.moderate,
-                                  iconSize: widget.iconSize,
-                                  onInvoke: () => _invoke(command.id),
+                        child: SingleChildScrollView(
+                          key: const Key("toolbar-command-scroll"),
+                          controller: _scrollController,
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Row(
+                            spacing: 12,
+                            children: [
+                              for (final group in selectedTab.groups)
+                                Row(
+                                  key: ValueKey("toolbar-group-${group.id}"),
+                                  mainAxisSize: MainAxisSize.min,
+                                  spacing: 4,
+                                  children: [
+                                    for (final command in group.commands)
+                                      _ToolbarCommandButton(
+                                        key: ValueKey(command.id),
+                                        command: command,
+                                        showLabel:
+                                            widget.mode == ToolbarMode.moderate,
+                                        iconSize: widget.iconSize,
+                                        onInvoke: () => _invoke(command.id),
+                                      ),
+                                  ],
                                 ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -619,6 +627,7 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
 
 class _ToolbarCommandButton extends StatelessWidget {
   const _ToolbarCommandButton({
+    super.key,
     required this.command,
     required this.showLabel,
     required this.iconSize,
@@ -635,36 +644,59 @@ class _ToolbarCommandButton extends StatelessWidget {
     final selected = command.type == RibbonCommandType.toggle
         ? command.stateFor(const RibbonContext()) == RibbonCheckState.checked
         : null;
-    final searchState = command.id.startsWith("search.") ? selected : null;
+    final colors = Theme.of(context).colorScheme;
+    final selection = selected == true ? 1.0 : 0.0;
     return HelpTarget(
       topicId: HelpTopicId.forCommand(command.id),
       child: Semantics(
         toggled: selected,
-        child: IconButton(
-          key: ValueKey("toolbar-command-${command.id}"),
-          tooltip: [
-            command.label,
-            if (!command.enabledFor(const RibbonContext()) &&
-                command.disabledReasonFor(const RibbonContext()) != null)
-              command.disabledReasonFor(const RibbonContext())!,
-          ].join("\n"),
-          isSelected: selected,
-          style: IconButton.styleFrom(
-            minimumSize: const Size(48, 48),
-            backgroundColor: searchState == true
-                ? Theme.of(context).colorScheme.secondaryContainer
-                : null,
-          ),
-          onPressed: command.enabledFor(const RibbonContext()) && !busy
-              ? onInvoke
-              : null,
-          icon: _ToolbarButtonContent(
-            icon: command.icon,
-            iconSize: iconSize,
-            label: showLabel ? command.label : null,
-            busy: busy,
-            searchState: searchState,
-          ),
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: selection, end: selection),
+          duration: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : const Duration(milliseconds: 160),
+          curve: Curves.easeOutCubic,
+          builder: (context, amount, _) {
+            final foreground = Color.lerp(
+              colors.onSurfaceVariant,
+              colors.onSecondaryContainer,
+              amount,
+            )!;
+            return IconButton(
+              key: ValueKey("toolbar-command-${command.id}"),
+              tooltip: [
+                command.label,
+                if (!command.enabledFor(const RibbonContext()) &&
+                    command.disabledReasonFor(const RibbonContext()) != null)
+                  command.disabledReasonFor(const RibbonContext())!,
+              ].join("\n"),
+              isSelected: selected,
+              style: IconButton.styleFrom(
+                minimumSize: const Size(48, 48),
+                backgroundColor: colors.secondaryContainer.withValues(
+                  alpha: amount,
+                ),
+                foregroundColor: foreground,
+                disabledForegroundColor: Color.lerp(
+                  colors.onSurface,
+                  colors.onSecondaryContainer,
+                  amount,
+                )!.withValues(alpha: .38),
+                overlayColor: foreground,
+                // The selection tween animates both colors on the same clock.
+                animationDuration: Duration.zero,
+              ),
+              onPressed: command.enabledFor(const RibbonContext()) && !busy
+                  ? onInvoke
+                  : null,
+              icon: _ToolbarButtonContent(
+                icon: command.icon,
+                iconSize: iconSize,
+                label: showLabel ? command.label : null,
+                busy: busy,
+              ),
+            );
+          },
         ),
       ),
     );
@@ -677,62 +709,32 @@ class _ToolbarButtonContent extends StatelessWidget {
     required this.iconSize,
     this.label,
     this.busy = false,
-    this.searchState,
   });
   final IconData icon;
   final double iconSize;
   final String? label;
   final bool busy;
-  final bool? searchState;
 
   @override
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      if (busy)
-        const SizedBox.square(
-          dimension: 20,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        )
-      else
-        Icon(icon, size: iconSize),
+      SizedBox.square(
+        dimension: iconSize,
+        child: busy
+            ? CircularProgressIndicator(
+                strokeWidth: 2,
+                color: IconTheme.of(context).color,
+              )
+            : Icon(icon, size: iconSize),
+      ),
       if (label != null) ...[
         const SizedBox(width: 6),
-        Text(label!, style: Theme.of(context).textTheme.labelLarge),
-      ],
-      if (searchState != null) ...[
-        const SizedBox(width: 4),
-        ExcludeSemantics(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
-            decoration: BoxDecoration(
-              color: searchState!
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  searchState! ? Icons.check : Icons.close,
-                  size: 12,
-                  color: searchState!
-                      ? Theme.of(context).colorScheme.onPrimary
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                if (label != null)
-                  Text(
-                    searchState! ? context.l10n.uiOn : context.l10n.uiOff,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: searchState!
-                          ? Theme.of(context).colorScheme.onPrimary
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-              ],
-            ),
-          ),
+        Text(
+          label!,
+          style: Theme.of(
+            context,
+          ).textTheme.labelLarge?.copyWith(color: IconTheme.of(context).color),
         ),
       ],
     ],

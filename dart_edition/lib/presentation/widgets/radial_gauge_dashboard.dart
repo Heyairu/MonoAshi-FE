@@ -38,6 +38,8 @@ class RadialGaugeDashboard extends ConsumerStatefulWidget {
   static const collapsedWidth = 48.0;
 
   final VoidCallback onClose;
+  final bool capsule;
+  final bool reverseOrder;
   final VoidCallback? onStartRevision;
   final VoidCallback? onOpenRevision;
 
@@ -46,6 +48,8 @@ class RadialGaugeDashboard extends ConsumerStatefulWidget {
     required this.onClose,
     this.onStartRevision,
     this.onOpenRevision,
+    this.capsule = false,
+    this.reverseOrder = false,
   });
 
   @override
@@ -96,61 +100,125 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
     final settings = ref.watch(gaugeDashboardProvider);
     final colors = Theme.of(context).colorScheme;
     final canAdd = settings.metrics.length < DashboardMetric.values.length;
+    final metrics = widget.reverseOrder
+        ? settings.metrics.reversed
+        : settings.metrics;
+    final addGauge = PopupMenuButton<DashboardMetric>(
+      tooltip: canAdd
+          ? context.l10n.uiAddGauge
+          : context.l10n.uiAllGaugesAreAlreadyShown,
+      enabled: canAdd,
+      onSelected: (metric) =>
+          ref.read(gaugeDashboardProvider.notifier).setVisible(metric, true),
+      itemBuilder: (context) => [
+        for (final metric in DashboardMetric.values)
+          if (!settings.metrics.contains(metric))
+            PopupMenuItem(
+              value: metric,
+              child: Text(context.l10n.legacyLabel(metric.label)),
+            ),
+      ],
+      icon: Icon(
+        Icons.add_rounded,
+        color: canAdd ? colors.primary : colors.onSurfaceVariant,
+      ),
+    );
     return Material(
       key: const ValueKey("radial-gauge-dashboard"),
       color: colors.surfaceContainerLow,
-      child: Scrollbar(
-        controller: _scrollController,
-        thumbVisibility: true,
-        child: SingleChildScrollView(
-          key: const ValueKey("gauge-dashboard-scroll-area"),
-          controller: _scrollController,
-          primary: false,
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: AppSpacing.sm),
-              for (final metric in settings.metrics) ...[
-                _buildGauge(metric, settings),
-                const SizedBox(height: AppSpacing.md),
-              ],
-              if (settings.metrics.isEmpty)
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                  child: Text(
-                    context.l10n.uiAddAGaugeToViewYourWritingProgress,
-                  ),
-                ),
-              PopupMenuButton<DashboardMetric>(
-                tooltip: canAdd
-                    ? context.l10n.uiAddGauge
-                    : context.l10n.uiAllGaugesAreAlreadyShown,
-                enabled: canAdd,
-                onSelected: (metric) => ref
-                    .read(gaugeDashboardProvider.notifier)
-                    .setVisible(metric, true),
-                itemBuilder: (context) => [
-                  for (final metric in DashboardMetric.values)
-                    if (!settings.metrics.contains(metric))
-                      PopupMenuItem(
-                        value: metric,
-                        child: Text(context.l10n.legacyLabel(metric.label)),
+      elevation: widget.capsule ? 6 : 0,
+      shape: widget.capsule ? const StadiumBorder() : null,
+      clipBehavior: widget.capsule ? Clip.antiAlias : Clip.none,
+      child: Column(
+        children: [
+          Expanded(
+            child: Scrollbar(
+              controller: _scrollController,
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                key: const ValueKey("gauge-dashboard-scroll-area"),
+                controller: _scrollController,
+                primary: false,
+                reverse: widget.reverseOrder,
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: AppSpacing.sm),
+                    if (widget.reverseOrder) addGauge,
+                    for (final metric in metrics) ...[
+                      _DashboardGauge(
+                        metric: metric,
+                        settings: settings,
+                        onStartRevision: widget.onStartRevision,
+                        onOpenRevision: widget.onOpenRevision,
                       ),
-                ],
-                icon: Icon(
-                  Icons.add_rounded,
-                  color: canAdd ? colors.primary : colors.onSurfaceVariant,
+                      const SizedBox(height: AppSpacing.md),
+                    ],
+                    if (settings.metrics.isEmpty)
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                        child: Text(
+                          context.l10n.uiAddAGaugeToViewYourWritingProgress,
+                        ),
+                      ),
+                    if (!widget.reverseOrder) addGauge,
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+          if (widget.capsule)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: IconButton(
+                key: const ValueKey("mobile-dashboard-close"),
+                tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                onPressed: widget.onClose,
+                icon: const Icon(Icons.close_rounded, size: 24),
+              ),
+            ),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildGauge(DashboardMetric metric, GaugeDashboardSettings settings) {
+/// The first visible metric also serves as the mobile dashboard launcher.
+class RadialGaugePreview extends ConsumerWidget {
+  const RadialGaugePreview({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(gaugeDashboardProvider);
+    if (settings.metrics.isEmpty) {
+      return const Icon(Icons.speed_rounded, size: 24);
+    }
+    return _DashboardGauge(
+      metric: settings.metrics.first,
+      settings: settings,
+      previewOnly: true,
+    );
+  }
+}
+
+class _DashboardGauge extends ConsumerWidget {
+  const _DashboardGauge({
+    required this.metric,
+    required this.settings,
+    this.previewOnly = false,
+    this.onStartRevision,
+    this.onOpenRevision,
+  });
+
+  final DashboardMetric metric;
+  final GaugeDashboardSettings settings;
+  final bool previewOnly;
+  final VoidCallback? onStartRevision;
+  final VoidCallback? onOpenRevision;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
     final values = switch (metric) {
       DashboardMetric.dailyWords => (
@@ -190,7 +258,7 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
       ),
       DashboardMetric.revisionTracking => null,
     };
-    if (values == null) return _buildRevisionGauge();
+    if (values == null) return _buildRevisionGauge(context, ref);
     final (value, maximum, color) = values;
     final format = context.formats.integer;
     final detail = maximum == 0
@@ -223,6 +291,14 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
     final unit = metric.hasWordGoal
         ? context.l10n.uiWords2
         : context.l10n.uiEntries5;
+
+    final dial = CompactRadialGauge(
+      progress: progress,
+      currentValue: hasChapter && !dailyUnavailable ? format(value) : "—",
+      targetValue: "/ ${format(maximum)} $unit",
+      color: color,
+    );
+    if (previewOnly) return dial;
 
     return MenuAnchor(
       key: ValueKey("gauge-${metric.name}"),
@@ -324,7 +400,7 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
             if (metric.hasWordGoal)
               MenuItemButton(
                 autofocus: true,
-                onPressed: () => _editGoal(metric, maximum),
+                onPressed: () => _editGoal(context, ref, metric, maximum),
                 leadingIcon: const Icon(Icons.flag_outlined, size: 20),
                 child: Text(context.l10n.uiSetWordCountGoal),
               ),
@@ -365,14 +441,7 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CompactRadialGauge(
-                      progress: progress,
-                      currentValue: hasChapter && !dailyUnavailable
-                          ? format(value)
-                          : "—",
-                      targetValue: "/ ${format(maximum)} $unit",
-                      color: color,
-                    ),
+                    dial,
                     Text(
                       context.l10n.legacyLabel(metric.label),
                       textAlign: TextAlign.center,
@@ -388,7 +457,7 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
     );
   }
 
-  Widget _buildRevisionGauge() {
+  Widget _buildRevisionGauge(BuildContext context, WidgetRef ref) {
     final tracking = ref.watch(revisionTrackingProvider);
     final summary = RevisionGaugeSummary.fromComparison(tracking.comparison);
     final colors = Theme.of(context).colorScheme;
@@ -414,6 +483,16 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
       context.formats.integer((summary.revisionsFraction * 100).round()),
       (status).toString(),
     );
+    final dial = CompactRadialGauge(
+      progress: summary.additionsFraction,
+      secondaryProgress: summary.revisionsFraction,
+      currentValue: "+$additions",
+      targetValue: "−$revisions",
+      color: colors.primary,
+      secondaryColor: colors.tertiary,
+    );
+    if (previewOnly) return dial;
+
     return MenuAnchor(
       key: const ValueKey("gauge-revisionTracking"),
       crossAxisUnconstrained: false,
@@ -470,15 +549,15 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
               MenuItemButton(
                 autofocus: true,
                 onPressed:
-                    widget.onStartRevision ??
+                    onStartRevision ??
                     () => ref.read(revisionTrackingProvider.notifier).start(),
                 leadingIcon: const Icon(Icons.play_arrow_rounded, size: 20),
                 child: Text(context.l10n.uiStartTracking),
               ),
-            if (widget.onOpenRevision != null)
+            if (onOpenRevision != null)
               MenuItemButton(
                 autofocus: tracking.baseline != null,
-                onPressed: widget.onOpenRevision,
+                onPressed: onOpenRevision,
                 leadingIcon: const Icon(Icons.rate_review_outlined, size: 20),
                 child: Text(context.l10n.uiViewRevisionDetails),
               ),
@@ -517,14 +596,7 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CompactRadialGauge(
-                      progress: summary.additionsFraction,
-                      secondaryProgress: summary.revisionsFraction,
-                      currentValue: "+$additions",
-                      targetValue: "−$revisions",
-                      color: colors.primary,
-                      secondaryColor: colors.tertiary,
-                    ),
+                    dial,
                     Text(
                       context.l10n.uiTrackRevisions,
                       style: Theme.of(context).textTheme.labelSmall,
@@ -539,12 +611,16 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
     );
   }
 
-  Future<void> _editGoal(DashboardMetric metric, int current) =>
-      showWritingGoalDialog(context, ref, switch (metric) {
-        DashboardMetric.dailyWords => WritingGoalKind.daily,
-        DashboardMetric.chapterWords => WritingGoalKind.chapter,
-        _ => WritingGoalKind.total,
-      });
+  Future<void> _editGoal(
+    BuildContext context,
+    WidgetRef ref,
+    DashboardMetric metric,
+    int current,
+  ) => showWritingGoalDialog(context, ref, switch (metric) {
+    DashboardMetric.dailyWords => WritingGoalKind.daily,
+    DashboardMetric.chapterWords => WritingGoalKind.chapter,
+    _ => WritingGoalKind.total,
+  });
 }
 
 /// Status-icon proportions: a 64dp dial and a 4dp rounded arc.

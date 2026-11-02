@@ -1,6 +1,7 @@
 // Copyright 2025-2026 Heyairu（部屋伊琉）
 // Licensed under the Apache License, Version 2.0.
 
+import "../../ui_library/mobile_editor_insets.dart";
 import 'package:monogatari_assistant/l10n/app_localization.dart';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
@@ -274,6 +275,9 @@ class _HelpViewerState extends State<HelpViewer> {
     }
     String? category;
     return ListView(
+      padding: MobileModuleInsets.bottomOf(context) == 0
+          ? null
+          : MobileModuleInsets.scrollPaddingOf(context),
       children: [
         for (final topic in topics) ...[
           if (_query.text.trim().isEmpty && category != topic.category)
@@ -302,6 +306,7 @@ class _HelpViewerState extends State<HelpViewer> {
     final topic = catalog.topic(widget.topic.value);
     return SingleChildScrollView(
       controller: _articleScroll,
+      padding: MobileModuleInsets.scrollPaddingOf(context),
       child: SelectionArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

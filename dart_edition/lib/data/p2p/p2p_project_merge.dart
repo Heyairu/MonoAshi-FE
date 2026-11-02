@@ -85,9 +85,9 @@ class P2pProjectMergePlan {
       projectUUID: localProject.projectUUID,
       baseInfoData: _baseInfoFromMap(baseInfoValues),
       writingGoals: ProjectWritingGoals.fromJson({
-        'chapter': baseInfoValues['每章字數目標'],
-        'total': baseInfoValues['全文字數目標'],
-        'recovery': baseInfoValues['目標復原資料'] ?? const <String>[],
+        "chapter": baseInfoValues["每章字數目標"],
+        "total": baseInfoValues["全文字數目標"],
+        "recovery": baseInfoValues["目標復原資料"] ?? const <String>[],
       }),
       segmentsData: remainder.segmentsData,
       outlineData: remainder.outlineData,
@@ -536,7 +536,7 @@ P2pFieldConflictItem _itemWorkspaceConflict({
           "場景 ${collision.sceneUuid}",
           collision.allocationIds.isEmpty
               ? "分配數量"
-              : "分配 ${collision.allocationIds.join(', ')}",
+              : "分配 ${collision.allocationIds.join(", ")}",
         ];
   return P2pFieldConflictItem(
     groupId: projectUuid,
@@ -623,7 +623,7 @@ Map<String, ItemClassStateChange> _classChangesBySemanticKey(
   for (final change in changes)
     "${change.classId.length}:${change.classId}/"
             "${change.sceneUUID.length}:${change.sceneUUID}/"
-            "${change.sourcePlacementUUID ?? ''}/${change.sequence}":
+            "${change.sourcePlacementUUID ?? ""}/${change.sequence}":
         change,
 };
 
@@ -797,9 +797,9 @@ Map<String, CharacterEntryData> _charactersByStableId(
 Map<String, Object?> _projectInfoToMap(ProjectData data) {
   final value = data.baseInfoData;
   return <String, Object?>{
-    '每章字數目標': data.writingGoals.chapterWordGoal,
-    '全文字數目標': data.writingGoals.totalWordGoal,
-    '目標復原資料': data.writingGoals.recoveryXml,
+    "每章字數目標": data.writingGoals.chapterWordGoal,
+    "全文字數目標": data.writingGoals.totalWordGoal,
+    "目標復原資料": data.writingGoals.recoveryXml,
     "書名": value.bookName,
     "作者": value.author,
     "創作目的": value.purpose,

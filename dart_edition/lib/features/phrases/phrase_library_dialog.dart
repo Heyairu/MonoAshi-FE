@@ -1,26 +1,26 @@
-import 'package:monogatari_assistant/l10n/app_localization.dart';
+import "package:monogatari_assistant/l10n/app_localization.dart";
 import "../help/help_scope.dart";
 import "../help/help_topic.dart";
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
+import "package:flutter/material.dart";
+import "package:flutter/foundation.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:uuid/uuid.dart";
 
 import "../../ui_library/spacing.dart";
-import '../../bin/content.dart';
-import '../../presentation/providers/project_state_providers.dart';
-import '../inline_annotations/inline_annotation_edit_dialog.dart';
-import '../inline_annotations/inline_annotation.dart';
-import '../inline_annotations/inline_annotation_parser.dart';
-import '../inline_annotations/inline_annotation_syntax.dart';
-import '../inline_annotations/mosaic_editing_controller.dart';
-import 'phrase_body_validator.dart';
-import 'phrase_entry.dart';
-import 'phrase_display_preview.dart';
-import 'global_phrases_provider.dart';
-import 'phrase_search_index.dart';
-import 'phrase_transfer.dart';
-import 'phrase_transfer_io.dart';
+import "../../bin/content.dart";
+import "../../presentation/providers/project_state_providers.dart";
+import "../inline_annotations/inline_annotation_edit_dialog.dart";
+import "../inline_annotations/inline_annotation.dart";
+import "../inline_annotations/inline_annotation_parser.dart";
+import "../inline_annotations/inline_annotation_syntax.dart";
+import "../inline_annotations/mosaic_editing_controller.dart";
+import "phrase_body_validator.dart";
+import "phrase_entry.dart";
+import "phrase_display_preview.dart";
+import "global_phrases_provider.dart";
+import "phrase_search_index.dart";
+import "phrase_transfer.dart";
+import "phrase_transfer_io.dart";
 import "../../ui_library/forms.dart";
 
 final class PhraseLibraryDialog extends ConsumerStatefulWidget {
@@ -75,7 +75,7 @@ final class _PhraseLibraryDialogState
   ]) => setState(() {
     _editing = phrase;
     _editingScope = scope;
-    _newBody = body ?? (phrase == null ? '' : null);
+    _newBody = body ?? (phrase == null ? "" : null);
     _newTags = const [];
   });
 
@@ -95,14 +95,14 @@ final class _PhraseLibraryDialogState
   Future<void> _save(ScopedPhrase entry, {PhraseScope? originalScope}) async {
     var phrase = entry.phrase;
     if (entry.scope == PhraseScope.global && phraseHasMention(phrase)) {
-      throw const FormatException('含 Mention 的短語只能儲存在目前專案');
+      throw const FormatException("含 Mention 的短語只能儲存在目前專案");
     }
     final projects = ref.read(phrasesProvider);
     final globals =
         ref.read(globalPhrasesProvider).valueOrNull ?? const <PhraseEntry>[];
     if (entry.scope == PhraseScope.global &&
         !ref.read(globalPhrasesProvider).hasValue) {
-      throw StateError('全域短語庫尚未載入');
+      throw StateError("全域短語庫尚未載入");
     }
     final sourceScope = originalScope ?? entry.scope;
     final sourceItems = sourceScope == PhraseScope.project ? projects : globals;
@@ -127,7 +127,7 @@ final class _PhraseLibraryDialogState
         remaining.any(
           (item) => item.normalizedShortcut == phrase.normalizedShortcut,
         )) {
-      throw const FormatException('短碼已被使用，請使用其他短碼');
+      throw const FormatException("短碼已被使用，請使用其他短碼");
     }
     if (remaining.any((item) => item.id == phrase.id)) {
       phrase = copyPhrase(phrase, id: const Uuid().v4());
@@ -208,7 +208,7 @@ final class _PhraseLibraryDialogState
 
   void _showError(Object error) => ScaffoldMessenger.of(
     context,
-  ).showSnackBar(SnackBar(content: Text('$error')));
+  ).showSnackBar(SnackBar(content: Text("$error")));
 
   Future<void> _export() async {
     try {
@@ -248,9 +248,9 @@ final class _PhraseLibraryDialogState
             (conflicts
                     .map(
                       (item) =>
-                          '${item.phrase.shortcut}（${item.scope == PhraseScope.global ? dialogContext.l10n.uiAllProjects : dialogContext.l10n.uiCurrentProject}）',
+                          "${item.phrase.shortcut}（${item.scope == PhraseScope.global ? dialogContext.l10n.uiAllProjects : dialogContext.l10n.uiCurrentProject}）",
                     )
-                    .join('、'))
+                    .join("、"))
                 .toString(),
             (newShortcut).toString(),
           ),
@@ -346,7 +346,7 @@ final class _PhraseLibraryDialogState
                         ? context
                               .l10n
                               .uiPhrasesWithMentionsAreLimitedToThisProject
-                        : '')
+                        : "")
                     .toString(),
               ),
             ),
@@ -400,7 +400,7 @@ final class _PhraseLibraryDialogState
             padding: const EdgeInsets.all(AppSpacing.space20),
             child: editing
                 ? _PhraseEditForm(
-                    key: ValueKey(_editing?.id ?? 'new'),
+                    key: ValueKey(_editing?.id ?? "new"),
                     original: _editing,
                     initialBody: _newBody,
                     initialTags: _newTags,
@@ -445,7 +445,7 @@ final class _PhraseLibraryDialogState
                                   label: Text(context.l10n.uiExport),
                                 ),
                                 FilledButton.icon(
-                                  onPressed: () => _openEditor(null, ''),
+                                  onPressed: () => _openEditor(null, ""),
                                   icon: const Icon(Icons.add),
                                   label: Text(context.l10n.uiAddPhrase),
                                 ),
@@ -523,7 +523,7 @@ final class _PhraseLibraryDialogState
           style: Theme.of(context).textTheme.labelSmall,
         ),
         Text(
-          preview.replaceAll('\n', ' '),
+          preview.replaceAll("\n", " "),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -618,13 +618,13 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
   void initState() {
     super.initState();
     final phrase = widget.original;
-    _shortcut = TextEditingController(text: phrase?.shortcut ?? '');
+    _shortcut = TextEditingController(text: phrase?.shortcut ?? "");
     _tagInput = TextEditingController();
     _bodyFocus = FocusNode();
     _tags = [...?phrase?.tags, ...widget.initialTags];
     _scope = widget.initialScope;
     _body = MosaicEditingController(
-      rawText: widget.initialBody ?? phrase?.body ?? '',
+      rawText: widget.initialBody ?? phrase?.body ?? "",
     );
     _body.addListener(_refresh);
   }
@@ -682,7 +682,7 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
       kind: InlineAnnotationKind.emphasis,
       displayText: _body.selection.isValid
           ? _body.plainTextForSelection(_body.selection)
-          : '',
+          : "",
     );
     final result = await InlineAnnotationEditDialog.show(
       context: context,
@@ -711,18 +711,18 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
             phrase.id != widget.original?.id &&
             phrase.normalizedShortcut == shortcut.toLowerCase(),
       )) {
-        throw const FormatException('短碼已被使用');
+        throw const FormatException("短碼已被使用");
       }
       final validation = const PhraseBodyValidator().validate(_body.rawText);
       if (!validation.isValid) {
-        throw const FormatException('Mosaic 內容不完整');
+        throw const FormatException("Mosaic 內容不完整");
       }
       if (_body.rawText.trim().isEmpty) {
-        throw const FormatException('內容不能為空');
+        throw const FormatException("內容不能為空");
       }
       _addTag(_tagInput.text);
       final display = phraseDisplayPreview(_body.rawText).trim();
-      final firstLine = display.split('\n').first.trim();
+      final firstLine = display.split("\n").first.trim();
       final name = firstLine.isEmpty
           ? shortcut
           : firstLine.substring(0, firstLine.length.clamp(0, 48));
@@ -733,7 +733,7 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
             id: widget.original?.id ?? const Uuid().v4(),
             name: name,
             shortcut: shortcut,
-            category: widget.original?.category ?? '',
+            category: widget.original?.category ?? "",
             tags: _tags,
             body: _body.rawText,
             enabled: widget.original?.enabled ?? true,
@@ -745,7 +745,7 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
         ),
       );
     } catch (error) {
-      if (mounted) setState(() => _error = '$error');
+      if (mounted) setState(() => _error = "$error");
     }
   }
 
@@ -772,7 +772,7 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                 ),
                 const SizedBox(height: 8),
                 TextField(
-                  key: const ValueKey('phrase-shortcut'),
+                  key: const ValueKey("phrase-shortcut"),
                   controller: _shortcut,
                   autofocus: true,
                   decoration: appFieldDecoration(
@@ -788,7 +788,7 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                   children: [
                     Text(context.l10n.uiAvailableInAllProjects),
                     Switch(
-                      key: const ValueKey('phrase-global-scope'),
+                      key: const ValueKey("phrase-global-scope"),
                       value: _scope == PhraseScope.global && !hasMention,
                       onChanged: hasMention || !widget.globalReady
                           ? null
@@ -805,7 +805,7 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                 const SizedBox(height: 10),
                 Text(context.l10n.uiTags),
                 Wrap(
-                  key: const ValueKey('phrase-tags'),
+                  key: const ValueKey("phrase-tags"),
                   spacing: 6,
                   runSpacing: 4,
                   crossAxisAlignment: WrapCrossAlignment.center,
@@ -818,7 +818,7 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                     SizedBox(
                       width: 160,
                       child: TextField(
-                        key: const ValueKey('phrase-tag-input'),
+                        key: const ValueKey("phrase-tag-input"),
                         controller: _tagInput,
                         decoration: appFieldDecoration(
                           context,
@@ -864,33 +864,33 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                     for (final target in [
                       (
                         label: context.l10n.uiCharacter,
-                        trigger: '@',
+                        trigger: "@",
                         icon: Icons.person_outline,
                       ),
                       (
                         label: context.l10n.uiItem,
-                        trigger: '*',
+                        trigger: "*",
                         icon: Icons.inventory_2_outlined,
                       ),
                       (
                         label: context.l10n.uiLocation,
-                        trigger: '!',
+                        trigger: "!",
                         icon: Icons.place_outlined,
                       ),
                       (
                         label: context.l10n.uiEvent,
-                        trigger: '#',
+                        trigger: "#",
                         icon: Icons.event_outlined,
                       ),
                     ])
                       OutlinedButton.icon(
-                        key: ValueKey('phrase-insert-${target.trigger}'),
+                        key: ValueKey("phrase-insert-${target.trigger}"),
                         onPressed: () => _insertTarget(target.trigger),
                         icon: Icon(target.icon),
                         label: Text(target.label),
                       ),
                     OutlinedButton.icon(
-                      key: const ValueKey('phrase-insert-mark'),
+                      key: const ValueKey("phrase-insert-mark"),
                       onPressed: _insertMark,
                       icon: const Icon(Icons.highlight_outlined),
                       label: Text(context.l10n.uiAnnotation2),
@@ -934,7 +934,7 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                                 ),
                           ),
                           child: KeyedSubtree(
-                            key: const ValueKey('phrase-body'),
+                            key: const ValueKey("phrase-body"),
                             child: EditorTextBox(
                               controller: _body,
                               focusNode: _bodyFocus,
@@ -958,7 +958,7 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                           TextButton(
                             onPressed: () => _editMention(i),
                             child: Text(
-                              'Mention：${_body.annotations[i].displayText}',
+                              "Mention：${_body.annotations[i].displayText}",
                             ),
                           ),
                       ],

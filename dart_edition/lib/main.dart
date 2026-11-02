@@ -306,7 +306,7 @@ class _MainAppState extends ConsumerState<MainApp> {
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Text(
-                  context.l10n.initializationFailed('${bootstrap.error}'),
+                  context.l10n.initializationFailed("${bootstrap.error}"),
                 ),
               ),
             ),
@@ -546,6 +546,7 @@ class _EditorStatusBarState extends ConsumerState<_EditorStatusBar> {
     final cursor = _positionIndex.lineColumnFromOffset(status.cursorOffset);
 
     return MonogatariStatusBar(
+      compact: MediaQuery.sizeOf(context).width < 800,
       themePreset: ref.watch(
         appThemeSettingsProvider.select((theme) => theme.preset),
       ),
@@ -788,36 +789,6 @@ class _ContentViewState extends ConsumerState<ContentView>
     } finally {
       _moduleSwitcherOpen = false;
     }
-  }
-
-  Widget _buildModuleSwitcherButton() {
-    final label = context.l10n.uiSwitchModuleCurrent(
-      (context.l10n.legacyLabel(_currentModule.label)).toString(),
-    );
-    return Tooltip(
-      message:
-          "$label（${Theme.of(context).platform == TargetPlatform.macOS ? "⌘⇧M" : "Ctrl+Shift+M"}）",
-      child: MediaQuery.sizeOf(context).width < 1000
-          ? IconButton(
-              key: const Key("module-switcher-button"),
-              tooltip: label,
-              onPressed: _openModuleSwitcher,
-              icon: Icon(_currentModule.icon),
-            )
-          : TextButton.icon(
-              key: const Key("module-switcher-button"),
-              onPressed: _openModuleSwitcher,
-              icon: Icon(_currentModule.icon),
-              label: SizedBox(
-                width: 110,
-                child: Text(
-                  "${context.l10n.legacyLabel(_currentModule.label)} ▾",
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-    );
   }
 
   int _findOptionsRevision = 0;
@@ -2858,7 +2829,6 @@ class _ContentViewState extends ConsumerState<ContentView>
             child: Scaffold(
               appBar: MonogatariTopAppBar(
                 key: _topAppBarKey,
-                moduleSwitcher: _buildModuleSwitcherButton(),
                 iconSize: fontSize + 8,
                 mode: toolbarMode,
                 controller: _ribbonController,
@@ -3078,7 +3048,7 @@ class _ContentViewState extends ConsumerState<ContentView>
     }
   }
 
-  // 手機佈局（使用 BottomNavigationBar）
+  // 手機佈局（左右浮動導覽與儀表板）
   Widget _buildMobileLayout({
     required double fontSize,
     required WordCountMode wordCountMode,
@@ -3090,6 +3060,7 @@ class _ContentViewState extends ConsumerState<ContentView>
 
     return MonogatariMobileLayout(
       isEditorMode: isEditorMode,
+      selectedIndex: _getNavigationIndex(),
       functionPage: _buildMobileFunctionPage(fontSize: fontSize),
       editorPage: _buildEditor(),
       statusBar: _buildMobileStatusBar(
@@ -3098,9 +3069,18 @@ class _ContentViewState extends ConsumerState<ContentView>
         hasUnsavedChanges: hasUnsavedChanges,
         lastSavedTime: lastSavedTime,
       ),
-      onDestinationSelected: (index) => _selectModule(
-        index == 0 ? _lastFunctionModule : AppModule.forNavigation(17),
+      dashboardBuilder: (onClose) => RadialGaugeDashboard(
+        capsule: true,
+        reverseOrder: true,
+        onClose: onClose,
+        onStartRevision: _startRevisionTracking,
+        onOpenRevision: () {
+          onClose();
+          _openRevisionDetails();
+        },
       ),
+      onDestinationSelected: (index) =>
+          _selectModule(AppModule.forNavigation(index)),
     );
   }
 
@@ -3135,10 +3115,6 @@ class _ContentViewState extends ConsumerState<ContentView>
           ? _lastFunctionModule.navigationIndex
           : slidePageIndexNow,
       fontSize: fontSize,
-      onBeforePageSwitch: _syncEditorToSelectedChapter,
-      onPageSelected: (index) {
-        _selectModule(AppModule.forNavigation(index));
-      },
       pageBuilder: _buildSpecificPageContent,
     );
   }

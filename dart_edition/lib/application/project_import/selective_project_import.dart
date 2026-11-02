@@ -92,25 +92,25 @@ class SelectiveProjectImportManifest {
     addWhen(SelectiveProjectModule.phrases, const <String>["Phrases"]);
     final partial = <SelectiveProjectModule>{};
     final structural = <SelectiveProjectModule>{};
-    final scopes = root.findElements('ExportScope').toList();
-    if (scopes.length > 1) throw const FormatException('重複的細項匯出範圍。');
+    final scopes = root.findElements("ExportScope").toList();
+    if (scopes.length > 1) throw const FormatException("重複的細項匯出範圍。");
     for (final scope in scopes) {
-      if (scope.getAttribute('Version') != '1') {
-        throw const FormatException('此細項匯出版本尚未支援，請更新 App。');
+      if (scope.getAttribute("Version") != "1") {
+        throw const FormatException("此細項匯出版本尚未支援，請更新 App。");
       }
-      for (final entry in scope.findElements('Module')) {
+      for (final entry in scope.findElements("Module")) {
         final matching = SelectiveProjectModule.values
-            .where((m) => m.id == entry.getAttribute('Id'))
+            .where((m) => m.id == entry.getAttribute("Id"))
             .toList();
         if (matching.isEmpty ||
-            entry.getAttribute('Mode') != 'partial' ||
+            entry.getAttribute("Mode") != "partial" ||
             !declared.contains(matching.first) ||
             !partial.add(matching.first) ||
-            entry.findElements('Selected').isEmpty) {
-          throw const FormatException('細項匯出範圍不完整或無法辨識。');
+            entry.findElements("Selected").isEmpty) {
+          throw const FormatException("細項匯出範圍不完整或無法辨識。");
         }
-        if (entry.findElements('Structural').isNotEmpty ||
-            entry.findElements('Dependency').isNotEmpty) {
+        if (entry.findElements("Structural").isNotEmpty ||
+            entry.findElements("Dependency").isNotEmpty) {
           structural.add(matching.first);
         }
       }
@@ -133,11 +133,11 @@ class SelectiveProjectImportManifest {
         SelectiveProjectModule.chapters =>
           target.segmentsData.isNotEmpty &&
               !(target.segmentsData.length == 1 &&
-                  target.segmentsData.first.segmentName == 'Folder 1' &&
+                  target.segmentsData.first.segmentName == "Folder 1" &&
                   target.segmentsData.first.childSegments.isEmpty &&
                   target.segmentsData.first.chapters.length == 1 &&
                   target.segmentsData.first.chapters.first.chapterName ==
-                      'Chapter 1' &&
+                      "Chapter 1" &&
                   target
                       .segmentsData
                       .first
@@ -153,8 +153,8 @@ class SelectiveProjectImportManifest {
                     l.conflictPoint.isNotEmpty ||
                     l.people.isNotEmpty ||
                     l.item.isNotEmpty ||
-                    l.storylineType != '開場' ||
-                    l.storylineName != '序章',
+                    l.storylineType != "開場" ||
+                    l.storylineName != "序章",
               ) ||
               target.outlineData.length > 1,
         SelectiveProjectModule.worldSettings =>
@@ -165,7 +165,7 @@ class SelectiveProjectImportManifest {
                     l.note.isNotEmpty ||
                     l.localType.isNotEmpty ||
                     l.nodeType != WorldNodeType.location ||
-                    l.localName != '主要場景',
+                    l.localName != "主要場景",
               ) ||
               target.worldSettingsData.length > 1,
         SelectiveProjectModule.items =>
@@ -212,17 +212,17 @@ class SelectiveProjectImporter {
     final unavailable = selectedModules.difference(manifest.availableModules);
     if (unavailable.isNotEmpty) {
       throw FormatException(
-        "來源檔不包含：${unavailable.map((item) => item.label).join('、')}。",
+        "來源檔不包含：${unavailable.map((item) => item.label).join("、")}。",
       );
     }
     if (selectedModules.intersection(manifest.partialModules).isNotEmpty &&
         !allowPartialReplacement) {
-      throw const FormatException('細項匯入會替換整個模組，請先檢視影響並明確確認。');
+      throw const FormatException("細項匯入會替換整個模組，請先檢視影響並明確確認。");
     }
     if (selectedModules
         .intersection(manifest.blockedReplacements(current))
         .isNotEmpty) {
-      throw const FormatException('此細項含必要祖先或依賴，不能替換已有資料的模組；請改匯入空白專案。');
+      throw const FormatException("此細項含必要祖先或依賴，不能替換已有資料的模組；請改匯入空白專案。");
     }
     bool selected(SelectiveProjectModule module) =>
         selectedModules.contains(module);
@@ -239,7 +239,7 @@ class SelectiveProjectImporter {
           : current.baseInfoData,
       segmentsData: use("ChapterSelection", SelectiveProjectModule.chapters)
           ? List.unmodifiable(
-              manifest.containsType('ChapterSelection')
+              manifest.containsType("ChapterSelection")
                   ? source.segmentsData
                   : const [],
             )
@@ -256,7 +256,7 @@ class SelectiveProjectImporter {
       worldSettingsData:
           use("WorldSettings", SelectiveProjectModule.worldSettings)
           ? List.unmodifiable(
-              manifest.containsType('WorldSettings')
+              manifest.containsType("WorldSettings")
                   ? source.worldSettingsData
                   : const [],
             )

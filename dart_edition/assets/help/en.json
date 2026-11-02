@@ -132,7 +132,7 @@
           "heading": "Switch ribbon tabs and modules",
           "paragraphs": [
             "Alt+Left/Right selects the previous/next ribbon tab; Alt+Up/Down selects the previous/next module. Use Option on macOS. Navigation wraps at either end, requires no toolbar focus, and ignores key repeats. Left/Right preserves the original input focus and does not execute tab commands.",
-            "Open the top “Switch Module” button or press Ctrl+Shift+M (Command+Shift+M on macOS). Search by module name, choose with the arrow keys, confirm with Enter, or cancel with Esc. Home, Settings, Help, Manuscript Editor, and About are included.",
+            "Press Ctrl+Shift+M (Command+Shift+M on macOS) to open the module list. Search by module name, choose with the arrow keys, confirm with Enter, or cancel with Esc. Home, Settings, Help, Manuscript Editor, and About are included.",
             "Ctrl+0–9 (Command on macOS) opens Home, Manuscript Editor, Chapters, Outline, Characters, Worldbuilding, Timeline, Items, Settings, and Help respectively. Ctrl+, / Command+, also opens Settings.",
             "Option/Alt+arrow keys take priority for workspace navigation. They do not switch background modules during IME composition, candidate selection, menus, dialogs, point-and-click help, or project loading. Ctrl+Alt/AltGr and combinations with Shift or Command are excluded.",
             "The Help module has contents, search, and articles, and preserves its reading state when you switch away. F1 still opens a contextual help dialog; Esc closes that dialog and restores focus."
@@ -1152,7 +1152,7 @@
         {
           "heading": "Switch modules and tabs",
           "paragraphs": [
-            "“Switch Module” is available in all three toolbar modes; narrow windows show the current module's icon. Search all modules, including Home, Settings, and Help.",
+            "Use navigation to switch modules; on mobile, open the navigation menu at the bottom left. Ctrl+Shift+M (Command+Shift+M on macOS) opens a searchable list including Home, Settings, and Help.",
             "Alt+Left/Right (Option+Left/Right on macOS) changes ribbon tabs; Alt+Up/Down changes modules. Arrow navigation does not execute tab commands. F10 still starts KeyTips inside the ribbon."
           ],
           "steps": []
@@ -1298,7 +1298,7 @@
           "heading": "Switch modes and keep your settings",
           "paragraphs": [],
           "steps": [
-            "Open Toolbar Mode from the toolbar or Settings → Appearance & Interface → Toolbar Mode.",
+            "On desktop, open Toolbar Mode from the toolbar. On mobile, use Settings → Appearance & Interface → Toolbar Mode.",
             "Select a mode preview card. The selected card has a border and checkmark.",
             "After switching, check the current tab and scroll horizontally if needed to see the remaining commands."
           ]

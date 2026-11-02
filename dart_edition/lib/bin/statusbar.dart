@@ -16,14 +16,16 @@
  * 
  ************************************************************/
 
-import 'package:monogatari_assistant/l10n/app_localization.dart';
+import "package:monogatari_assistant/l10n/app_localization.dart";
 import "package:flutter/material.dart";
+import "dart:math" as math;
 
 import "../ui_library/spacing.dart";
 import "../ui_library/theme_palette.dart";
 
 class MonogatariStatusBar extends StatelessWidget {
   final AppThemePreset themePreset;
+  final bool compact;
   final String displayText;
   final String saveTimeText;
   final int cursorLine;
@@ -43,6 +45,7 @@ class MonogatariStatusBar extends StatelessWidget {
   const MonogatariStatusBar({
     super.key,
     this.themePreset = AppThemePreset.standard,
+    this.compact = false,
     required this.displayText,
     required this.saveTimeText,
     required this.cursorLine,
@@ -78,6 +81,137 @@ class MonogatariStatusBar extends StatelessWidget {
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.standard,
     );
+    final wordsText = context.l10n.uiCharacters(
+      context.formats.integer(currentWords),
+      context.formats.integer(totalWords),
+    );
+    final cursorText =
+        "${context.formats.integer(cursorLine)}:${context.formats.integer(cursorColumn)}";
+    final summaryPainter = TextPainter(
+      strutStyle: statusStrutStyle,
+      text: TextSpan(
+        style: statusTextStyle,
+        children: [
+          TextSpan(
+            text: wordsText,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          TextSpan(text: cursorText),
+        ],
+      ),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    // Reserve a readable document slot, icons, gaps and badge insets.
+    final minimumSummaryWidth = summaryPainter.width + iconSize * 2 + 104;
+    // Match the desktop row: a 24dp control or the tallest status item,
+    // plus the desktop's 8dp vertical inset on each side.
+    final rowHeight =
+        math.max(
+          24.0,
+          math.max(
+            iconSize,
+            summaryPainter.height + AppSpacing.badgePadding.vertical,
+          ),
+        ) +
+        AppSpacing.sm * 2;
+    summaryPainter.dispose();
+    final document = Row(
+      children: [
+        Icon(
+          Icons.description,
+          size: iconSize,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        const SizedBox(width: 4),
+        Expanded(
+          child: RepaintBoundary(
+            child: ClipRect(
+              child: _ScrollingText(
+                text: displayText,
+                style: statusTextStyle,
+                strutStyle: statusStrutStyle,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+    final saveTime = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.access_time,
+          size: iconSize,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          saveTimeText,
+          style: statusTextStyle,
+          strutStyle: statusStrutStyle,
+        ),
+      ],
+    );
+    final cursor = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.pin_drop_outlined,
+          size: iconSize,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: 4),
+        Text(cursorText, style: statusTextStyle, strutStyle: statusStrutStyle),
+      ],
+    );
+    final tabMenu = _TabSpacesMenu(
+      buttonStyle: statusButtonStyle,
+      labelStrutStyle: statusStrutStyle,
+      count: tabSpaceCount,
+      fullWidth: tabFullWidth,
+      autoIndentLineStart: autoIndentLineStart,
+      onAutoIndentLineStartChanged: onAutoIndentLineStartChanged,
+      onCountChanged: onTabSpaceCountChanged,
+      onFullWidthChanged: onTabFullWidthChanged,
+    );
+    final overwrite = Tooltip(
+      message: overwriteMode
+          ? context.l10n.uiOvertypeModeIns
+          : context.l10n.uiInsertModeIns,
+      child: Focus(
+        canRequestFocus: false,
+        descendantsAreFocusable: false,
+        child: TextButton(
+          style: statusButtonStyle,
+          onPressed: onToggleOverwrite,
+          // Reserve both labels so mode changes do not shift adjacent items.
+          child: IndexedStack(
+            index: overwriteMode ? 1 : 0,
+            alignment: Alignment.center,
+            children: [
+              Text("[DEF]", strutStyle: statusStrutStyle),
+              Text("[OVR]", strutStyle: statusStrutStyle),
+            ],
+          ),
+        ),
+      ),
+    );
+    final words = Container(
+      padding: AppSpacing.badgePadding,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        wordsText,
+        strutStyle: statusStrutStyle,
+        style: statusTextStyle.copyWith(
+          color: Theme.of(context).colorScheme.onPrimaryContainer,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
@@ -85,7 +219,7 @@ class MonogatariStatusBar extends StatelessWidget {
           top: BorderSide(
             color: Theme.of(
               context,
-            ).colorScheme.outlineVariant.withOpacity(0.5),
+            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
             width: 1,
           ),
         ),
@@ -101,142 +235,168 @@ class MonogatariStatusBar extends StatelessWidget {
                 opacity: .4,
               ),
             ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.sm,
-            ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final minimumWidth = MediaQuery.textScalerOf(
-                  context,
-                ).scale(480);
-                final width = constraints.maxWidth < minimumWidth
-                    ? minimumWidth
-                    : constraints.maxWidth;
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SizedBox(
-                    width: width,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.description,
-                                size: iconSize,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: RepaintBoundary(
-                                  child: ClipRect(
-                                    child: _ScrollingText(
-                                      text: displayText,
-                                      style: statusTextStyle,
-                                      strutStyle: statusStrutStyle,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          Icons.access_time,
-                          size: iconSize,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          saveTimeText,
-                          style: statusTextStyle,
-                          strutStyle: statusStrutStyle,
-                        ),
-                        const SizedBox(width: 12),
-                        Icon(
-                          Icons.pin_drop_outlined,
-                          size: iconSize,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          "${context.formats.integer(cursorLine)}:${context.formats.integer(cursorColumn)}",
-                          style: statusTextStyle,
-                          strutStyle: statusStrutStyle,
-                        ),
-                        const SizedBox(width: 12),
-                        _TabSpacesMenu(
-                          buttonStyle: statusButtonStyle,
-                          labelStrutStyle: statusStrutStyle,
-                          count: tabSpaceCount,
-                          fullWidth: tabFullWidth,
-                          autoIndentLineStart: autoIndentLineStart,
-                          onAutoIndentLineStartChanged:
-                              onAutoIndentLineStartChanged,
-                          onCountChanged: onTabSpaceCountChanged,
-                          onFullWidthChanged: onTabFullWidthChanged,
-                        ),
-                        Tooltip(
-                          message: overwriteMode
-                              ? context.l10n.uiOvertypeModeIns
-                              : context.l10n.uiInsertModeIns,
-                          child: Focus(
-                            canRequestFocus: false,
-                            descendantsAreFocusable: false,
-                            child: TextButton(
-                              style: statusButtonStyle,
-                              onPressed: onToggleOverwrite,
-                              // Reserve the larger label's size so toggling does not shift
-                              // this button or the adjacent status items. Both labels still
-                              // follow the theme font and system text scaling.
-                              child: IndexedStack(
-                                index: overwriteMode ? 1 : 0,
-                                alignment: Alignment.center,
-                                children: [
-                                  Text("[DEF]", strutStyle: statusStrutStyle),
-                                  Text("[OVR]", strutStyle: statusStrutStyle),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Container(
-                          padding: AppSpacing.badgePadding,
-                          decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            context.l10n.uiCharacters(
-                              context.formats.integer(currentWords),
-                              context.formats.integer(totalWords),
-                            ),
-                            strutStyle: statusStrutStyle,
-                            style: statusTextStyle.copyWith(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onPrimaryContainer,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
+          if (compact)
+            _ExpandableStatusRows(
+              document: document,
+              minimumWidth: minimumSummaryWidth,
+              rowHeight: rowHeight,
+              words: words,
+              cursor: cursor,
+              controls: [saveTime, tabMenu, overwrite],
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.sm,
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final minimumWidth = MediaQuery.textScalerOf(
+                    context,
+                  ).scale(480);
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: constraints.maxWidth < minimumWidth
+                          ? minimumWidth
+                          : constraints.maxWidth,
+                      child: Row(
+                        children: [
+                          Expanded(child: document),
+                          const SizedBox(width: 8),
+                          saveTime,
+                          const SizedBox(width: 12),
+                          cursor,
+                          const SizedBox(width: 12),
+                          tabMenu,
+                          overwrite,
+                          const SizedBox(width: 4),
+                          words,
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
         ],
       ),
     );
   }
+}
+
+/// Essential information stays visible while secondary controls expand below.
+class _ExpandableStatusRows extends StatefulWidget {
+  const _ExpandableStatusRows({
+    required this.document,
+    required this.minimumWidth,
+    required this.rowHeight,
+    required this.words,
+    required this.cursor,
+    required this.controls,
+  });
+
+  final Widget document;
+  final double minimumWidth;
+  final double rowHeight;
+  final Widget words;
+  final Widget cursor;
+  final List<Widget> controls;
+
+  @override
+  State<_ExpandableStatusRows> createState() => _ExpandableStatusRowsState();
+}
+
+class _ExpandableStatusRowsState extends State<_ExpandableStatusRows> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      SizedBox(
+        key: const Key("statusbar-summary-row"),
+        height: widget.rowHeight,
+        child: Padding(
+          padding: const EdgeInsets.only(left: AppSpacing.sm),
+          child: Row(
+            children: [
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    // At large text scales or with large counts, keep every
+                    // value readable by scrolling the summary independently.
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SizedBox(
+                        width: constraints.maxWidth < widget.minimumWidth
+                            ? widget.minimumWidth
+                            : constraints.maxWidth,
+                        child: Row(
+                          children: [
+                            Expanded(child: widget.document),
+                            const SizedBox(width: 8),
+                            widget.cursor,
+                            const SizedBox(width: 8),
+                            widget.words,
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Semantics(
+                expanded: _expanded,
+                child: IconButton(
+                  key: const Key("statusbar-expand"),
+                  constraints: BoxConstraints.tight(
+                    Size.square(widget.rowHeight),
+                  ),
+                  tooltip: _expanded
+                      ? context.l10n.uiCollapseDetails
+                      : context.l10n.uiExpandDetails,
+                  onPressed: () => setState(() => _expanded = !_expanded),
+                  icon: Icon(_expanded ? Icons.expand_more : Icons.expand_less),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      if (_expanded) ...[
+        const Divider(height: 1),
+        SizedBox(
+          key: const Key("statusbar-secondary-row"),
+          height: widget.rowHeight,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            child: LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                  child: SizedBox(
+                    height: widget.rowHeight,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        widget.controls[0],
+                        const SizedBox(width: 12),
+                        ...widget.controls.skip(1),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ],
+  );
 }
 
 /// Space width and count appear in columns, with auto-indent across the bottom.
@@ -390,132 +550,135 @@ class _ScrollingText extends StatefulWidget {
 }
 
 class _ScrollingTextState extends State<_ScrollingText>
-    with WidgetsBindingObserver {
-  late ScrollController _scrollController;
-  bool _shouldScroll = false;
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  static const _gap = 32.0;
+  static const _pixelsPerSecond = 32.0;
+
+  late final AnimationController _animation;
   bool _isAppActive = true;
-  int _scrollGeneration = 0;
+  bool _shouldAnimate = false;
+  double _period = -1;
+  int _generation = 0;
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
+    _animation = AnimationController(vsync: this);
     WidgetsBinding.instance.addObserver(this);
-
-    _scheduleScrollCheck();
   }
 
   @override
-  void didUpdateWidget(_ScrollingText oldWidget) {
+  void didUpdateWidget(covariant _ScrollingText oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.text != widget.text ||
         oldWidget.style != widget.style ||
         oldWidget.strutStyle != widget.strutStyle) {
-      _stopScrolling(resetPosition: true);
-      _scheduleScrollCheck();
+      _animation.reset();
+      _period = -1;
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final isActive = state == AppLifecycleState.resumed;
-    if (_isAppActive == isActive) return;
-    _isAppActive = isActive;
-    if (isActive) {
-      _scheduleScrollCheck();
+    _isAppActive = state == AppLifecycleState.resumed;
+    if (_isAppActive && _shouldAnimate) {
+      _animation.repeat();
     } else {
-      _stopScrolling(resetPosition: false);
+      _animation.stop();
     }
   }
 
-  void _scheduleScrollCheck() {
-    final generation = ++_scrollGeneration;
+  void _configureAnimation(double period, bool enabled) {
+    if (_period == period && _shouldAnimate == enabled) return;
+    _period = period;
+    _shouldAnimate = enabled;
+    final generation = ++_generation;
+    // Width, text scaling and animation preferences can change during layout.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || generation != _scrollGeneration) return;
-      _checkScroll();
+      if (!mounted || generation != _generation) return;
+      _animation.stop();
+      if (!_shouldAnimate) return;
+      _animation.duration = Duration(
+        milliseconds: (_period / _pixelsPerSecond * 1000).round(),
+      );
+      if (_isAppActive) _animation.repeat();
     });
-  }
-
-  void _checkScroll() {
-    if (!mounted) return;
-
-    if (_scrollController.hasClients) {
-      final maxScroll = _scrollController.position.maxScrollExtent;
-      if (maxScroll > 0 && !_shouldScroll && _isAppActive) {
-        setState(() {
-          _shouldScroll = true;
-        });
-        final generation = ++_scrollGeneration;
-        _runMarquee(generation);
-      } else if (maxScroll <= 0 && _shouldScroll) {
-        _stopScrolling(resetPosition: true);
-      }
-    }
-  }
-
-  bool _canContinue(int generation) {
-    return mounted &&
-        _isAppActive &&
-        _shouldScroll &&
-        generation == _scrollGeneration &&
-        _scrollController.hasClients;
-  }
-
-  Future<void> _runMarquee(int generation) async {
-    try {
-      while (_canContinue(generation)) {
-        await _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: Duration(
-            milliseconds: (widget.text.length * 200).clamp(2000, 30000),
-          ),
-          curve: Curves.linear,
-        );
-        if (!_canContinue(generation)) return;
-        await Future<void>.delayed(const Duration(seconds: 1));
-        if (!_canContinue(generation)) return;
-        await _scrollController.animateTo(
-          0,
-          duration: const Duration(milliseconds: 1000),
-          curve: Curves.easeOut,
-        );
-        if (!_canContinue(generation)) return;
-        await Future<void>.delayed(const Duration(seconds: 2));
-      }
-    } catch (_) {
-      // jumpTo/dispose can cancel an in-flight animation; generation owns restart.
-    }
-  }
-
-  void _stopScrolling({required bool resetPosition}) {
-    _scrollGeneration++;
-    _shouldScroll = false;
-    if (resetPosition && _scrollController.hasClients) {
-      _scrollController.jumpTo(0);
-    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _scrollGeneration++;
-    _scrollController.dispose();
+    _animation.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      controller: _scrollController,
-      scrollDirection: Axis.horizontal,
-      physics: const NeverScrollableScrollPhysics(),
-      child: Text(
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final direction = Directionality.of(context);
+      final textScaler = MediaQuery.textScalerOf(context);
+      final painter = TextPainter(
+        text: TextSpan(text: widget.text, style: widget.style),
+        strutStyle: widget.strutStyle,
+        maxLines: 1,
+        textDirection: direction,
+        textScaler: textScaler,
+      )..layout();
+      final textWidth = painter.width;
+      final textHeight = painter.height;
+      painter.dispose();
+      final overflows =
+          constraints.maxWidth.isFinite && textWidth > constraints.maxWidth;
+      final animated = overflows && !MediaQuery.disableAnimationsOf(context);
+      final period = textWidth + _gap;
+      _configureAnimation(period, animated);
+
+      Widget text() => Text(
         widget.text,
         style: widget.style,
         strutStyle: widget.strutStyle,
+        textDirection: direction,
         textAlign: TextAlign.left,
         maxLines: 1,
-      ),
-    );
-  }
+        overflow: TextOverflow.clip,
+      );
+      if (!animated) return text();
+
+      return Semantics(
+        label: widget.text,
+        child: ExcludeSemantics(
+          child: SizedBox(
+            height: textHeight,
+            child: ClipRect(
+              key: const Key("statusbar-chapter-marquee"),
+              child: OverflowBox(
+                alignment: Alignment.centerLeft,
+                minWidth: period * 2,
+                maxWidth: period * 2,
+                minHeight: textHeight,
+                maxHeight: textHeight,
+                child: AnimatedBuilder(
+                  animation: _animation,
+                  builder: (context, child) => Transform.translate(
+                    key: const Key("statusbar-chapter-cycle"),
+                    offset: Offset(-_animation.value * period, 0),
+                    child: child,
+                  ),
+                  child: Row(
+                    textDirection: TextDirection.ltr,
+                    children: [
+                      text(),
+                      const SizedBox(width: _gap),
+                      text(),
+                      const SizedBox(width: _gap),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }

@@ -515,11 +515,15 @@ class PlainTextQuillEditorPoc extends StatefulWidget {
     this.overwriteProtectedRanges = const [],
     this.revisionRanges = const [],
     this.revisionMarkers = const [],
+    this.padding = const EdgeInsets.all(AppSpacing.lg),
   });
 
   /// Plain text supplied by the host. Changing this value simulates selecting
   /// a different chapter without persisting a Quill document.
   final String content;
+
+  /// Scrollable space around the text, including host overlay compensation.
+  final EdgeInsets padding;
   final List<PlainTextQuillRenderRange> revisionRanges;
   final List<PlainTextQuillRevisionMarker> revisionMarkers;
 
@@ -1217,7 +1221,7 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
                 return null;
               },
               expands: true,
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: widget.padding,
               placeholder: widget.placeholder ?? context.l10n.uiStartWriting,
               customStyles: DefaultStyles(
                 paragraph: defaultParagraph.copyWith(

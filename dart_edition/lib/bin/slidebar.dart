@@ -67,6 +67,7 @@ class MonogatariNavigationLayout extends StatefulWidget {
     this.selectedLabelTextStyle,
     this.unselectedLabelTextStyle,
     this.visible = true,
+    this.modalLauncherBuilder,
   });
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
@@ -76,6 +77,10 @@ class MonogatariNavigationLayout extends StatefulWidget {
   final TextStyle? selectedLabelTextStyle;
   final TextStyle? unselectedLabelTextStyle;
   final bool visible;
+
+  /// Supplies a positioned launcher for modal navigation, such as a mobile FAB.
+  final Widget Function(BuildContext, VoidCallback, FocusNode)?
+  modalLauncherBuilder;
 
   @override
   State<MonogatariNavigationLayout> createState() =>
@@ -282,19 +287,24 @@ class _MonogatariNavigationLayoutState
                 ),
               ),
               if (widget.visible && widget.modal)
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  child: SafeArea(
-                    child: IconButton(
-                      key: const Key("navigation-launcher"),
-                      focusNode: _launcherFocus,
-                      tooltip: context.l10n.uiExpandNavigation,
-                      icon: const Icon(Icons.menu),
-                      onPressed: () => _open(pinned: true),
+                widget.modalLauncherBuilder?.call(
+                      context,
+                      () => _open(pinned: true),
+                      _launcherFocus,
+                    ) ??
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      child: SafeArea(
+                        child: IconButton(
+                          key: const Key("navigation-launcher"),
+                          focusNode: _launcherFocus,
+                          tooltip: context.l10n.uiExpandNavigation,
+                          icon: const Icon(Icons.menu),
+                          onPressed: () => _open(pinned: true),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
               if (widget.visible && _expanded && (widget.modal || !_pinned))
                 Positioned.fill(
                   child: Semantics(
@@ -425,6 +435,7 @@ class _MonogatariNavigationLayoutState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           destination(0),
+          if (widget.modal) destination(17),
           const Divider(height: 1),
           Expanded(
             child: Scrollbar(
@@ -436,7 +447,7 @@ class _MonogatariNavigationLayoutState
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     for (final index in _scrollingModuleIndexes)
-                      destination(index),
+                      if (!widget.modal || index != 17) destination(index),
                   ],
                 ),
               ),

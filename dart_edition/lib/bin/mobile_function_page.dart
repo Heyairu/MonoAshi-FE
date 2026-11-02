@@ -17,53 +17,155 @@
 import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
+import "dart:math" as math;
+
 import "slidebar.dart";
+import "../ui_library/mobile_editor_insets.dart";
+import "../presentation/widgets/radial_gauge_dashboard.dart";
 import "punctuation_panel.dart";
 
-class MonogatariMobileLayout extends StatelessWidget {
+class MonogatariMobileLayout extends StatefulWidget {
   final bool isEditorMode;
+  final int selectedIndex;
   final Widget functionPage;
   final Widget editorPage;
   final Widget statusBar;
+  final Widget Function(VoidCallback onClose) dashboardBuilder;
   final ValueChanged<int> onDestinationSelected;
 
   const MonogatariMobileLayout({
     super.key,
     required this.isEditorMode,
+    required this.selectedIndex,
     required this.functionPage,
     required this.editorPage,
     required this.statusBar,
+    required this.dashboardBuilder,
     required this.onDestinationSelected,
   });
 
   @override
+  State<MonogatariMobileLayout> createState() => _MonogatariMobileLayoutState();
+}
+
+class _MonogatariMobileLayoutState extends State<MonogatariMobileLayout> {
+  bool _dashboardOpen = false;
+
+  void _closeDashboard() => setState(() => _dashboardOpen = false);
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: isEditorMode ? 1 : 0,
-        children: [functionPage, editorPage],
-      ),
-      bottomSheet: null,
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          statusBar,
-          NavigationBar(
-            selectedIndex: isEditorMode ? 1 : 0,
-            onDestinationSelected: onDestinationSelected,
-            destinations: [
-              NavigationDestination(
-                icon: Icon(Icons.dashboard),
-                label: context.l10n.uiFeatures,
+      // The outer workspace Scaffold already applies the keyboard inset.
+      resizeToAvoidBottomInset: false,
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: MonogatariNavigationLayout(
+          modal: true,
+          selectedIndex: widget.selectedIndex,
+          onDestinationSelected: widget.onDestinationSelected,
+          modalLauncherBuilder: (context, openDrawer, focusNode) => Positioned(
+            left:
+                MobileEditorInsets.edge +
+                (RadialGaugeDashboard.panelWidth -
+                        MobileEditorInsets.buttonSize) /
+                    2,
+            bottom: MobileEditorInsets.edge,
+            child: SizedBox.square(
+              dimension: MobileEditorInsets.buttonSize,
+              child: FloatingActionButton.large(
+                key: const Key("mobile-navigation-button"),
+                heroTag: null,
+                focusNode: focusNode,
+                tooltip: context.l10n.uiExpandNavigation,
+                shape: const CircleBorder(),
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest,
+                foregroundColor: Theme.of(context).colorScheme.primary,
+                elevation: 0,
+                focusElevation: 0,
+                hoverElevation: 0,
+                highlightElevation: 0,
+                disabledElevation: 0,
+                onPressed: () {
+                  if (_dashboardOpen) _closeDashboard();
+                  openDrawer();
+                },
+                child: const Icon(Icons.menu_rounded, size: 24),
               ),
-              NavigationDestination(
-                icon: Icon(Icons.edit_note),
-                label: context.l10n.uiEditor,
-              ),
-            ],
+            ),
           ),
-        ],
+          child: LayoutBuilder(
+            builder: (context, constraints) => Stack(
+              children: [
+                Positioned.fill(
+                  child: IndexedStack(
+                    index: widget.isEditorMode ? 1 : 0,
+                    children: [widget.functionPage, widget.editorPage],
+                  ),
+                ),
+                if (_dashboardOpen)
+                  Positioned.fill(
+                    child: GestureDetector(
+                      key: const Key("mobile-dashboard-dismiss-area"),
+                      behavior: HitTestBehavior.opaque,
+                      onTap: _closeDashboard,
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+                if (_dashboardOpen)
+                  Positioned(
+                    key: const Key("mobile-dashboard-capsule"),
+                    right: MobileEditorInsets.edge,
+                    bottom: MobileEditorInsets.edge,
+                    width: RadialGaugeDashboard.panelWidth,
+                    height: math.min(
+                      560,
+                      math.max(
+                        0,
+                        constraints.maxHeight - MobileEditorInsets.edge * 2,
+                      ),
+                    ),
+                    child: widget.dashboardBuilder(_closeDashboard),
+                  )
+                else
+                  Positioned(
+                    right:
+                        MobileEditorInsets.edge +
+                        (RadialGaugeDashboard.panelWidth -
+                                MobileEditorInsets.buttonSize) /
+                            2,
+                    bottom: MobileEditorInsets.edge,
+                    child: SizedBox.square(
+                      dimension: MobileEditorInsets.buttonSize,
+                      child: FloatingActionButton.large(
+                        key: const Key("mobile-dashboard-button"),
+                        heroTag: null,
+                        tooltip: context.l10n.uiOpenDashboard,
+                        shape: const CircleBorder(),
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
+                        elevation: 0,
+                        focusElevation: 0,
+                        hoverElevation: 0,
+                        highlightElevation: 0,
+                        disabledElevation: 0,
+                        onPressed: () => setState(() => _dashboardOpen = true),
+                        child: const ExcludeSemantics(
+                          child: RadialGaugePreview(),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
       ),
+      bottomNavigationBar: SafeArea(top: false, child: widget.statusBar),
     );
   }
 }
@@ -75,8 +177,6 @@ class MonogatariMobileFunctionPage extends StatelessWidget {
   final int pageCount;
   final int selectedIndex;
   final double fontSize;
-  final VoidCallback onBeforePageSwitch;
-  final ValueChanged<int> onPageSelected;
   final Widget Function(int pageIndex) pageBuilder;
 
   const MonogatariMobileFunctionPage({
@@ -87,8 +187,6 @@ class MonogatariMobileFunctionPage extends StatelessWidget {
     required this.pageCount,
     required this.selectedIndex,
     required this.fontSize,
-    required this.onBeforePageSwitch,
-    required this.onPageSelected,
     required this.pageBuilder,
   });
 
@@ -103,41 +201,11 @@ class MonogatariMobileFunctionPage extends StatelessWidget {
           ),
 
         Expanded(
-          child: MonogatariNavigationLayout(
-            modal: true,
-            selectedIndex: selectedIndex.clamp(0, pageCount - 1),
-            onDestinationSelected: (index) {
-              onBeforePageSwitch();
-              onPageSelected(index);
-            },
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 48,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 56, right: 16),
-                      child: Text(
-                        monogatariNavigationDestinations[selectedIndex.clamp(
-                              0,
-                              pageCount - 1,
-                            )]
-                            .label,
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: IndexedStack(
-                    index: selectedIndex.clamp(0, pageCount - 1),
-                    children: [
-                      for (var i = 0; i < pageCount; i++) pageBuilder(i),
-                    ],
-                  ),
-                ),
-              ],
+          child: MobileModuleInsets(
+            child: IndexedStack(
+              key: const Key("mobile-module-pages"),
+              index: selectedIndex.clamp(0, pageCount - 1),
+              children: [for (var i = 0; i < pageCount; i++) pageBuilder(i)],
             ),
           ),
         ),
