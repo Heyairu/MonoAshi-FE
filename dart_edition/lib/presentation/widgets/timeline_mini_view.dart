@@ -20,8 +20,8 @@ class TimelineMiniView extends StatelessWidget {
   final bool showPlayhead;
   final double height;
   final double pixelsPerTick;
-  final String emptyMessage;
-  final String semanticLabel;
+  final String? emptyMessage;
+  final String? semanticLabel;
   final Key? canvasKey;
 
   const TimelineMiniView({
@@ -38,8 +38,8 @@ class TimelineMiniView extends StatelessWidget {
     this.showPlayhead = true,
     this.height = 120,
     this.pixelsPerTick = 48,
-    this.emptyMessage = "尚無時間軸節點",
-    this.semanticLabel = "微型時間軸",
+    this.emptyMessage,
+    this.semanticLabel,
     this.canvasKey,
   });
 

@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "control_size.dart";
@@ -47,20 +48,21 @@ class NeonIconButton extends StatelessWidget {
     final targetSize = desktop ? AppControlSize.height : 48.0;
     final description = [
       label,
-      if (selected != null) selected! ? "已啟用" : "未啟用",
+      if (selected != null)
+        selected! ? context.l10n.uiEnabled : context.l10n.uiDisabled2,
       if (status != NeonStatus.idle || statusLabel != null)
         statusLabel ??
             switch (status) {
-              NeonStatus.idle => "待命",
-              NeonStatus.error => "錯誤",
-              NeonStatus.warning => "異常需要處理",
-              NeonStatus.notice => "待確認",
-              NeonStatus.active => "持續生效",
-              NeonStatus.connected => "已連結",
-              NeonStatus.info => "資訊",
-              NeonStatus.preview => "歷史預覽",
+              NeonStatus.idle => context.l10n.uiStandby,
+              NeonStatus.error => context.l10n.uiError,
+              NeonStatus.warning => context.l10n.uiAttentionRequired,
+              NeonStatus.notice => context.l10n.uiAwaitingConfirmation,
+              NeonStatus.active => context.l10n.uiActive,
+              NeonStatus.connected => context.l10n.uiLinked,
+              NeonStatus.info => context.l10n.uiInformation2,
+              NeonStatus.preview => context.l10n.uiHistoricalPreview,
             },
-      if (busy) "處理中",
+      if (busy) context.l10n.uiProcessing,
     ].join("，");
     final statusIcon = NeonStatusIcon(
       icon: icon,

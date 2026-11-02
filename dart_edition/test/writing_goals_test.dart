@@ -60,14 +60,14 @@ void main() {
     expect(defaults.chapterWordGoal, 3000);
   });
 
-  test('1.18 upgrades to 1.20 without materializing defaults', () {
+  test('1.18 upgrades to 1.22 without materializing defaults', () {
     final parsed = FileService.parseProjectXMLWithMetadata(
       '<Project><ver>1.18</ver></Project>',
     );
     expect(parsed.wasMigrated, isTrue);
     expect(parsed.data.writingGoals, const ProjectWritingGoals());
     final xml = FileService.generateProjectXML(parsed.data);
-    expect(xml, contains('<ver>1.20</ver>'));
+    expect(xml, contains('<ver>1.22</ver>'));
     expect(xml, isNot(contains('<Name>WritingGoals</Name>')));
   });
 

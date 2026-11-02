@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "dart:async";
 import "package:xml/xml.dart" as xml;
@@ -1721,9 +1722,12 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 標題
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
-                child: LargeTitle(icon: Icons.account_tree, text: "大綱調整"),
+                child: LargeTitle(
+                  icon: Icons.account_tree,
+                  text: context.l10n.uiOutline,
+                ),
               ),
               const SizedBox(height: 32),
               SceneRangeView(storylines: outlineStorylines),
@@ -1784,7 +1788,10 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const MediumTitle(icon: Icons.library_books, text: "大箱（故事線）"),
+            MediumTitle(
+              icon: Icons.library_books,
+              text: context.l10n.uiStorylines,
+            ),
             const SizedBox(height: 16),
 
             // 故事線列表
@@ -1826,7 +1833,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                   child: storylines.isEmpty
                       ? Center(
                           child: Text(
-                            "暫無故事線",
+                            context.l10n.uiNoStorylinesYet,
                             style: Theme.of(context).textTheme.labelLarge
                                 ?.copyWith(
                                   color: Theme.of(
@@ -1850,7 +1857,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
 
             // 新增故事線
             AddItemInput(
-              title: "故事線名稱",
+              title: context.l10n.uiStorylineName,
               controller: newStorylineController,
               onAdd: (_) => _addStoryline(),
               allowEmpty: true,
@@ -1864,7 +1871,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
 
             const SizedBox(height: 12),
             Text(
-              "大箱：故事的大致走向。標記可以使用「三幕劇」、「起承轉合」、「故事七步驟」等結構",
+              context.l10n.uiStorylineTheBroadDirectionOfYourStoryUse,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(
                   context,
@@ -1894,8 +1901,9 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
       final val = _renameListController!.text.trim();
       _updateStorylineAt(
         index,
-        (storyline) =>
-            storyline.copyWith(storylineName: val.isEmpty ? "(未命名故事線)" : val),
+        (storyline) => storyline.copyWith(
+          storylineName: val.isEmpty ? context.l10n.uiUntitledStoryline : val,
+        ),
       );
       _notifyChange();
     }
@@ -1918,7 +1926,9 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
       _updateEventAt(
         slIdx,
         evIdx,
-        (event) => event.copyWith(storyEvent: val.isEmpty ? "(未命名事件)" : val),
+        (event) => event.copyWith(
+          storyEvent: val.isEmpty ? context.l10n.uiUntitledEvent : val,
+        ),
       );
       _notifyChange();
     }
@@ -1942,7 +1952,9 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
         slIdx,
         evIdx,
         scIdx,
-        (scene) => scene.copyWith(sceneName: val.isEmpty ? "(未命名場景)" : val),
+        (scene) => scene.copyWith(
+          sceneName: val.isEmpty ? context.l10n.uiUntitledScene : val,
+        ),
       );
       _notifyChange();
     }
@@ -2028,7 +2040,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "大箱內容（故事線細節）",
+              context.l10n.uiStorylineDetails,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -2040,8 +2052,8 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                 selectedStorylineID!,
                 "storylineName",
               ),
-              decoration: const InputDecoration(
-                labelText: "故事線名稱",
+              decoration: InputDecoration(
+                labelText: context.l10n.uiStorylineName,
                 isDense: true,
               ),
             ),
@@ -2052,8 +2064,8 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                 selectedStorylineID!,
                 "storylineType",
               ),
-              decoration: const InputDecoration(
-                labelText: "類型 (如：開頭、中段、高潮、結尾)",
+              decoration: InputDecoration(
+                labelText: context.l10n.uiTypeEGOpeningMiddleClimaxEnding,
                 isDense: true,
               ),
             ),
@@ -2064,13 +2076,16 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                 selectedStorylineID!,
                 "conflictPoint",
               ),
-              decoration: const InputDecoration(
-                labelText: "主要衝突",
+              decoration: InputDecoration(
+                labelText: context.l10n.uiMainConflict,
                 isDense: true,
               ),
             ),
             const SizedBox(height: 16),
-            Text("備註", style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              context.l10n.uiNotes,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             _buildCollaborativeOutlineField(
               controller: storylineMemoController,
@@ -2078,7 +2093,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                 selectedStorylineID!,
                 "memo",
               ),
-              decoration: const InputDecoration(hintText: "輸入備註..."),
+              decoration: InputDecoration(hintText: context.l10n.uiEnterNotes),
               maxLines: 4,
             ),
           ],
@@ -2099,7 +2114,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const MediumTitle(icon: Icons.event_note, text: "中箱（事件）"),
+            MediumTitle(icon: Icons.event_note, text: context.l10n.uiEvents),
             const SizedBox(height: 16),
 
             if (selectedStorylineIndex != null) ...[
@@ -2128,7 +2143,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                     child: events.isEmpty
                         ? Center(
                             child: Text(
-                              "此故事線暫無事件",
+                              context.l10n.uiNoEventsInThisStorylineYet,
                               style: Theme.of(context).textTheme.labelLarge
                                   ?.copyWith(
                                     color: Theme.of(
@@ -2151,7 +2166,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
               const SizedBox(height: 16),
 
               AddItemInput(
-                title: "事件名稱",
+                title: context.l10n.uiEventName,
                 controller: newEventController,
                 onAdd: (_) => _addEvent(),
                 allowEmpty: true,
@@ -2167,15 +2182,16 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                 width: double.infinity,
                 decoration: _outlineListDecoration(),
                 child: _outlineListEmptyState(
-                  title: "請先選擇故事線",
-                  description: "選擇故事線後即可新增與編輯事件",
+                  title: context.l10n.uiSelectAStorylineFirst,
+                  description:
+                      context.l10n.uiSelectAStorylineToAddAndEditEvents,
                 ),
               ),
             ],
 
             const SizedBox(height: 12),
             Text(
-              "中箱：具體發生的事件。",
+              context.l10n.uiEventASpecificOccurrenceInTheStory,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(
                   context,
@@ -2214,7 +2230,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
         onEdit: () => _startRenamingStoryline(storyline),
         onSubmitted: (_) => _submitRenamingStoryline(index),
         onCanceled: _cancelRenaming,
-        emptyText: "(未命名故事線)",
+        emptyText: context.l10n.uiUntitledStoryline,
         style: isSelected
             ? TextStyle(
                 fontWeight: FontWeight.w600,
@@ -2223,7 +2239,9 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
             : null,
       ),
       subtitle: Text(
-        storyline.storylineType.isEmpty ? "未設定類型" : storyline.storylineType,
+        storyline.storylineType.isEmpty
+            ? context.l10n.uiTypeNotSet
+            : storyline.storylineType,
         style: Theme.of(context).textTheme.bodySmall,
       ),
       leading: Icon(
@@ -2248,7 +2266,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
             onDelete: storylines.length > 1
                 ? () => _deleteStoryline(storyline.chapterUUID)
                 : null,
-            deleteTooltip: "刪除故事線",
+            deleteTooltip: context.l10n.uiDeleteStoryline,
           ),
         ],
       ),
@@ -2305,7 +2323,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
           _moveEventToStoryline(data.id, storyline.chapterUUID);
           AppFeedback.success(
             context,
-            "事件已移動到「${storyline.storylineName}」",
+            context.l10n.uiEventMovedTo((storyline.storylineName).toString()),
             duration: const Duration(seconds: 2),
           );
         }
@@ -2340,7 +2358,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
         onEdit: () => _startRenamingEvent(event),
         onSubmitted: (_) => _submitRenamingEvent(slIdx, index),
         onCanceled: _cancelRenaming,
-        emptyText: "(未命名事件)",
+        emptyText: context.l10n.uiUntitledEvent,
         style: isSelected
             ? TextStyle(
                 fontWeight: FontWeight.w600,
@@ -2349,7 +2367,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
             : null,
       ),
       subtitle: Text(
-        "${event.scenes.length} 個場景",
+        context.l10n.uiScenes(context.formats.integer(event.scenes.length)),
         style: Theme.of(context).textTheme.bodySmall,
       ),
       leading: Icon(
@@ -2371,7 +2389,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
           ItemActionBar.editDelete(
             onEdit: () => _startRenamingEvent(event),
             onDelete: () => _deleteEvent(event.storyEventUUID, slIdx),
-            deleteTooltip: "刪除事件",
+            deleteTooltip: context.l10n.uiDeleteEvent,
           ),
         ],
       ),
@@ -2471,7 +2489,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "中箱內容（事件細節）",
+              context.l10n.uiEventDetails,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -2491,8 +2509,8 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                     event.storyEventUUID,
                     "storyEvent",
                   ),
-                  decoration: const InputDecoration(
-                    labelText: "事件名稱",
+                  decoration: InputDecoration(
+                    labelText: context.l10n.uiEventName,
                     isDense: true,
                   ),
                 );
@@ -2514,8 +2532,8 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                     event.storyEventUUID,
                     "conflictPoint",
                   ),
-                  decoration: const InputDecoration(
-                    labelText: "衝突點",
+                  decoration: InputDecoration(
+                    labelText: context.l10n.uiPointOfConflict,
                     isDense: true,
                   ),
                 );
@@ -2525,7 +2543,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
             const SizedBox(height: 16),
 
             CardList(
-              title: "預設人物",
+              title: context.l10n.uiDefaultCharacters,
               icon: Icons.person,
               items: event.people.map(_characterReferenceLabel).toList(),
               onAdd: (item) {
@@ -2580,7 +2598,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
               children: [
                 Expanded(
                   child: Text(
-                    "物品分配",
+                    context.l10n.uiItemAllocations,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
@@ -2588,13 +2606,13 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                   key: const Key("event-link-item"),
                   onPressed: () => _linkItemToEvent(event.storyEventUUID),
                   icon: const Icon(Icons.add_link),
-                  label: const Text("分配物品"),
+                  label: Text(context.l10n.uiAssignItem),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             if (linkedItems.isEmpty)
-              const Text("尚未分配正式物品。")
+              Text(context.l10n.uiNoTrackedItemsAllocatedYet)
             else
               ...linkedItems.map(
                 (entry) => ListTile(
@@ -2612,11 +2630,11 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                   subtitle: Text(
                     [
                       entry.relation.itemKind == ItemReferenceKind.itemClass
-                          ? "物品 Class"
-                          : "單件物品",
+                          ? context.l10n.uiItemClass
+                          : context.l10n.uiIndividualItems,
                       if (entry.relation.role.isNotEmpty) entry.relation.role,
                       if (entry.relation.note.isNotEmpty) entry.relation.note,
-                    ].join("・"),
+                    ].join(context.l10n.uiLiteral),
                   ),
                   trailing: Wrap(
                     children: [
@@ -2625,7 +2643,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                           key: ValueKey(
                             "event-open-item-${entry.relation.relationId}",
                           ),
-                          tooltip: "開啟物品頁",
+                          tooltip: context.l10n.uiOpenItems,
                           onPressed: () {
                             final classId =
                                 entry.relation.itemKind ==
@@ -2642,7 +2660,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                         key: ValueKey(
                           "event-unlink-item-${entry.relation.relationId}",
                         ),
-                        tooltip: "解除關聯",
+                        tooltip: context.l10n.uiUnlink,
                         onPressed: () => ref
                             .read(itemWorkspaceProvider.notifier)
                             .removeRelation(entry.relation.relationId),
@@ -2655,7 +2673,10 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
 
             const SizedBox(height: 16),
 
-            Text("備註", style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              context.l10n.uiNotes,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             Builder(
               builder: (context) {
@@ -2671,7 +2692,9 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                     event.storyEventUUID,
                     "memo",
                   ),
-                  decoration: const InputDecoration(hintText: "輸入備註..."),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.uiEnterNotes,
+                  ),
                   maxLines: 4,
                 );
               },
@@ -2697,7 +2720,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
         .toSet();
     final selected = await showProjectObjectSelector(
       context: context,
-      title: "選擇要連結的事件物品",
+      title: context.l10n.uiChooseAnEventItemToLink,
       allowedKinds: const {
         ProjectObjectKind.itemClass,
         ProjectObjectKind.itemInstance,
@@ -2715,7 +2738,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
             itemKind: itemKind,
             targetId: eventId,
             targetKind: ItemRelationTargetKind.event,
-            role: "大綱物件",
+            role: context.l10n.uiOutlineObjects,
           ),
         );
   }
@@ -2729,8 +2752,8 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const AppNoticeBanner(
-          message: "以下是舊版文字物件。請轉換為正式物品；大綱已不再新增舊格式物件。",
+        AppNoticeBanner(
+          message: context.l10n.uiTheseAreLegacyTextObjectsConvertThemTo,
           icon: Icons.sync_alt,
           tone: AppFeedbackTone.warning,
         ),
@@ -2744,12 +2767,12 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
               children: [
                 IconButton(
                   key: ValueKey("$keyPrefix-convert-${entry.key}"),
-                  tooltip: "轉換為正式物品",
+                  tooltip: context.l10n.uiConvertToManagedItem,
                   onPressed: () => onConvert(entry.key),
                   icon: const Icon(Icons.sync_alt),
                 ),
                 IconButton(
-                  tooltip: "刪除舊資料",
+                  tooltip: context.l10n.uiDeleteLegacyEntry,
                   onPressed: () => onRemove(entry.key),
                   icon: const Icon(Icons.delete_outline),
                 ),
@@ -2795,7 +2818,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
           children: [
             Expanded(
               child: Text(
-                "物品分配",
+                context.l10n.uiItemAllocations,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
@@ -2803,13 +2826,13 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
               key: const Key("scene-link-item"),
               onPressed: () => _linkItemToScene(sceneId),
               icon: const Icon(Icons.add_link),
-              label: const Text("分配物品"),
+              label: Text(context.l10n.uiAssignItem),
             ),
           ],
         ),
         const SizedBox(height: 8),
         if (entries.isEmpty)
-          const Text("尚未分配正式物品。")
+          Text(context.l10n.uiNoTrackedItemsAllocatedYet)
         else
           ...entries.map(
             (entry) => ListTile(
@@ -2824,14 +2847,14 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
               title: Text(entry.label),
               subtitle: Text(
                 entry.relation.itemKind == ItemReferenceKind.itemClass
-                    ? "物品 Class"
-                    : "單件物品",
+                    ? context.l10n.uiItemClass
+                    : context.l10n.uiIndividualItems,
               ),
               trailing: Wrap(
                 children: [
                   if (widget.onOpenItem != null && entry.classId != null)
                     IconButton(
-                      tooltip: "開啟物品頁",
+                      tooltip: context.l10n.uiOpenItems,
                       onPressed: () => widget.onOpenItem!(entry.classId!),
                       icon: const Icon(Icons.open_in_new),
                     ),
@@ -2839,7 +2862,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                     key: ValueKey(
                       "scene-unlink-item-${entry.relation.relationId}",
                     ),
-                    tooltip: "移除分配",
+                    tooltip: context.l10n.uiRemoveAllocation,
                     onPressed: () => ref
                         .read(itemWorkspaceProvider.notifier)
                         .removeRelation(entry.relation.relationId),
@@ -2868,7 +2891,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
         .toSet();
     final selected = await showProjectObjectSelector(
       context: context,
-      title: "選擇要分配給場景的物品",
+      title: context.l10n.uiChooseAnItemToAllocateToTheScene,
       allowedKinds: const {
         ProjectObjectKind.itemClass,
         ProjectObjectKind.itemInstance,
@@ -2886,7 +2909,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
             itemKind: itemKind,
             targetId: sceneId,
             targetKind: ItemRelationTargetKind.scene,
-            role: "大綱物件",
+            role: context.l10n.uiOutlineObjects,
           ),
         );
   }
@@ -2901,12 +2924,14 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
       context: context,
       builder: (context) => AlertDialog(
         key: const Key("legacy-item-conversion-choice"),
-        title: Text("轉換「$legacyName」"),
-        content: const Text("轉換成功後會移除這筆舊文字，改用可追蹤的正式物品 ID 關聯。"),
+        title: Text(context.l10n.uiConvert((legacyName).toString())),
+        content: Text(
+          context.l10n.uiAfterConversionThisLegacyTextIsReplacedWith,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("取消"),
+            child: Text(context.l10n.commonCancel),
           ),
           OutlinedButton(
             key: const Key("legacy-item-link-existing"),
@@ -2914,7 +2939,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
               context,
               _LegacyItemConversionAction.linkExisting,
             ),
-            child: const Text("連結既有"),
+            child: Text(context.l10n.uiLinkExisting),
           ),
           FilledButton(
             key: const Key("legacy-item-create-and-link"),
@@ -2922,7 +2947,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
               context,
               _LegacyItemConversionAction.createAndLink,
             ),
-            child: const Text("建立並連結"),
+            child: Text(context.l10n.uiCreateAndLink),
           ),
         ],
       ),
@@ -2949,7 +2974,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
           .toSet();
       final selected = await showProjectObjectSelector(
         context: context,
-        title: "選擇「$legacyName」對應的物品",
+        title: context.l10n.uiChooseTheItemFor((legacyName).toString()),
         allowedKinds: const {
           ProjectObjectKind.itemClass,
           ProjectObjectKind.itemInstance,
@@ -2972,9 +2997,9 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
         legacyName: legacyName,
         subject: subject,
       );
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("已轉為正式物品關聯。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.uiConvertedToATrackedItemLink)),
+      );
     } on StateError catch (error) {
       ScaffoldMessenger.of(
         context,
@@ -2992,7 +3017,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           key: const Key("legacy-item-create-dialog"),
-          title: const Text("建立正式物品"),
+          title: Text(context.l10n.uiCreateManagedItem),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -3001,7 +3026,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                 initialValue: name,
                 decoration: appFieldDecoration(
                   context,
-                  decoration: const InputDecoration(labelText: "名稱"),
+                  decoration: InputDecoration(labelText: context.l10n.uiName2),
                 ),
                 onChanged: (value) => setDialogState(() => name = value),
               ),
@@ -3017,20 +3042,24 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                 initialValue: mode,
                 decoration: appDropdownFieldDecoration(
                   context,
-                  decoration: const InputDecoration(labelText: "物品模式"),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.uiItemMode,
+                  ),
                 ),
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: ItemMode.dedicated,
-                    child: Text("專用（建立獨立 ID）"),
+                    child: Text(context.l10n.uiDedicatedIndependentID),
                   ),
                   DropdownMenuItem(
                     value: ItemMode.semiDedicated,
-                    child: Text("半專用（Class 內建立一件）"),
+                    child: Text(
+                      context.l10n.uiSemiDedicatedOneInstanceInADefinition,
+                    ),
                   ),
                   DropdownMenuItem(
                     value: ItemMode.generic,
-                    child: Text("非專用（只建立 Class）"),
+                    child: Text(context.l10n.uiNonDedicatedClassOnly),
                   ),
                 ],
                 onChanged: (value) => setDialogState(() {
@@ -3042,14 +3071,14 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               key: const Key("legacy-item-create-confirm"),
               onPressed: name.trim().isEmpty
                   ? null
                   : () => Navigator.pop(context, true),
-              child: const Text("建立並連結"),
+              child: Text(context.l10n.uiCreateAndLink),
             ),
           ],
         ),
@@ -3181,8 +3210,8 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
           itemKind: subject.itemKind,
           targetId: targetId,
           targetKind: targetKind,
-          role: "大綱物件",
-          note: "由舊文字「$legacyName」轉換",
+          role: context.l10n.uiOutlineObjects,
+          note: context.l10n.uiConvertedFromLegacyText((legacyName).toString()),
         ),
       ],
     );
@@ -3209,7 +3238,10 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const MediumTitle(icon: Icons.theater_comedy, text: "小箱（場景）"),
+            MediumTitle(
+              icon: Icons.theater_comedy,
+              text: context.l10n.uiScenes2,
+            ),
             const SizedBox(height: 16),
 
             if (selectedStorylineIndex != null &&
@@ -3251,7 +3283,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                             .isEmpty
                         ? Center(
                             child: Text(
-                              "暫無場景",
+                              context.l10n.uiNoScenesYet,
                               style: Theme.of(context).textTheme.labelLarge
                                   ?.copyWith(
                                     color: Theme.of(
@@ -3281,7 +3313,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
               const SizedBox(height: 16),
 
               AddItemInput(
-                title: "場景名稱",
+                title: context.l10n.uiSceneName2,
                 controller: newSceneController,
                 onAdd: (_) => _addScene(),
                 allowEmpty: true,
@@ -3296,15 +3328,15 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                 height: 250,
                 decoration: _outlineListDecoration(),
                 child: _outlineListEmptyState(
-                  title: "請先選擇一個事件",
-                  description: "選擇事件後即可新增與編輯場景",
+                  title: context.l10n.uiSelectAnEventFirst,
+                  description: context.l10n.uiSelectAnEventToAddAndEditScenes,
                 ),
               ),
             ],
 
             const SizedBox(height: 12),
             Text(
-              "小箱：事件的詳細場景。",
+              context.l10n.uiSceneADetailedSceneWithinAnEvent,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(
                   context,
@@ -3346,7 +3378,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
           index,
         ),
         onCanceled: _cancelRenaming,
-        emptyText: "(未命名場景)",
+        emptyText: context.l10n.uiUntitledScene,
         style: isSelected
             ? TextStyle(
                 fontWeight: FontWeight.w600,
@@ -3410,7 +3442,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
               selectedStorylineIndex!,
               selectedEventIndex!,
             ),
-            deleteTooltip: "刪除場景",
+            deleteTooltip: context.l10n.uiDeleteScene,
           ),
         ],
       ),
@@ -3495,7 +3527,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "小箱內容（場景細節）",
+              context.l10n.uiSceneDetails,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -3515,8 +3547,8 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                     scene.sceneUUID,
                     "sceneName",
                   ),
-                  decoration: const InputDecoration(
-                    labelText: "場景名稱",
+                  decoration: InputDecoration(
+                    labelText: context.l10n.uiSceneName2,
                     isDense: true,
                   ),
                 );
@@ -3542,8 +3574,8 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                               scene.sceneUUID,
                               "time",
                             ),
-                        decoration: const InputDecoration(
-                          labelText: "時間",
+                        decoration: InputDecoration(
+                          labelText: context.l10n.uiTime,
                           isDense: true,
                         ),
                       );
@@ -3566,8 +3598,8 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                               scene.sceneUUID,
                               "location",
                             ),
-                        decoration: const InputDecoration(
-                          labelText: "地點",
+                        decoration: InputDecoration(
+                          labelText: context.l10n.uiLocation,
                           isDense: true,
                         ),
                       );
@@ -3596,8 +3628,8 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                               scene.sceneUUID,
                               "focusPoint",
                             ),
-                        decoration: const InputDecoration(
-                          labelText: "聚焦點",
+                        decoration: InputDecoration(
+                          labelText: context.l10n.uiFocus,
                           isDense: true,
                         ),
                       );
@@ -3620,8 +3652,8 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                               scene.sceneUUID,
                               "conflictPoint",
                             ),
-                        decoration: const InputDecoration(
-                          labelText: "衝突點",
+                        decoration: InputDecoration(
+                          labelText: context.l10n.uiPointOfConflict,
                           isDense: true,
                         ),
                       );
@@ -3634,7 +3666,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
             const SizedBox(height: 16),
 
             CardList(
-              title: "人物",
+              title: context.l10n.uiCharacter,
               icon: Icons.person,
               items: scene.people.map(_characterReferenceLabel).toList(),
               onAdd: (item) {
@@ -3691,7 +3723,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
             const SizedBox(height: 16),
 
             CardList(
-              title: "行動",
+              title: context.l10n.uiAction,
               icon: Icons.directions_run,
               items: scene.doingThings,
               onAdd: (item) {
@@ -3717,7 +3749,10 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
 
             const SizedBox(height: 16),
 
-            Text("備註", style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              context.l10n.uiNotes,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             Builder(
               builder: (context) {
@@ -3733,7 +3768,9 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                     scene.sceneUUID,
                     "memo",
                   ),
-                  decoration: const InputDecoration(hintText: "輸入備註..."),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.uiEnterNotes,
+                  ),
                   maxLines: 4,
                 );
               },
@@ -3747,7 +3784,9 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
   // MARK: - 新增方法
   void _addStoryline() {
     final name = newStorylineController.text.trim();
-    final finalName = name.isEmpty ? "故事線 ${storylines.length + 1}" : name;
+    final finalName = name.isEmpty
+        ? context.l10n.uiStoryline2((storylines.length + 1).toString())
+        : name;
 
     final newStoryline = StorylineData(
       storylineName: finalName,
@@ -3776,7 +3815,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
 
     final name = newEventController.text.trim();
     final finalName = name.isEmpty
-        ? "事件 ${storylines[si].scenes.length + 1}"
+        ? context.l10n.uiEvent3((storylines[si].scenes.length + 1).toString())
         : name;
 
     final newEvent =
@@ -3810,7 +3849,9 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
 
     final name = newSceneController.text.trim();
     final finalName = name.isEmpty
-        ? "場景 ${storylines[si].scenes[ei].scenes.length + 1}"
+        ? context.l10n.uiScene(
+            (storylines[si].scenes[ei].scenes.length + 1).toString(),
+          )
         : name;
 
     final newScene =

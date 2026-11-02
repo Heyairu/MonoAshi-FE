@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "../../bin/ui_library.dart";
@@ -28,7 +29,7 @@ class ItemSnapshotStateEditor extends StatelessWidget {
       children: [
         _snapshotText(
           "name",
-          "當時名稱",
+          context.l10n.uiNameAtThisPoint,
           state.name,
           onChanged == null
               ? null
@@ -37,7 +38,7 @@ class ItemSnapshotStateEditor extends StatelessWidget {
         ),
         _snapshotText(
           "description",
-          "當時描述",
+          context.l10n.uiDescriptionAtThisPoint,
           state.description,
           onChanged == null
               ? null
@@ -48,7 +49,7 @@ class ItemSnapshotStateEditor extends StatelessWidget {
         ),
         _snapshotText(
           "status",
-          "狀態",
+          context.l10n.uiStatus,
           state.status,
           onChanged == null
               ? null
@@ -57,7 +58,7 @@ class ItemSnapshotStateEditor extends StatelessWidget {
         ),
         _snapshotSwitch(
           "exists",
-          "此時已存在",
+          context.l10n.uiExistsAtThisPoint,
           state.exists,
           onChanged == null
               ? null
@@ -65,8 +66,9 @@ class ItemSnapshotStateEditor extends StatelessWidget {
                     onChanged!(ItemStatePatch(exists: StateValue.set(value))),
         ),
         _snapshotReference(
+          context,
           "holder",
-          "持有人",
+          context.l10n.uiHolder,
           state.holderCharacterId,
           characters,
           onChanged == null
@@ -78,8 +80,9 @@ class ItemSnapshotStateEditor extends StatelessWidget {
                 ),
         ),
         _snapshotReference(
+          context,
           "location",
-          "所在地",
+          context.l10n.uiLocation2,
           state.locationId,
           locations,
           onChanged == null
@@ -129,7 +132,7 @@ class LocationSnapshotStateEditor extends StatelessWidget {
       children: [
         _snapshotText(
           "name",
-          "當時名稱",
+          context.l10n.uiNameAtThisPoint,
           state.name,
           onChanged == null
               ? null
@@ -138,7 +141,7 @@ class LocationSnapshotStateEditor extends StatelessWidget {
         ),
         _snapshotText(
           "description",
-          "當時描述",
+          context.l10n.uiDescriptionAtThisPoint,
           state.description,
           onChanged == null
               ? null
@@ -149,7 +152,7 @@ class LocationSnapshotStateEditor extends StatelessWidget {
         ),
         _snapshotText(
           "status",
-          "狀態",
+          context.l10n.uiStatus,
           state.status,
           onChanged == null
               ? null
@@ -159,7 +162,7 @@ class LocationSnapshotStateEditor extends StatelessWidget {
         ),
         _snapshotSwitch(
           "exists",
-          "此時已存在",
+          context.l10n.uiExistsAtThisPoint,
           state.exists,
           onChanged == null
               ? null
@@ -169,7 +172,7 @@ class LocationSnapshotStateEditor extends StatelessWidget {
         ),
         _snapshotSwitch(
           "accessible",
-          "可進入",
+          context.l10n.uiAccessible,
           state.accessible,
           onChanged == null
               ? null
@@ -178,8 +181,9 @@ class LocationSnapshotStateEditor extends StatelessWidget {
                 ),
         ),
         _snapshotReference(
+          context,
           "controller",
-          "控制者",
+          context.l10n.uiController2,
           state.controllerCharacterId,
           characters,
           onChanged == null
@@ -247,6 +251,7 @@ Widget _snapshotText(
 );
 
 Widget _snapshotReference(
+  BuildContext context,
   String id,
   String label,
   String? value,
@@ -259,9 +264,9 @@ Widget _snapshotReference(
     value: value ?? "",
     labelText: label,
     options: [
-      const DropdownOption(value: "", label: "未設定"),
+      DropdownOption(value: "", label: context.l10n.uiNotSet),
       if (value != null && !options.any((option) => option.value == value))
-        DropdownOption(value: value, label: "找不到：$value"),
+        DropdownOption(value: value, label: context.l10n.uiNotFound(value)),
       ...options,
     ],
     onChanged: onChanged == null

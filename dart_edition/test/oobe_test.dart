@@ -360,7 +360,7 @@ void main() {
           .onChanged,
       isNotNull,
     );
-    expect(find.text('立即套用並自動儲存。部分功能仍顯示繁體中文。'), findsOneWidget);
+    expect(find.text('切換後立即套用並自動保存；專案內容不受介面語言影響。'), findsOneWidget);
   });
 
   testWidgets("switches disable sliders while retaining intervals", (

@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "dart:ui" as ui;
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
@@ -251,36 +252,11 @@ class AppTheme {
     ),
   );
 
-  /// UI font follows the resolved application locale, including script code.
-  static String fontFamilyForLocale(Locale locale) {
-    final lang = locale.languageCode;
-    final country = locale.countryCode;
+  /// Backward-compatible presentation entry point; font policy lives in l10n.
+  static String fontFamilyForLocale(Locale locale) => AppFonts.primary(locale);
 
-    if (lang == "zh") {
-      if (locale.scriptCode == 'Hant') return 'NotoSansTC';
-      if (country == "HK") return "NotoSansHK";
-      if (country == "TW" || country == "MO") return "NotoSansTC";
-      return "NotoSansSC";
-    } else if (lang == "ja") {
-      return "NotoSansJP";
-    } else if (lang == "ko") {
-      return "NotoSansKR";
-    } else if (lang == "th") {
-      return "NotoSansThai";
-    }
-    return "NotoSans";
-  }
-
-  /// 字體回退列表 (保證不論選擇哪種字體，其他語言的字元也能顯示)
-  static const List<String> _fontFamilyFallback = [
-    "NotoSans",
-    "NotoSansTC",
-    "NotoSansSC",
-    "NotoSansJP",
-    "NotoSansKR",
-    "NotoSansHK",
-    "NotoSansThai",
-  ];
+  static List<String> fontFallbackForLocale(Locale locale) =>
+      AppFonts.fallbacks(locale);
 
   /// Scale Material 3 type roles around its 14sp bodyMedium size.
   /// ThemeData supplies each role's Material 3 weight, line height and spacing.
@@ -354,7 +330,9 @@ class AppTheme {
       fontFamily: fontFamilyForLocale(
         locale ?? ui.PlatformDispatcher.instance.locale,
       ),
-      fontFamilyFallback: _fontFamilyFallback,
+      fontFamilyFallback: fontFallbackForLocale(
+        locale ?? ui.PlatformDispatcher.instance.locale,
+      ),
       textTheme: _buildTextTheme(baseFontSize),
       iconTheme: IconThemeData(
         size: AppControlSize.icon,
@@ -457,7 +435,9 @@ class AppTheme {
       fontFamily: fontFamilyForLocale(
         locale ?? ui.PlatformDispatcher.instance.locale,
       ),
-      fontFamilyFallback: _fontFamilyFallback,
+      fontFamilyFallback: fontFallbackForLocale(
+        locale ?? ui.PlatformDispatcher.instance.locale,
+      ),
       textTheme: _buildTextTheme(baseFontSize),
       iconTheme: IconThemeData(
         size: AppControlSize.icon,
@@ -770,7 +750,9 @@ class _AddItemInputState extends State<AddItemInput> {
           child: AppTextField(
             controller: _controller,
             enabled: widget.enabled,
-            hintText: widget.enabled ? "新增${widget.title}" : widget.title,
+            hintText: widget.enabled
+                ? context.l10n.uiAdd((widget.title).toString())
+                : widget.title,
             onSubmitted: (value) {
               if (widget.enabled &&
                   (widget.allowEmpty || value.trim().isNotEmpty)) {
@@ -791,13 +773,13 @@ class _AddItemInputState extends State<AddItemInput> {
               return NeonIconButton(
                 onPressed: canAdd ? _handleAdd : null,
                 icon: Icons.add_circle,
-                label: "新增${widget.title}",
+                label: context.l10n.uiAdd((widget.title).toString()),
                 accent: NeonAccent.green,
                 statusLabel: canAdd
                     ? null
                     : widget.enabled
-                    ? "請先輸入${widget.title}"
-                    : "目前不可新增",
+                    ? context.l10n.uiEnterFirst((widget.title).toString())
+                    : context.l10n.uiCannotAddRightNow,
               );
             }
             return IconButton(
@@ -806,7 +788,7 @@ class _AddItemInputState extends State<AddItemInput> {
                 Icons.add_circle,
                 color: canAdd ? Colors.green : Colors.grey,
               ),
-              tooltip: "新增${widget.title}",
+              tooltip: context.l10n.uiAdd((widget.title).toString()),
             );
           },
         ),
@@ -956,7 +938,7 @@ class CardList extends StatelessWidget {
                         minHeight: AppControlSize.height,
                       ),
                       padding: EdgeInsets.zero,
-                      tooltip: "轉為正式物品關聯",
+                      tooltip: context.l10n.uiConvertToItemLink,
                       onPressed: () => onConvert!(index),
                       icon: const Icon(Icons.sync_alt, size: 18),
                     ),

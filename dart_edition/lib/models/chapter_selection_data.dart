@@ -1,4 +1,5 @@
 import "package:freezed_annotation/freezed_annotation.dart";
+import "package:uuid/uuid.dart";
 
 import "../bin/settings_manager.dart";
 import "../services/word_count_service.dart";
@@ -25,11 +26,11 @@ abstract final class ChapterTreeSchema {
       case 1:
       case 2:
       case currentVersion:
-        return _snapshot(segments);
+        return _snapshot(ChapterTree.repair(segments));
       default:
         // Preserve data from newer schemas. A future migration can be inserted
         // here without coupling the chapter tree to the project-file version.
-        return _snapshot(segments);
+        return _snapshot(ChapterTree.repair(segments));
     }
   }
 
@@ -64,6 +65,81 @@ class ChapterLocation {
 
 /// Read-only traversal helpers shared by the editor, persistence and UI layers.
 abstract final class ChapterTree {
+  /// Repairs identity collisions without dropping manuscripts or folders.
+  /// Existing unambiguous IDs survive so references into the tree stay valid.
+  /// Replacement IDs are deterministic, making repeated recovery idempotent.
+  static List<SegmentData> repair(List<SegmentData> roots) {
+    final reserved = <String>{ChapterTreeSchema.hiddenRootId};
+    for (final folder in foldersDepthFirst(roots)) {
+      reserved.add(folder.segmentUUID);
+      reserved.addAll(folder.chapters.map((chapter) => chapter.chapterUUID));
+    }
+    final used = <String>{ChapterTreeSchema.hiddenRootId};
+    String identity(String original, String path) {
+      if (original.trim().isNotEmpty && used.add(original)) return original;
+      var attempt = 0;
+      String replacement;
+      do {
+        replacement = const Uuid().v5(
+          Uuid.NAMESPACE_URL,
+          'monogatari/chapter-tree/$path/$original/${attempt++}',
+        );
+      } while (reserved.contains(replacement) || used.contains(replacement));
+      used.add(replacement);
+      return replacement;
+    }
+
+    SegmentData repairFolder(SegmentData folder, String path) {
+      final id = identity(folder.segmentUUID, path);
+      final orderMap = <String, List<String>>{};
+      void record(String oldId, String newId) =>
+          orderMap.putIfAbsent(oldId, () => []).add(newId);
+      final chapters = <ChapterData>[];
+      for (var i = 0; i < folder.chapters.length; i++) {
+        final chapter = folder.chapters[i];
+        final chapterId = identity(chapter.chapterUUID, '$path/chapter/$i');
+        record(chapter.chapterUUID, chapterId);
+        chapters.add(
+          chapterId == chapter.chapterUUID
+              ? chapter
+              : chapter.copyWith(chapterUUID: chapterId),
+        );
+      }
+      final children = <SegmentData>[];
+      for (var i = 0; i < folder.childSegments.length; i++) {
+        final child = folder.childSegments[i];
+        final repaired = repairFolder(child, '$path/folder/$i');
+        record(child.segmentUUID, repaired.segmentUUID);
+        children.add(repaired);
+      }
+      final order = <String>[];
+      final ordered = <String>{};
+      for (final oldId in [...folder.childNodeOrder, ...orderMap.keys]) {
+        for (final newId in orderMap[oldId] ?? const <String>[]) {
+          if (ordered.add(newId)) order.add(newId);
+        }
+      }
+      bool same<T>(List<T> a, List<T> b) =>
+          a.length == b.length &&
+          Iterable<int>.generate(a.length).every((i) => a[i] == b[i]);
+      if (id == folder.segmentUUID &&
+          same(chapters, folder.chapters) &&
+          same(children, folder.childSegments) &&
+          same(order, folder.childNodeOrder))
+        return folder;
+      return folder.copyWith(
+        segmentUUID: id,
+        chapters: chapters,
+        childSegments: children,
+        childNodeOrder: order,
+      );
+    }
+
+    return [
+      for (var i = 0; i < roots.length; i++) repairFolder(roots[i], '$i'),
+    ];
+  }
+
   static Iterable<SegmentData> foldersDepthFirst(
     Iterable<SegmentData> roots,
   ) sync* {
@@ -152,9 +228,7 @@ abstract final class ChapterTree {
   }
 }
 
-int _generateChapterSelectionId() {
-  return DateTime.now().microsecondsSinceEpoch;
-}
+String _generateChapterSelectionId() => const Uuid().v4();
 
 @freezed
 class ChapterData with _$ChapterData {

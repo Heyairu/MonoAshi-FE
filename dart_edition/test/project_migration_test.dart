@@ -113,7 +113,7 @@ void main() {
     );
 
     final savedXml = FileService.generateProjectXML(result.data);
-    expect(savedXml, contains("<ver>1.20</ver>"));
+    expect(savedXml, contains("<ver>1.22</ver>"));
     expect(savedXml, contains("Name=\"Alice &amp; Co\""));
     expect(savedXml, isNot(contains("DisplayName=")));
     expect(savedXml, contains("Id=\"${bob.key}\""));
@@ -392,7 +392,7 @@ void main() {
       reopened.characterData[characterId]!.relationships,
       customized.relationships,
     );
-    expect(reopened.characterData[characterId]!.characterType, "主角");
+    expect(reopened.characterData[characterId]!.characterType, "protagonist");
     expect(
       reopened.characterData[characterId]!.organizations,
       customized.organizations,

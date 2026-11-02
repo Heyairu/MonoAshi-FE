@@ -75,7 +75,10 @@ flutter:
   
   # 添加資源文件
   assets:
+    - assets/help/manifest.json
     - assets/help/zh_TW.json
+    - assets/help/en.json
+    - assets/help/ja.json
     # Copilot Ask／Plan／future Agent trusted format reference
     - MNPROJ_FILE_STRUCTURE.md
     # ICONS

@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "../../../bin/ui_library.dart" show UILibrary, AppThemePreset, PrideFlag;
@@ -32,18 +33,18 @@ class SettingsColorPicker extends StatelessWidget {
           runSpacing: 8,
           children: [
             for (final entry in UILibrary.supportedColors.entries)
-              _swatch(entry.key, entry.value, colors),
+              _swatch(context, entry.key, entry.value, colors),
             if (onPresetChanged != null)
               for (final option in AppThemePreset.values.where(
                 (value) => value != AppThemePreset.standard,
               ))
-                _presetSwatch(option, colors),
+                _presetSwatch(context, option, colors),
           ],
         ),
         if (preset.isPride) ...[
           const SizedBox(height: 12),
           Text(
-            "除了使用這個主題外，你還可以做什麼……",
+            context.l10n.uiBeyondUsingThisThemeWhatElseCanYou,
             key: const ValueKey("pride-support-caption"),
             style: Theme.of(
               context,
@@ -51,7 +52,7 @@ class SettingsColorPicker extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            "尊重每個人的名字與代名詞、參加「同志遊行」等活動、傾聽 LGBTQ+ 的故事，並在日常生活中支持平等、制止歧視。",
+            context.l10n.uiRespectPeopleSNamesAndPronounsJoinEvents,
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
@@ -61,18 +62,22 @@ class SettingsColorPicker extends StatelessWidget {
     );
   }
 
-  Widget _presetSwatch(AppThemePreset option, ColorScheme colors) {
+  Widget _presetSwatch(
+    BuildContext context,
+    AppThemePreset option,
+    ColorScheme colors,
+  ) {
     final selected = preset == option;
     void select() => onPresetChanged!(option);
     return Semantics(
       button: true,
       selected: selected,
       inMutuallyExclusiveGroup: true,
-      label: option.label,
+      label: context.l10n.legacyLabel(option.label),
       excludeSemantics: true,
       onTap: select,
       child: Tooltip(
-        message: option.label,
+        message: context.l10n.legacyLabel(option.label),
         child: InkWell(
           key: ValueKey("$keyPrefix-preset-${option.name}"),
           onTap: select,
@@ -129,25 +134,32 @@ class SettingsColorPicker extends StatelessWidget {
     );
   }
 
-  Widget _swatch(String name, Color color, ColorScheme colors) {
+  Widget _swatch(
+    BuildContext context,
+    String name,
+    Color color,
+    ColorScheme colors,
+  ) {
     final selected =
         preset == AppThemePreset.standard &&
         selectedColor.toARGB32() == color.toARGB32();
     final label =
         labels[name] ??
-        const {
-          "Auto": "自動",
-          "Gray": "灰色",
-          "Red": "紅色",
-          "Orange": "橙色",
-          "Yellow": "黃色",
-          "Green": "綠色",
-          "Cyan": "青色",
-          "Blue": "藍色",
-          "Purple": "紫色",
-          "Pink": "粉紅色",
-        }[name] ??
-        name;
+        context.l10n.legacyLabel(
+          const {
+                "Auto": "自動",
+                "Gray": "灰色",
+                "Red": "紅色",
+                "Orange": "橙色",
+                "Yellow": "黃色",
+                "Green": "綠色",
+                "Cyan": "青色",
+                "Blue": "藍色",
+                "Purple": "紫色",
+                "Pink": "粉紅色",
+              }[name] ??
+              name,
+        );
     return Semantics(
       button: true,
       selected: selected,

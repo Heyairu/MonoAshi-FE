@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "dart:async";
@@ -137,6 +138,7 @@ class _InspirationLayerEntry {
   });
 
   factory _InspirationLayerEntry.folder({
+    required AppLocalizations l10n,
     required InspirationFolder folder,
     required int noteCount,
     required int depth,
@@ -144,14 +146,15 @@ class _InspirationLayerEntry {
     return _InspirationLayerEntry(
       id: folder.id,
       type: _InspirationLayerType.folder,
-      title: folder.name.isEmpty ? "（未命名）" : folder.name,
-      subtitle: "$noteCount 則靈感",
+      title: folder.name.isEmpty ? l10n.uiUntitled : folder.name,
+      subtitle: l10n.inspirationNoteCount((noteCount).toString()),
       depth: depth,
       folderContextId: folder.parentId,
     );
   }
 
   factory _InspirationLayerEntry.note({
+    required AppLocalizations l10n,
     required InspirationNote note,
     required int depth,
     required String? folderContextId,
@@ -159,7 +162,7 @@ class _InspirationLayerEntry {
     return _InspirationLayerEntry(
       id: note.id,
       type: _InspirationLayerType.note,
-      title: note.title.isEmpty ? "（未命名）" : note.title,
+      title: note.title.isEmpty ? l10n.uiUntitled : note.title,
       subtitle: note.content.isEmpty ? null : note.content,
       depth: depth,
       folderContextId: folderContextId,
@@ -1068,6 +1071,7 @@ class _PlanViewState extends ConsumerState<PlanView> {
           if (folder == null) continue;
           entries.add(
             _InspirationLayerEntry.folder(
+              l10n: context.l10n,
               folder: folder,
               noteCount: inspirationNotes.where((n) => n.folderId == id).length,
               depth: depth,
@@ -1081,6 +1085,7 @@ class _PlanViewState extends ConsumerState<PlanView> {
           if (note == null) continue;
           entries.add(
             _InspirationLayerEntry.note(
+              l10n: context.l10n,
               note: note,
               depth: depth,
               folderContextId: note.folderId,
@@ -1175,17 +1180,20 @@ class _PlanViewState extends ConsumerState<PlanView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const MediumTitle(icon: Icons.list_alt_outlined, text: "伏筆列表"),
+            MediumTitle(
+              icon: Icons.list_alt_outlined,
+              text: context.l10n.uiForeshadowingList,
+            ),
             const SizedBox(height: 12),
             CollectionPanel.custom(
-              title: "伏筆列表",
+              title: context.l10n.uiForeshadowingList,
               showSectionCard: false,
               minHeight: 180,
               maxHeight: 300,
               content: items.isEmpty
-                  ? const AppEmptyState(
-                      title: "尚無伏筆",
-                      description: "請新增第一個項目",
+                  ? AppEmptyState(
+                      title: context.l10n.uiNoForeshadowingYet,
+                      description: context.l10n.uiAddYourFirstEntry2,
                       compact: true,
                     )
                   : ListView.builder(
@@ -1207,7 +1215,9 @@ class _PlanViewState extends ConsumerState<PlanView> {
                             color: Theme.of(context).colorScheme.primary,
                           ),
                           title: Text(
-                            item.title.isEmpty ? "（未命名）" : item.title,
+                            item.title.isEmpty
+                                ? context.l10n.uiUntitled
+                                : item.title,
                             style: TextStyle(
                               decoration: item.isRevealed
                                   ? TextDecoration.lineThrough
@@ -1279,12 +1289,15 @@ class _PlanViewState extends ConsumerState<PlanView> {
                     ),
             ),
             const SizedBox(height: 8),
-            AddItemInput(title: "新增伏筆", onAdd: _addForeshadow),
+            AddItemInput(
+              title: context.l10n.uiAddForeshadowing,
+              onAdd: _addForeshadow,
+            ),
             const SizedBox(height: 12),
             if (selectedItem == null)
-              const AppEmptyState(
-                title: "請選擇一個伏筆",
-                description: "選取後即可編輯內容",
+              AppEmptyState(
+                title: context.l10n.uiSelectAForeshadowingEntry,
+                description: context.l10n.uiSelectAnEntryToEditItsContent,
                 icon: Icons.touch_app_outlined,
                 compact: true,
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
@@ -1294,16 +1307,16 @@ class _PlanViewState extends ConsumerState<PlanView> {
                 children: [
                   AppTextField(
                     controller: foreshadowTitleController,
-                    decoration: const InputDecoration(
-                      labelText: "伏筆名稱",
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiForeshadowingName,
                       isDense: true,
                     ),
                   ),
                   const SizedBox(height: 8),
                   AppTextField(
                     controller: foreshadowNoteController,
-                    decoration: const InputDecoration(
-                      labelText: "說明",
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiHelp,
                       isDense: true,
                     ),
                     minLines: 2,
@@ -1311,7 +1324,7 @@ class _PlanViewState extends ConsumerState<PlanView> {
                   ),
                   const SizedBox(height: 8),
                   SwitchListTile(
-                    title: const Text("已揭露"),
+                    title: Text(context.l10n.uiRevealed),
                     contentPadding: EdgeInsets.zero,
                     value: selectedItem.isRevealed,
                     onChanged: (value) {
@@ -1338,17 +1351,17 @@ class _PlanViewState extends ConsumerState<PlanView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const MediumTitle(icon: Icons.note, text: "更新計畫"),
+            MediumTitle(icon: Icons.note, text: context.l10n.uiReleasePlans),
             const SizedBox(height: 12),
             CollectionPanel.custom(
-              title: "更新計畫",
+              title: context.l10n.uiReleasePlans,
               showSectionCard: false,
               minHeight: 180,
               maxHeight: 300,
               content: items.isEmpty
-                  ? const AppEmptyState(
-                      title: "尚無更新計畫",
-                      description: "請新增第一個項目",
+                  ? AppEmptyState(
+                      title: context.l10n.uiNoReleasePlansYet,
+                      description: context.l10n.uiAddYourFirstEntry2,
                       compact: true,
                     )
                   : ListView.builder(
@@ -1370,7 +1383,9 @@ class _PlanViewState extends ConsumerState<PlanView> {
                             color: Theme.of(context).colorScheme.primary,
                           ),
                           title: Text(
-                            item.title.isEmpty ? "（未命名）" : item.title,
+                            item.title.isEmpty
+                                ? context.l10n.uiUntitled
+                                : item.title,
                             style: TextStyle(
                               decoration: item.isDone
                                   ? TextDecoration.lineThrough
@@ -1439,12 +1454,15 @@ class _PlanViewState extends ConsumerState<PlanView> {
                     ),
             ),
             const SizedBox(height: 8),
-            AddItemInput(title: "新增更新計畫", onAdd: _addUpdatePlan),
+            AddItemInput(
+              title: context.l10n.uiAddReleasePlan,
+              onAdd: _addUpdatePlan,
+            ),
             const SizedBox(height: 12),
             if (selectedItem == null)
-              const AppEmptyState(
-                title: "請選擇一個更新計畫",
-                description: "選取後即可編輯內容",
+              AppEmptyState(
+                title: context.l10n.uiSelectAReleasePlan,
+                description: context.l10n.uiSelectAnEntryToEditItsContent,
                 icon: Icons.touch_app_outlined,
                 compact: true,
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
@@ -1454,16 +1472,16 @@ class _PlanViewState extends ConsumerState<PlanView> {
                 children: [
                   AppTextField(
                     controller: updatePlanTitleController,
-                    decoration: const InputDecoration(
-                      labelText: "計畫名稱",
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiPlanName,
                       isDense: true,
                     ),
                   ),
                   const SizedBox(height: 8),
                   AppTextField(
                     controller: updatePlanNoteController,
-                    decoration: const InputDecoration(
-                      labelText: "說明",
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiHelp,
                       isDense: true,
                     ),
                     minLines: 2,
@@ -1471,7 +1489,7 @@ class _PlanViewState extends ConsumerState<PlanView> {
                   ),
                   const SizedBox(height: 8),
                   SwitchListTile(
-                    title: const Text("已完成"),
+                    title: Text(context.l10n.uiCompleted),
                     contentPadding: EdgeInsets.zero,
                     value: selectedItem.isDone,
                     onChanged: (value) {
@@ -1493,14 +1511,14 @@ class _PlanViewState extends ConsumerState<PlanView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CollectionPanel.custom(
-          title: "靈感列表",
+          title: context.l10n.uiIdeaList,
           showSectionCard: false,
           minHeight: 220,
           maxHeight: 420,
           content: inspirationFolders.isEmpty && inspirationNotes.isEmpty
-              ? const AppEmptyState(
-                  title: "尚無靈感",
-                  description: "請新增資料夾或靈感",
+              ? AppEmptyState(
+                  title: context.l10n.uiNoIdeasYet,
+                  description: context.l10n.uiAddAFolderOrIdea,
                   compact: true,
                 )
               : LayoutBuilder(
@@ -1567,7 +1585,9 @@ class _PlanViewState extends ConsumerState<PlanView> {
                                     IconButton(
                                       onPressed: () =>
                                           _toggleFolderCollapsed(entry.id),
-                                      tooltip: isCollapsed ? "展開" : "收合",
+                                      tooltip: isCollapsed
+                                          ? context.l10n.uiExpand
+                                          : context.l10n.uiCollapse,
                                       icon: Icon(
                                         isCollapsed
                                             ? Icons.chevron_right
@@ -1645,9 +1665,12 @@ class _PlanViewState extends ConsumerState<PlanView> {
                 ),
         ),
         const SizedBox(height: 8),
-        AddItemInput(title: "資料夾", onAdd: _addInspirationFolder),
+        AddItemInput(
+          title: context.l10n.uiFolder2,
+          onAdd: _addInspirationFolder,
+        ),
         const SizedBox(height: 8),
-        AddItemInput(title: "靈感", onAdd: _addInspirationNote),
+        AddItemInput(title: context.l10n.uiIdea, onAdd: _addInspirationNote),
         const SizedBox(height: 8),
       ],
     );
@@ -1656,9 +1679,9 @@ class _PlanViewState extends ConsumerState<PlanView> {
   Widget _buildInspirationEditorPanel() {
     final selected = _selectedInspiration;
     if (selected == null) {
-      return const AppEmptyState(
-        title: "請選擇一則靈感",
-        description: "選取後即可編輯內容",
+      return AppEmptyState(
+        title: context.l10n.uiSelectAnIdea,
+        description: context.l10n.uiSelectAnEntryToEditItsContent,
         icon: Icons.touch_app_outlined,
         compact: true,
         padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
@@ -1671,13 +1694,19 @@ class _PlanViewState extends ConsumerState<PlanView> {
         AppTextField(
           controller: inspirationTitleController,
           focusNode: _inspirationTitleFocusNode,
-          decoration: const InputDecoration(labelText: "靈感標題", isDense: true),
+          decoration: InputDecoration(
+            labelText: context.l10n.uiIdeaTitle,
+            isDense: true,
+          ),
         ),
         const SizedBox(height: 8),
         AppTextField(
           controller: inspirationContentController,
           focusNode: _inspirationContentFocusNode,
-          decoration: const InputDecoration(labelText: "內容", isDense: true),
+          decoration: InputDecoration(
+            labelText: context.l10n.uiContent,
+            isDense: true,
+          ),
           minLines: 4,
           maxLines: 8,
         ),
@@ -1700,7 +1729,10 @@ class _PlanViewState extends ConsumerState<PlanView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const MediumTitle(icon: Icons.book_outlined, text: "靈感筆記"),
+              MediumTitle(
+                icon: Icons.book_outlined,
+                text: context.l10n.uiIdeaNotes,
+              ),
               const SizedBox(height: 12),
               if (_isLoadingInspiration)
                 const Center(child: CircularProgressIndicator())
@@ -1761,9 +1793,12 @@ class _PlanViewState extends ConsumerState<PlanView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
-              child: LargeTitle(icon: Icons.assessment, text: "計畫規劃"),
+              child: LargeTitle(
+                icon: Icons.assessment,
+                text: context.l10n.uiPlanning,
+              ),
             ),
 
             const SizedBox(height: 32),

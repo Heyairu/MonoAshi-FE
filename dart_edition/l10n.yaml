@@ -10,3 +10,4 @@ preferred-supported-locales:
 nullable-getter: false
 required-resource-attributes: true
 format: true
+use-escaping: true

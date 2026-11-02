@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 import '../../../application/project_export/export_models.dart';
 
@@ -53,8 +54,8 @@ class _ExportSelectionTreeState extends State<ExportSelectionTree> {
       children: [
         TextField(
           key: const Key('export-tree-search'),
-          decoration: const InputDecoration(
-            labelText: '搜尋名稱（保留原選取）',
+          decoration: InputDecoration(
+            labelText: context.l10n.uiSearchNamesKeepSelection,
             prefixIcon: Icon(Icons.search),
           ),
           onChanged: (value) =>
@@ -65,27 +66,32 @@ class _ExportSelectionTreeState extends State<ExportSelectionTree> {
           children: [
             TextButton(
               onPressed: () => widget.onChanged(all),
-              child: const Text('全選清單'),
+              child: Text(context.l10n.uiSelectEntireList),
             ),
             TextButton(
               onPressed: () => widget.onChanged({}),
-              child: const Text('清除清單'),
+              child: Text(context.l10n.uiClearListSelection),
             ),
             TextButton(
               onPressed: () => setState(expandAll),
-              child: const Text('全部展開'),
+              child: Text(context.l10n.uiExpandAll),
             ),
             TextButton(
               onPressed: () => setState(_expanded.clear),
-              child: const Text('全部收合'),
+              child: Text(context.l10n.uiCollapseAll),
             ),
           ],
         ),
-        Text('已選 ${widget.selected.length}／${all.length} 項'),
+        Text(
+          context.l10n.uiSelectedOf(
+            context.formats.integer(widget.selected.length),
+            context.formats.integer(all.length),
+          ),
+        ),
         SizedBox(
           height: 280,
           child: rows.isEmpty
-              ? const Center(child: Text('沒有符合的項目'))
+              ? Center(child: Text(context.l10n.uiNoMatchingEntries))
               : ListView.builder(
                   itemCount: rows.length,
                   itemBuilder: (context, index) {
@@ -108,8 +114,12 @@ class _ExportSelectionTreeState extends State<ExportSelectionTree> {
                                 ? null
                                 : IconButton(
                                     tooltip: _expanded.contains(node.key)
-                                        ? '收合 ${node.label}'
-                                        : '展開 ${node.label}',
+                                        ? context.l10n.uiCollapse3(
+                                            (node.label).toString(),
+                                          )
+                                        : context.l10n.uiExpand2(
+                                            (node.label).toString(),
+                                          ),
                                     icon: Icon(
                                       _expanded.contains(node.key)
                                           ? Icons.expand_more
@@ -137,8 +147,12 @@ class _ExportSelectionTreeState extends State<ExportSelectionTree> {
                                     }
                                     widget.onChanged(next);
                                   },
-                            semanticLabel:
-                                '${node.label}，${node.kind}，已選 $count／${keys.length}',
+                            semanticLabel: context.l10n.uiSelectedOf2(
+                              (node.label).toString(),
+                              context.l10n.legacyLabel(node.kind),
+                              (count).toString(),
+                              context.formats.integer(keys.length),
+                            ),
                           ),
                           Expanded(
                             child: Tooltip(
@@ -156,7 +170,7 @@ class _ExportSelectionTreeState extends State<ExportSelectionTree> {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     Text(
-                                      '${node.kind}${node.children.isEmpty ? '' : ' · $count／${keys.length}'}',
+                                      '${context.l10n.legacyLabel(node.kind)}${node.children.isEmpty ? '' : ' · $count／${keys.length}'}',
                                       style: Theme.of(
                                         context,
                                       ).textTheme.bodySmall,
@@ -177,7 +191,9 @@ class _ExportSelectionTreeState extends State<ExportSelectionTree> {
                               node.children.isNotEmpty &&
                               node.kind != '資料夾')
                             IconButton(
-                              tooltip: '僅此項：${node.label}',
+                              tooltip: context.l10n.uiOnlyThisItem(
+                                (node.label).toString(),
+                              ),
                               icon: const Icon(Icons.check_box_outlined),
                               onPressed: () {
                                 widget.onChanged(

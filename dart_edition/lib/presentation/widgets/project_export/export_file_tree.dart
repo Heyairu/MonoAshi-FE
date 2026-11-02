@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 import '../../../application/project_export/export_models.dart';
 
@@ -39,21 +40,21 @@ class ExportFileTree extends StatelessWidget {
         ),
     ];
     return ExpansionTile(
-      title: const Text('ZIP 檔案樹'),
+      title: Text(context.l10n.uiZIPFileTree),
       initiallyExpanded: true,
       children: [
         ...children(root, ''),
-        const ListTile(
+        ListTile(
           dense: true,
           leading: Icon(Icons.info_outline),
           title: Text('README.txt'),
-          subtitle: Text('匯出說明'),
+          subtitle: Text(context.l10n.uiExportNotes),
         ),
-        const ListTile(
+        ListTile(
           dense: true,
           leading: Icon(Icons.list_alt),
           title: Text('export-manifest.json'),
-          subtitle: Text('檔案與階層索引'),
+          subtitle: Text(context.l10n.uiFileAndHierarchyIndex),
         ),
       ],
     );

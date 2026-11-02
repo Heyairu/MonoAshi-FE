@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0.
 // https://www.apache.org/licenses/LICENSE-2.0
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
+import '../l10n/ribbon_localizations_adapter.dart';
 import "../features/help/help_controller.dart";
 import "../features/help/help_scope.dart";
 import "../features/help/help_topic.dart";
@@ -191,78 +193,80 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
     final commands = [
       command(
         "save",
-        "儲存檔案",
+        context.l10n.uiSaveFile,
         Icons.save_outlined,
         size: RibbonCommandSize.large,
       ),
-      command("new", "新建檔案", Icons.note_add_outlined),
-      command("open", "開啟檔案", Icons.folder_open_outlined),
-      command("saveAs", "另存新檔", Icons.save_as_outlined),
-      command("import_selective", "匯入", Icons.input),
-      command("export_selective", "匯出", Icons.output),
-      command("selectAll", "全選", Icons.select_all),
-      command("cut", "剪下", Icons.content_cut),
-      command("copy", "複製", Icons.content_copy),
+      command("new", context.l10n.uiNewFile, Icons.note_add_outlined),
+      command("open", context.l10n.uiOpenFile, Icons.folder_open_outlined),
+      command("saveAs", context.l10n.uiSaveAs, Icons.save_as_outlined),
+      command("import_selective", context.l10n.uiImport, Icons.input),
+      command("export_selective", context.l10n.uiExport, Icons.output),
+      command("selectAll", context.l10n.editorSelectAll, Icons.select_all),
+      command("cut", context.l10n.editorCut, Icons.content_cut),
+      command("copy", context.l10n.commonCopy, Icons.content_copy),
       command(
         "paste",
-        "貼上",
+        context.l10n.editorPaste,
         Icons.content_paste,
         size: RibbonCommandSize.large,
       ),
-      command("undo", "復原", Icons.undo),
-      command("redo", "重做", Icons.redo),
+      command("undo", context.l10n.editorUndo, Icons.undo),
+      command("redo", context.l10n.editorRedo, Icons.redo),
       command(
         "phrases.library",
-        "短語庫",
+        context.l10n.uiPhraseLibrary,
         Icons.library_books_outlined,
         enabled: widget.onOpenPhraseLibrary != null,
         size: RibbonCommandSize.large,
       ),
       command(
         "phrases.insert",
-        "插入短語",
+        context.l10n.uiInsertPhrase,
         Icons.add_comment_outlined,
         enabled: widget.onInsertPhrase != null,
-        disabledReason: widget.onInsertPhrase == null ? "請先開啟正文編輯頁。" : null,
+        disabledReason: widget.onInsertPhrase == null
+            ? context.l10n.uiOpenTheManuscriptEditorFirst
+            : null,
       ),
       command(
         "phrases.saveSelection",
-        "選取內容存為短語",
+        context.l10n.uiSaveSelectionAsPhrase,
         Icons.bookmark_add_outlined,
         enabled: widget.onSaveSelectionAsPhrase != null,
         disabledReason: widget.onSaveSelectionAsPhrase == null
-            ? "請先開啟正文編輯頁。"
+            ? context.l10n.uiOpenTheManuscriptEditorFirst
             : null,
       ),
       command(
         "punctuation",
-        "標點符號",
+        context.l10n.uiPunctuation,
         Icons.keyboard_alt_outlined,
         selected: widget.showPunctuationPanel,
       ),
       command(
         "find",
-        "搜尋",
+        context.l10n.uiSearch,
         Icons.search,
         selected: widget.showFindReplaceWindow,
       ),
       command(
         "view.navigation",
-        "導覽列",
+        context.l10n.uiNavigation,
         Icons.navigation_outlined,
         selected: widget.showNavigation,
         enabled: widget.onToggleNavigation != null,
       ),
       command(
         "view.sidebar",
-        "側邊欄",
+        context.l10n.uiSidebar,
         Icons.view_sidebar_outlined,
         selected: widget.showSidebar,
         enabled: widget.onToggleSidebar != null,
       ),
       command(
         "view.dashboard",
-        "儀表板",
+        context.l10n.uiDashboard,
         Icons.speed_rounded,
         selected: widget.showDashboard,
         enabled: widget.onToggleDashboard != null,
@@ -270,12 +274,36 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
     ];
     final options = widget.searchOptions ?? _defaultSearchOptions;
     for (final (option, label, icon) in [
-      (FindReplaceOption.matchCase, "大小寫需相同", Icons.text_fields),
-      (FindReplaceOption.wholeWord, "全字拼寫相符", Icons.text_format),
-      (FindReplaceOption.useRegexp, "使用正則表示", Icons.data_object),
-      (FindReplaceOption.matchWidth, "全半形須相符", Icons.width_normal),
-      (FindReplaceOption.ignorePunctuation, "略過標點符號", Icons.format_quote),
-      (FindReplaceOption.ignoreWhitespace, "略過空白字元", Icons.space_bar),
+      (
+        FindReplaceOption.matchCase,
+        context.l10n.uiMatchCase,
+        Icons.text_fields,
+      ),
+      (
+        FindReplaceOption.wholeWord,
+        context.l10n.uiWholeWords,
+        Icons.text_format,
+      ),
+      (
+        FindReplaceOption.useRegexp,
+        context.l10n.uiRegularExpression,
+        Icons.data_object,
+      ),
+      (
+        FindReplaceOption.matchWidth,
+        context.l10n.uiMatchCharacterWidth,
+        Icons.width_normal,
+      ),
+      (
+        FindReplaceOption.ignorePunctuation,
+        context.l10n.uiIgnorePunctuation,
+        Icons.format_quote,
+      ),
+      (
+        FindReplaceOption.ignoreWhitespace,
+        context.l10n.uiIgnoreWhitespace,
+        Icons.space_bar,
+      ),
     ]) {
       final enabled = options.enabledFor(option, widget.searchQuery);
       commands.add(
@@ -288,8 +316,10 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
           disabledReason: enabled
               ? null
               : options.useRegexp
-              ? "正則表示模式固定大小寫與全半形相符，並停用全字拼寫。"
-              : "搜尋文字含全形字元、標點或空白，無法使用全字拼寫。",
+              ? context
+                    .l10n
+                    .uiRegularExpressionsAlwaysMatchCaseAndCharacterWidth
+              : context.l10n.uiWholeWordMatchingIsUnavailableWhenTheQuery,
         ),
       );
     }
@@ -340,9 +370,15 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
         stackTrace: stackTrace,
       );
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("無法完成「${command.label}」，請重試。")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.uiCouldNotCompletePleaseTryAgain(
+                (command.label).toString(),
+              ),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _running.remove(id));
@@ -353,12 +389,12 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
   List<RibbonTab> _tabs(Map<String, RibbonCommand> commands) => [
     RibbonTab(
       id: "file",
-      label: "檔案",
+      label: context.l10n.uiFile,
       keyTip: "F",
       groups: [
         RibbonGroup(
           id: "project",
-          label: "專案",
+          label: context.l10n.uiProject,
           rows: 3,
           commands: [
             for (final id
@@ -370,7 +406,7 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
         ),
         RibbonGroup(
           id: "transfer",
-          label: "資料交換",
+          label: context.l10n.uiDataExchange,
           commands: [
             commands["import_selective"]!,
             commands["export_selective"]!,
@@ -380,12 +416,12 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
     ),
     RibbonTab(
       id: "home",
-      label: "常用",
+      label: context.l10n.uiHome,
       keyTip: "H",
       groups: [
         RibbonGroup(
           id: "clipboard",
-          label: "剪貼簿",
+          label: context.l10n.uiClipboard,
           rows: 3,
           commands: [
             for (final id in ["paste", "cut", "copy", "selectAll"])
@@ -394,17 +430,17 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
         ),
         RibbonGroup(
           id: "history",
-          label: "歷史",
+          label: context.l10n.uiHistory,
           commands: [commands["undo"]!, commands["redo"]!],
         ),
         RibbonGroup(
           id: "tools",
-          label: "寫作工具",
+          label: context.l10n.uiWritingTools,
           commands: [commands["punctuation"]!, commands["find"]!],
         ),
         RibbonGroup(
           id: "phrases",
-          label: "短語",
+          label: context.l10n.uiPhrases,
           commands: [
             commands["phrases.library"]!,
             commands["phrases.insert"]!,
@@ -413,7 +449,7 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
         ),
         RibbonGroup(
           id: "display-blocks",
-          label: "顯示區塊",
+          label: context.l10n.uiWorkspacePanels,
           rows: 3,
           commands: [
             commands["view.navigation"]!,
@@ -425,17 +461,17 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
     ),
     RibbonTab(
       id: "search",
-      label: "搜尋",
+      label: context.l10n.uiSearch,
       keyTip: "S",
       groups: [
         RibbonGroup(
           id: "search-panel",
-          label: "尋找與取代",
+          label: context.l10n.uiFindAndReplace,
           commands: [commands["find"]!],
         ),
         RibbonGroup(
           id: "search-match",
-          label: "符合條件",
+          label: context.l10n.uiMatchOptions,
           rows: 3,
           commands: [
             for (final option in [
@@ -448,7 +484,7 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
         ),
         RibbonGroup(
           id: "search-mode",
-          label: "搜尋方式",
+          label: context.l10n.uiSearchMethod,
           rows: 3,
           commands: [
             for (final option in [
@@ -509,7 +545,10 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
                   compact: false,
                   collapsed: !full,
                   context: _ribbonContext,
-                  localizations: RibbonLocalizations.traditionalChinese,
+                  localizations: localizedRibbon(
+                    context.l10n,
+                    Theme.of(context).platform,
+                  ),
                   selectedTabId: _selectedTabId,
                   onSelectedTabChanged: _selectTab,
                   bodyScrollController: _scrollController,
@@ -684,7 +723,7 @@ class _ToolbarButtonContent extends StatelessWidget {
                 ),
                 if (label != null)
                   Text(
-                    searchState! ? "開" : "關",
+                    searchState! ? context.l10n.uiOn : context.l10n.uiOff,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: searchState!
                           ? Theme.of(context).colorScheme.onPrimary
@@ -715,7 +754,7 @@ class _ToolbarModeMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) => PopupMenuButton<String>(
     key: const Key("toolbar-mode-menu"),
-    tooltip: "工具列模式",
+    tooltip: context.l10n.uiToolbarMode,
     icon: const Icon(Icons.view_compact_outlined),
     onOpened: onOpened,
     onCanceled: onClosed,
@@ -727,7 +766,7 @@ class _ToolbarModeMenu extends StatelessWidget {
       CheckedPopupMenuItem(
         value: "automatic",
         checked: preference == null,
-        child: const Text("自動（桌面 Full／手機 Moderate）"),
+        child: Text(context.l10n.uiAutomaticFullOnDesktopModerateOnMobile),
       ),
       for (final mode in ToolbarMode.values)
         CheckedPopupMenuItem(
@@ -766,7 +805,7 @@ class _HelpMenuState extends State<_HelpMenu> {
           _pointerCaptured = true;
         },
         child: PopupMenuButton<String>(
-          tooltip: '說明',
+          tooltip: context.l10n.uiHelp,
           onOpened: () {
             if (!_pointerCaptured) help?.beginMenu();
             _pointerCaptured = false;
@@ -795,10 +834,10 @@ class _HelpMenuState extends State<_HelpMenu> {
             help?.endMenu();
           },
           itemBuilder: (_) => [
-            for (final (id, label) in const [
-              ('home', '說明首頁'),
-              ('context', '目前功能說明（F1）'),
-              ('pick', '這是什麼？（Shift+F1）'),
+            for (final (id, label) in [
+              ('home', context.l10n.uiHelpHome),
+              ('context', context.l10n.uiHelpForThisFeatureF1),
+              ('pick', context.l10n.uiWhatSThisShiftF1),
             ])
               HelpPopupMenuItem(
                 topicId: HelpTopicId.usingHelp,

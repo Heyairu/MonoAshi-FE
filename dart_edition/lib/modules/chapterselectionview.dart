@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "dart:async";
 import "package:xml/xml.dart" as xml;
@@ -705,7 +706,9 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
 
     name = name.trim();
     final folderCount = ChapterTree.foldersDepthFirst(_segments).length;
-    final finalName = name.isEmpty ? "資料夾 ${folderCount + 1}" : name;
+    final finalName = name.isEmpty
+        ? context.l10n.uiFolder((folderCount + 1).toString())
+        : name;
     final newSegment = _segmentsNotifier.addFolder(
       name: finalName,
       parentFolderID: parentFolderID,
@@ -1042,7 +1045,10 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
               // 標題
               Row(
                 children: [
-                  LargeTitle(icon: Icons.menu_book, text: "章節選擇"),
+                  LargeTitle(
+                    icon: Icons.menu_book,
+                    text: context.l10n.uiChapters,
+                  ),
                   const Spacer(),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -1064,7 +1070,9 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          "全書共 $totalWordCount 字",
+                          context.l10n.uiTotalCharacters(
+                            (totalWordCount).toString(),
+                          ),
                           style: Theme.of(context).textTheme.labelSmall,
                         ),
                       ],
@@ -1170,12 +1178,12 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
           children: [
             Expanded(
               child: Text(
-                "資料夾與章節位於同一清單；移除資料夾會一併移除其中章節。",
+                context.l10n.uiFoldersAndChaptersShareOneListDeletingA,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
-            const Tooltip(
-              message: "長按拖曳排序；章節可拖入其他資料夾。根目錄固定隱藏。",
+            Tooltip(
+              message: context.l10n.uiLongPressAndDragToReorderDragChapters,
               child: Icon(Icons.info_outline, size: 16),
             ),
           ],
@@ -1183,12 +1191,12 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
         const SizedBox(height: 12),
         AppTextField(
           controller: _searchController,
-          hintText: "搜尋資料夾或章節名稱",
+          hintText: context.l10n.uiSearchFolderOrChapterNames,
           prefixIcon: const Icon(Icons.search),
           suffixIcon: _searchQuery.isEmpty
               ? null
               : IconButton(
-                  tooltip: "清除搜尋",
+                  tooltip: context.l10n.uiClearSearch,
                   onPressed: () {
                     _searchController.clear();
                     setState(() => _searchQuery = "");
@@ -1224,7 +1232,7 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
                     )
                   : null,
               child: CollectionPanel.builder(
-                title: "章節樹",
+                title: context.l10n.uiChapterTree,
                 showSectionCard: false,
                 minHeight: 320,
                 maxHeight: 560,
@@ -1232,8 +1240,8 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
                 showScrollbar: true,
                 listPadding: const EdgeInsets.all(AppSpacing.sm),
                 itemCount: rows.length,
-                emptyTitle: "尚無章節",
-                emptyDescription: "請新增第一個資料夾",
+                emptyTitle: context.l10n.uiNoChapters,
+                emptyDescription: context.l10n.uiAddYourFirstFolder,
                 emptyIcon: Icons.create_new_folder_outlined,
                 itemBuilder: (context, index) {
                   final row = rows[index];
@@ -1267,10 +1275,14 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
               child: AddItemInput(
                 title: switch (_createType) {
                   _CreateType.chapter =>
-                    canAddToSelectedFolder ? "章節名稱" : "請先選擇資料夾",
+                    canAddToSelectedFolder
+                        ? context.l10n.uiChapterName
+                        : context.l10n.uiSelectAFolderFirst,
                   _CreateType.childFolder =>
-                    canAddToSelectedFolder ? "子資料夾" : "請先選擇父資料夾",
-                  _CreateType.rootFolder => "根資料夾",
+                    canAddToSelectedFolder
+                        ? context.l10n.uiSubfolder
+                        : context.l10n.uiSelectAParentFolderFirst,
+                  _CreateType.rootFolder => context.l10n.uiRootFolder,
                 },
                 enabled:
                     _createType == _CreateType.rootFolder ||
@@ -1299,17 +1311,17 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
                   _buildCreateTypeButton(
                     type: _CreateType.chapter,
                     icon: Icons.article_outlined,
-                    tooltip: "新增章節",
+                    tooltip: context.l10n.uiAddChapter,
                   ),
                   _buildCreateTypeButton(
                     type: _CreateType.childFolder,
                     icon: Icons.folder_copy_outlined,
-                    tooltip: "新增子資料夾",
+                    tooltip: context.l10n.uiAddSubfolder,
                   ),
                   _buildCreateTypeButton(
                     type: _CreateType.rootFolder,
                     icon: Icons.folder_outlined,
-                    tooltip: "新增根資料夾",
+                    tooltip: context.l10n.uiAddRootFolder,
                   ),
                 ],
               ),
@@ -1336,7 +1348,7 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
       final value = _renameController!.text.trim();
       _segmentsNotifier.renameSegment(
         segmentID: _editingSegmentID!,
-        name: value.isEmpty ? "（未命名資料夾）" : value,
+        name: value.isEmpty ? context.l10n.uiUnnamedFolder : value,
       );
       _notifySegmentsChanged();
     }
@@ -1431,7 +1443,7 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
               onEdit: () => _startEditingSegment(segment),
               onSubmitted: (_) => _submitEditingSegment(),
               onCanceled: _cancelEditing,
-              emptyText: "（未命名資料夾）",
+              emptyText: context.l10n.uiUnnamedFolder,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: isSelected
                     ? Theme.of(context).colorScheme.onPrimaryContainer
@@ -1455,7 +1467,11 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
         ],
       ),
       subtitle: Text(
-        "${subtreeChapters.length} 章 • ${segment.childSegments.length} 個子資料夾 • $segmentWordCount 字",
+        context.l10n.uiChaptersSubfoldersCount(
+          context.formats.integer(subtreeChapters.length),
+          context.formats.integer(segment.childSegments.length),
+          (segmentWordCount).toString(),
+        ),
         style: Theme.of(context).textTheme.bodySmall,
       ),
       leading: SizedBox(
@@ -1464,7 +1480,9 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Tooltip(
-              message: isExpanded ? "收合資料夾" : "展開資料夾",
+              message: isExpanded
+                  ? context.l10n.uiCollapseFolder
+                  : context.l10n.uiExpandFolder,
               child: InkWell(
                 borderRadius: BorderRadius.circular(12),
                 onTap: () {
@@ -1499,7 +1517,9 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
         onDelete: canDelete
             ? () => _deleteSegment(segment.segmentUUID, selection)
             : null,
-        deleteTooltip: canDelete ? "刪除此資料夾與其中章節" : "至少須保留一章",
+        deleteTooltip: canDelete
+            ? context.l10n.uiDeleteThisFolderAndItsChapters
+            : context.l10n.uiAtLeastOneChapterIsRequired,
       ),
       onClicked: () {
         setState(() {
@@ -1553,7 +1573,7 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
             _moveChapterToSegment(data.id, segment.segmentUUID, selection);
             AppFeedback.success(
               context,
-              "章節已移動到「${segment.segmentName}」",
+              context.l10n.uiChapterMovedTo((segment.segmentName).toString()),
               duration: const Duration(seconds: 2),
             );
           } else {
@@ -1631,7 +1651,9 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "${chapter.getWordCount(wordCountMode)} 字",
+            context.l10n.uiCharacters2(
+              (chapter.getWordCount(wordCountMode)).toString(),
+            ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           ChapterRemotePresenceBadges(chapterId: chapter.chapterUUID),
@@ -1656,7 +1678,9 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
         onDelete: _totalChaptersCount > 1
             ? () => _deleteChapter(folder, chapter.chapterUUID, selection)
             : null,
-        deleteTooltip: _totalChaptersCount > 1 ? "刪除此章節" : "至少須保留一章",
+        deleteTooltip: _totalChaptersCount > 1
+            ? context.l10n.uiDeleteThisChapter
+            : context.l10n.uiAtLeastOneChapterIsRequired,
       ),
       onClicked: () =>
           _selectChapter(folder.segmentUUID, chapter.chapterUUID, selection),

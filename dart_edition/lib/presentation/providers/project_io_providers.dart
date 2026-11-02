@@ -21,6 +21,15 @@ final projectIoControllerProvider =
       ProjectIoController.new,
     );
 
+/// Riverpod may retain the preceding busy value in an AsyncError. A completed
+/// operation that failed must release every UI gate, including keyboard actions.
+extension ProjectIoAsyncStatus on AsyncValue<ProjectIoStatus> {
+  bool get isProjectIoBusy => !hasError && (valueOrNull?.isBusy ?? isLoading);
+
+  bool get blocksProjectEditor =>
+      !hasError && (valueOrNull?.blocksEditor ?? isLoading);
+}
+
 enum ProjectIoOperation {
   idle,
   newProject,

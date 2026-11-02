@@ -1,3 +1,4 @@
+import "../../models/project_operation_error.dart";
 import "dart:convert";
 import "dart:typed_data";
 
@@ -79,7 +80,11 @@ class ProjectExportService {
   const ProjectExportService();
 
   PreparedExport prepare(ProjectData source, ExportRequest request) {
-    if (!request.format.available) throw const FormatException("此匯出格式尚未開放。");
+    if (!request.format.available)
+      throw const ProjectValidationException(
+        ProjectErrorCode.exportFormat,
+        "此匯出格式尚未開放。",
+      );
     final valid = switch (request.purpose) {
       ExportPurpose.manuscript =>
         request.format == ExportFormat.txt ||
@@ -92,7 +97,10 @@ class ProjectExportService {
         (request.purpose == ExportPurpose.manuscript &&
             (request.modules.length != 1 ||
                 !request.modules.contains(SelectiveProjectModule.chapters)))) {
-      throw const FormatException("匯出用途、格式或範圍不相容。");
+      throw const ProjectValidationException(
+        ProjectErrorCode.exportFormat,
+        "匯出用途、格式或範圍不相容。",
+      );
     }
     final scope = resolveExportScope(source, request);
     final data = scope.data;
@@ -112,7 +120,11 @@ class ProjectExportService {
     );
     if (request.purpose == ExportPurpose.manuscript) {
       final entries = _manuscripts(data.segmentsData, source.segmentsData);
-      if (entries.isEmpty) throw const FormatException("所選範圍沒有文稿，請重新選取。");
+      if (entries.isEmpty)
+        throw const ProjectValidationException(
+          ProjectErrorCode.exportEmpty,
+          "所選範圍沒有文稿，請重新選取。",
+        );
       final markdown = request.format == ExportFormat.markdown;
       String text(String value) =>
           markdown ? _escape(readerExportText(value)) : readerExportText(value);
@@ -215,7 +227,10 @@ class ProjectExportService {
           );
         }
         if (documents.isEmpty) {
-          throw const FormatException("所選模組沒有可閱讀內容，請重新選取。");
+          throw const ProjectValidationException(
+            ProjectErrorCode.exportEmpty,
+            "所選模組沒有可閱讀內容，請重新選取。",
+          );
         }
         if (request.packaging == ExportPackaging.singleFile) {
           final content = request.purpose == ExportPurpose.exchange

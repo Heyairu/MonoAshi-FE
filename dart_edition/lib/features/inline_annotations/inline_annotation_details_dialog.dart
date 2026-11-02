@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "../../ui_library/spacing.dart";
@@ -103,7 +104,10 @@ class _InlineAnnotationQuickEditorState
       if (parsed.length != 1 ||
           parsed.single.sourceRange.end != _rawSyntaxController.text.length ||
           parsed.single.sourceRange.start != 0) {
-        setState(() => _syntaxError = "完整語法無效，請修正後再套用。");
+        setState(
+          () => _syntaxError =
+              context.l10n.uiInvalidAnnotationSyntaxCorrectItBeforeApplying,
+        );
         return;
       }
       final annotation = parsed.single;
@@ -124,7 +128,10 @@ class _InlineAnnotationQuickEditorState
       if (parsed.length != 1 ||
           parsed.single.sourceRange.start != 0 ||
           parsed.single.sourceRange.end != rawSyntax.length) {
-        setState(() => _syntaxError = "完整語法無效，請修正後再套用。");
+        setState(
+          () => _syntaxError =
+              context.l10n.uiInvalidAnnotationSyntaxCorrectItBeforeApplying,
+        );
         return;
       }
       Navigator.of(context).pop(
@@ -173,7 +180,7 @@ class _InlineAnnotationQuickEditorState
                     ),
                   ),
                   IconButton(
-                    tooltip: "關閉",
+                    tooltip: context.l10n.commonClose,
                     visualDensity: VisualDensity.compact,
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close, size: 18),
@@ -189,8 +196,8 @@ class _InlineAnnotationQuickEditorState
                 maxLines: 3,
                 decoration: appFieldDecoration(
                   context,
-                  decoration: const InputDecoration(
-                    labelText: "備註",
+                  decoration: InputDecoration(
+                    labelText: context.l10n.uiNotes,
                     isDense: true,
                   ),
                 ),
@@ -209,11 +216,11 @@ class _InlineAnnotationQuickEditorState
                 child: Column(
                   children: [
                     _InfoRow(
-                      label: "類型",
+                      label: context.l10n.uiType,
                       value: _kindLabel(widget.annotation.kind),
                     ),
                     _InfoRow(
-                      label: "對象",
+                      label: context.l10n.uiTarget,
                       value:
                           widget.target?.primaryName ??
                           (widget.annotation.targetId == null
@@ -223,11 +230,11 @@ class _InlineAnnotationQuickEditorState
                     if (widget.annotation.targetId case final targetId?)
                       _InfoRow(label: "UUID", value: targetId),
                     _InfoRow(
-                      label: "狀態",
+                      label: context.l10n.uiStatus,
                       value: _stateLabel(widget.annotation.state),
                     ),
                     _InfoRow(
-                      label: "色彩",
+                      label: context.l10n.uiColor,
                       value:
                           "${widget.annotation.colors.background}${widget.annotation.colors.foreground}",
                       isLast: true,
@@ -255,7 +262,7 @@ class _InlineAnnotationQuickEditorState
                         ),
                       ),
                       icon: const Icon(Icons.open_in_new, size: 16),
-                      label: const Text("開啟節點"),
+                      label: Text(context.l10n.uiOpenNode),
                     ),
                   _buildMoreMenu(),
                   OutlinedButton.icon(
@@ -269,7 +276,7 @@ class _InlineAnnotationQuickEditorState
                       ),
                     ),
                     icon: const Icon(Icons.tune, size: 16),
-                    label: const Text("編輯標記"),
+                    label: Text(context.l10n.uiEditAnnotation),
                   ),
                   FilledButton(
                     key: const ValueKey("inline-annotation-quick-apply"),
@@ -277,7 +284,7 @@ class _InlineAnnotationQuickEditorState
                       visualDensity: VisualDensity.compact,
                     ),
                     onPressed: _apply,
-                    child: const Text("套用"),
+                    child: Text(context.l10n.uiApply),
                   ),
                 ],
               ),
@@ -296,32 +303,35 @@ class _InlineAnnotationQuickEditorState
         widget.target!.primaryName != widget.annotation.displayText;
     return PopupMenuButton<InlineAnnotationDetailsAction>(
       key: const ValueKey("inline-annotation-more"),
-      tooltip: "更多標記操作",
+      tooltip: context.l10n.uiMoreAnnotationActions,
       onSelected: (action) =>
           Navigator.of(context).pop(InlineAnnotationDetailsResult(action)),
       itemBuilder: (_) => [
         if (canUpdateName)
-          const PopupMenuItem(
+          PopupMenuItem(
             key: ValueKey("inline-annotation-update-name"),
             value: InlineAnnotationDetailsAction.updateToPrimaryName,
             child: _AnnotationMenuLabel(
               icon: Icons.drive_file_rename_outline,
-              label: "更新為目前名稱",
+              label: context.l10n.uiUpdateToCurrentName,
             ),
           ),
         if (canRelink)
-          const PopupMenuItem(
+          PopupMenuItem(
             key: ValueKey("inline-annotation-relink"),
             value: InlineAnnotationDetailsAction.relinkTarget,
             child: _AnnotationMenuLabel(
               icon: Icons.add_link,
-              label: "重新連結遺失對象",
+              label: context.l10n.uiRelinkMissingTarget,
             ),
           ),
-        const PopupMenuItem(
+        PopupMenuItem(
           key: ValueKey("inline-annotation-remove-keep-text"),
           value: InlineAnnotationDetailsAction.removeKeepText,
-          child: _AnnotationMenuLabel(icon: Icons.link_off, label: "移除標記但保留文字"),
+          child: _AnnotationMenuLabel(
+            icon: Icons.link_off,
+            label: context.l10n.uiRemoveAnnotationKeepText,
+          ),
         ),
       ],
       icon: const Icon(Icons.more_horiz, size: 18),
@@ -329,13 +339,13 @@ class _InlineAnnotationQuickEditorState
   }
 
   String _kindLabel(InlineAnnotationKind kind) => switch (kind) {
-    InlineAnnotationKind.character => "人物",
-    InlineAnnotationKind.location => "地點",
-    InlineAnnotationKind.event => "事件",
-    InlineAnnotationKind.foreshadowing => "伏筆",
-    InlineAnnotationKind.plan => "計畫",
-    InlineAnnotationKind.item => "物品",
-    InlineAnnotationKind.emphasis => "高亮",
+    InlineAnnotationKind.character => context.l10n.uiCharacter,
+    InlineAnnotationKind.location => context.l10n.uiLocation,
+    InlineAnnotationKind.event => context.l10n.uiEvent,
+    InlineAnnotationKind.foreshadowing => context.l10n.uiForeshadowing,
+    InlineAnnotationKind.plan => context.l10n.uiPlan,
+    InlineAnnotationKind.item => context.l10n.uiItem,
+    InlineAnnotationKind.emphasis => context.l10n.uiHighlight,
   };
 
   Widget _buildDisplayField() {
@@ -345,8 +355,8 @@ class _InlineAnnotationQuickEditorState
       autofocus: true,
       decoration: appFieldDecoration(
         context,
-        decoration: const InputDecoration(
-          labelText: "顯示文字",
+        decoration: InputDecoration(
+          labelText: context.l10n.uiDisplayText,
           isDense: true,
           contentPadding: EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
@@ -375,7 +385,7 @@ class _InlineAnnotationQuickEditorState
           context,
         ).textTheme.bodySmall?.copyWith(fontFamily: "monospace", fontSize: 11),
         decoration: InputDecoration(
-          labelText: "完整語法",
+          labelText: context.l10n.uiFullSyntax,
           errorText: _syntaxError,
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(
@@ -384,7 +394,7 @@ class _InlineAnnotationQuickEditorState
           ),
           suffixIcon: IconButton(
             key: const ValueKey("inline-annotation-copy-syntax"),
-            tooltip: "複製語法",
+            tooltip: context.l10n.uiCopySyntax,
             visualDensity: VisualDensity.compact,
             onPressed: () => Navigator.of(context).pop(
               InlineAnnotationDetailsResult(
@@ -403,9 +413,9 @@ class _InlineAnnotationQuickEditorState
   }
 
   String _stateLabel(InlineAnnotationState state) => switch (state) {
-    InlineAnnotationState.none => "一般",
-    InlineAnnotationState.start => "開始",
-    InlineAnnotationState.end => "結束",
+    InlineAnnotationState.none => context.l10n.uiGeneral,
+    InlineAnnotationState.start => context.l10n.uiStart,
+    InlineAnnotationState.end => context.l10n.uiEnd,
   };
 }
 

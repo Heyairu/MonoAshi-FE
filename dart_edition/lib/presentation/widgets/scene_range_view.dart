@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "../../bin/ui_library.dart";
@@ -68,7 +69,8 @@ class SceneRangeView extends StatelessWidget {
     Color(0xFF8CBA76),
   ];
 
-  static String _label(String name) => name.isEmpty ? "未設定類型" : name;
+  static String _label(AppLocalizations l10n, String name) =>
+      name.isEmpty ? l10n.uiTypeNotSet : name;
 
   @override
   Widget build(BuildContext context) {
@@ -97,17 +99,20 @@ class SceneRangeView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text("場次範圍", style: theme.textTheme.titleMedium),
+          Text(context.l10n.uiStoryRange, style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
           Text(
-            "依大箱類型與順序 · 權重＝1＋中箱數＋小箱數",
+            context.l10n.uiByStorylineTypeAndOrderWeightEventsScenes,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 12),
           if (segments.isEmpty)
-            Text("新增大箱後，會在這裡顯示場次範圍。", style: theme.textTheme.bodySmall)
+            Text(
+              context.l10n.uiAddStorylinesToDisplayTheStoryRangeHere,
+              style: theme.textTheme.bodySmall,
+            )
           else ...[
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
@@ -120,13 +125,21 @@ class SceneRangeView extends StatelessWidget {
                         flex: segments[index].weight,
                         child: Tooltip(
                           key: ValueKey("scene-range-segment-$index"),
-                          message: _label(segments[index].name),
+                          message: _label(context.l10n, segments[index].name),
                           child: Semantics(
-                            label:
-                                "${_label(segments[index].name)}，"
-                                "第 ${segments[index].firstBox} 至 "
-                                "${segments[index].firstBox + segments[index].count - 1} 個大箱，"
-                                "權重 ${segments[index].weight}",
+                            label: context.l10n.uiStorylinesWeight(
+                              (_label(
+                                context.l10n,
+                                segments[index].name,
+                              )).toString(),
+                              context.formats.integer(segments[index].firstBox),
+                              context.formats.integer(
+                                segments[index].firstBox +
+                                    segments[index].count -
+                                    1,
+                              ),
+                              context.formats.integer(segments[index].weight),
+                            ),
                             child: Container(
                               decoration: BoxDecoration(
                                 color: colors[segments[index].name],
@@ -160,10 +173,10 @@ class SceneRangeView extends StatelessWidget {
                           text: "● ",
                           style: TextStyle(color: colors[entry.key]),
                         ),
-                        TextSpan(text: _label(entry.key)),
+                        TextSpan(text: _label(context.l10n, entry.key)),
                         TextSpan(
                           text:
-                              " ${(entry.value / totalWeight * 100).toStringAsFixed(1)}%",
+                              " ${context.formats.percent(entry.value / totalWeight)}",
                           style: TextStyle(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),

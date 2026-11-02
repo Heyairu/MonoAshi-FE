@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
@@ -79,9 +80,12 @@ class _SceneSnapshotTimelinePreviewState
           ),
           const SizedBox(height: 6),
           Text(
-            "快照綁定：${anchor?.label ?? '未選擇 Scene'} · 起點 Tick ${anchor?.startTick ?? '—'}",
+            context.l10n.uiSnapshotBoundToStartTick(
+              (anchor?.label ?? context.l10n.uiNoSceneSelected).toString(),
+              anchor == null ? '—' : context.formats.integer(anchor.startTick),
+            ),
           ),
-          const Text("拖曳至單一 Scene 可選取；空白或重疊區域請使用 Scene 選單。"),
+          Text(context.l10n.uiDragOntoASingleSceneToSelectIt),
           const SizedBox(height: 12),
         ],
       ),

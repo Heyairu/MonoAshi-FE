@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "package:flutter_quill/flutter_quill.dart";
 
@@ -169,7 +170,10 @@ class _MentionBadge extends StatelessWidget {
     final foreground = Theme.of(context).colorScheme.onSurface;
     return Semantics(
       key: ValueKey<String>("plain-text-quill-mention-${marker.offset}"),
-      label: "${_kindLabel(annotation.kind)}標記：${annotation.displayText}",
+      label: context.l10n.uiAnnotation(
+        (_kindLabel(context.l10n, annotation.kind)).toString(),
+        (annotation.displayText).toString(),
+      ),
       child: ExcludeSemantics(
         child: DecoratedBox(
           decoration: BoxDecoration(color: background.withValues(alpha: 0.42)),
@@ -189,15 +193,16 @@ class _MentionBadge extends StatelessWidget {
     );
   }
 
-  String _kindLabel(InlineAnnotationKind kind) => switch (kind) {
-    InlineAnnotationKind.character => "人物",
-    InlineAnnotationKind.location => "地點",
-    InlineAnnotationKind.event => "事件",
-    InlineAnnotationKind.foreshadowing => "伏筆",
-    InlineAnnotationKind.plan => "計畫",
-    InlineAnnotationKind.item => "物品",
-    InlineAnnotationKind.emphasis => "高亮",
-  };
+  String _kindLabel(AppLocalizations l10n, InlineAnnotationKind kind) =>
+      switch (kind) {
+        InlineAnnotationKind.character => l10n.uiCharacter,
+        InlineAnnotationKind.location => l10n.uiLocation,
+        InlineAnnotationKind.event => l10n.uiEvent,
+        InlineAnnotationKind.foreshadowing => l10n.uiForeshadowing,
+        InlineAnnotationKind.plan => l10n.uiPlan,
+        InlineAnnotationKind.item => l10n.uiItem,
+        InlineAnnotationKind.emphasis => l10n.uiHighlight,
+      };
 
   String _symbol(InlineAnnotationKind kind) => switch (kind) {
     InlineAnnotationKind.character => "@",

@@ -1237,6 +1237,7 @@ class RibbonCommand {
     this.keyTip,
     this.type = RibbonCommandType.action,
     this.size = RibbonCommandSize.medium,
+    this.wrapLargeLabel = true,
     this.isEnabled,
     this.disabledReason,
     this.isBusy,
@@ -1264,6 +1265,10 @@ class RibbonCommand {
   final RibbonCommandHandler? onInvoked;
   final RibbonCommandType type;
   final RibbonCommandSize size;
+
+  /// Wrap expanded large-button labels onto two centered lines. Compact
+  /// controls keep their single-line layout. Disable for single-line labels.
+  final bool wrapLargeLabel;
   final bool Function(RibbonContext)? isEnabled;
   final String? Function(RibbonContext)? disabledReason;
   final bool Function(RibbonContext)? isBusy;
@@ -3144,11 +3149,14 @@ class _CommandButton extends StatelessWidget {
             children: [
               icon,
               const SizedBox(height: 5),
-              Text(
-                command.label,
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
+              Flexible(
+                child: Text(
+                  command.label,
+                  maxLines: command.wrapLargeLabel ? 2 : 1,
+                  softWrap: command.wrapLargeLabel,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
@@ -3279,10 +3287,14 @@ class _MenuButton extends StatelessWidget {
               children: [
                 icon,
                 const SizedBox(height: 5),
-                Text(
-                  command.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Flexible(
+                  child: Text(
+                    command.label,
+                    maxLines: command.wrapLargeLabel ? 2 : 1,
+                    softWrap: command.wrapLargeLabel,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 const Icon(Icons.arrow_drop_down, size: 18),
               ],

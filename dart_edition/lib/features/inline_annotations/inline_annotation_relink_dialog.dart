@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "../../ui_library/dialogs.dart";
@@ -49,7 +50,7 @@ class _InlineAnnotationRelinkFormState
   Widget build(BuildContext context) {
     final candidates = _visibleCandidates;
     return AppDialog(
-      title: "重新連結遺失對象",
+      title: context.l10n.uiRelinkMissingTarget,
       icon: Icons.add_link,
       maxWidth: 560,
       content: SizedBox(
@@ -62,8 +63,8 @@ class _InlineAnnotationRelinkFormState
               autofocus: true,
               decoration: appFieldDecoration(
                 context,
-                decoration: const InputDecoration(
-                  labelText: "搜尋名稱、路徑或 UUID",
+                decoration: InputDecoration(
+                  labelText: context.l10n.uiSearchNamePathOrUUID,
                   prefixIcon: Icon(Icons.search),
                 ),
               ),
@@ -72,7 +73,7 @@ class _InlineAnnotationRelinkFormState
             const SizedBox(height: 12),
             Expanded(
               child: candidates.isEmpty
-                  ? const Center(child: Text("沒有相符的可連結對象"))
+                  ? Center(child: Text(context.l10n.uiNoMatchingLinkTargets))
                   : ListView.builder(
                       itemCount: candidates.length,
                       itemBuilder: (context, index) {
@@ -84,7 +85,7 @@ class _InlineAnnotationRelinkFormState
                           leading: const Icon(Icons.link),
                           title: Text(
                             candidate.primaryName.isEmpty
-                                ? "（未命名）"
+                                ? context.l10n.uiUntitled
                                 : candidate.primaryName,
                           ),
                           subtitle: Text(
@@ -101,7 +102,9 @@ class _InlineAnnotationRelinkFormState
             ),
             if (widget.candidates.length > _resultLimit && _query.isEmpty)
               Text(
-                "目前顯示前 $_resultLimit 筆，請輸入關鍵字縮小範圍。",
+                context.l10n.uiShowingTheFirstResultsEnterKeywordsToNarrow(
+                  (_resultLimit).toString(),
+                ),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
           ],
@@ -110,7 +113,7 @@ class _InlineAnnotationRelinkFormState
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text("取消"),
+          child: Text(context.l10n.commonCancel),
         ),
       ],
     );

@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "package:flutter/foundation.dart" show listEquals;
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -172,14 +173,14 @@ class RevisionTrackingPanel extends ConsumerWidget {
               children: [
                 const Icon(Icons.rate_review_outlined, size: 20),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    "修訂追蹤",
+                    context.l10n.uiTrackChanges,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 IconButton(
-                  tooltip: "收合修訂窗格",
+                  tooltip: context.l10n.uiCollapseChangesPane,
                   onPressed: onClose,
                   icon: const Icon(Icons.close),
                 ),
@@ -196,15 +197,18 @@ class RevisionTrackingPanel extends ConsumerWidget {
                     children: [
                       Text(
                         state.status == RevisionComparisonStatus.unavailable
-                            ? (state.error ?? "追蹤資料無法讀取")
-                            : "從目前內容建立比較基準，開始查看修訂。",
+                            ? (state.error ??
+                                  context.l10n.uiCouldNotReadChangeTrackingData)
+                            : context
+                                  .l10n
+                                  .uiCreateABaselineFromTheCurrentContentTo,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 12),
                       FilledButton.icon(
                         onPressed: onStart,
                         icon: const Icon(Icons.play_arrow),
-                        label: const Text("開始追蹤"),
+                        label: Text(context.l10n.uiStartTracking),
                       ),
                     ],
                   ),
@@ -218,12 +222,21 @@ class RevisionTrackingPanel extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "基準：${state.baseline!.label}",
+                    context.l10n.uiBaseline((state.baseline!.label).toString()),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    "${state.baseline!.readOnly ? "唯讀版本" : "建立"}：${state.baseline!.createdAt.toLocal().toString().substring(0, 16)} · 目標：目前內容",
+                    context.l10n.uiComparingToCurrentContent(
+                      (state.baseline!.readOnly
+                              ? context.l10n.uiReadOnlyVersion
+                              : context.l10n.commonCreate)
+                          .toString(),
+                      context.formats.dateTime(
+                        state.baseline!.createdAt,
+                        seconds: false,
+                      ),
+                    ),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   if (state.baseline!.sourceRevisionId case final revisionId?)
@@ -255,8 +268,17 @@ class RevisionTrackingPanel extends ConsumerWidget {
                         ),
                       ),
                       IconButton(
-                        tooltip: "儲存目前內容為檢查點並套用",
-                        onPressed: () => notifier.saveCheckpoint(),
+                        tooltip: context
+                            .l10n
+                            .uiSaveCurrentContentAsCheckpointAndApply,
+                        onPressed: () => notifier.saveCheckpoint(
+                          label: context.l10n.revisionCheckpointLabel(
+                            context.formats.dateTime(
+                              DateTime.now(),
+                              seconds: false,
+                            ),
+                          ),
+                        ),
                         icon: const Icon(Icons.bookmark_add_outlined),
                       ),
                     ],
@@ -264,7 +286,7 @@ class RevisionTrackingPanel extends ConsumerWidget {
                   CheckboxListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
-                    title: const Text("顯示已接受"),
+                    title: Text(context.l10n.uiShowAcceptedChanges),
                     value: state.showAccepted,
                     onChanged: (value) =>
                         notifier.setShowAccepted(value ?? false),
@@ -272,7 +294,7 @@ class RevisionTrackingPanel extends ConsumerWidget {
                   TextButton.icon(
                     onPressed: notifier.stop,
                     icon: const Icon(Icons.stop_circle_outlined, size: 18),
-                    label: const Text("結束追蹤"),
+                    label: Text(context.l10n.uiStopTracking),
                   ),
                 ],
               ),
@@ -283,9 +305,9 @@ class RevisionTrackingPanel extends ConsumerWidget {
                 spacing: 3,
                 children: [
                   for (final (label, filter) in [
-                    ("全部", RevisionViewFilter.all),
-                    ("正文", RevisionViewFilter.text),
-                    ("設定", RevisionViewFilter.settings),
+                    (context.l10n.uiAll, RevisionViewFilter.all),
+                    (context.l10n.uiManuscript, RevisionViewFilter.text),
+                    (context.l10n.uiSettings, RevisionViewFilter.settings),
                   ])
                     ChoiceChip(
                       label: Text(label),
@@ -299,19 +321,19 @@ class RevisionTrackingPanel extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               child: Row(
                 children: [
-                  const Text("範圍："),
+                  Text(context.l10n.uiScope),
                   Expanded(
                     child: DropdownButton<RevisionViewScope>(
                       isExpanded: true,
                       value: state.scope,
-                      items: const [
+                      items: [
                         DropdownMenuItem(
                           value: RevisionViewScope.current,
-                          child: Text("目前章節／頁面"),
+                          child: Text(context.l10n.uiCurrentChapterPage),
                         ),
                         DropdownMenuItem(
                           value: RevisionViewScope.allProject,
-                          child: Text("全專案"),
+                          child: Text(context.l10n.uiEntireProject),
                         ),
                       ],
                       onChanged: (value) {
@@ -326,7 +348,19 @@ class RevisionTrackingPanel extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                 child: Text(
-                  "正文 +${result.addedLines} / -${result.removedLines} 行 · 設定 +${result.recordCount(RevisionChangeKind.added)} / -${result.recordCount(RevisionChangeKind.removed)} / M${result.recordCount(RevisionChangeKind.modified)}",
+                  context.l10n.uiManuscriptLinesSettingsM(
+                    context.formats.integer(result.addedLines),
+                    context.formats.integer(result.removedLines),
+                    context.formats.integer(
+                      result.recordCount(RevisionChangeKind.added),
+                    ),
+                    context.formats.integer(
+                      result.recordCount(RevisionChangeKind.removed),
+                    ),
+                    context.formats.integer(
+                      result.recordCount(RevisionChangeKind.modified),
+                    ),
+                  ),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
@@ -336,7 +370,11 @@ class RevisionTrackingPanel extends ConsumerWidget {
                 child: TextButton.icon(
                   onPressed: () => notifier.acceptEvents(pendingKeys),
                   icon: const Icon(Icons.done_all, size: 16),
-                  label: Text("接受此範圍 ${pendingKeys.length} 筆"),
+                  label: Text(
+                    context.l10n.uiAcceptChangesInScope(
+                      context.formats.integer(pendingKeys.length),
+                    ),
+                  ),
                 ),
               ),
             if (pendingText.values.fold<int>(
@@ -351,19 +389,21 @@ class RevisionTrackingPanel extends ConsumerWidget {
                 child: TextButton.icon(
                   onPressed: () => onRejectTextScope!(pendingText),
                   icon: const Icon(Icons.undo, size: 16),
-                  label: const Text("拒絕此範圍正文"),
+                  label: Text(context.l10n.uiRejectManuscriptChangesInScope),
                 ),
               ),
             if (result != null && result.texts.any((text) => text.isCoarse))
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                child: Text("大型差異已簡化，行數可能非最小值"),
+                child: Text(
+                  context.l10n.uiLargeDifferencesAreSimplifiedLineCountsMayNot,
+                ),
               ),
             if (result != null && result.unsupportedKinds.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                 child: Text(
-                  "部分資料類型尚未納入比較",
+                  context.l10n.uiSomeDataTypesAreNotYetIncludedIn,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
@@ -371,14 +411,14 @@ class RevisionTrackingPanel extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                  tooltip: "上一筆",
+                  tooltip: context.l10n.uiPreviousChange,
                   onPressed: navigation.isEmpty
                       ? null
                       : () => _step(ref, navigation, -1),
                   icon: const Icon(Icons.keyboard_arrow_up),
                 ),
                 IconButton(
-                  tooltip: "下一筆",
+                  tooltip: context.l10n.uiNextChange,
                   onPressed: navigation.isEmpty
                       ? null
                       : () => _step(ref, navigation, 1),
@@ -395,14 +435,19 @@ class RevisionTrackingPanel extends ConsumerWidget {
                 RevisionComparisonStatus.failed => Center(
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Text("計算修訂失敗：${state.error ?? "未知錯誤"}"),
+                    child: Text(
+                      context.l10n.uiCouldNotCalculateChanges(
+                        (state.error ?? context.l10n.uiUnknownError).toString(),
+                      ),
+                    ),
                   ),
                 ),
-                RevisionComparisonStatus.unavailable => const Center(
-                  child: Text("比較來源尚未取得"),
+                RevisionComparisonStatus.unavailable => Center(
+                  child: Text(context.l10n.uiComparisonSourceIsNotAvailableYet),
                 ),
-                _ when visibleHunks.isEmpty && visibleRecords.isEmpty =>
-                  const Center(child: Text("此範圍沒有修訂")),
+                _ when visibleHunks.isEmpty && visibleRecords.isEmpty => Center(
+                  child: Text(context.l10n.uiNoChangesInThisScope),
+                ),
                 _ => ListView.builder(
                   itemCount: visibleHunks.length + visibleRecords.length,
                   itemBuilder: (context, index) {
@@ -542,7 +587,11 @@ class _TextHunkCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "正文／$chapterName · 舊 ${hunk.oldStart + 1} → 新 ${hunk.newStart + 1}",
+              context.l10n.uiManuscriptBeforeAfter(
+                (chapterName).toString(),
+                context.formats.integer(hunk.oldStart + 1),
+                context.formats.integer(hunk.newStart + 1),
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.labelMedium,
@@ -558,27 +607,51 @@ class _TextHunkCard extends StatelessWidget {
                       : Colors.red.shade700,
                 ),
               ),
-            if (hunk.lines.length > 12) Text("另有 ${hunk.lines.length - 12} 行…"),
+            if (hunk.lines.length > 12)
+              Text(
+                context.l10n.uiAdditionalLines(
+                  context.formats.integer(hunk.lines.length - 12),
+                ),
+              ),
             if (hunk.lines.isEmpty && text.trailingNewlineChanged)
               Text(
-                "行尾換行：${text.oldTrailingNewline ? "有" : "無"} → ${text.newTrailingNewline ? "有" : "無"}",
+                context.l10n.uiTrailingNewline(
+                  (text.oldTrailingNewline
+                          ? context.l10n.uiPresent
+                          : context.l10n.uiNone)
+                      .toString(),
+                  (text.newTrailingNewline
+                          ? context.l10n.uiPresent
+                          : context.l10n.uiNone)
+                      .toString(),
+                ),
               ),
             if (text.isCoarse)
-              const Text("大型差異概略呈現", style: TextStyle(fontSize: 11)),
+              Text(
+                context.l10n.uiLargeDifferencesOverview,
+                style: TextStyle(fontSize: 11),
+              ),
             Wrap(
               spacing: 4,
               children: [
                 TextButton(
                   onPressed: () => _showFullDiff(context),
-                  child: const Text("完整標記"),
+                  child: Text(context.l10n.uiFullAnnotation),
                 ),
                 if (onAccept != null)
                   TextButton(
                     onPressed: accepted ? onUnaccept : onAccept,
-                    child: Text(accepted ? "取消接受" : "接受"),
+                    child: Text(
+                      accepted
+                          ? context.l10n.uiUndoAcceptance
+                          : context.l10n.uiAccept,
+                    ),
                   ),
                 if (!accepted && onReject != null)
-                  TextButton(onPressed: onReject, child: const Text("拒絕")),
+                  TextButton(
+                    onPressed: onReject,
+                    child: Text(context.l10n.uiReject),
+                  ),
               ],
             ),
           ],
@@ -591,7 +664,7 @@ class _TextHunkCard extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("$chapterName · 完整標記"),
+        title: Text(context.l10n.uiFullAnnotation2((chapterName).toString())),
         content: SizedBox(
           width: (MediaQuery.sizeOf(context).width - 80).clamp(200.0, 640.0),
           height: (MediaQuery.sizeOf(context).height - 180).clamp(200.0, 500.0),
@@ -624,7 +697,7 @@ class _TextHunkCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("關閉"),
+            child: Text(context.l10n.commonClose),
           ),
         ],
       ),
@@ -662,7 +735,7 @@ class _RecordCard extends StatelessWidget {
     final page = RevisionFieldRegistry.pageFor(record.key.kind);
     final label = page == null
         ? record.key.kind.name
-        : RevisionFieldRegistry.pageLabel(page);
+        : context.l10n.legacyLabel(RevisionFieldRegistry.pageLabel(page));
     final name =
         record.after?.fields["displayName"] ??
         record.after?.fields["name"] ??
@@ -670,7 +743,9 @@ class _RecordCard extends StatelessWidget {
         record.before?.fields["displayName"] ??
         record.before?.fields["name"] ??
         record.before?.fields["event"] ??
-        (record.key.kind.name == "baseInfo" ? "專案資訊" : record.key.recordId);
+        (record.key.kind.name == "baseInfo"
+            ? context.l10n.uiProjectInformation
+            : record.key.recordId);
     return Card(
       margin: const EdgeInsets.fromLTRB(8, 5, 8, 2),
       child: Padding(
@@ -686,8 +761,12 @@ class _RecordCard extends StatelessWidget {
               onTap: () => onTap(null),
             ),
             if (record.fields.isEmpty)
-              Text(record.kind == RevisionChangeKind.added ? "新增項目" : "刪除項目"),
-            if (record.fields.isEmpty) _reviewActions(null),
+              Text(
+                record.kind == RevisionChangeKind.added
+                    ? context.l10n.uiAddedItem
+                    : context.l10n.uiDeletedItem,
+              ),
+            if (record.fields.isEmpty) _reviewActions(context, null),
             if (record.fields.isEmpty)
               for (final entry
                   in (record.after ?? record.before)!.fields.entries
@@ -696,7 +775,7 @@ class _RecordCard extends StatelessWidget {
                       )
                       .take(8))
                 Text(
-                  "${RevisionFieldRegistry.labelFor([entry.key])}：${_display(entry.value)}",
+                  "${context.l10n.revisionFieldLabel([entry.key])}：${_display(entry.value)}",
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -715,7 +794,7 @@ class _RecordCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "${RevisionFieldRegistry.labelFor(field.target.fieldPath)}  "
+                          "${context.l10n.revisionFieldLabel(field.target.fieldPath)}  "
                           "${switch (field.kind) {
                             RevisionChangeKind.added => "+",
                             RevisionChangeKind.removed => "-",
@@ -737,7 +816,7 @@ class _RecordCard extends StatelessWidget {
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),
-                        _reviewActions(field),
+                        _reviewActions(context, field),
                       ],
                     ),
                   ),
@@ -748,7 +827,7 @@ class _RecordCard extends StatelessWidget {
     );
   }
 
-  Widget _reviewActions(RevisionFieldChange? field) {
+  Widget _reviewActions(BuildContext context, RevisionFieldChange? field) {
     if (onAccept == null) return const SizedBox.shrink();
     final key = RevisionReviewService.recordKey(baseline, record, field);
     final accepted = acceptedEvents.contains(key);
@@ -758,7 +837,11 @@ class _RecordCard extends StatelessWidget {
         TextButton(
           onPressed: () =>
               accepted ? onUnaccept?.call(key) : onAccept?.call(key),
-          child: Text(accepted ? "取消接受" : "接受"),
+          child: Text(
+            accepted
+                ? context.l10n.revisionUnaccept
+                : context.l10n.revisionAccept,
+          ),
         ),
         if (!accepted &&
             onReject != null &&
@@ -766,7 +849,7 @@ class _RecordCard extends StatelessWidget {
             RevisionReviewService.canRejectField(record, field))
           TextButton(
             onPressed: () => onReject!(field),
-            child: const Text("拒絕"),
+            child: Text(context.l10n.revisionReject),
           ),
       ],
     );

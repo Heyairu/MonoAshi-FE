@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
@@ -454,7 +455,7 @@ class AppEditableTableCell extends StatefulWidget {
   final VoidCallback? onEditStarted;
   final VoidCallback? onEditCanceled;
   final bool selected;
-  final String emptyText;
+  final String? emptyText;
   final String? hintText;
   final TextStyle? style;
   final int maxLines;
@@ -467,7 +468,7 @@ class AppEditableTableCell extends StatefulWidget {
     this.onEditStarted,
     this.onEditCanceled,
     this.selected = false,
-    this.emptyText = "（空白）",
+    this.emptyText,
     this.hintText,
     this.style,
     this.maxLines = 1,
@@ -543,7 +544,7 @@ class _AppEditableTableCellState extends State<AppEditableTableCell> {
       onSubmitted: _submit,
       onCanceled: _cancel,
       onTapOutside: (_) => _submit(_controller.text),
-      emptyText: widget.emptyText,
+      emptyText: widget.emptyText ?? context.l10n.uiBlank2,
       hintText: widget.hintText,
       style: widget.style,
       maxLines: widget.maxLines,
@@ -577,9 +578,9 @@ class AppTwoColumnTableEditor extends StatelessWidget {
   final AppTwoColumnTableSubmit onSubmit;
   final VoidCallback? onDelete;
   final AppTwoColumnTableValidator? canSubmit;
-  final String addTooltip;
-  final String updateTooltip;
-  final String deleteTooltip;
+  final String? addTooltip;
+  final String? updateTooltip;
+  final String? deleteTooltip;
   final int secondFieldMaxLines;
   final AppTwoColumnTableFieldBuilder? firstFieldBuilder;
 
@@ -595,9 +596,9 @@ class AppTwoColumnTableEditor extends StatelessWidget {
     this.canSubmit,
     this.firstHint,
     this.secondHint,
-    this.addTooltip = "新增",
-    this.updateTooltip = "更新",
-    this.deleteTooltip = "刪除",
+    this.addTooltip,
+    this.updateTooltip,
+    this.deleteTooltip,
     this.secondFieldMaxLines = 1,
     this.firstFieldBuilder,
   }) : assert(secondFieldMaxLines > 0);
@@ -642,11 +643,13 @@ class AppTwoColumnTableEditor extends StatelessWidget {
                   actions: [
                     ItemAction.edit(
                       icon: isEditing ? Icons.save_outlined : Icons.add,
-                      tooltip: isEditing ? updateTooltip : addTooltip,
+                      tooltip: isEditing
+                          ? (updateTooltip ?? context.l10n.uiUpdate)
+                          : (addTooltip ?? context.l10n.commonAdd),
                       onPressed: submitEnabled ? _submit : null,
                     ),
                     ItemAction.delete(
-                      tooltip: deleteTooltip,
+                      tooltip: deleteTooltip ?? context.l10n.commonDelete,
                       onPressed: isEditing ? onDelete : null,
                     ),
                   ],

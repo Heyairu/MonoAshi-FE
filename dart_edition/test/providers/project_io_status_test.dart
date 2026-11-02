@@ -21,6 +21,94 @@ import 'package:monogatari_assistant/presentation/providers/global_state_provide
 
 void main() {
   test(
+    'error states release gates even when Riverpod retains a busy value',
+    () {
+      final busy = const AsyncData(
+        ProjectIoStatus(
+          operation: ProjectIoOperation.openProject,
+          isSaving: true,
+          isParsing: true,
+        ),
+      );
+      final failed = AsyncError<ProjectIoStatus>(
+        StateError('failed'),
+        StackTrace.current,
+      ).copyWithPrevious(busy);
+      expect(failed.valueOrNull?.isBusy, isTrue);
+      expect(failed.isProjectIoBusy, isFalse);
+      expect(failed.blocksProjectEditor, isFalse);
+      expect(busy.isProjectIoBusy, isTrue);
+      expect(busy.blocksProjectEditor, isTrue);
+    },
+  );
+
+  test('failed save can be retried with editor content intact', () async {
+    final repository = _RecoveringFileRepository();
+    final container = ProviderContainer(
+      overrides: [fileRepositoryProvider.overrideWithValue(repository)],
+    );
+    addTearDown(container.dispose);
+    final controller = container.read(projectIoControllerProvider.notifier);
+    final data = ProjectData.empty();
+    final current = ProjectFile(
+      fileName: 'draft.mnproj',
+      filePath: '/draft.mnproj',
+      content: '',
+    );
+    Future<ProjectFile> save() => controller.saveProject(
+      currentProject: current,
+      currentData: data,
+      forceSaveAs: false,
+    );
+    await expectLater(save(), throwsA(isA<FileException>()));
+    expect(
+      container.read(projectIoControllerProvider).isProjectIoBusy,
+      isFalse,
+    );
+    expect(
+      container.read(projectIoControllerProvider).blocksProjectEditor,
+      isFalse,
+    );
+    final chapters = data.segmentsData;
+    await save();
+    expect(repository.attempts, 2);
+    expect(data.segmentsData, chapters);
+    expect(container.read(projectIoControllerProvider).hasError, isFalse);
+    expect(
+      container.read(projectIoControllerProvider).isProjectIoBusy,
+      isFalse,
+    );
+  });
+
+  test('failed parsing also releases the editor loading overlay', () async {
+    final repository = _BlockingFileRepository();
+    final container = ProviderContainer(
+      overrides: [fileRepositoryProvider.overrideWithValue(repository)],
+    );
+    addTearDown(container.dispose);
+    container.read(editorCoordinatorProvider);
+    final loading = container
+        .read(projectIoControllerProvider.notifier)
+        .loadProject(
+          ProjectFile(
+            fileName: 'bad.mnproj',
+            filePath: '/bad.mnproj',
+            content: 'broken',
+          ),
+        );
+    final assertion = expectLater(loading, throwsFormatException);
+    await repository.loadStarted.future;
+    expect(container.read(editorCoordinatorProvider).isLoading, isTrue);
+    repository.loadCompleter.completeError(const FormatException('broken'));
+    await assertion;
+    expect(container.read(editorCoordinatorProvider).isLoading, isFalse);
+    expect(
+      container.read(projectIoControllerProvider).isProjectIoBusy,
+      isFalse,
+    );
+  });
+
+  test(
     'new projects use the default pen name without changing existing authors',
     () async {
       final profileRepository = _ProfileRepository(
@@ -551,6 +639,15 @@ class _ProfileRepository extends UserProfileRepository {
   @override
   Future<void> save(UserProfile value) async {
     profile = value.normalized;
+  }
+}
+
+class _RecoveringFileRepository extends _BlockingFileRepository {
+  int attempts = 0;
+  @override
+  Future<ProjectFile> saveProject(ProjectFile projectFile) async {
+    if (++attempts == 1) throw FileException('write failed');
+    return projectFile;
   }
 }
 

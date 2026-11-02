@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "dart:async";
 import "dart:math" as math;
 
@@ -264,11 +265,17 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const LargeTitle(icon: Icons.view_timeline_outlined, text: "時間軸"),
+            LargeTitle(
+              icon: Icons.view_timeline_outlined,
+              text: context.l10n.uiTimeline,
+            ),
             const SizedBox(height: 20),
             if (danglingCount > 0) ...[
               AppNoticeBanner(
-                message: "偵測到 $danglingCount 筆缺失引用；資料已保留，請重新連結或移除對應節點。",
+                message: context.l10n
+                    .uiFoundMissingReferencesDataHasBeenPreservedRelink(
+                      (danglingCount).toString(),
+                    ),
                 tone: AppFeedbackTone.warning,
               ),
               const SizedBox(height: 16),
@@ -277,12 +284,12 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
             const SizedBox(height: 12),
             AppTextField(
               controller: _searchController,
-              labelText: "搜尋時間軸",
+              labelText: context.l10n.uiSearchTimeline,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _searchController.text.isEmpty
                   ? null
                   : IconButton(
-                      tooltip: "清除搜尋",
+                      tooltip: context.l10n.uiClearSearch,
                       onPressed: () {
                         _searchController.clear();
                         ref.read(timelineViewProvider.notifier).setQuery("");
@@ -304,10 +311,12 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
                   FilterChip(
                     key: ValueKey("timeline-impact-filter-${filter.name}"),
                     label: Text(switch (filter) {
-                      _TimelineImpactFilter.all => "全部狀態變更",
-                      _TimelineImpactFilter.character => "角色",
-                      _TimelineImpactFilter.item => "物品",
-                      _TimelineImpactFilter.location => "地點",
+                      _TimelineImpactFilter.all =>
+                        context.l10n.uiAllStateChanges,
+                      _TimelineImpactFilter.character =>
+                        context.l10n.uiCharacters3,
+                      _TimelineImpactFilter.item => context.l10n.uiItem,
+                      _TimelineImpactFilter.location => context.l10n.uiLocation,
                     }),
                     selected: _impactFilter == filter,
                     onSelected: (_) => setState(() => _impactFilter = filter),
@@ -586,7 +595,7 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
           onPressed: () =>
               ref.read(timelineViewProvider.notifier).enterScope(null),
           icon: const Icon(Icons.home_outlined, size: 18),
-          label: const Text("主時間軸"),
+          label: Text(context.l10n.uiMainTimeline),
         ),
         for (final placement in path) ...[
           const Icon(Icons.chevron_right, size: 18),
@@ -594,7 +603,7 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
             onPressed: () => ref
                 .read(timelineViewProvider.notifier)
                 .enterScope(placement.placementUUID),
-            child: Text(_placementLabel(placement, const {})),
+            child: Text(_placementLabel(context.l10n, placement, const {})),
           ),
         ],
       ],
@@ -614,10 +623,10 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
       TimelineElementLevel.small => null,
     };
     final label = switch (nextLevel) {
-      TimelineElementLevel.large => "新增大箱",
-      TimelineElementLevel.middle => "新增中箱",
-      TimelineElementLevel.small => "新增小箱",
-      null => "小箱是最末層節點",
+      TimelineElementLevel.large => context.l10n.uiAddStoryline,
+      TimelineElementLevel.middle => context.l10n.uiAddEvent,
+      TimelineElementLevel.small => context.l10n.uiAddScene,
+      null => context.l10n.uiScenesAreLeafNodes,
     };
     final icon = switch (nextLevel) {
       TimelineElementLevel.large => Icons.add_home_work_rounded,
@@ -641,7 +650,7 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
                   children: [
                     IconButton(
                       icon: Icon(Icons.menu_open_rounded),
-                      tooltip: "只看目前章節",
+                      tooltip: context.l10n.uiCurrentChapterOnly,
                       style: state.onlyCurrentChapter
                           ? IconButton.styleFrom(
                               foregroundColor: Colors.teal[400],
@@ -658,7 +667,7 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
                     ),
                     IconButton(
                       icon: Icon(Icons.link_off_rounded),
-                      tooltip: "未連結章節",
+                      tooltip: context.l10n.uiNoChapterLinked,
                       style: state.onlyUnlinked
                           ? IconButton.styleFrom(
                               foregroundColor: Colors.teal[400],
@@ -672,7 +681,9 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
                     IconButton(
                       key: const ValueKey("timeline-auto-sort-outline"),
                       icon: Icon(Icons.view_timeline_outlined),
-                      tooltip: "自動排序大綱\n依起始 Tick、時間軌順序排列大綱；大綱順序變更時同步調整時間軸。",
+                      tooltip: context
+                          .l10n
+                          .uiAutomaticallySortOutlineSortByStartTickAnd,
                       style: grid.autoSortOutline
                           ? IconButton.styleFrom(
                               foregroundColor: Colors.teal[400],
@@ -687,8 +698,8 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
                       key: const ValueKey("timeline-omit-empty-ranges"),
                       icon: const Icon(Icons.compress_rounded),
                       tooltip: state.omitEmptyRanges
-                          ? "顯示時間軸空白區段"
-                          : "省略時間軸空白區段",
+                          ? context.l10n.uiShowEmptyTimelineRanges
+                          : context.l10n.uiSkipEmptyTimelineRanges,
                       style: state.omitEmptyRanges
                           ? IconButton.styleFrom(
                               foregroundColor: Colors.teal[400],
@@ -701,7 +712,7 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.location_on_rounded),
-                      tooltip: "返回目前時間軸",
+                      tooltip: context.l10n.uiReturnToCurrentTimeline,
                       hoverColor: Theme.of(
                         context,
                       ).colorScheme.primaryContainer,
@@ -736,7 +747,7 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
     final zoomSlider = IconedSlider(
       icon: Icons.zoom_in,
       value: state.pixelsPerTick,
-      tooltip: "畫面 Tick 寬度",
+      tooltip: context.l10n.uiVisibleTickWidth,
       min: 36,
       max: 144,
       divisions: 54,
@@ -758,7 +769,7 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
             width: 260,
             child: _NumberStepper(
               key: const ValueKey("timeline-current-tick-stepper"),
-              label: "目前 Tick",
+              label: context.l10n.uiCurrentTick2,
               value: state.currentTick,
               minimum: timelineMinimumTick,
               maximum: timelineMaximumTick,
@@ -801,18 +812,20 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
 
   Widget _buildPendingOutlineBoxes(List<_PendingOutlineBox> boxes) {
     return AppSectionCard(
-      title: "未排定大箱",
+      title: context.l10n.uiUnscheduledStorylines,
       icon: Icons.pending_actions_outlined,
       child: boxes.isEmpty
-          ? const AppEmptyState(
-              title: "所有大綱大箱皆已同步",
+          ? AppEmptyState(
+              title: context.l10n.uiAllOutlineStorylinesAreSynced,
               icon: Icons.check_circle_outline,
               compact: true,
             )
           : Column(
               children: [
-                const AppNoticeBanner(
-                  message: "同步時會建立或補齊整個大箱、中箱與小箱階層，不會把單一場景放進目前中箱。",
+                AppNoticeBanner(
+                  message: context
+                      .l10n
+                      .uiSyncCreatesOrCompletesTheEntireStorylineEvent,
                   tone: AppFeedbackTone.info,
                 ),
                 for (final box in boxes)
@@ -821,16 +834,25 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
                     leading: const Icon(Icons.inventory_2_outlined),
                     title: Text(
                       box.storyline.storylineName.isEmpty
-                          ? "未命名大箱"
+                          ? context.l10n.uiUntitledStoryline2
                           : box.storyline.storylineName,
                     ),
                     subtitle: Text(
                       box.isLargeMissing
-                          ? "時間軸大箱不存在；包含 ${box.storyline.scenes.length} 個中箱、${box.missingSceneCount} 個小箱"
-                          : "待補齊 ${box.missingEventCount} 個中箱、${box.missingSceneCount} 個小箱",
+                          ? context.l10n
+                                .uiTimelineStorylineMissingContainsEventsAndScenes(
+                                  context.formats.integer(
+                                    box.storyline.scenes.length,
+                                  ),
+                                  (box.missingSceneCount).toString(),
+                                )
+                          : context.l10n.uiMissingEventsAndScenes(
+                              (box.missingEventCount).toString(),
+                              (box.missingSceneCount).toString(),
+                            ),
                     ),
                     trailing: IconButton(
-                      tooltip: "同步整個大箱",
+                      tooltip: context.l10n.uiSyncEntireStoryline,
                       onPressed: () {
                         final result = _actions.syncStorylineHierarchy(
                           box.storyline.chapterUUID,
@@ -849,17 +871,20 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
 
   Widget _buildGridSettings(TimelineGridConfig grid) {
     return AppSectionCard(
-      title: "故事刻度設定",
+      title: context.l10n.uiStoryTimeScale,
       icon: Icons.straighten,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           AppDropdownField<TickDurationUnit>(
             value: grid.ticksPerLittleBox.unit,
-            labelText: "Tick 單位",
+            labelText: context.l10n.uiTickUnit,
             options: [
               for (final unit in TickDurationUnit.values)
-                DropdownOption(value: unit, label: _unitLabel(unit)),
+                DropdownOption(
+                  value: unit,
+                  label: _unitLabel(context.l10n, unit),
+                ),
             ],
             onChanged: (unit) {
               if (unit == null) return;
@@ -875,7 +900,7 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
           const SizedBox(height: 12),
           _NumberStepper(
             key: const ValueKey("timeline-tick-unit-value"),
-            label: "Tick 對應單位數",
+            label: context.l10n.uiUnitsPerTick,
             value: grid.ticksPerLittleBox.value,
             onChanged: (value) => _actions.updateGrid(
               grid.copyWith(
@@ -887,19 +912,19 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
           ),
           _NumberStepper(
             key: const ValueKey("timeline-small-box-ticks"),
-            label: "每小箱 Tick 數",
+            label: context.l10n.uiTicksPerScene,
             value: grid.ticksPerSmallBox,
             onChanged: (value) =>
                 _actions.updateGrid(grid.copyWith(ticksPerSmallBox: value)),
           ),
           _NumberStepper(
-            label: "每中箱的小箱數",
+            label: context.l10n.uiScenesPerEvent,
             value: grid.ticksPerMiddleBox,
             onChanged: (value) =>
                 _actions.updateGrid(grid.copyWith(ticksPerMiddleBox: value)),
           ),
           _NumberStepper(
-            label: "每大箱的中箱數",
+            label: context.l10n.uiEventsPerStoryline,
             value: grid.middleBoxesPerLargeBox,
             onChanged: (value) => _actions.updateGrid(
               grid.copyWith(middleBoxesPerLargeBox: value),
@@ -907,10 +932,19 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
           ),
           const SizedBox(height: 8),
           Text(
-            "1 Tick = ${grid.ticksPerLittleBox.value} ${_unitLabel(grid.ticksPerLittleBox.unit)}；"
-            "1 小箱 = ${grid.ticksPerSmallBox} Tick；"
-            "1 中箱 = ${grid.ticksPerSmallBox * grid.ticksPerMiddleBox} Tick；"
-            "1 大箱 = ${grid.ticksPerSmallBox * grid.ticksPerMiddleBox * grid.middleBoxesPerLargeBox} Tick。",
+            context.l10n.uiTickSceneTicksEventTicksStorylineTicks(
+              (grid.ticksPerLittleBox.value).toString(),
+              (_unitLabel(
+                context.l10n,
+                grid.ticksPerLittleBox.unit,
+              )).toString(),
+              (grid.ticksPerSmallBox).toString(),
+              (grid.ticksPerSmallBox * grid.ticksPerMiddleBox).toString(),
+              (grid.ticksPerSmallBox *
+                      grid.ticksPerMiddleBox *
+                      grid.middleBoxesPerLargeBox)
+                  .toString(),
+            ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
@@ -940,7 +974,9 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text("新增${_levelLabel(level)}"),
+          title: Text(
+            context.l10n.uiAdd((_levelLabel(context.l10n, level)).toString()),
+          ),
           content: SizedBox(
             width: 420,
             child: Column(
@@ -948,17 +984,19 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
               children: [
                 AppTextField(
                   key: const ValueKey("timeline-add-node-label"),
-                  labelText: "節點名稱",
+                  labelText: context.l10n.uiNodeName,
                   hintText: level == TimelineElementLevel.small
-                      ? "未選場景時必填"
-                      : "例如：第一幕",
+                      ? context.l10n.uiRequiredWhenNoSceneIsSelected
+                      : context.l10n.uiForExampleActOne,
                   autofocus: true,
                   onChanged: (value) => label = value,
                 ),
                 if (level == TimelineElementLevel.middle) ...[
                   const SizedBox(height: 12),
-                  const AppNoticeBanner(
-                    message: "新增中箱時會同步建立對應的大綱事件。",
+                  AppNoticeBanner(
+                    message: context
+                        .l10n
+                        .uiAddingAnEventAlsoCreatesItsCorrespondingOutline,
                     tone: AppFeedbackTone.info,
                   ),
                 ],
@@ -966,17 +1004,17 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
                   const SizedBox(height: 12),
                   AppDropdownField<String?>(
                     value: selectedSceneUUID,
-                    labelText: "大綱場景（可選）",
+                    labelText: context.l10n.uiOutlineSceneOptional,
                     options: [
-                      const DropdownOption<String?>(
+                      DropdownOption<String?>(
                         value: null,
-                        label: "建立新的大綱場景",
+                        label: context.l10n.uiCreateNewOutlineScene,
                       ),
                       for (final reference in availableScenes)
                         DropdownOption<String?>(
                           value: reference.scene.sceneUUID,
                           label: reference.scene.sceneName.isEmpty
-                              ? "未命名場景"
+                              ? context.l10n.uiUntitledScene2
                               : reference.scene.sceneName,
                         ),
                     ],
@@ -990,12 +1028,12 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               key: const ValueKey("timeline-confirm-add-node"),
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text("新增"),
+              child: Text(context.l10n.commonAdd),
             ),
           ],
         ),
@@ -1022,8 +1060,8 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
   Future<void> _addTrack() async {
     final name = await AppDialog.prompt(
       context: context,
-      title: "新增軌道",
-      labelText: "軌道名稱",
+      title: context.l10n.uiAddTrack,
+      labelText: context.l10n.uiTrackName,
       initialValue:
           "時間軸 ${ref.read(timelineDocumentProvider).tracks.length + 1}",
     );
@@ -1039,7 +1077,7 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
       case "rename":
         final name = await AppDialog.prompt(
           context: context,
-          title: "重新命名軌道",
+          title: context.l10n.uiRenameTrack,
           initialValue: track.name,
         );
         if (name != null) _actions.renameTrack(track.trackUUID, name);
@@ -1056,8 +1094,8 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
       case "delete":
         final confirmed = await AppDialog.confirm(
           context: context,
-          title: "刪除軌道",
-          message: "軌道上的節點會移到其他軌道，不會刪除大綱場景。",
+          title: context.l10n.uiDeleteTrack,
+          message: context.l10n.uiNodesMoveToAnotherTrackOutlineScenesWill,
           destructive: true,
         );
         if (confirmed) {
@@ -1106,7 +1144,7 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
       chapterUUID = await showDialog<String>(
         context: context,
         builder: (dialogContext) => SimpleDialog(
-          title: const Text("選擇要開啟的章節"),
+          title: Text(dialogContext.l10n.uiChooseAChapterToOpen),
           children: [
             for (final link in validLinks)
               SimpleDialogOption(
@@ -1218,8 +1256,8 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
   Future<void> _deletePlacement(TimelinePlacementData placement) async {
     final confirmed = await AppDialog.confirm(
       context: context,
-      title: "刪除時間軸節點",
-      message: "將刪除此節點與其子節點；大綱場景和章節內容不會被刪除。",
+      title: context.l10n.uiDeleteTimelineNode,
+      message: context.l10n.uiThisDeletesTheNodeAndItsChildrenOutline,
       destructive: true,
     );
     if (confirmed) _actions.removePlacement(placement.placementUUID);
@@ -1253,7 +1291,11 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text(appliesToDescendants ? "連結章節並套用到所有子節點" : "選擇關聯章節"),
+          title: Text(
+            appliesToDescendants
+                ? context.l10n.uiLinkChaptersAndApplyToAllChildren
+                : context.l10n.uiChooseLinkedChapters,
+          ),
           content: SizedBox(
             width: 460,
             height: math
@@ -1270,14 +1312,19 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
               children: [
                 if (appliesToDescendants) ...[
                   AppNoticeBanner(
-                    message: "套用後，${sceneUUIDs.length} 個子場景會使用完全相同的章節選擇。",
+                    message: context.l10n.uiAllChildScenesWillUseTheSameChapter(
+                      context.formats.integer(sceneUUIDs.length),
+                    ),
                     tone: AppFeedbackTone.info,
                   ),
                   const SizedBox(height: 8),
                 ],
                 Expanded(
                   child: chapters.isEmpty
-                      ? const AppEmptyState(title: "目前沒有章節", compact: true)
+                      ? AppEmptyState(
+                          title: context.l10n.uiNoChaptersYet,
+                          compact: true,
+                        )
                       : ListView(
                           children: [
                             for (final location in chapters)
@@ -1291,7 +1338,18 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
                                           coveredScenesByChapter.containsKey(
                                             location.chapter.chapterUUID,
                                           )
-                                      ? "${location.folder.segmentName} · 目前 ${coveredScenesByChapter[location.chapter.chapterUUID]!.length}/${sceneUUIDs.length} 個子場景"
+                                      ? context.l10n.uiCurrentlyChildScenes(
+                                          (location.folder.segmentName)
+                                              .toString(),
+                                          (coveredScenesByChapter[location
+                                                      .chapter
+                                                      .chapterUUID]!
+                                                  .length)
+                                              .toString(),
+                                          context.formats.integer(
+                                            sceneUUIDs.length,
+                                          ),
+                                        )
                                       : location.folder.segmentName,
                                 ),
                                 onChanged: (checked) {
@@ -1315,11 +1373,11 @@ class _TimelineViewState extends ConsumerState<TimelineView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text("套用"),
+              child: Text(context.l10n.uiApply),
             ),
           ],
         ),
@@ -1553,7 +1611,9 @@ class _TimelineScrubberHandleState extends State<_TimelineScrubberHandle> {
       width: 24,
       height: widget.height,
       child: Semantics(
-        label: "時間 Scrubber，目前 ${widget.currentTick} Tick",
+        label: context.l10n.uiTimeScrubberCurrentlyTicks(
+          (widget.currentTick).toString(),
+        ),
         slider: true,
         value: "${widget.currentTick} Tick",
         child: GestureDetector(
@@ -1568,7 +1628,9 @@ class _TimelineScrubberHandleState extends State<_TimelineScrubberHandle> {
             child: Align(
               alignment: Alignment.topCenter,
               child: Tooltip(
-                message: "拖動目前時間：${widget.currentTick} Tick",
+                message: context.l10n.uiDragCurrentTimeTicks(
+                  (widget.currentTick).toString(),
+                ),
                 child: Container(
                   width: 18,
                   height: 18,
@@ -1676,17 +1738,17 @@ class _TimelineBoard extends StatelessWidget {
                     height: rulerHeight,
                     child: Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: Padding(
                             padding: EdgeInsets.only(left: AppSpacing.md),
                             child: Text(
-                              "軌道",
+                              context.l10n.uiTrack,
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
                         IconButton(
-                          tooltip: "新增軌道",
+                          tooltip: context.l10n.uiAddTrack,
                           onPressed: onAddTrack,
                           icon: const Icon(Icons.add, size: 18),
                         ),
@@ -1813,15 +1875,15 @@ class _TimelineBoard extends StatelessWidget {
   Widget _trackDropdown(BuildContext context, TimelineTrackData track) {
     final error = Theme.of(context).colorScheme.error;
     return PopupMenuButton<String>(
-      tooltip: "軌道選項",
+      tooltip: context.l10n.uiTrackOptions,
       icon: const Icon(Icons.arrow_drop_down, size: 22),
       onSelected: (action) => onTrackAction(track, action),
       itemBuilder: (context) => [
-        const PopupMenuItem(
+        PopupMenuItem(
           value: "rename",
           child: ListTile(
             leading: Icon(Icons.edit_outlined),
-            title: Text("重新命名"),
+            title: Text(context.l10n.commonRename),
             contentPadding: EdgeInsets.zero,
           ),
         ),
@@ -1831,24 +1893,28 @@ class _TimelineBoard extends StatelessWidget {
             leading: Icon(
               track.isCollapsed ? Icons.unfold_more : Icons.unfold_less,
             ),
-            title: Text(track.isCollapsed ? "展開軌道" : "收合軌道"),
+            title: Text(
+              track.isCollapsed
+                  ? context.l10n.uiExpandTrack
+                  : context.l10n.uiCollapseTrack,
+            ),
             contentPadding: EdgeInsets.zero,
           ),
         ),
         const PopupMenuDivider(),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: "up",
           child: ListTile(
             leading: Icon(Icons.arrow_upward),
-            title: Text("上移"),
+            title: Text(context.l10n.uiMoveUp),
             contentPadding: EdgeInsets.zero,
           ),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: "down",
           child: ListTile(
             leading: Icon(Icons.arrow_downward),
-            title: Text("下移"),
+            title: Text(context.l10n.uiMoveDown),
             contentPadding: EdgeInsets.zero,
           ),
         ),
@@ -1857,7 +1923,10 @@ class _TimelineBoard extends StatelessWidget {
           value: "delete",
           child: ListTile(
             leading: Icon(Icons.delete_outline, color: error),
-            title: Text("刪除軌道", style: TextStyle(color: error)),
+            title: Text(
+              context.l10n.uiDeleteTrack,
+              style: TextStyle(color: error),
+            ),
             contentPadding: EdgeInsets.zero,
           ),
         ),
@@ -1980,9 +2049,13 @@ class _TimelineBoard extends StatelessWidget {
     Widget resizeHandle(_TimelineResizeEdge edge) {
       final isStart = edge == _TimelineResizeEdge.start;
       return Tooltip(
-        message: isStart ? "拖曳調整頭端 Tick" : "拖曳調整尾端 Tick",
+        message: isStart
+            ? context.l10n.uiDragToAdjustStartTick
+            : context.l10n.uiDragToAdjustEndTick,
         child: Semantics(
-          label: isStart ? "調整頭端 Tick" : "調整尾端 Tick",
+          label: isStart
+              ? context.l10n.uiAdjustStartTick
+              : context.l10n.uiAdjustEndTick,
           child: GestureDetector(
             key: ValueKey(
               "timeline-resize-${isStart ? 'start' : 'end'}-${placement.placementUUID}",
@@ -2055,7 +2128,7 @@ class _TimelineBoard extends StatelessWidget {
       child: Semantics(
         button: true,
         selected: selected,
-        label: _placementLabel(placement, scenes),
+        label: _placementLabel(context.l10n, placement, scenes),
         child: AnimatedContainer(
           duration: dragOffset == Offset.zero && resizePreview == null
               ? const Duration(milliseconds: 120)
@@ -2123,7 +2196,7 @@ class _TimelineBoard extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Tooltip(
-                              message: "拖曳以調整時間",
+                              message: context.l10n.uiDragToAdjustTime,
                               child: Draggable<String>(
                                 key: ValueKey(
                                   "timeline-move-vertical-${placement.placementUUID}",
@@ -2155,7 +2228,11 @@ class _TimelineBoard extends StatelessWidget {
                                 child: MouseRegion(
                                   cursor: SystemMouseCursors.resizeUpDown,
                                   child: Text(
-                                    _placementLabel(placement, scenes),
+                                    _placementLabel(
+                                      context.l10n,
+                                      placement,
+                                      scenes,
+                                    ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: Theme.of(
@@ -2168,8 +2245,18 @@ class _TimelineBoard extends StatelessWidget {
                           ),
                           if (impactCount > 0)
                             Tooltip(
-                              message:
-                                  "狀態變更：角色 ${sceneImpact.characters.length}、物品 ${sceneImpact.items.length}、地點 ${sceneImpact.locations.length}",
+                              message: context.l10n
+                                  .uiStateChangesCharactersItemsLocations(
+                                    context.formats.integer(
+                                      sceneImpact.characters.length,
+                                    ),
+                                    context.formats.integer(
+                                      sceneImpact.items.length,
+                                    ),
+                                    context.formats.integer(
+                                      sceneImpact.locations.length,
+                                    ),
+                                  ),
                               child: Container(
                                 key: ValueKey(
                                   "timeline-impact-marker-${placement.placementUUID}",
@@ -2282,12 +2369,12 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
   Widget build(BuildContext context) {
     final placement = widget.placement;
     if (placement == null) {
-      return const AppSectionCard(
-        title: "節點屬性",
+      return AppSectionCard(
+        title: context.l10n.uiNodeProperties,
         icon: Icons.tune,
         child: AppEmptyState(
-          title: "尚未選取節點",
-          description: "點一下時間軸節點即可檢視與調整 Tick、軌道及章節關聯。",
+          title: context.l10n.uiNoNodeSelected,
+          description: context.l10n.uiSelectATimelineNodeToViewAndAdjust,
           icon: Icons.touch_app_outlined,
           compact: true,
         ),
@@ -2329,11 +2416,11 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
     final tracks = [...widget.document.tracks]
       ..sort((a, b) => a.order.compareTo(b.order));
     return AppSectionCard(
-      title: "節點屬性",
+      title: context.l10n.uiNodeProperties,
       icon: Icons.tune,
       actions: [
         IconButton(
-          tooltip: "刪除節點",
+          tooltip: context.l10n.uiDeleteNode,
           onPressed: () => widget.onDelete(placement),
           icon: const Icon(Icons.delete_outline),
           style: IconButton.styleFrom(foregroundColor: Colors.red),
@@ -2343,15 +2430,15 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            "${_levelLabel(placement.level)} · ${_placementLabel(placement, widget.scenes)}",
+            "${_levelLabel(context.l10n, placement.level)} · ${_placementLabel(context.l10n, placement, widget.scenes)}",
             style: Theme.of(context).textTheme.titleSmall,
           ),
           const SizedBox(height: 12),
           AppTextField(
             key: ValueKey("timeline-label-${placement.placementUUID}"),
             controller: _labelController,
-            labelText: "自訂名稱",
-            hintText: scene?.scene.sceneName ?? "節點名稱",
+            labelText: context.l10n.uiCustomName,
+            hintText: scene?.scene.sceneName ?? context.l10n.uiNodeName,
             textInputAction: TextInputAction.done,
             onSubmitted: (value) =>
                 widget.onUpdate(placement, label: value.trim()),
@@ -2365,7 +2452,7 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
           const SizedBox(height: 12),
           AppDropdownField<String>(
             value: placement.trackUUID,
-            labelText: "所在軌道",
+            labelText: context.l10n.uiAssignedTrack,
             options: [
               for (final track in tracks)
                 DropdownOption(value: track.trackUUID, label: track.name),
@@ -2378,7 +2465,7 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
           ),
           const SizedBox(height: 8),
           _NumberStepper(
-            label: "頭端 Tick",
+            label: context.l10n.uiStartTick,
             value: placement.startTick,
             minimum: timelineMinimumTick,
             maximum: timelineMaximumNodeTick,
@@ -2386,14 +2473,14 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
             onChanged: (value) => widget.onUpdate(placement, startTick: value),
           ),
           _NumberStepper(
-            label: "Tick 數",
+            label: context.l10n.uiTickCount,
             value: placement.durationTicks,
             maximum: timelineMaximumTick - placement.startTick,
             onChanged: (value) =>
                 widget.onUpdate(placement, durationTicks: value),
           ),
           _NumberStepper(
-            label: "尾端 Tick",
+            label: context.l10n.uiEndTick,
             value: placement.endTick,
             minimum: placement.startTick + 1,
             maximum: timelineMaximumTick,
@@ -2411,7 +2498,7 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
                 leading: const Icon(Icons.account_tree_outlined),
                 title: Text(
                   scene.scene.sceneName.isEmpty
-                      ? "未命名場景"
+                      ? context.l10n.uiUntitledScene2
                       : scene.scene.sceneName,
                 ),
                 subtitle: Text(
@@ -2420,7 +2507,7 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
                 trailing: widget.onOpenOutlineScene == null
                     ? null
                     : IconButton(
-                        tooltip: "在大綱中開啟",
+                        tooltip: context.l10n.uiOpenInOutline,
                         onPressed: () =>
                             widget.onOpenOutlineScene!(scene.scene.sceneUUID),
                         icon: const Icon(Icons.open_in_new),
@@ -2428,7 +2515,10 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
               )
             else
               AppNoticeBanner(
-                message: "以下章節彙整自 ${sceneUUIDs.length} 個子場景。",
+                message: context.l10n
+                    .uiChaptersBelowAreCollectedFromChildScenes(
+                      context.formats.integer(sceneUUIDs.length),
+                    ),
                 tone: AppFeedbackTone.info,
               ),
             const Divider(height: 28),
@@ -2436,12 +2526,16 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
               children: [
                 Expanded(
                   child: Text(
-                    "場景狀態變更",
+                    context.l10n.uiSceneStateChanges,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
                 Text(
-                  "角色 ${impactedCharacters.length}・物品 ${impactedItems.length}・地點 ${impactedLocations.length}",
+                  context.l10n.uiCharactersItemsLocations(
+                    context.formats.integer(impactedCharacters.length),
+                    context.formats.integer(impactedItems.length),
+                    context.formats.integer(impactedLocations.length),
+                  ),
                   key: const ValueKey("timeline-impact-summary"),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
@@ -2449,7 +2543,7 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
             ),
             const SizedBox(height: 8),
             if (sceneImpact.isEmpty)
-              const Text("此場景沒有角色、物品或地點快照變更。")
+              Text(context.l10n.uiNoCharacterItemOrLocationSnapshotChangesIn)
             else ...[
               if (impactedCharacters.isNotEmpty)
                 _buildImpactChips(
@@ -2481,12 +2575,14 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
               children: [
                 Expanded(
                   child: Text(
-                    "關聯章節",
+                    context.l10n.uiLinkedChapters,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
                 IconButton(
-                  tooltip: isContainer ? "連結章節並套用到所有子節點" : "選擇章節",
+                  tooltip: isContainer
+                      ? context.l10n.uiLinkChaptersAndApplyToAllChildren
+                      : context.l10n.uiChooseChapters,
                   onPressed: () => widget.onAddChapterLink(placement),
                   icon: Icon(isContainer ? Icons.account_tree : Icons.add_link),
                 ),
@@ -2494,8 +2590,12 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
             ),
             if (links.isEmpty)
               AppEmptyState(
-                title: isContainer ? "子場景尚未連結章節" : "此場景尚未連結章節",
-                description: isContainer ? "可選擇章節並一次套用到所有子節點。" : "不會自動切換到第一章。",
+                title: isContainer
+                    ? context.l10n.uiChildScenesHaveNoLinkedChaptersYet
+                    : context.l10n.uiThisSceneHasNoLinkedChaptersYet,
+                description: isContainer
+                    ? context.l10n.uiChooseChaptersAndApplyThemToAllChild
+                    : context.l10n.uiTheFirstChapterWillNotOpenAutomatically,
                 icon: Icons.link_off,
                 compact: true,
               )
@@ -2508,7 +2608,7 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
                     InputChip(
                       avatar: const Icon(Icons.menu_book, size: 16),
                       label: Text(
-                        "${widget.chapters[chapterUUID]?.chapter.chapterName ?? "缺失章節"}${isContainer ? " (${linkedScenesByChapter[chapterUUID]?.length ?? 0}/${sceneUUIDs.length})" : ""}",
+                        "${widget.chapters[chapterUUID]?.chapter.chapterName ?? context.l10n.uiMissingChapter}${isContainer ? " (${linkedScenesByChapter[chapterUUID]?.length ?? 0}/${sceneUUIDs.length})" : ""}",
                       ),
                       onPressed:
                           widget.onOpenChapter == null ||
@@ -2524,8 +2624,8 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
             const Divider(height: 28),
             AppNoticeBanner(
               message: isContainer
-                  ? "此容器目前沒有可連結章節的子場景；請先新增小箱。"
-                  : "此小箱尚未連結大綱場景，無法建立章節關聯。",
+                  ? context.l10n.uiThisContainerHasNoChildScenesThatCan
+                  : context.l10n.uiThisSceneHasNoOutlineSceneLinkedSo,
               tone: AppFeedbackTone.info,
             ),
           ],
@@ -2552,7 +2652,9 @@ class _TimelineInspectorState extends State<_TimelineInspector> {
               key: ValueKey("timeline-impact-$prefix-${entry.id}"),
               avatar: Icon(icon, size: 16),
               label: Text(entry.label),
-              tooltip: onOpen == null ? null : "開啟${entry.label}",
+              tooltip: onOpen == null
+                  ? null
+                  : context.l10n.uiOpen2((entry.label).toString()),
               onPressed: onOpen == null
                   ? null
                   : () => onOpen(entry.navigationId),
@@ -2652,7 +2754,7 @@ class _NumberStepperState extends State<_NumberStepper> {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              tooltip: "減少",
+              tooltip: context.l10n.uiDecrease,
               constraints: BoxConstraints.tightFor(
                 width: controlHeight,
                 height: controlHeight,
@@ -2697,7 +2799,7 @@ class _NumberStepperState extends State<_NumberStepper> {
               ),
             ),
             IconButton(
-              tooltip: "增加",
+              tooltip: context.l10n.uiIncrease,
               constraints: BoxConstraints.tightFor(
                 width: controlHeight,
                 height: controlHeight,
@@ -2893,6 +2995,7 @@ class _TimelineGridPainter extends CustomPainter {
 }
 
 String _placementLabel(
+  AppLocalizations l10n,
   TimelinePlacementData placement,
   Map<String, TimelineSceneReference> scenes,
 ) {
@@ -2903,25 +3006,27 @@ String _placementLabel(
   if (scene?.scene.sceneName.trim().isNotEmpty == true) {
     return scene!.scene.sceneName.trim();
   }
-  return "未命名${_levelLabel(placement.level)}";
+  return l10n.untitledTimelineNode(_levelLabel(l10n, placement.level));
 }
 
-String _levelLabel(TimelineElementLevel level) => switch (level) {
-  TimelineElementLevel.large => "大箱",
-  TimelineElementLevel.middle => "中箱",
-  TimelineElementLevel.small => "小箱",
-};
+String _levelLabel(AppLocalizations l10n, TimelineElementLevel level) =>
+    switch (level) {
+      TimelineElementLevel.large => l10n.uiStoryline3,
+      TimelineElementLevel.middle => l10n.uiEvent5,
+      TimelineElementLevel.small => l10n.uiScene3,
+    };
 
-String _unitLabel(TickDurationUnit unit) => switch (unit) {
-  TickDurationUnit.second => "秒",
-  TickDurationUnit.minute => "分鐘",
-  TickDurationUnit.hour => "小時",
-  TickDurationUnit.day => "天",
-  TickDurationUnit.week => "週",
-  TickDurationUnit.month => "月",
-  TickDurationUnit.season => "季節",
-  TickDurationUnit.year => "年",
-  TickDurationUnit.decade => "十年",
-  TickDurationUnit.century => "世紀",
-  TickDurationUnit.custom => "自訂單位",
-};
+String _unitLabel(AppLocalizations l10n, TickDurationUnit unit) =>
+    switch (unit) {
+      TickDurationUnit.second => l10n.uiSeconds,
+      TickDurationUnit.minute => l10n.uiMinutes2,
+      TickDurationUnit.hour => l10n.uiHours,
+      TickDurationUnit.day => l10n.uiDays,
+      TickDurationUnit.week => l10n.uiWeeks,
+      TickDurationUnit.month => l10n.uiMonths,
+      TickDurationUnit.season => l10n.uiSeasons,
+      TickDurationUnit.year => l10n.uiYears,
+      TickDurationUnit.decade => l10n.uiDecades,
+      TickDurationUnit.century => l10n.uiCenturies,
+      TickDurationUnit.custom => l10n.uiCustomUnit,
+    };

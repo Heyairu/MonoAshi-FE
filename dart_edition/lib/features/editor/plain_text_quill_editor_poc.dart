@@ -3,6 +3,7 @@
 // content cannot enter the plain-text boundary.
 // ignore_for_file: experimental_member_use
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -505,7 +506,7 @@ class PlainTextQuillEditorPoc extends StatefulWidget {
     this.selection,
     this.clipboardTextTransform,
     this.mentionMarkers = const <PlainTextQuillMentionMarker>[],
-    this.placeholder = "開始撰寫正文…",
+    this.placeholder,
     this.overwriteMode = false,
     this.tabSpaces = "\u3000\u3000",
     this.autoIndentLineStart = false,
@@ -560,7 +561,7 @@ class PlainTextQuillEditorPoc extends StatefulWidget {
   /// Optional display-to-reader-text transform used only for clipboard data.
   final String Function(String text)? clipboardTextTransform;
   final List<PlainTextQuillMentionMarker> mentionMarkers;
-  final String placeholder;
+  final String? placeholder;
   final bool overwriteMode;
   final String tabSpaces;
   final bool autoIndentLineStart;
@@ -1217,7 +1218,7 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
               },
               expands: true,
               padding: const EdgeInsets.all(AppSpacing.lg),
-              placeholder: widget.placeholder,
+              placeholder: widget.placeholder ?? context.l10n.uiStartWriting,
               customStyles: DefaultStyles(
                 paragraph: defaultParagraph.copyWith(
                   style: defaultParagraph.style.copyWith(height: 1.6),
@@ -1282,35 +1283,35 @@ class _PlainTextQuillEditorPocPageState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Quill 純文字正文 PoC"),
+        title: Text(context.l10n.uiQuillPlainTextManuscriptPreview),
         actions: <Widget>[
           IconButton(
-            tooltip: "復原",
+            tooltip: context.l10n.editorUndo,
             onPressed: _commands.undo,
             icon: const Icon(Icons.undo),
           ),
           IconButton(
-            tooltip: "重做",
+            tooltip: context.l10n.editorRedo,
             onPressed: _commands.redo,
             icon: const Icon(Icons.redo),
           ),
           IconButton(
-            tooltip: "全選",
+            tooltip: context.l10n.editorSelectAll,
             onPressed: _commands.selectAll,
             icon: const Icon(Icons.select_all),
           ),
           IconButton(
-            tooltip: "剪下",
+            tooltip: context.l10n.editorCut,
             onPressed: _commands.cut,
             icon: const Icon(Icons.content_cut),
           ),
           IconButton(
-            tooltip: "複製",
+            tooltip: context.l10n.commonCopy,
             onPressed: _commands.copy,
             icon: const Icon(Icons.content_copy),
           ),
           IconButton(
-            tooltip: "貼上",
+            tooltip: context.l10n.editorPaste,
             onPressed: _commands.paste,
             icon: const Icon(Icons.content_paste),
           ),

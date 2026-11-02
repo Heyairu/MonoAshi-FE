@@ -1,6 +1,6 @@
 # Monogatari Assistant 統一 API 文件
 
-更新日期：2026-11-01
+更新日期：2026-11-02
 
 適用範圍：目前儲存庫已實作的整合與主要開發介面
 
@@ -14,10 +14,10 @@
 | --- | --- | --- | --- |
 | MCP 唯讀工具與 resources | Host ↔ sidecar：stdio MCP | server `0.1.0`，payload `schemaVersion: "1"` | 外部 MCP Host |
 | MCP App bridge | sidecar ↔ App：loopback HTTP | descriptor `version: 1`、`contractVersion: "0.1.0"` | App／sidecar 內部 |
-| 專案檔案 API | Dart use case／repository／FileService | XML `1.20` | App 開發者 |
+| 專案檔案 API | Dart use case／repository／FileService | XML `1.22` | App 開發者 |
 | Rhodanthe | Dart worker → C ABI → UTF-8 JSON | ABI `1`、contract `1` | 編輯器／原生整合 |
 | Copilot provider adapter | App → 設定的 provider：HTTP JSON | 依 adapter 選定的 protocol | App 開發者 |
-| P2P 快照與協作 | LAN TCP、配對與加密 frame | 各 frame 前綴獨立版本；協作 schema `7` | 相容的 App 裝置 |
+| P2P 快照與協作 | LAN TCP、配對與加密 frame | 各 frame 前綴獨立版本；協作 schema `8` | 相容的 App 裝置 |
 
 UTF-8 byte budget 與 UTF-16 offset 是不同單位；`KiB = 1024 bytes`。MCP 的 `schemaVersion` 是字串，Rhodanthe 的 `contractVersion` 是整數。本文 JSON 中的 `session-example`、`chapter-example`、`fingerprint-example` 等是示意值；實際 ID、cursor 與 fingerprint 必須使用前一個回應提供的值。
 
@@ -356,12 +356,12 @@ Word／PDF 的 format enum 已預留但 service 拒絕執行。預覽與 Writer 
 
 細項 XML 的 `ExportScope Version="1"` 與 ChapterTreeVersion 分開演進。manifest 提供 partialModules、structuralModules 與 blockedReplacements；`SelectiveProjectImporter.apply` 預設拒絕細項模組替換，UI 檢視影響並明確選取後才傳入 `allowPartialReplacement: true`。含結構祖先或依賴且目標模組已有內容時仍拒絕；這不是依 ID 合併 API。
 
-現行格式由 `ProjectMigrator.currentVersion` 定義為 `1.20`。根為 `Project`，`UUID` 為專案 ID，`ver` 為格式版本；每個模組位於 `Type`，以直屬 `Name` 辨識。
+現行格式由 `ProjectMigrator.currentVersion` 定義為 `1.22`。根為 `Project`，`UUID` 為專案 ID，`ver` 為格式版本；每個模組位於 `Type`，以直屬 `Name` 辨識。
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <Project UUID="12345678-1234-4234-8234-123456789abc">
-  <ver>1.20</ver>
+  <ver>1.22</ver>
   <Type>
     <Name>BaseInfo</Name>
     <General>
@@ -384,7 +384,7 @@ Word／PDF 的 format enum 已預留但 service 拒絕執行。預覽與 Writer 
 
 帳本位於 Application Support 的 `Data/WritingProgress.json`，schema／countPolicy 均為 1。按當地日期及作品 UUID 保存小計，以 session 序號去重；程序內佇列及跨程序鎖保護讀取、合併、暫存替換。寫入失敗保留待處理事件；損壞先保留原檔並嘗試 `.bak`。異常終止可能遺失尚未落盤的增量，不從開檔差值補算。
 
-即時協作 schema 7 的 BaseInfo record 新增 `writingGoals`，包含明確 null 與復原資料；較舊協作 schema 拒絕套用。三方快照合併逐欄處理每章／全文覆寫及清除，並呈現同欄衝突。本機預設與每日帳本不進 record、快照或局部交換。
+即時協作 schema 7 曾於 BaseInfo record 新增 `writingGoals`，包含明確 null 與復原資料；較舊協作 schema 拒絕套用。三方快照合併逐欄處理每章／全文覆寫及清除，並呈現同欄衝突。本機預設與每日帳本不進 record、快照或局部交換。
 
 ## 4. Rhodanthe 原生 API
 
@@ -560,7 +560,7 @@ timeout 為可選 named `Duration`。事件由 `inboundProbes`、`inboundProject
 
 ### 6.4 即時協作與交易
 
-`CollaborationSchema.currentVersion = 7`。單一 batch 最多 128 operations；單次插入最多 24 KiB，建議文字 chunk 4 KiB；單一刪除 operation 最多 1,000,000 atoms。協作 record／text 操作、vector、presence 與交易欄位由既有 codec 驗證；XML 僅作 checkpoint／持久化，不放入每個即時 operation。
+`CollaborationSchema.currentVersion = 8`。單一 batch 最多 128 operations；單次插入最多 24 KiB，建議文字 chunk 4 KiB；單一刪除 operation 最多 1,000,000 atoms。協作 record／text 操作、vector、presence 與交易欄位由既有 codec 驗證；XML 僅作 checkpoint／持久化，不放入每個即時 operation。
 
 `OperationId` 包含 replicaId 與正整數 sequence。游標 target 可為 chapterText、projectText、projectField；文字游標採 atom anchor 與 fallback offset，不能以畫面投影 offset 直接替換 raw 位置。多筆 record 的同一交易在收齊後一次套用。
 
@@ -691,4 +691,15 @@ Help 不寫入作品、設定或同步 schema。快捷鍵及點選的自動化�
 
 新增文字使用 `lib/l10n/app_zh.arb` 的語意 key，英文與日文需包含相同訊息集合；`app_zh_Hant.arb` 繼承繁中來源。執行 `flutter gen-l10n` 產生 `lib/l10n/generated/`，不用手改生成檔。UI 使用 `context.l10n`，業務及資料層不持有 BuildContext 或翻譯字串。
 
-目前僅語系入口與部分引導／設定文字完成三語；其他 UI 與 Help 保留後續遷移。驗證入口：`app_locale_test.dart`、`locale_preferences_test.dart`、`locale_switching_test.dart`、`oobe_test.dart`。Widget 測試涵蓋系統變更、重啟讀回、寫入競態、失敗回復、Quill draft／selection／undo／focus、IME composing 與開啟中對話框的狀態保留；原生系統 UI 語言與多平台實機行為另行驗收。
+導覽、Ribbon、共用操作及各功能模組已遷移至三語 ARB。`model_labels.dart` 僅適配既有 App 列舉／預設標籤，不能套用至使用者文字；新文案直接使用 typed getter。`localizedRibbon` 完整提供套件 labels／語意模板；`HelpCatalog.load(localeName: ...)` 載入相同 ID 的三語文章，語系切換會失效快取並保留閱讀主題。三語 Help 各有完整 64 篇、167 個章節、258 段內文與 230 個步驟。原生存檔標題由 repository 在操作時取得有效語系，不重建檔案或編輯協調器。驗證入口另含 `module_localization_test.dart`、`project_format_122_test.dart`，以及`app_locale_test.dart`、`locale_preferences_test.dart`、`locale_switching_test.dart`、`oobe_test.dart`。Widget 測試涵蓋系統變更、重啟讀回、寫入競態、失敗回復、Quill draft／selection／undo／focus、IME composing 與開啟中對話框的狀態保留；原生系統 UI 語言與多平台實機行為另行驗收。
+
+專案格式 1.22 的內建角色類型改存 `protagonist`、`majorSupporting`、`minorSupporting`、`majorAntagonist`、`minorAntagonist`、`other`。XML、legacy map、typed record 與三方合併邊界共同正規化；未知自訂值保留。協作 schema 8 拒絕先前角色值契約的連線。
+
+P2P 連線與傳輸訊息以 `LocalizedUiText` 保存具型別的 ARB resolver 與事件當下的參數，畫面使用 `messageFor(l10n)`／各錯誤欄位的 `...For(l10n)`，因此既有狀態也會即時換語言。descriptor 僅存在 presentation state，不進入檔案、revision 或通訊；既有 String getter 保留繁中診斷表示。
+
+### 離線內容、顯示格式與字型
+
+- `HelpAssets` 提供 locale-to-asset 對照及版本 2 的快取 key。`HelpCatalog.load` 讀取 bundle 內 manifest，核對版本、語系、完整 topic ID 與有效連結；載入失敗可重試。Viewer 等待新語系時顯示載入狀態，不呈現舊語系資料；舊 Future 完成不覆蓋新結果。搜尋正規化大小寫與全形 ASCII，不改寫文章。
+- `context.formats`／`AppFormatters` 明確使用當前語系；`initialize()` 使用 intl 隨附資料、不連網；只快取資料註冊狀態，不保留綁定首次呼叫 Zone 的 Future。`date`／`dateTime` 以 `yMd` 顯示本地日期，`time` 與含時間的日期維持 24 小時制。整數、小數、比例（0.125 → 12.5%）及容量統一格式化，不依賴 `Intl.defaultLocale`。容量保留既有 1024 進位與 B／KB／MB 標籤。僅用於顯示；可編輯數值、檔名、ID、存檔與協定保持原格式。新建 checkpoint 的預設名稱在建立時使用當前語系，既有名稱視為內容保留。
+- `AppFonts.primary`／`fallbacks` 共用於工作區、啟動、錯誤與 OOBE，依繁中／英文／日文選擇 TC／Latin／JP。Latin、TC、JP、HK、SC、KR、Thai 與 Latin italic 均來自 bundled TTF，不下載字型；目前 CJK 語系優先於其他 CJK 字形。
+- 驗證入口：`app_formatters_test.dart`、`app_formatters_bootstrap_test.dart`、`app_fonts_test.dart`、`offline_help_localization_test.dart`，另延用 Help／OOBE／編輯器與檔案 1.22 往返測試。字型測試檢查真實 cmap、100–900 weight 軸與 FontManifest，widget 測試不取代原生字形的視覺審查。

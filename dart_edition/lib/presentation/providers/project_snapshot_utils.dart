@@ -64,7 +64,11 @@ List<chapter_module.SegmentData> snapshotSegmentsData(
           );
   }
 
-  return _freezeListView(source.map(freezeSegment).toList(growable: false));
+  return _freezeListView(
+    chapter_module.ChapterTree.repair(
+      source,
+    ).map(freezeSegment).toList(growable: false),
+  );
 }
 
 List<outline_module.StorylineData> snapshotOutlineData(
@@ -212,7 +216,7 @@ ProjectData snapshotProjectData(
 }) {
   return ProjectData(
     projectUUID: source.projectUUID,
-      writingGoals: source.writingGoals,
+    writingGoals: source.writingGoals,
     baseInfoData: snapshotBaseInfoData(baseInfoOverride ?? source.baseInfoData),
     segmentsData: snapshotSegmentsData(source.segmentsData),
     outlineData: snapshotOutlineData(source.outlineData),

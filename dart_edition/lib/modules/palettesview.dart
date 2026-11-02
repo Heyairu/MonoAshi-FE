@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "dart:async";
 import "dart:convert";
 import "dart:io";
@@ -99,7 +100,9 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
         _hasLoaded = true;
         _loadWarning = result.warnings.isEmpty
             ? null
-            : "已略過或修復 ${result.warnings.length} 項調色盤資料問題。";
+            : context.l10n.uiSkippedOrRepairedPaletteDataIssues(
+                context.formats.integer(result.warnings.length),
+              );
       });
     } catch (error) {
       if (!mounted) {
@@ -108,7 +111,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
       setState(() {
         _isLoading = false;
         _hasLoaded = false;
-        _loadError = "調色盤資料無法讀取：$error";
+        _loadError = context.l10n.uiCouldNotReadPaletteData((error).toString());
       });
     }
   }
@@ -232,9 +235,9 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
     }
     AppFeedback.show(
       context,
-      message: "已刪除「${entry.text}」",
+      message: context.l10n.uiDeleted((entry.text).toString()),
       tone: AppFeedbackTone.warning,
-      actionLabel: "復原",
+      actionLabel: context.l10n.editorUndo,
       onAction: () {
         _notifier.restoreEntry(record);
       },
@@ -280,7 +283,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
       return;
     }
     final String? savedPath = await FilePicker.platform.saveFile(
-      dialogTitle: "匯出文字色票",
+      dialogTitle: context.l10n.uiExportTextPalette,
       fileName: "Palettes.yaml",
       type: FileType.custom,
       allowedExtensions: const <String>["yaml", "yml"],
@@ -308,7 +311,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
           .last;
       AppFeedback.success(
         context,
-        "色票匯出完成：$fileName",
+        context.l10n.uiPaletteExported((fileName).toString()),
         duration: const Duration(seconds: 2),
       );
     } catch (error) {
@@ -317,7 +320,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
       }
       AppFeedback.error(
         context,
-        "色票匯出失敗：$error",
+        context.l10n.uiPaletteExportFailed((error).toString()),
         duration: const Duration(seconds: 2),
       );
     }
@@ -328,7 +331,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
       return;
     }
     final FilePickerResult? result = await FilePicker.platform.pickFiles(
-      dialogTitle: "匯入文字色票",
+      dialogTitle: context.l10n.uiImportTextPalette,
       type: FileType.custom,
       allowedExtensions: const <String>["yaml", "yml"],
       withData: true,
@@ -362,11 +365,17 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
 
       final String warningText = decoded.warnings.isEmpty
           ? ""
-          : "，另略過 ${decoded.warnings.length} 項格式問題";
+          : context.l10n.uiWithFormatIssuesSkipped(
+              context.formats.integer(decoded.warnings.length),
+            );
       if (merged.changed) {
         AppFeedback.success(
           context,
-          "匯入完成：新增 ${merged.addedPlacements} 個色票詞條、略過 ${merged.skippedDuplicates} 個重複詞條$warningText",
+          context.l10n.uiImportedPaletteEntriesSkippedDuplicates(
+            (merged.addedPlacements).toString(),
+            (merged.skippedDuplicates).toString(),
+            (warningText).toString(),
+          ),
           duration: const Duration(seconds: 3),
         );
       } else {
@@ -382,7 +391,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
       }
       AppFeedback.error(
         context,
-        "色票匯入失敗：檔案格式錯誤或無法讀取",
+        context.l10n.uiPaletteImportFailedInvalidFormatOrUnreadableFile,
         duration: const Duration(seconds: 2),
       );
     }
@@ -401,12 +410,12 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.xl),
             child: AppNoticeBanner(
-              title: "調色盤載入失敗",
+              title: context.l10n.uiCouldNotLoadPalettes,
               message: _loadError!,
               tone: AppFeedbackTone.error,
               action: FilledButton.tonal(
                 onPressed: _load,
-                child: const Text("重試"),
+                child: Text(context.l10n.commonRetry),
               ),
             ),
           ),
@@ -439,7 +448,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
           if (state.persistenceError != null) ...<Widget>[
             const SizedBox(height: 12),
             AppNoticeBanner(
-              title: "尚未寫入磁碟",
+              title: context.l10n.uiNotSavedToDiskYet,
               message: state.persistenceError!,
               tone: AppFeedbackTone.error,
               compact: true,
@@ -449,7 +458,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
                     await _notifier.flushPalettePersistence();
                   } catch (_) {}
                 },
-                child: const Text("重試"),
+                child: Text(context.l10n.commonRetry),
               ),
             ),
           ],
@@ -470,7 +479,10 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        LargeTitle(icon: Icons.palette_outlined, text: "文字色票"),
+        LargeTitle(
+          icon: Icons.palette_outlined,
+          text: context.l10n.uiTextPalettes,
+        ),
         const SizedBox(height: 12),
         Row(
           mainAxisSize: MainAxisSize.min,
@@ -479,12 +491,12 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
               child: AppTextField(
                 key: const ValueKey<String>("palette-search-field"),
                 controller: _searchController,
-                hintText: "搜尋詞條……",
+                hintText: context.l10n.uiSearchEntries,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchController.text.isEmpty
                     ? null
                     : IconButton(
-                        tooltip: "清除搜尋",
+                        tooltip: context.l10n.uiClearSearch,
                         onPressed: _searchController.clear,
                         icon: const Icon(Icons.clear),
                       ),
@@ -493,7 +505,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
             const SizedBox(width: 8),
             PopupMenuButton<String>(
               key: const ValueKey<String>("palette-import-export-menu"),
-              tooltip: "匯入或匯出色票",
+              tooltip: context.l10n.uiImportOrExportPalettes,
               iconColor: menuIconColor,
               onSelected: (String value) {
                 switch (value) {
@@ -505,25 +517,24 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
                     break;
                 }
               },
-              itemBuilder: (BuildContext context) =>
-                  const <PopupMenuEntry<String>>[
-                    PopupMenuItem<String>(
-                      value: "import",
-                      child: ListTile(
-                        leading: Icon(Icons.file_open_outlined),
-                        title: Text("匯入色票……"),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                    PopupMenuItem<String>(
-                      value: "export",
-                      child: ListTile(
-                        leading: Icon(Icons.save_alt_outlined),
-                        title: Text("匯出色票……"),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                  ],
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                PopupMenuItem<String>(
+                  value: "import",
+                  child: ListTile(
+                    leading: Icon(Icons.file_open_outlined),
+                    title: Text(context.l10n.uiImportPalette),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: "export",
+                  child: ListTile(
+                    leading: Icon(Icons.save_alt_outlined),
+                    title: Text(context.l10n.uiExportPalette),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
               icon: Icon(Icons.import_export_outlined, color: menuIconColor),
             ),
           ],
@@ -554,7 +565,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
             child: ExpansionTile(
               initiallyExpanded: true,
               leading: const Icon(Icons.gradient_outlined),
-              title: const Text("灰階"),
+              title: Text(context.l10n.uiGrayscale),
               subtitle: const Text("S 0% · V 0 / 20 / 50 / 80 / 100%"),
               children: <Widget>[
                 Padding(
@@ -691,7 +702,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
         width: buttonSize,
         height: buttonSize,
         child: Semantics(
-          label: "色相 $hue°，飽和度 80%，明度 100%",
+          label: context.l10n.uiHueSaturationBrightness((hue).toString()),
           button: true,
           selected: selected,
           child: IconButton(
@@ -763,6 +774,14 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
     );
   }
 
+  String _slotSemantics(PaletteSlotDefinition slot) => slot.isGray
+      ? context.l10n.paletteGraySemantics(slot.value.toString())
+      : context.l10n.paletteColorSemantics(
+          slot.hue.toString(),
+          slot.saturation.toString(),
+          slot.value.toString(),
+        );
+
   Widget _buildSlotCard(PaletteSlotDefinition slot, PaletteStateData state) {
     final List<String> ids = state.slotEntryIds[slot.id] ?? const <String>[];
     final List<PaletteEntry> entries = ids
@@ -785,7 +804,10 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
 
     return Semantics(
       container: true,
-      label: "${slot.semanticsLabel}，${entries.length} 個詞條",
+      label: context.l10n.uiEntries2(
+        _slotSemantics(slot),
+        context.formats.integer(entries.length),
+      ),
       child: Card(
         key: ValueKey<String>("palette-slot-${slot.id}"),
         color: cardColor,
@@ -803,12 +825,14 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
             ),
           ),
           title: Text(title),
-          subtitle: Text("${entries.length} 個詞條"),
+          subtitle: Text(
+            context.l10n.uiEntries3(context.formats.integer(entries.length)),
+          ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               PopupMenuButton<String>(
-                tooltip: "色格操作",
+                tooltip: context.l10n.uiColorCellActions,
                 onSelected: (String value) {
                   if (value == "sort") {
                     final bool changed = _notifier.sortSlotByText(slot.id);
@@ -817,13 +841,12 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
                     }
                   }
                 },
-                itemBuilder: (BuildContext context) =>
-                    const <PopupMenuEntry<String>>[
-                      PopupMenuItem<String>(
-                        value: "sort",
-                        child: Text("依文字排序"),
-                      ),
-                    ],
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    value: "sort",
+                    child: Text(context.l10n.uiSortByText),
+                  ),
+                ],
               ),
               const Icon(Icons.expand_more),
             ],
@@ -849,7 +872,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
                       InputChip(
                         key: ValueKey<String>("palette-entry-${entry.id}"),
                         label: Text(entry.text),
-                        tooltip: "編輯「${entry.text}」",
+                        tooltip: context.l10n.uiEdit2((entry.text).toString()),
                         backgroundColor: chipColor,
                         labelStyle: TextStyle(color: chipForeground),
                         deleteIconColor: chipForeground,
@@ -863,7 +886,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
                     ActionChip(
                       key: ValueKey<String>("palette-add-${slot.id}"),
                       avatar: const Icon(Icons.add, size: 18),
-                      label: const Text("新增詞條"),
+                      label: Text(context.l10n.uiAddEntry),
                       onPressed: () => _beginAdd(slot.id),
                     ),
                 ],
@@ -887,20 +910,20 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
               controller: _entryEditorController,
               focusNode: _entryEditorFocusNode,
               maxLength: paletteTermMaxLength,
-              hintText: "輸入詞條",
+              hintText: context.l10n.uiEnterATerm,
               decoration: const InputDecoration(counterText: ""),
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _commitActiveEditor(),
             ),
           ),
           IconButton(
-            tooltip: "儲存",
+            tooltip: context.l10n.commonSave,
             visualDensity: VisualDensity.compact,
             onPressed: _commitActiveEditor,
             icon: const Icon(Icons.check),
           ),
           IconButton(
-            tooltip: "取消",
+            tooltip: context.l10n.commonCancel,
             visualDensity: VisualDensity.compact,
             onPressed: _cancelActiveEditor,
             icon: const Icon(Icons.close),
@@ -922,7 +945,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
               color: Theme.of(context).colorScheme.outline,
             ),
             const SizedBox(height: 12),
-            Text("找不到包含「$searchQuery」的詞條"),
+            Text(context.l10n.uiNoEntriesContaining((searchQuery).toString())),
           ],
         ),
       );
@@ -935,7 +958,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
         return ListTile(
           leading: CircleAvatar(backgroundColor: _slotColor(hit.slot)),
           title: Text(hit.entry.text),
-          subtitle: Text(hit.slot.semanticsLabel),
+          subtitle: Text(_slotSemantics(hit.slot)),
           trailing: const Icon(Icons.arrow_forward),
           onTap: () {
             if (!hit.slot.isGray) {

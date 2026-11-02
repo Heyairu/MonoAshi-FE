@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "dart:async";
 import "dart:convert";
 import "dart:isolate";
@@ -467,6 +468,20 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
     }
   }
 
+  String? _displayLocale;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = context.l10n.localeName;
+    if (_displayLocale == locale) return;
+    _displayLocale = locale;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_isDisposing)
+        _scheduleBackgroundProofreading(immediate: true);
+    });
+  }
+
   @override
   void dispose() {
     _isDisposing = true;
@@ -565,7 +580,9 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
     } catch (error) {
       if (mounted && generation == _fillerWordLoadGeneration) {
         setState(() {
-          _loadingError = "無法載入贅字詞庫：$error";
+          _loadingError = context.l10n.uiCouldNotLoadTheFillerWordDictionary(
+            (error).toString(),
+          );
         });
       }
     } finally {
@@ -745,6 +762,7 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
     final String text = widget.textController.text;
     final int revision = ++_proofreadingRevision;
     _pendingProofreadingRequest = _ProofreadingRequest(
+      localeName: context.l10n.localeName,
       text: text,
       fillerWords: _fillerWords,
       fillerWordsRevision: _fillerWordsRevision,
@@ -1227,8 +1245,8 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
   }
 
   Widget _buildWarningCard() {
-    return const AppNoticeBanner(
-      message: "本功能正在開發中，使用時可能出現錯誤。",
+    return AppNoticeBanner(
+      message: context.l10n.uiThisFeatureIsInDevelopmentAndMayContain,
       tone: AppFeedbackTone.warning,
     );
   }
@@ -1246,9 +1264,12 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // 標題
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
-              child: LargeTitle(icon: Icons.spellcheck, text: "文本校正"),
+              child: LargeTitle(
+                icon: Icons.spellcheck,
+                text: context.l10n.uiProofreading,
+              ),
             ),
             const SizedBox(height: 32),
             // 警語
@@ -1267,17 +1288,25 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
                   children: [
                     const SizedBox(height: 8),
                     Text(
-                      "此處可協助執行文本檢查。",
+                      context.l10n.uiCheckYourTextHere,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     const SizedBox(height: 4),
-                    Text("當前文本長度：${sourceText.length} 字元"),
+                    Text(
+                      context.l10n.uiCurrentTextLengthCharacters(
+                        context.formats.integer(sourceText.length),
+                      ),
+                    ),
                     if (_isLoadingFillerWords)
-                      const Text("載入贅字詞庫中")
+                      Text(context.l10n.uiLoadingFillerWordDictionary)
                     else if (_loadingError != null)
                       Text(_loadingError!)
                     else
-                      Text("贅字詞庫已載入 ${_fillerWords.length} 筆"),
+                      Text(
+                        context.l10n.uiFillerWordDictionaryLoadedEntries(
+                          context.formats.integer(_fillerWords.length),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -1297,13 +1326,17 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
                   children: [
                     SmallTitle(
                       icon: Icons.data_array_rounded,
-                      text: "引號、括號閉合檢查",
+                      text: context.l10n.uiQuoteAndBracketMatching,
                     ),
                     const SizedBox(height: 8),
                     if (_resultsTruncated) ...[
                       AppNoticeBanner(
-                        message:
-                            "結果數量過多，目前只保留各檢測的前段樣本；完整統計共 ${_resultCounts.combinedTotal} 筆。",
+                        message: context.l10n
+                            .uiTooManyResultsOnlyInitialSamplesAreShown(
+                              context.formats.integer(
+                                _resultCounts.combinedTotal,
+                              ),
+                            ),
                         tone: AppFeedbackTone.info,
                       ),
                       const SizedBox(height: 12),
@@ -1312,26 +1345,35 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
                     const Divider(height: 24),
                     SmallTitle(
                       icon: Icons.warning_amber_rounded,
-                      text: "標點異常檢測",
+                      text: context.l10n.uiPunctuationAnomalies,
                     ),
                     const SizedBox(height: 8),
                     _buildConsecutiveSymbolResult(sourceText),
                     const Divider(height: 24),
-                    SmallTitle(icon: Icons.format_line_spacing, text: "行尾辨識"),
+                    SmallTitle(
+                      icon: Icons.format_line_spacing,
+                      text: context.l10n.uiLineEndingCheck,
+                    ),
                     const SizedBox(height: 8),
                     _buildLineEndingResult(sourceText),
                     const Divider(height: 24),
-                    SmallTitle(icon: Icons.edit_note, text: "標點符號格式統一"),
+                    SmallTitle(
+                      icon: Icons.edit_note,
+                      text: context.l10n.uiPunctuationConsistency,
+                    ),
                     const SizedBox(height: 8),
                     _buildPunctuationResult(punctuationResult),
                     const Divider(height: 24),
-                    SmallTitle(icon: Icons.grading, text: "贅字檢查"),
+                    SmallTitle(
+                      icon: Icons.grading,
+                      text: context.l10n.uiFillerWordCheck,
+                    ),
                     const SizedBox(height: 8),
                     _buildFillerWordResult(),
                     const Divider(height: 24),
                     SmallTitle(
                       icon: Icons.track_changes_outlined,
-                      text: "贅字率計算",
+                      text: context.l10n.uiFillerWordRatio,
                     ),
                     const SizedBox(height: 8),
                     _buildFillerRateResult(),
@@ -1350,7 +1392,10 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SmallTitle(icon: Icons.settings, text: "檢測設定"),
+                    SmallTitle(
+                      icon: Icons.settings,
+                      text: context.l10n.uiCheckSettings,
+                    ),
                     const SizedBox(height: 12),
                     _buildPunctuationProfileSetting(),
                   ],
@@ -1410,7 +1455,11 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
         child: TextButton.icon(
           onPressed: onPressed,
           icon: const Icon(Icons.expand_more, size: 16),
-          label: Text("顯示更多（剩餘 ${totalCount - visibleCount}）"),
+          label: Text(
+            context.l10n.uiShowMoreRemaining(
+              context.formats.integer(totalCount - visibleCount),
+            ),
+          ),
         ),
       ),
     );
@@ -1418,11 +1467,11 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
 
   Widget _buildResolveSingleButton({
     required VoidCallback onPressed,
-    String tooltip = "解決單項",
+    String? tooltip,
   }) {
     return IconButton(
       onPressed: onPressed,
-      tooltip: tooltip,
+      tooltip: tooltip ?? context.l10n.uiResolveThisIssue,
       icon: const Icon(Icons.build_circle_outlined, size: 18),
       visualDensity: VisualDensity.compact,
       padding: const EdgeInsets.all(AppSpacing.xs),
@@ -1463,8 +1512,8 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SwitchWithTitle(
-          title: "引號、括號閉合檢查",
-          subtitle: "檢查配對與閉合狀態",
+          title: context.l10n.uiQuoteAndBracketMatching,
+          subtitle: context.l10n.uiCheckPairedAndUnclosedDelimiters,
           value: _enablePairCheck,
           onChanged: (bool value) async {
             unawaited(
@@ -1479,8 +1528,8 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
         ),
 
         SwitchWithTitle(
-          title: "標點異常檢測",
-          subtitle: "檢查連續標點與引號層級",
+          title: context.l10n.uiPunctuationAnomalies,
+          subtitle: context.l10n.uiCheckRepeatedPunctuationAndQuoteNesting,
           value: _enableSymbolCheck,
           onChanged: (bool value) async {
             unawaited(
@@ -1494,8 +1543,8 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
           },
         ),
         SwitchWithTitle(
-          title: "標點符號格式統一",
-          subtitle: "檢查可統一的標點替換",
+          title: context.l10n.uiPunctuationConsistency,
+          subtitle: context.l10n.uiFindPunctuationThatCanBeStandardized,
           value: _enablePunctuationNormalization,
           onChanged: (bool value) async {
             unawaited(
@@ -1510,8 +1559,8 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
           },
         ),
         SwitchWithTitle(
-          title: "贅字檢查",
-          subtitle: "檢查詞庫中的贅字出現位置",
+          title: context.l10n.uiFillerWordCheck,
+          subtitle: context.l10n.uiFindFillerWordsListedInTheDictionary,
           value: _enableFillerWordCheck,
           onChanged: (bool value) async {
             unawaited(
@@ -1526,8 +1575,8 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
           },
         ),
         SwitchWithTitle(
-          title: "行尾辨識",
-          subtitle: "檢查行尾符號是否符合規則",
+          title: context.l10n.uiLineEndingCheck,
+          subtitle: context.l10n.uiCheckLineEndingsAgainstTheRules,
           value: _enableLineEndingCheck,
           onChanged: (bool value) async {
             unawaited(
@@ -1543,11 +1592,14 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
         ),
         if (_enableLineEndingCheck) ...[
           const SizedBox(height: 8),
-          Text("行尾辨識細項", style: Theme.of(context).textTheme.labelLarge),
+          Text(
+            context.l10n.uiLineEndingOptions,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           const SizedBox(height: 4),
           SwitchWithTitle(
-            title: "行尾逗號不提示",
-            subtitle: "行尾為 , 或 ，時不顯示提示",
+            title: context.l10n.uiIgnoreCommasAtLineEnd,
+            subtitle: context.l10n.uiDoNotFlagLinesEndingInOr,
             value: _lineEndingIgnoreComma,
             onChanged: (bool value) async {
               unawaited(
@@ -1562,8 +1614,8 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
             },
           ),
           SwitchWithTitle(
-            title: "行尾破折號不提示",
-            subtitle: "行尾為 — 或 - 時不顯示提示",
+            title: context.l10n.uiIgnoreDashesAtLineEnd,
+            subtitle: context.l10n.uiDoNotFlagLinesEndingInOr2,
             value: _lineEndingIgnoreDash,
             onChanged: (bool value) async {
               unawaited(
@@ -1578,8 +1630,8 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
             },
           ),
           SwitchWithTitle(
-            title: "行尾刪節號不提示",
-            subtitle: "行尾為 … / …… 時不顯示提示",
+            title: context.l10n.uiIgnoreEllipsesAtLineEnd,
+            subtitle: context.l10n.uiDoNotFlagLinesEndingInOr3,
             value: _lineEndingIgnoreEllipsis,
             onChanged: (bool value) async {
               unawaited(
@@ -1594,8 +1646,8 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
             },
           ),
           SwitchWithTitle(
-            title: "行尾冒號不提示",
-            subtitle: "行尾為 : 或 ：時不顯示提示",
+            title: context.l10n.uiIgnoreColonsAtLineEnd,
+            subtitle: context.l10n.uiDoNotFlagLinesEndingInOr4,
             value: _lineEndingIgnoreColon,
             onChanged: (bool value) async {
               unawaited(
@@ -1610,8 +1662,8 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
             },
           ),
           SwitchWithTitle(
-            title: "行尾分號不提示",
-            subtitle: "行尾為；時不顯示提示",
+            title: context.l10n.uiIgnoreSemicolonsAtLineEnd,
+            subtitle: context.l10n.uiDoNotFlagLinesEndingIn,
             value: _lineEndingIgnoreSemicolon,
             onChanged: (bool value) async {
               unawaited(
@@ -1627,7 +1679,7 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
           ),
         ],
         const SizedBox(height: 8),
-        SmallTitle(icon: Icons.translate, text: "格式選項"),
+        SmallTitle(icon: Icons.translate, text: context.l10n.uiFormatOptions),
         const SizedBox(height: 12),
         AppDropdownField<_PunctuationProfile>(
           value: _punctuationProfile,
@@ -1638,12 +1690,14 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
             }
             unawaited(_setPunctuationProfile(value));
           },
-          labelText: "標點符號檢查格式",
-          hintText: "請選擇格式",
+          labelText: context.l10n.uiPunctuationStyle,
+          hintText: context.l10n.uiChooseAStyle,
         ),
         const SizedBox(height: 4),
         Text(
-          "目前格式：${_punctuationProfileCode(_punctuationProfile)}",
+          context.l10n.uiCurrentStyle(
+            (_punctuationProfileCode(_punctuationProfile)).toString(),
+          ),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -1652,9 +1706,9 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           dense: true,
-          title: const Text("拉丁文句檢測"),
+          title: Text(context.l10n.uiDetectLatinScriptSentences),
           subtitle: Text(
-            "偵測到拉丁文字時，自動套用拉丁標點",
+            context.l10n.uiAutomaticallyUseLatinPunctuationWhenLatinTextIs,
             style: Theme.of(context).textTheme.labelTiny,
           ),
           value: _enableLatinSentenceDetection,
@@ -1663,11 +1717,14 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
           },
         ),
         const SizedBox(height: 8),
-        Text("拉丁字母辨識細項", style: Theme.of(context).textTheme.labelLarge),
+        Text(
+          context.l10n.uiLatinScriptDetectionOptions,
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
         const SizedBox(height: 4),
         SwitchWithTitle(
-          title: "允許字尾使用 CJK 引號/括號",
-          subtitle: "拉丁字尾可接受 CJK 引號與括號",
+          title: context.l10n.uiAllowCJKQuotesBracketsAtWordEnd,
+          subtitle: context.l10n.uiAllowCJKQuotesAndBracketsAfterLatinText,
           value: _latinAllowCjkQuoteBracketEnding,
           onChanged: (bool value) async {
             unawaited(
@@ -1682,8 +1739,8 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
           },
         ),
         SwitchWithTitle(
-          title: "允許字尾使用 CJK 驚嘆號/問號",
-          subtitle: "拉丁字尾可接受 ！與 ？",
+          title: context.l10n.uiAllowCJKExclamationQuestionMarksAtWordEnd,
+          subtitle: context.l10n.uiAllowAndAfterLatinText,
           value: _latinAllowCjkQuestionExclamationEnding,
           onChanged: (bool value) async {
             unawaited(
@@ -1698,8 +1755,8 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
           },
         ),
         SwitchWithTitle(
-          title: "允許在 CJK 文字前後加入 CJK 標點",
-          subtitle: "若任一側語境為行首/CJK/行尾，CJK 標點不視為拉丁延伸",
+          title: context.l10n.uiAllowCJKPunctuationAroundCJKText,
+          subtitle: context.l10n.uiDoNotTreatCJKPunctuationAsLatinContinuation,
           value: _latinAllowCjkPunctuationAroundCjkText,
           onChanged: (bool value) async {
             unawaited(
@@ -1719,16 +1776,22 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
 
   Widget _buildPairCheckResult(String sourceText) {
     if (!_enablePairCheck) {
-      return Text("此檢測已關閉。", style: Theme.of(context).textTheme.bodySmall);
+      return Text(
+        context.l10n.uiThisCheckIsDisabled,
+        style: Theme.of(context).textTheme.bodySmall,
+      );
     }
 
     if (sourceText.trim().isEmpty) {
-      return Text("請先輸入文本。", style: Theme.of(context).textTheme.bodySmall);
+      return Text(
+        context.l10n.uiEnterSomeTextFirst,
+        style: Theme.of(context).textTheme.bodySmall,
+      );
     }
 
     if (_pairIssues.isEmpty) {
       return Text(
-        "未發現閉合問題。",
+        context.l10n.uiNoUnclosedDelimitersFound,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: Colors.green,
           fontWeight: FontWeight.w700,
@@ -1790,20 +1853,29 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
   Widget _buildPunctuationResult(_PunctuationNormalizationResult? result) {
     final String sourceText = widget.textController.text;
     if (!_enablePunctuationNormalization) {
-      return Text("此檢測已關閉。", style: Theme.of(context).textTheme.bodySmall);
+      return Text(
+        context.l10n.uiThisCheckIsDisabled,
+        style: Theme.of(context).textTheme.bodySmall,
+      );
     }
 
     if (sourceText.trim().isEmpty) {
-      return Text("請先輸入文本。", style: Theme.of(context).textTheme.bodySmall);
+      return Text(
+        context.l10n.uiEnterSomeTextFirst,
+        style: Theme.of(context).textTheme.bodySmall,
+      );
     }
 
     if (result == null) {
-      return Text("尚未執行檢查。", style: Theme.of(context).textTheme.bodySmall);
+      return Text(
+        context.l10n.uiNoCheckRunYet,
+        style: Theme.of(context).textTheme.bodySmall,
+      );
     }
 
     if (!result.hasChanges) {
       return Text(
-        "格式已一致，無需調整。",
+        context.l10n.uiPunctuationIsConsistentNoChangesNeeded,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: Colors.green,
           fontWeight: FontWeight.w700,
@@ -1819,7 +1891,11 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("共偵測到 ${result.totalChanges} 處可統一的標點。"),
+        Text(
+          context.l10n.uiFoundPunctuationMarksThatCanBeStandardized(
+            context.formats.integer(result.totalChanges),
+          ),
+        ),
         const SizedBox(height: 6),
         _buildScrollableResultArea(
           controller: _punctuationScrollController,
@@ -1872,7 +1948,10 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
         const SizedBox(height: 8),
         TextButton(
           onPressed: _applyPunctuationNormalization,
-          child: const SmallTitle(icon: Icons.auto_fix_high, text: "全部解決"),
+          child: SmallTitle(
+            icon: Icons.auto_fix_high,
+            text: context.l10n.uiResolveAll,
+          ),
         ),
       ],
     );
@@ -1880,16 +1959,22 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
 
   Widget _buildConsecutiveSymbolResult(String sourceText) {
     if (!_enableSymbolCheck) {
-      return Text("此檢測已關閉。", style: Theme.of(context).textTheme.bodySmall);
+      return Text(
+        context.l10n.uiThisCheckIsDisabled,
+        style: Theme.of(context).textTheme.bodySmall,
+      );
     }
 
     if (sourceText.trim().isEmpty) {
-      return Text("請先輸入文本。", style: Theme.of(context).textTheme.bodySmall);
+      return Text(
+        context.l10n.uiEnterSomeTextFirst,
+        style: Theme.of(context).textTheme.bodySmall,
+      );
     }
 
     if (_symbolIssues.isEmpty && _sameTypeQuoteIssues.isEmpty) {
       return Text(
-        "未發現標點符號異常。",
+        context.l10n.uiNoPunctuationAnomaliesFound,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: Colors.green,
           fontWeight: FontWeight.w700,
@@ -1987,7 +2072,7 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "建議：${issue.suggestion}",
+                      context.l10n.uiSuggestion((issue.suggestion).toString()),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -2011,7 +2096,10 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
         const SizedBox(height: 8),
         TextButton(
           onPressed: _resolveAllAnomalies,
-          child: const SmallTitle(icon: Icons.auto_fix_high, text: "全部解決"),
+          child: SmallTitle(
+            icon: Icons.auto_fix_high,
+            text: context.l10n.uiResolveAll,
+          ),
         ),
       ],
     );
@@ -2019,16 +2107,22 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
 
   Widget _buildLineEndingResult(String sourceText) {
     if (!_enableLineEndingCheck) {
-      return Text("此檢測已關閉。", style: Theme.of(context).textTheme.bodySmall);
+      return Text(
+        context.l10n.uiThisCheckIsDisabled,
+        style: Theme.of(context).textTheme.bodySmall,
+      );
     }
 
     if (sourceText.trim().isEmpty) {
-      return Text("請先輸入文本。", style: Theme.of(context).textTheme.bodySmall);
+      return Text(
+        context.l10n.uiEnterSomeTextFirst,
+        style: Theme.of(context).textTheme.bodySmall,
+      );
     }
 
     if (_lineEndingIssues.isEmpty) {
       return Text(
-        "未發現行尾異常。",
+        context.l10n.uiNoLineEndingIssuesFound,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: Colors.green,
           fontWeight: FontWeight.w700,
@@ -2089,16 +2183,22 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
   Widget _buildFillerWordResult() {
     final String sourceText = widget.textController.text;
     if (!_enableFillerWordCheck) {
-      return Text("此檢測已關閉。", style: Theme.of(context).textTheme.bodySmall);
+      return Text(
+        context.l10n.uiThisCheckIsDisabled,
+        style: Theme.of(context).textTheme.bodySmall,
+      );
     }
 
     if (sourceText.trim().isEmpty) {
-      return Text("請先輸入文本。", style: Theme.of(context).textTheme.bodySmall);
+      return Text(
+        context.l10n.uiEnterSomeTextFirst,
+        style: Theme.of(context).textTheme.bodySmall,
+      );
     }
 
     if (_fillerWordAnalysis.hits.isEmpty) {
       return Text(
-        "未偵測到詞庫中的贅字。",
+        context.l10n.uiNoDictionaryFillerWordsFound,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: Colors.green,
           fontWeight: FontWeight.w700,
@@ -2114,7 +2214,10 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("點擊下列贅字展開位置列表。", style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          context.l10n.uiClickAFillerWordBelowToExpandIts,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
         const SizedBox(height: 8),
         Container(
           constraints: const BoxConstraints(maxHeight: 280),
@@ -2161,7 +2264,9 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
                       style: Theme.of(context).textTheme.labelMedium,
                     ),
                     subtitle: Text(
-                      "出現 ${hit.count} 次",
+                      context.l10n.uiOccurrences(
+                        context.formats.integer(hit.count),
+                      ),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     children: [
@@ -2185,7 +2290,9 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
                         Padding(
                           padding: const EdgeInsets.only(top: AppSpacing.sm),
                           child: Text(
-                            "僅顯示前 $visiblePositionCount 個位置。",
+                            context.l10n.uiShowingOnlyTheFirstLocations(
+                              context.formats.integer(visiblePositionCount),
+                            ),
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ),
@@ -2215,11 +2322,17 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
   Widget _buildFillerRateResult() {
     final String sourceText = widget.textController.text;
     if (!_enableFillerWordCheck) {
-      return Text("此檢測已關閉。", style: Theme.of(context).textTheme.bodySmall);
+      return Text(
+        context.l10n.uiThisCheckIsDisabled,
+        style: Theme.of(context).textTheme.bodySmall,
+      );
     }
 
     if (sourceText.trim().isEmpty) {
-      return Text("請先輸入文本。", style: Theme.of(context).textTheme.bodySmall);
+      return Text(
+        context.l10n.uiEnterSomeTextFirst,
+        style: Theme.of(context).textTheme.bodySmall,
+      );
     }
 
     final double percent = _fillerWordAnalysis.ratio * 100;
@@ -2228,9 +2341,25 @@ class _ProofReadingViewState extends ConsumerState<ProofReadingView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("贅字總次數：${_fillerWordAnalysis.totalMatches}"),
-        Text("有效字數：${_fillerWordAnalysis.effectiveChars}"),
-        Text("贅字率：${percent.toStringAsFixed(2)}%"),
+        Text(
+          context.l10n.uiTotalFillerWordOccurrences(
+            context.formats.integer(_fillerWordAnalysis.totalMatches),
+          ),
+        ),
+        Text(
+          context.l10n.uiEffectiveWordCount(
+            context.formats.integer(_fillerWordAnalysis.effectiveChars),
+          ),
+        ),
+        Text(
+          context.l10n.uiFillerWordRatio2(
+            context.formats.decimal(
+              percent,
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            ),
+          ),
+        ),
         const SizedBox(height: 8),
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
@@ -2474,8 +2603,10 @@ class _ProofreadingRequest {
     required this.options,
     required this.budget,
     required this.revision,
+    this.localeName = 'zh',
   });
 
+  final String localeName;
   final String text;
   final List<String> fillerWords;
   final int fillerWordsRevision;
@@ -2573,6 +2704,8 @@ class _ProofreadingAnalyzer {
   final _ProofreadingRequest request;
   final _FillerWordMatcher? _fillerWordMatcher;
 
+  AppLocalizations get l10n =>
+      lookupAppLocalizations(Locale(request.localeName.split('_').first));
   String get text => request.text;
   _ProofreadingOptions get options => request.options;
 
@@ -2665,7 +2798,11 @@ class _ProofreadingAnalyzer {
 
       if (stack.isEmpty) {
         collector.add(
-          _PairIssue(index: i, symbol: char, message: "出現未配對的右符號「$char」。"),
+          _PairIssue(
+            index: i,
+            symbol: char,
+            message: l10n.proofUnmatchedClosing((char).toString()),
+          ),
         );
         continue;
       }
@@ -2678,7 +2815,11 @@ class _ProofreadingAnalyzer {
           _PairIssue(
             index: i,
             symbol: char,
-            message: "右符號「$char」與左符號「${top.symbol}」不匹配，預期為「$expected」。",
+            message: l10n.proofMismatchedPair(
+              (char).toString(),
+              (top.symbol).toString(),
+              (expected).toString(),
+            ),
           ),
         );
       }
@@ -2691,7 +2832,10 @@ class _ProofreadingAnalyzer {
         _PairIssue(
           index: token.index,
           symbol: token.symbol,
-          message: "左符號「${token.symbol}」未閉合，缺少「$expected」。",
+          message: l10n.proofUnclosedPair(
+            (token.symbol).toString(),
+            (expected).toString(),
+          ),
         ),
       );
     }
@@ -2721,14 +2865,18 @@ class _ProofreadingAnalyzer {
       if (_shouldFlagConsecutiveSymbol(symbol, count) && category != null) {
         final String sequence = text.substring(i, j);
         final String message = symbol == "…"
-            ? "刪節號建議使用「……」，目前為「$sequence」。"
-            : "連續$count個$category「$sequence」。";
+            ? l10n.proofEllipsisSuggestion((sequence).toString())
+            : l10n.proofConsecutiveSymbols(
+                (count).toString(),
+                l10n.legacyLabel(category),
+                (sequence).toString(),
+              );
         collector.add(
           _ConsecutiveSymbolIssue(
             index: i,
             symbol: symbol,
             count: count,
-            category: category,
+            category: l10n.legacyLabel(category),
             sequence: sequence,
             message: message,
           ),
@@ -2788,7 +2936,7 @@ class _ProofreadingAnalyzer {
     }
 
     final String? startMessage = markers.first.symbol == "'"
-        ? "引號結構應以\" \"開頭，不應以' '開頭。"
+        ? l10n.uiQuotesShouldStartWithNot
         : null;
 
     int maxDepth = 0;
@@ -2806,7 +2954,7 @@ class _ProofreadingAnalyzer {
 
     return _SameTypeQuoteIssue(
       index: lineStartOffset + markers.first.index,
-      message: startMessage ?? "偵測到引號層級未交錯，建議以\" \"與' '交替。",
+      message: startMessage ?? l10n.uiQuoteLevelsShouldAlternateBetweenAnd,
       suggestion: suggested,
     );
   }
@@ -2942,7 +3090,7 @@ class _ProofreadingAnalyzer {
 
     final String firstQuote = line[positions.first];
     final String? startMessage = firstQuote == "『"
-        ? "引號結構應以「」開頭，不應以『』開頭。"
+        ? l10n.uiQuotesShouldStartWithNot2
         : null;
 
     final List<String> chars = line.split("");
@@ -2970,7 +3118,7 @@ class _ProofreadingAnalyzer {
 
     return _SameTypeQuoteIssue(
       index: lineStartOffset + positions.first,
-      message: startMessage ?? "偵測到引號層級未交錯，建議以「『』」為一循環交替。",
+      message: startMessage ?? l10n.uiQuoteLevelsShouldAlternateInACycle,
       suggestion: suggested,
     );
   }
@@ -3036,7 +3184,10 @@ class _ProofreadingAnalyzer {
             _LineEndingIssue(
               index: lineStartOffset + lastIndex,
               endingSymbol: endingSymbol,
-              message: "[$code] 行尾未符合結尾規則，目前為「$endingSymbol」。",
+              message: l10n.proofInvalidLineEnding(
+                (code).toString(),
+                (endingSymbol).toString(),
+              ),
             ),
           );
         }

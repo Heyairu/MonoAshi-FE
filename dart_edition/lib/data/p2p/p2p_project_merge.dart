@@ -855,7 +855,7 @@ Map<String, Object?> _characterToMap(CharacterEntryData value) {
       },
       tableLabel: "人物關係",
     ),
-    "角色類型": value.characterType,
+    "角色類型": normalizeCharacterType(value.characterType),
     "組織": _profileRows(value.organizations, "組織"),
     "擁有物品": _indexRows(
       value.possessions,
@@ -982,7 +982,7 @@ CharacterEntryData _characterFromMap(String id, Map<String, Object?> value) {
           ),
         )
         .toList(growable: false),
-    characterType: value["角色類型"]! as String,
+    characterType: normalizeCharacterType(value["角色類型"]! as String),
     organizations: _profileRowsFromMap(value["組織"]),
     possessions: _rows(value["擁有物品"])
         .map(

@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "../models/character_data.dart";
@@ -52,7 +53,7 @@ class CharacterRelationshipEditor {
     String initialInternalRelationship = "",
     bool allowSourceSelection = true,
     bool allowBidirectional = true,
-    String title = "新增人物關係",
+    String? title,
   }) {
     return AppDialog.showCustom<CharacterRelationshipEditorResult>(
       context: context,
@@ -72,7 +73,7 @@ class CharacterRelationshipEditor {
 }
 
 class _CharacterRelationshipEditorDialog extends StatefulWidget {
-  final String title;
+  final String? title;
   final Map<String, CharacterEntryData> characters;
   final String? sourceCharacterId;
   final String initialPerson;
@@ -155,7 +156,7 @@ class _CharacterRelationshipEditorDialogState
         )
         .toList(growable: false);
     return AppDialog(
-      title: widget.title,
+      title: widget.title ?? context.l10n.uiAddCharacterRelationship,
       icon: Icons.hub_outlined,
       content: SizedBox(
         width: 440,
@@ -174,7 +175,9 @@ class _CharacterRelationshipEditorDialogState
               initialValue: _sourceCharacterId,
               decoration: appDropdownFieldDecoration(
                 context,
-                decoration: const InputDecoration(labelText: "來源人物"),
+                decoration: InputDecoration(
+                  labelText: context.l10n.uiSourceCharacter,
+                ),
               ),
               items: [
                 for (final entry in widget.characters.entries)
@@ -200,8 +203,8 @@ class _CharacterRelationshipEditorDialogState
               key: const ValueKey("relationship-target-combobox"),
               controller: _personController,
               options: targetOptions,
-              labelText: "目標人物",
-              hintText: "選擇現有人物或輸入新人物名稱",
+              labelText: context.l10n.uiTargetCharacter,
+              hintText: context.l10n.uiSelectAnExistingCharacterOrEnterANew,
               onChanged: (_) => setState(() {}),
               onSelected: (_) => setState(() {}),
             ),
@@ -209,8 +212,8 @@ class _CharacterRelationshipEditorDialogState
             AppTextField(
               key: const ValueKey("relationship-description-field"),
               controller: _descriptionController,
-              labelText: "外在關係",
-              hintText: "例如：朋友、家人、競爭對手",
+              labelText: context.l10n.uiExternalRelationship,
+              hintText: context.l10n.uiForExampleFriendFamilyRival,
               maxLines: 1,
               textInputAction: TextInputAction.next,
             ),
@@ -218,8 +221,8 @@ class _CharacterRelationshipEditorDialogState
             AppTextField(
               key: const ValueKey("relationship-internal-field"),
               controller: _internalController,
-              labelText: "內在關係",
-              hintText: "例如：信任、崇拜、嫉妒",
+              labelText: context.l10n.uiInternalRelationship,
+              hintText: context.l10n.uiForExampleTrustAdmirationEnvy,
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _submit(),
             ),
@@ -230,8 +233,10 @@ class _CharacterRelationshipEditorDialogState
                 value: _bidirectional,
                 contentPadding: EdgeInsets.zero,
                 controlAffinity: ListTileControlAffinity.leading,
-                title: const Text("雙向關係"),
-                subtitle: const Text("同時建立目標人物指回來源人物的關係"),
+                title: Text(context.l10n.uiBidirectionalRelationship),
+                subtitle: Text(
+                  context.l10n.uiAlsoCreateARelationshipFromTheTargetBack,
+                ),
                 onChanged: (value) {
                   setState(() => _bidirectional = value ?? false);
                 },
@@ -243,11 +248,11 @@ class _CharacterRelationshipEditorDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text("取消"),
+          child: Text(context.l10n.commonCancel),
         ),
         FilledButton(
           onPressed: _canSubmit ? _submit : null,
-          child: const Text("儲存"),
+          child: Text(context.l10n.commonSave),
         ),
       ],
     );

@@ -1,3 +1,5 @@
+import '../../l10n/app_localization.dart';
+import 'package:flutter/widgets.dart';
 import "package:flutter/services.dart";
 
 import "../inline_annotations/inline_annotation.dart";
@@ -69,7 +71,10 @@ final class MosaicIntelliSenseEngine {
     "F": "灰色",
   };
 
-  const MosaicIntelliSenseEngine();
+  const MosaicIntelliSenseEngine({this.localizations});
+  final AppLocalizations? localizations;
+  AppLocalizations get l10n =>
+      localizations ?? lookupAppLocalizations(defaultAppLocale);
 
   MosaicCompletionSession? build({
     required String rawText,
@@ -221,7 +226,7 @@ final class MosaicIntelliSenseEngine {
       return MosaicCompletionCandidate(
         id: "object-${kind.name}",
         label: "$symbol ${_kindLabel(kind)}",
-        detail: "瀏覽${_kindLabel(kind)}對象",
+        detail: l10n.completionBrowseTargets((_kindLabel(kind)).toString()),
         insertText: symbol,
         children: _targetCandidates(
           kind: kind,
@@ -335,15 +340,15 @@ final class MosaicIntelliSenseEngine {
         MosaicCompletionCandidate(
           id: "manual-character",
           label: "@",
-          detail: "人物候選",
+          detail: l10n.uiCharacterSuggestions,
           insertText: "@",
           children: targetChildren(InlineAnnotationKind.character),
           submenuOnly: true,
         ),
         MosaicCompletionCandidate(
           id: "manual-phrases",
-          label: "短語",
-          detail: "搜尋並插入專案短語",
+          label: l10n.uiPhrases,
+          detail: l10n.uiSearchAndInsertProjectPhrases,
           insertText: "",
           phraseMenu: true,
           children: _phraseCandidates(phraseIndex, "", phraseTargetExists),
@@ -352,7 +357,7 @@ final class MosaicIntelliSenseEngine {
         MosaicCompletionCandidate(
           id: "manual-location",
           label: "!",
-          detail: "地點候選",
+          detail: l10n.uiLocationSuggestions,
           insertText: "!",
           children: targetChildren(InlineAnnotationKind.location),
           submenuOnly: true,
@@ -360,7 +365,7 @@ final class MosaicIntelliSenseEngine {
         MosaicCompletionCandidate(
           id: "manual-event",
           label: "#",
-          detail: "事件候選",
+          detail: l10n.uiEventSuggestions,
           insertText: "#",
           children: targetChildren(InlineAnnotationKind.event),
           submenuOnly: true,
@@ -368,7 +373,7 @@ final class MosaicIntelliSenseEngine {
         MosaicCompletionCandidate(
           id: "manual-foreshadowing",
           label: "?",
-          detail: "伏筆候選",
+          detail: l10n.uiForeshadowingSuggestions,
           insertText: "?",
           children: targetChildren(InlineAnnotationKind.foreshadowing),
           submenuOnly: true,
@@ -376,7 +381,7 @@ final class MosaicIntelliSenseEngine {
         MosaicCompletionCandidate(
           id: "manual-plan",
           label: "&",
-          detail: "計畫候選",
+          detail: l10n.uiPlanSuggestions,
           insertText: "&",
           children: targetChildren(InlineAnnotationKind.plan),
           submenuOnly: true,
@@ -384,7 +389,7 @@ final class MosaicIntelliSenseEngine {
         MosaicCompletionCandidate(
           id: "manual-item",
           label: "*",
-          detail: "物品候選",
+          detail: l10n.uiItemSuggestions,
           insertText: "*",
           children: targetChildren(InlineAnnotationKind.item),
           submenuOnly: true,
@@ -392,63 +397,63 @@ final class MosaicIntelliSenseEngine {
         MosaicCompletionCandidate(
           id: "manual-highlight",
           label: "^",
-          detail: "高亮色彩候選",
+          detail: l10n.uiHighlightColorSuggestions,
           insertText: "^",
           children: _directHighlightSession(caret).candidates,
           submenuOnly: true,
         ),
-        const MosaicCompletionCandidate(
+        MosaicCompletionCandidate(
           id: "template-character",
           label: "@<>",
-          detail: "人物標記骨架",
+          detail: l10n.uiCharacterMarkerTemplate,
           insertText: "//@<",
         ),
-        const MosaicCompletionCandidate(
+        MosaicCompletionCandidate(
           id: "template-location",
           label: "!<>",
-          detail: "地點標記骨架",
+          detail: l10n.uiLocationMarkerTemplate,
           insertText: "//!<",
         ),
-        const MosaicCompletionCandidate(
+        MosaicCompletionCandidate(
           id: "template-event",
           label: "#<>",
-          detail: "事件標記骨架",
+          detail: l10n.uiEventMarkerTemplate,
           insertText: "//#<",
         ),
-        const MosaicCompletionCandidate(
+        MosaicCompletionCandidate(
           id: "template-foreshadowing",
           label: "?<>",
-          detail: "伏筆標記骨架",
+          detail: l10n.uiForeshadowingMarkerTemplate,
           insertText: "//?<",
         ),
-        const MosaicCompletionCandidate(
+        MosaicCompletionCandidate(
           id: "template-plan",
           label: "&<>",
-          detail: "計畫標記骨架",
+          detail: l10n.uiPlanMarkerTemplate,
           insertText: "//&<",
         ),
-        const MosaicCompletionCandidate(
+        MosaicCompletionCandidate(
           id: "template-item",
           label: "*<>",
-          detail: "物品標記骨架",
+          detail: l10n.uiItemMarkerTemplate,
           insertText: "//*<",
         ),
-        const MosaicCompletionCandidate(
+        MosaicCompletionCandidate(
           id: "template-highlight",
           label: "^<>",
-          detail: "高亮標記骨架",
+          detail: l10n.uiHighlightMarkerTemplate,
           insertText: "//^<",
         ),
-        const MosaicCompletionCandidate(
+        MosaicCompletionCandidate(
           id: "literal-slash",
-          label: "插入字面 /",
-          detail: r"以 \/ 寫入，避免被解析為語法界線",
+          label: l10n.uiInsertLiteral,
+          detail: l10n.uiWriteAsToPreventParsingAsASyntax,
           insertText: r"\/",
         ),
-        const MosaicCompletionCandidate(
+        MosaicCompletionCandidate(
           id: "literal-backslash",
-          label: "插入字面 \\",
-          detail: r"以 \\ 寫入",
+          label: l10n.uiInsertLiteral2,
+          detail: l10n.uiWriteAs,
           insertText: r"\\",
         ),
       ],
@@ -490,7 +495,20 @@ final class MosaicIntelliSenseEngine {
                 (annotation) => annotation.targetId != null,
               ) &&
               targetExists != null)
-            '待連結 ${result.annotations.where((annotation) => annotation.targetId != null && (result.phrase.requiresRelink || !targetExists(annotation.kind, annotation.targetId!))).length}',
+            l10n.completionPendingLink(
+              (result.annotations
+                      .where(
+                        (annotation) =>
+                            annotation.targetId != null &&
+                            (result.phrase.requiresRelink ||
+                                !targetExists(
+                                  annotation.kind,
+                                  annotation.targetId!,
+                                )),
+                      )
+                      .length)
+                  .toString(),
+            ),
         ].where((part) => part.isNotEmpty).join(' · '),
         insertText: '',
       ),
@@ -630,7 +648,10 @@ final class MosaicIntelliSenseEngine {
           MosaicCompletionCandidate(
             id: "${target.id}:alias:$aliasIndex",
             label: alias,
-            detail: "${_kindLabel(kind)} · ${target.primaryName}的別名",
+            detail: l10n.completionAlias(
+              (_kindLabel(kind)).toString(),
+              (target.primaryName).toString(),
+            ),
             insertText: InlineAnnotationSyntax.format(
               kind: kind,
               state: state,
@@ -667,7 +688,7 @@ final class MosaicIntelliSenseEngine {
             MosaicCompletionCandidate(
               id: "${target.id}:primary",
               label: target.primaryName,
-              detail: "人物 · 主名稱",
+              detail: l10n.uiCharacterPrimaryName,
               insertText: InlineAnnotationSyntax.format(
                 kind: kind,
                 state: state,
@@ -685,7 +706,9 @@ final class MosaicIntelliSenseEngine {
               MosaicCompletionCandidate(
                 id: "${target.id}:alias:$aliasIndex",
                 label: target.aliases[aliasIndex],
-                detail: "人物 · ${target.primaryName}的別名",
+                detail: l10n.completionCharacterAlias(
+                  (target.primaryName).toString(),
+                ),
                 insertText: InlineAnnotationSyntax.format(
                   kind: kind,
                   state: state,
@@ -696,8 +719,8 @@ final class MosaicIntelliSenseEngine {
               ),
             MosaicCompletionCandidate(
               id: "${target.id}:create-alias",
-              label: "新增別名…",
-              detail: "為 ${target.primaryName} 新增別名",
+              label: l10n.uiAddAlias2,
+              detail: l10n.completionAddAlias((target.primaryName).toString()),
               insertText: "",
               createAliasForCharacterId: target.id,
             ),
@@ -719,8 +742,8 @@ final class MosaicIntelliSenseEngine {
       ...children,
       MosaicCompletionCandidate(
         id: "${target.id}:custom-text",
-        label: "輸入其他顯示文字…",
-        detail: "僅用於此 Mention，不加入別名",
+        label: l10n.uiEnterOtherDisplayText,
+        detail: l10n.uiUseOnlyForThisMentionDoNotAdd,
         customDisplayText: true,
         insertText: InlineAnnotationSyntax.format(
           kind: kind,
@@ -735,27 +758,27 @@ final class MosaicIntelliSenseEngine {
           kind: kind,
           parentId: target.id,
           depth: depth + 1,
-          label: "新增子地點…",
+          label: l10n.uiAddChildLocation,
         ),
       if (includeHierarchy && kind == InlineAnnotationKind.event && depth == 0)
         _createCandidate(
           kind: kind,
           parentId: target.id,
           depth: 1,
-          label: "新增事件…",
+          label: l10n.uiAddEvent2,
         ),
       if (includeHierarchy && kind == InlineAnnotationKind.event && depth == 1)
         _createCandidate(
           kind: kind,
           parentId: target.id,
           depth: 2,
-          label: "新增場景…",
+          label: l10n.uiAddScene2,
         ),
     ];
 
     return MosaicCompletionCandidate(
       id: target.id,
-      label: target.primaryName.isEmpty ? "（未命名）" : target.primaryName,
+      label: target.primaryName.isEmpty ? l10n.uiUntitled : target.primaryName,
       detail: _targetDetail(target, kind, depth),
       insertText: InlineAnnotationSyntax.format(
         kind: kind,
@@ -778,9 +801,9 @@ final class MosaicIntelliSenseEngine {
       return "${_kindLabel(kind)} · $path";
     }
     final scope = switch (depth) {
-      0 => "大箱",
-      1 => "中箱",
-      _ => "小箱",
+      0 => l10n.uiStoryline3,
+      1 => l10n.uiEvent5,
+      _ => l10n.uiScene3,
     };
     return "${_kindLabel(kind)} · $scope · $path";
   }
@@ -795,8 +818,9 @@ final class MosaicIntelliSenseEngine {
       id: parentId == null && depth == 0
           ? "create-${kind.name}"
           : "create-${kind.name}-$parentId-$depth",
-      label: label ?? "新增${_kindLabel(kind)}…",
-      detail: "建立後立即插入標記",
+      label:
+          label ?? l10n.completionCreateTarget((_kindLabel(kind)).toString()),
+      detail: l10n.uiInsertMarkerImmediatelyAfterCreation,
       insertText: "",
       createTargetKind: kind,
       createParentId: parentId,
@@ -812,15 +836,18 @@ final class MosaicIntelliSenseEngine {
         for (final background in _colorLabels.entries)
           MosaicCompletionCandidate(
             id: "highlight-${background.key}",
-            label: "${background.key} · ${background.value}",
-            detail: "高亮背景色 · 文字色自動",
+            label: "${background.key} · ${l10n.legacyLabel(background.value)}",
+            detail: l10n.uiHighlightBackgroundAutomaticTextColor,
             insertText: _highlightSkeleton(background.key, "0"),
             children: [
               for (final foreground in _colorLabels.entries)
                 MosaicCompletionCandidate(
                   id: "highlight-${background.key}-foreground-${foreground.key}",
-                  label: "${foreground.key} · ${foreground.value}",
-                  detail: "高亮文字色 · 背景 ${background.value}",
+                  label:
+                      "${foreground.key} · ${l10n.legacyLabel(foreground.value)}",
+                  detail: l10n.completionHighlightForeground(
+                    (l10n.legacyLabel(background.value)).toString(),
+                  ),
                   insertText: _highlightSkeleton(
                     background.key,
                     foreground.key,
@@ -839,8 +866,8 @@ final class MosaicIntelliSenseEngine {
     String foreground,
   ) => MosaicCompletionCandidate(
     id: "highlight-$background-$foreground-custom-text",
-    label: "輸入其他顯示文字…",
-    detail: "僅用於此標註",
+    label: l10n.uiEnterOtherDisplayText,
+    detail: l10n.uiOnlyForThisAnnotation,
     customDisplayText: true,
     insertText: InlineAnnotationSyntax.format(
       kind: InlineAnnotationKind.emphasis,
@@ -849,7 +876,7 @@ final class MosaicIntelliSenseEngine {
         background: background,
         foreground: foreground,
       ),
-      displayText: "標註",
+      displayText: l10n.uiAnnotation3,
     ),
   );
 
@@ -867,15 +894,19 @@ final class MosaicIntelliSenseEngine {
           if (query.isEmpty || background.key == query)
             MosaicCompletionCandidate(
               id: "color-${background.key}",
-              label: "${background.key} · ${background.value}",
-              detail: "標記背景色碼 · 文字色自動",
+              label:
+                  "${background.key} · ${l10n.legacyLabel(background.value)}",
+              detail: l10n.uiMarkerBackgroundColorCodeAutomaticTextColor,
               insertText: background.key,
               children: [
                 for (final foreground in _colorLabels.entries)
                   MosaicCompletionCandidate(
                     id: "color-${background.key}-foreground-${foreground.key}",
-                    label: "${foreground.key} · ${foreground.value}",
-                    detail: "標記文字色碼 · 背景 ${background.value}",
+                    label:
+                        "${foreground.key} · ${l10n.legacyLabel(foreground.value)}",
+                    detail: l10n.completionMarkerForeground(
+                      (l10n.legacyLabel(background.value)).toString(),
+                    ),
                     insertText: "${background.key}${foreground.key}",
                   ),
               ],
@@ -927,12 +958,12 @@ final class MosaicIntelliSenseEngine {
   };
 
   String _kindLabel(InlineAnnotationKind kind) => switch (kind) {
-    InlineAnnotationKind.character => "人物",
-    InlineAnnotationKind.location => "地點",
-    InlineAnnotationKind.event => "事件",
-    InlineAnnotationKind.foreshadowing => "伏筆",
-    InlineAnnotationKind.plan => "計畫",
-    InlineAnnotationKind.item => "物品",
-    InlineAnnotationKind.emphasis => "高亮",
+    InlineAnnotationKind.character => l10n.uiCharacter,
+    InlineAnnotationKind.location => l10n.uiLocation,
+    InlineAnnotationKind.event => l10n.uiEvent,
+    InlineAnnotationKind.foreshadowing => l10n.uiForeshadowing,
+    InlineAnnotationKind.plan => l10n.uiPlan,
+    InlineAnnotationKind.item => l10n.uiItem,
+    InlineAnnotationKind.emphasis => l10n.uiHighlight,
   };
 }

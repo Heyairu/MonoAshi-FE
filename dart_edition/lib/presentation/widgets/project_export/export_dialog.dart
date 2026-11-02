@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../../application/project_export/export_models.dart';
@@ -5,6 +6,7 @@ import '../../../application/project_export/export_selection.dart';
 import '../../../features/help/help_scope.dart';
 import '../../../features/help/help_topic.dart';
 import '../../../models/project_data.dart';
+import '../../../models/project_operation_error.dart';
 import '../../../ui_library/dialogs.dart';
 import 'export_selection_tree.dart';
 import 'export_file_tree.dart';
@@ -66,10 +68,14 @@ class _ProjectExportDialogState extends State<ProjectExportDialog> {
   Future<void> _prepareOutput() async {
     setState(() {
       _busy = true;
-      _message = '準備內容與封裝…';
+      _message = context.l10n.uiPreparingContentAndPackage;
     });
     try {
-      if (!widget.isCurrent()) throw const FormatException('來源專案已切換，請重新開啟匯出。');
+      if (!widget.isCurrent())
+        throw const ProjectValidationException(
+          ProjectErrorCode.projectChanged,
+          'Source project changed',
+        );
       final request = ExportRequest(
         purpose: _purpose,
         format: _format,
@@ -96,7 +102,12 @@ class _ProjectExportDialogState extends State<ProjectExportDialog> {
         _message = null;
       });
     } catch (error) {
-      if (mounted) setState(() => _message = '無法準備匯出：$error');
+      if (mounted)
+        setState(
+          () => _message = context.l10n.uiCouldNotPrepareExport(
+            context.l10n.projectError(error),
+          ),
+        );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -107,19 +118,31 @@ class _ProjectExportDialogState extends State<ProjectExportDialog> {
     if (output == null) return;
     setState(() {
       _busy = true;
-      _message = '選擇位置並儲存…';
+      _message = context.l10n.uiChooseALocationAndSave;
     });
     try {
-      if (!widget.isCurrent()) throw const FormatException('來源專案已切換，請重新開啟匯出。');
+      if (!widget.isCurrent())
+        throw const ProjectValidationException(
+          ProjectErrorCode.projectChanged,
+          'Source project changed',
+        );
       final result = await widget.save(output);
       if (!mounted) return;
       if (result.status == ExportSaveStatus.saved) {
         Navigator.of(context).pop(result);
       } else {
-        setState(() => _message = '已取消儲存，可重新選擇位置。');
+        setState(
+          () => _message =
+              context.l10n.uiSaveCancelledYouCanChooseAnotherLocation,
+        );
       }
     } catch (error) {
-      if (mounted) setState(() => _message = '匯出失敗：$error');
+      if (mounted)
+        setState(
+          () => _message = context.l10n.uiExportFailed(
+            context.l10n.projectError(error),
+          ),
+        );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -147,7 +170,7 @@ class _ProjectExportDialogState extends State<ProjectExportDialog> {
       child: HelpTarget(
         topicId: HelpTopicId.exportFiles,
         child: AppDialog(
-          title: '匯出',
+          title: context.l10n.uiExport,
           icon: Icons.output,
           maxWidth: 840,
           insetPadding: const EdgeInsets.symmetric(
@@ -162,7 +185,12 @@ class _ProjectExportDialogState extends State<ProjectExportDialog> {
               child: ListView(
                 children: [
                   Text(
-                    '來源：${widget.snapshot.baseInfoData.bookName.isEmpty ? '目前作品' : widget.snapshot.baseInfoData.bookName}（開啟匯出時的內容快照）',
+                    context.l10n.uiSourceSnapshotTakenWhenExportOpened(
+                      (widget.snapshot.baseInfoData.bookName.isEmpty
+                              ? context.l10n.uiCurrentWork
+                              : widget.snapshot.baseInfoData.bookName)
+                          .toString(),
+                    ),
                   ),
                   if (_busy)
                     const Padding(
@@ -179,19 +207,21 @@ class _ProjectExportDialogState extends State<ProjectExportDialog> {
                     DropdownButtonFormField<ExportPurpose>(
                       key: const Key('export-purpose'),
                       initialValue: _purpose,
-                      decoration: const InputDecoration(labelText: '用途'),
-                      items: const [
+                      decoration: InputDecoration(
+                        labelText: context.l10n.uiPurpose,
+                      ),
+                      items: [
                         DropdownMenuItem(
                           value: ExportPurpose.manuscript,
-                          child: Text('正文交稿'),
+                          child: Text(context.l10n.uiManuscriptDelivery),
                         ),
                         DropdownMenuItem(
                           value: ExportPurpose.reference,
-                          child: Text('設定資料閱讀稿'),
+                          child: Text(context.l10n.uiReferenceMaterial),
                         ),
                         DropdownMenuItem(
                           value: ExportPurpose.exchange,
-                          child: Text('局部專案交換'),
+                          child: Text(context.l10n.uiPartialProjectExchange),
                         ),
                       ],
                       onChanged: (value) {
@@ -209,13 +239,15 @@ class _ProjectExportDialogState extends State<ProjectExportDialog> {
                     DropdownButtonFormField<ExportFormat>(
                       key: ValueKey('export-format-${_purpose.name}'),
                       initialValue: _format,
-                      decoration: const InputDecoration(labelText: '內容格式'),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.uiContentFormat,
+                      ),
                       items: [
                         for (final f in formats)
                           DropdownMenuItem(
                             value: f,
                             enabled: f.available,
-                            child: Text(f.label),
+                            child: Text(context.l10n.legacyLabel(f.label)),
                           ),
                       ],
                       onChanged: (value) {
@@ -226,15 +258,17 @@ class _ProjectExportDialogState extends State<ProjectExportDialog> {
                     DropdownButtonFormField<ExportPackaging>(
                       key: const Key('export-packaging'),
                       initialValue: _packaging,
-                      decoration: const InputDecoration(labelText: '檔案組織'),
-                      items: const [
+                      decoration: InputDecoration(
+                        labelText: context.l10n.uiFileOrganization,
+                      ),
+                      items: [
                         DropdownMenuItem(
                           value: ExportPackaging.singleFile,
-                          child: Text('合併為單一文件'),
+                          child: Text(context.l10n.uiCombineIntoOneDocument),
                         ),
                         DropdownMenuItem(
                           value: ExportPackaging.splitZip,
-                          child: Text('分散文件（ZIP）'),
+                          child: Text(context.l10n.uiSeparateDocumentsZIP),
                         ),
                       ],
                       onChanged: (value) {
@@ -243,12 +277,14 @@ class _ProjectExportDialogState extends State<ProjectExportDialog> {
                     ),
                     if (_purpose == ExportPurpose.manuscript) ...[
                       CheckboxListTile(
-                        title: const Text('包含作品資訊'),
+                        title: Text(context.l10n.uiIncludeWorkInformation),
                         value: _bookInfo,
                         onChanged: (v) => _change(() => _bookInfo = v ?? false),
                       ),
                       CheckboxListTile(
-                        title: const Text('包含資料夾／文稿標題'),
+                        title: Text(
+                          context.l10n.uiIncludeFolderManuscriptTitles,
+                        ),
                         value: _headings,
                         onChanged: (v) => _change(() => _headings = v ?? true),
                       ),
@@ -260,7 +296,7 @@ class _ProjectExportDialogState extends State<ProjectExportDialog> {
                             };
                             _modules.add(SelectiveProjectModule.chapters);
                           }),
-                          child: const Text('僅目前文稿'),
+                          child: Text(context.l10n.uiCurrentManuscriptOnly),
                         ),
                     ],
                     const SizedBox(height: 8),
@@ -272,7 +308,11 @@ class _ProjectExportDialogState extends State<ProjectExportDialog> {
                   if (output != null) ...[
                     const Divider(),
                     Text(
-                      '預覽：${output.documents.length} 份文件 · ${output.bytes.length} bytes · .${output.extension}',
+                      context.l10n.uiPreviewDocumentsBytes(
+                        context.formats.integer(output.documents.length),
+                        context.formats.integer(output.bytes.length),
+                        (output.extension).toString(),
+                      ),
                       key: const Key('export-preview-summary'),
                     ),
                     for (final warning in output.warnings)
@@ -328,7 +368,7 @@ class _ProjectExportDialogState extends State<ProjectExportDialog> {
           actions: [
             TextButton(
               onPressed: _busy ? null : () => Navigator.of(context).pop(),
-              child: const Text('關閉'),
+              child: Text(context.l10n.commonClose),
             ),
             OutlinedButton(
               key: const Key('export-prepare'),
@@ -337,12 +377,16 @@ class _ProjectExportDialogState extends State<ProjectExportDialog> {
                   : output == null
                   ? _prepareOutput
                   : () => _change(() {}),
-              child: Text(output == null ? '產生預覽' : '返回選項'),
+              child: Text(
+                output == null
+                    ? context.l10n.uiGeneratePreview
+                    : context.l10n.uiBackToOptions,
+              ),
             ),
             FilledButton(
               key: const Key('export-save'),
               onPressed: _busy || output == null ? null : _save,
-              child: const Text('匯出檔案'),
+              child: Text(context.l10n.uiExportFile),
             ),
           ],
         ),
@@ -370,7 +414,7 @@ class _ProjectExportDialogState extends State<ProjectExportDialog> {
       key: ValueKey('export-module-${module.id}'),
       maintainState: true,
       initiallyExpanded: module == SelectiveProjectModule.chapters,
-      title: Text(module.label),
+      title: Text(context.l10n.legacyLabel(module.label)),
       leading: Checkbox(
         key: ValueKey('export-module-check-${module.id}'),
         tristate: true,
@@ -389,9 +433,9 @@ class _ProjectExportDialogState extends State<ProjectExportDialog> {
       ),
       children: roots == null
           ? [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(12),
-                child: Text('此模組以完整內容匯出。'),
+                child: Text(context.l10n.uiThisModuleIsExportedInFull),
               ),
             ]
           : [

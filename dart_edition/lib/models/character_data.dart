@@ -28,16 +28,31 @@ String normalizeCharacterNanoId(String? value) {
 
 enum CustomFieldType { text, number, boolean, list }
 
-const defaultCharacterType = "次要配角";
+/// Stable English values in project format 1.22. Display labels are localized
+/// separately; unknown custom values are preserved verbatim.
+const defaultCharacterType = "minorSupporting";
 
 const characterTypeOptions = <String>[
-  "主角",
-  "重要配角",
+  "protagonist",
+  "majorSupporting",
   defaultCharacterType,
-  "主要反派",
-  "次要反派",
-  "其他",
+  "majorAntagonist",
+  "minorAntagonist",
+  "other",
 ];
+
+String normalizeCharacterType(String? value) {
+  if (value == null || value.trim().isEmpty) return defaultCharacterType;
+  return switch (value.trim()) {
+    '主角' => 'protagonist',
+    '重要配角' => 'majorSupporting',
+    '次要配角' => defaultCharacterType,
+    '主要反派' => 'majorAntagonist',
+    '次要反派' => 'minorAntagonist',
+    '其他' => 'other',
+    _ => value,
+  };
+}
 
 class CustomFieldValue {
   final CustomFieldType type;
@@ -394,8 +409,9 @@ class CharacterEntryData with _$CharacterEntryData {
           normalizedTextFields["family"] ??
           "",
       relationships: relationships,
-      characterType:
-          _readNullableString(source["characterType"]) ?? defaultCharacterType,
+      characterType: normalizeCharacterType(
+        source["characterType"]?.toString(),
+      ),
       organizations: _readProfileTableEntries(source["organizations"]),
       possessions: _readPossessionEntries(source["possessions"]),
       statusEntries: _readProfileTableEntries(source["statusEntries"]),
@@ -529,7 +545,7 @@ class CharacterEntryData with _$CharacterEntryData {
       "valuesAndBeliefs": valuesAndBeliefs,
       "fear": fear,
       "relationshipSummary": relationshipSummary,
-      "characterType": characterType,
+      "characterType": normalizeCharacterType(characterType),
       "organizations": organizations
           .map(
             (entry) => <String, String>{

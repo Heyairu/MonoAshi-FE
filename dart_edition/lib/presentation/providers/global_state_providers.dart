@@ -9,6 +9,7 @@ import "../../models/toolbar_mode.dart";
 import "../../data/repositories/user_profile_repository.dart";
 import "repository_providers.dart";
 import "../../l10n/app_locale.dart";
+import "../../l10n/app_formatters.dart";
 
 export "../../models/app_state_data.dart";
 
@@ -390,6 +391,7 @@ final appThemeSettingsProvider = Provider<AppThemeSettings>((ref) {
 
 final appInitializationProvider = FutureProvider<void>((ref) async {
   await Future.wait([
+    AppFormatters.initialize(),
     // Bootstrap should only await initial load; later updates should not
     // re-enter app-level loading and replace the whole UI tree.
     ref.read(themeStateProvider.future),

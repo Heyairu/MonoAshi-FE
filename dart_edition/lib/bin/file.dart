@@ -14,6 +14,7 @@
  * limitations under the License.
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "dart:io";
 import "dart:convert";
 import "package:flutter/material.dart";
@@ -35,6 +36,7 @@ import "../modules/worldsettingsview.dart";
 import "../modules/characterview.dart";
 import "../models/project_data.dart";
 import "../models/project_file.dart";
+import "../models/project_operation_error.dart";
 import "../models/project_migrator.dart";
 import "../models/writing_goal_data.dart";
 import "../features/writing_goals/writing_goals_codec.dart";
@@ -104,7 +106,7 @@ class _SystemBridge {
         "content": content,
       });
     } on PlatformException catch (e) {
-      throw FileException("寫入 URI 失敗: ${e.message}");
+      throw FileException("寫入 URI 失敗: ${e.message}", cause: e);
     }
   }
 
@@ -130,7 +132,10 @@ class _SystemBridge {
     try {
       return await platform.invokeMethod<String>("selectAutoBackupDirectory");
     } on PlatformException catch (e) {
-      throw FileException("選擇 AutoBackup 目錄失敗: ${e.message ?? e.code}");
+      throw FileException(
+        "選擇 AutoBackup 目錄失敗: ${e.message ?? e.code}",
+        cause: e,
+      );
     }
   }
 
@@ -157,7 +162,10 @@ class _SystemBridge {
     try {
       await platform.invokeMethod("openSelectedAutoBackupDirectory");
     } on PlatformException catch (e) {
-      throw FileException("開啟 AutoBackup 目錄失敗: ${e.message ?? e.code}");
+      throw FileException(
+        "開啟 AutoBackup 目錄失敗: ${e.message ?? e.code}",
+        cause: e,
+      );
     }
   }
 
@@ -182,7 +190,7 @@ class _SystemBridge {
       if (e.code == "NO_BACKUP_DIRECTORY") {
         throw FileException("請先在設定中選擇 AutoBackup 目錄。");
       }
-      throw FileException("寫入 AutoBackup 失敗: ${e.message ?? e.code}");
+      throw FileException("寫入 AutoBackup 失敗: ${e.message ?? e.code}", cause: e);
     }
   }
 
@@ -267,8 +275,26 @@ class _SystemBridge {
         content: rawContent,
       );
     } on PlatformException catch (e) {
-      throw FileException("無法以持久授權開啟檔案: ${e.message ?? e.code}");
+      throw FileException("無法以持久授權開啟檔案: ${e.message ?? e.code}", cause: e);
     }
+  }
+
+  /// Writes a project while the native macOS security scope remains active.
+  static Future<({String path, String uri})>
+  writeProjectFromSecurityScopedBookmark(
+    String bookmark,
+    String content,
+  ) async {
+    final result = await platform.invokeMapMethod<String, dynamic>(
+      "writeProjectFromSecurityScopedBookmark",
+      {"bookmark": bookmark, "content": content},
+    );
+    final resolvedPath = result?["path"];
+    final resolvedUri = result?["uri"];
+    if (resolvedPath is! String || resolvedUri is! String) {
+      throw const FormatException("Invalid bookmark write response");
+    }
+    return (path: resolvedPath, uri: resolvedUri);
   }
 
   /// Reads a project delivered by Android through an ACTION_VIEW URI.
@@ -293,7 +319,7 @@ class _SystemBridge {
       }
       return (name: rawName, uri: rawUri, content: rawContent);
     } on PlatformException catch (e) {
-      throw FileException("無法開啟外部專案檔案: ${e.message ?? e.code}");
+      throw FileException("無法開啟外部專案檔案: ${e.message ?? e.code}", cause: e);
     }
   }
 
@@ -344,6 +370,7 @@ class _SystemBridge {
   /// 顯示儲存專案對話框
   static Future<String?> saveProjectFileDialog({
     required String defaultName,
+    String? dialogTitle,
     required String content,
   }) async {
     if (Platform.isAndroid) {
@@ -357,11 +384,11 @@ class _SystemBridge {
           "content": content,
         });
       } on PlatformException catch (e) {
-        throw FileException("儲存 Android 專案檔案失敗: ${e.message}");
+        throw FileException("儲存 Android 專案檔案失敗: ${e.message}", cause: e);
       }
     } else if (Platform.isIOS) {
       return await FilePicker.platform.saveFile(
-        dialogTitle: "儲存專案檔案",
+        dialogTitle: dialogTitle ?? "儲存專案檔案",
         fileName: defaultName,
         type: FileType.any,
         bytes: utf8.encode(content),
@@ -369,7 +396,7 @@ class _SystemBridge {
     } else {
       // macOS, Windows, Linux: 不傳遞 bytes，由應用程式寫入檔案
       return await FilePicker.platform.saveFile(
-        dialogTitle: "儲存專案檔案",
+        dialogTitle: dialogTitle ?? "儲存專案檔案",
         fileName: defaultName,
         type: FileType.custom,
         allowedExtensions: ["mnproj"],
@@ -380,6 +407,7 @@ class _SystemBridge {
   /// 顯示匯出對話框
   static Future<String?> saveExportDialog({
     required String defaultName,
+    String? dialogTitle,
     required String extension,
     required String content,
   }) async {
@@ -387,7 +415,7 @@ class _SystemBridge {
     // macOS, Windows, Linux: 由應用程式寫入檔案
     if (Platform.isAndroid || Platform.isIOS) {
       return await FilePicker.platform.saveFile(
-        dialogTitle: "匯出文字檔案",
+        dialogTitle: dialogTitle ?? "匯出文字檔案",
         fileName: defaultName,
         type: FileType.custom,
         allowedExtensions: [extension.substring(1)], // 移除點號
@@ -395,7 +423,7 @@ class _SystemBridge {
       );
     } else {
       return await FilePicker.platform.saveFile(
-        dialogTitle: "匯出文字檔案",
+        dialogTitle: dialogTitle ?? "匯出文字檔案",
         fileName: defaultName,
         type: FileType.custom,
         allowedExtensions: [extension.substring(1)], // 移除點號
@@ -544,7 +572,7 @@ class ProjectManager {
       final content = projectFile.takeContent();
       return await compute(FileService.parseProjectXMLWithMetadata, content);
     } catch (e) {
-      throw FileException("解析專案檔案失敗：${e.toString()}");
+      throw FileException("解析專案檔案失敗：${e.toString()}", cause: e);
     }
   }
 
@@ -583,7 +611,7 @@ class ProjectManager {
                           dontShowAgain = value ?? false;
                         });
                       },
-                      title: const Text("以後不再提示"),
+                      title: Text(context.l10n.uiDonTAskAgain),
                       contentPadding: AppSpacing.checkboxTile,
                       dense: true,
                     ),
@@ -595,7 +623,7 @@ class ProjectManager {
                   onPressed: () {
                     Navigator.of(context).pop(null); // 取消
                   },
-                  child: const Text("取消"),
+                  child: Text(context.l10n.commonCancel),
                 ),
                 TextButton(
                   onPressed: () async {
@@ -607,7 +635,7 @@ class ProjectManager {
                     }
                   },
                   child: Text(
-                    "不儲存",
+                    context.l10n.uiDonTSave,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.error,
                     ),
@@ -625,7 +653,7 @@ class ProjectManager {
                       Navigator.of(context).pop(false); // 儲存後繼續
                     }
                   },
-                  child: const Text("儲存"),
+                  child: Text(context.l10n.commonSave),
                 ),
               ],
             );
@@ -649,8 +677,8 @@ class ProjectManager {
 
     final result = await showSaveConfirmDialog(
       context,
-      title: "未儲存的變更",
-      message: "您有未儲存的變更，是否要在退出前儲存？",
+      title: context.l10n.uiUnsavedChanges,
+      message: context.l10n.uiYouHaveUnsavedChangesSaveBeforeExiting,
       showDontShowAgain: true,
       onDontShowAgainChanged: onDontShowAgainChanged,
       onSave: onSave,
@@ -675,26 +703,27 @@ class ProjectManager {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AppDialog(
-          title: "版本相容性警告",
+          title: context.l10n.uiVersionCompatibilityWarning,
           icon: Icons.warning_amber_rounded,
           tone: AppFeedbackTone.error,
           content: Text(
-            "此檔案版本（$fileVersion）高於目前支援版本（$supportedVersion）。\n"
-            "若繼續開啟並儲存，可能遺失部分數據。\n\n"
-            "是否仍要繼續開啟？",
+            context.l10n.uiThisFileSVersionIsNewerThanThe(
+              (fileVersion).toString(),
+              (supportedVersion).toString(),
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               onPressed: () {
                 Navigator.of(context).pop(true);
               },
-              child: const Text("繼續開啟"),
+              child: Text(context.l10n.uiOpenAnyway),
             ),
           ],
         );
@@ -718,8 +747,8 @@ class ProjectManager {
     if (hasUnsavedChanges) {
       final shouldProceed = await showSaveConfirmDialog(
         context,
-        title: "建立新專案",
-        message: "您有未儲存的變更，是否要在建立新專案前儲存？",
+        title: context.l10n.uiCreateProject,
+        message: context.l10n.uiYouHaveUnsavedChangesSaveBeforeCreatingA,
         onDontShowAgainChanged: (_) {},
         onSave: onSave,
       );
@@ -733,10 +762,12 @@ class ProjectManager {
       final newData = ProjectData.empty();
       onProjectLoaded(newProject, newData);
       setLoading(false);
-      onSuccess("新專案建立成功！");
+      onSuccess(context.l10n.uiProjectCreated);
     } catch (e) {
       setLoading(false);
-      onError("建立新專案失敗：${e.toString()}");
+      onError(
+        context.l10n.uiCouldNotCreateTheProject(context.l10n.projectError(e)),
+      );
     }
   }
 
@@ -752,8 +783,8 @@ class ProjectManager {
     if (hasUnsavedChanges) {
       final shouldProceed = await showSaveConfirmDialog(
         context,
-        title: "開啟專案",
-        message: "您有未儲存的變更，是否要在開啟新專案前儲存？",
+        title: context.l10n.uiOpenProject,
+        message: context.l10n.uiYouHaveUnsavedChangesSaveBeforeOpeningAnother,
         onDontShowAgainChanged: (_) {},
         onSave: onSave,
       );
@@ -781,7 +812,7 @@ class ProjectManager {
           );
 
           if (!shouldContinue) {
-            onError("已取消開啟較新版本檔案。");
+            onError(context.l10n.uiOpeningTheNewerFileWasCancelled);
             return;
           }
           setLoading(true);
@@ -789,10 +820,16 @@ class ProjectManager {
 
         final data = parseResult.data;
         onProjectLoaded(projectFile, data);
-        onSuccess("專案開啟成功：${projectFile.nameWithoutExtension}");
+        onSuccess(
+          context.l10n.uiProjectOpened(
+            (projectFile.nameWithoutExtension).toString(),
+          ),
+        );
       }
     } catch (e) {
-      onError("開啟專案失敗：${e.toString()}");
+      onError(
+        context.l10n.uiCouldNotOpenTheProject(context.l10n.projectError(e)),
+      );
     } finally {
       setLoading(false);
     }
@@ -812,8 +849,8 @@ class ProjectManager {
     if (hasUnsavedChanges) {
       final shouldProceed = await showSaveConfirmDialog(
         context,
-        title: "開啟最近專案",
-        message: "您有未儲存的變更，是否要在開啟最近專案前儲存？",
+        title: context.l10n.uiOpenRecentProject,
+        message: context.l10n.uiYouHaveUnsavedChangesSaveBeforeOpeningA,
         onDontShowAgainChanged: (_) {},
         onSave: onSave,
       );
@@ -843,7 +880,7 @@ class ProjectManager {
         );
 
         if (!shouldContinue) {
-          onError("已取消開啟較新版本檔案。");
+          onError(context.l10n.uiOpeningTheNewerFileWasCancelled);
           return;
         }
         setLoading(true);
@@ -851,9 +888,17 @@ class ProjectManager {
 
       final data = parseResult.data;
       onProjectLoaded(projectFile, data);
-      onSuccess("專案開啟成功：${projectFile.nameWithoutExtension}");
+      onSuccess(
+        context.l10n.uiProjectOpened(
+          (projectFile.nameWithoutExtension).toString(),
+        ),
+      );
     } catch (e) {
-      onError("開啟最近專案失敗：${e.toString()}");
+      onError(
+        context.l10n.uiCouldNotOpenTheRecentProject(
+          context.l10n.projectError(e),
+        ),
+      );
     } finally {
       setLoading(false);
     }
@@ -890,10 +935,12 @@ class ProjectManager {
       final savedProject = await FileService.saveProject(currentProject);
       onProjectSaved(savedProject);
       setLoading(false);
-      onSuccess("專案儲存成功！");
+      onSuccess(context.l10n.uiProjectSaved);
     } catch (e) {
       setLoading(false);
-      onError("儲存專案失敗：${e.toString()}");
+      onError(
+        context.l10n.uiCouldNotSaveTheProject(context.l10n.projectError(e)),
+      );
     }
   }
 
@@ -918,13 +965,20 @@ class ProjectManager {
       final savedProject = await FileService.saveProjectAs(projectToSave);
       onProjectSaved(savedProject);
       setLoading(false);
-      onSuccess("專案另存成功：${savedProject.nameWithoutExtension}");
+      onSuccess(
+        context.l10n.uiProjectSavedAs(
+          (savedProject.nameWithoutExtension).toString(),
+        ),
+      );
     } catch (e) {
       setLoading(false);
-      onError("另存專案失敗：${e.toString()}");
+      onError(
+        context.l10n.uiCouldNotSaveTheProjectAsANew(
+          context.l10n.projectError(e),
+        ),
+      );
     }
   }
-
 }
 
 class _AutoBackupFileEntry {
@@ -979,7 +1033,9 @@ class _ProjectParser {
 
     try {
       final document = xml.XmlDocument.parse(xmlContent);
-      loadedWritingGoals = WritingGoalsCodec.decode(document.rootElement.findElements("Type"));
+      loadedWritingGoals = WritingGoalsCodec.decode(
+        document.rootElement.findElements("Type"),
+      );
       final rootUUID = document.rootElement.getAttribute("UUID")?.trim();
       if (ProjectData.isValidProjectUUID(rootUUID)) {
         projectUUID = rootUUID;
@@ -1256,7 +1312,10 @@ class _ProjectParser {
       migrationWarnings: [
         ...migration.warnings,
         if (decodedData.writingGoals.recoveryXml.isNotEmpty)
-          const ProjectMigrationWarning(code: 'writing-goals-recovery', message: '字數目標含無法解析的資料，已保留原始區塊；目前使用可讀目標或預設值。'),
+          const ProjectMigrationWarning(
+            code: 'writing-goals-recovery',
+            message: '字數目標含無法解析的資料，已保留原始區塊；目前使用可讀目標或預設值。',
+          ),
       ],
       wasMigrated: migration.wasMigrated || projectUUID == null,
     );
@@ -1397,7 +1456,6 @@ class _ProjectMerger {
 
     return buffer.toString();
   }
-
 }
 
 // MARK: - 7. Interface (介面)
@@ -1642,12 +1700,14 @@ class FileService {
         return ProjectFile(
           fileName: resolvedFileName,
           filePath: normalizedPath,
-          uri: result.uri,
+          uri: Platform.isMacOS
+              ? await createPersistentAccessToken(normalizedPath)
+              : result.uri,
           content: result.content,
         );
       }
     } catch (e) {
-      throw FileException("開啟檔案失敗: ${e.toString()}");
+      throw FileException("開啟檔案失敗: ${e.toString()}", cause: e);
     }
     return null;
   }
@@ -1660,19 +1720,36 @@ class FileService {
     final normalizedPath =
         _normalizeLocalPathOrNull(filePath) ?? filePath.trim();
     if (normalizedPath.isEmpty) {
-      throw FileException("檔案路徑不可為空");
+      throw FileException("檔案路徑不可為空", code: ProjectErrorCode.invalidPath);
+    }
+
+    // Restore persistent access before even checking existence. A sandbox can
+    // report an inaccessible file as absent, and a readable path alone does not
+    // imply that the subsequent save will be permitted.
+    if (Platform.isMacOS && accessToken?.trim().isNotEmpty == true) {
+      try {
+        return await openProjectFromSecurityScopedBookmark(accessToken!.trim());
+      } catch (error) {
+        debugPrint("Persistent project access failed: $error");
+      }
     }
 
     try {
       final exists = await _FileIO.exists(normalizedPath);
       if (!exists) {
-        throw FileException("檔案不存在：$normalizedPath");
+        throw FileException(
+          "檔案不存在：$normalizedPath",
+          code: ProjectErrorCode.fileMissing,
+        );
       }
 
       final content = await _FileIO.read(normalizedPath);
       return ProjectFile(
         fileName: path.basename(normalizedPath),
         filePath: normalizedPath,
+        uri: Platform.isMacOS
+            ? await createPersistentAccessToken(normalizedPath)
+            : null,
         content: content,
       );
     } catch (e) {
@@ -1713,10 +1790,13 @@ class FileService {
             content: picked.content,
           );
         }
-        throw FileException("最近檔案權限已失效，請重新選取檔案。");
+        throw FileException(
+          "最近檔案權限已失效，請重新選取檔案。",
+          code: ProjectErrorCode.accessDenied,
+        );
       }
 
-      throw FileException("開啟最近檔案失敗: ${e.toString()}");
+      throw FileException("開啟最近檔案失敗: ${e.toString()}", cause: e);
     }
   }
 
@@ -1729,7 +1809,7 @@ class FileService {
         bookmark,
       );
       if (opened == null) {
-        throw FileException("無法讀取外部專案檔案");
+        throw FileException("無法讀取外部專案檔案", code: ProjectErrorCode.invalidData);
       }
       return ProjectFile(
         fileName: opened.name.trim().isEmpty
@@ -1743,7 +1823,7 @@ class FileService {
       if (e is FileException) {
         rethrow;
       }
-      throw FileException("開啟外部專案檔案失敗: $e");
+      throw FileException("開啟外部專案檔案失敗: $e", cause: e);
     }
   }
 
@@ -1752,7 +1832,7 @@ class FileService {
     try {
       final opened = await _SystemBridge.openExternalProjectUri(uri);
       if (opened == null) {
-        throw FileException("無法讀取外部專案檔案");
+        throw FileException("無法讀取外部專案檔案", code: ProjectErrorCode.invalidData);
       }
       return ProjectFile(
         fileName: opened.name.trim().isEmpty
@@ -1766,12 +1846,37 @@ class FileService {
       if (e is FileException) {
         rethrow;
       }
-      throw FileException("開啟外部專案檔案失敗: $e");
+      throw FileException("開啟外部專案檔案失敗: $e", cause: e);
     }
   }
 
   /// 儲存專案檔案
-  static Future<ProjectFile> saveProject(ProjectFile projectFile) async {
+  static Future<void> _writeProjectToLocalPath(
+    ProjectFile projectFile,
+    String normalizedPath,
+  ) async {
+    if (Platform.isMacOS) {
+      final token =
+          projectFile.uri ?? await createPersistentAccessToken(normalizedPath);
+      if (token != null && token.isNotEmpty) {
+        final result =
+            await _SystemBridge.writeProjectFromSecurityScopedBookmark(
+              token,
+              projectFile.content,
+            );
+        projectFile.filePath = result.path;
+        projectFile.uri = result.uri;
+        return;
+      }
+    }
+    await _FileIO.write(normalizedPath, projectFile.content);
+  }
+
+  /// 儲存專案檔案
+  static Future<ProjectFile> saveProject(
+    ProjectFile projectFile, {
+    String? dialogTitle,
+  }) async {
     try {
       // Android SAF URI Support
       if (Platform.isAndroid && projectFile.uri != null) {
@@ -1781,7 +1886,7 @@ class FileService {
           return projectFile;
         } catch (e) {
           debugPrint("SAF Write failed (URI might be invalid or expired): $e");
-          throw FileException("原儲存位置已無法寫入；請明確使用「另存為」重新選擇位置。原因：$e");
+          throw FileException("原儲存位置已無法寫入；請明確使用「另存為」重新選擇位置。原因：$e", cause: e);
         }
       }
 
@@ -1791,7 +1896,7 @@ class FileService {
         projectFile.filePath = normalizedPath;
         // 儲存到現有路徑
         try {
-          await _FileIO.write(normalizedPath, projectFile.content);
+          await _writeProjectToLocalPath(projectFile, normalizedPath);
           projectFile.content = "";
           return projectFile;
         } catch (e) {
@@ -1799,17 +1904,17 @@ class FileService {
           // projects should use their persisted SAF URI and must never open a
           // surprise Save As dialog when a known location becomes invalid.
           if (Platform.isIOS) {
-            return await saveProjectAs(projectFile);
+            return await saveProjectAs(projectFile, dialogTitle: dialogTitle);
           }
           rethrow;
         }
       } else {
         // 另存新檔
-        return await saveProjectAs(projectFile);
+        return await saveProjectAs(projectFile, dialogTitle: dialogTitle);
       }
     } catch (e) {
       projectFile.content = "";
-      throw FileException("儲存檔案失敗: ${e.toString()}");
+      throw FileException("儲存檔案失敗: ${e.toString()}", cause: e);
     }
   }
 
@@ -1826,11 +1931,14 @@ class FileService {
 
       final normalizedPath = _normalizeLocalPathOrNull(projectFile.filePath);
       if (normalizedPath == null) {
-        throw FileException("自動儲存需要已知檔案路徑。");
+        throw FileException(
+          "自動儲存需要已知檔案路徑。",
+          code: ProjectErrorCode.noSaveLocation,
+        );
       }
 
       projectFile.filePath = normalizedPath;
-      await _FileIO.write(normalizedPath, projectFile.content);
+      await _writeProjectToLocalPath(projectFile, normalizedPath);
       projectFile.content = "";
       return projectFile;
     } catch (e) {
@@ -1838,27 +1946,34 @@ class FileService {
       if (e is FileException) {
         rethrow;
       }
-      throw FileException("自動儲存失敗: ${e.toString()}");
+      throw FileException("自動儲存失敗: ${e.toString()}", cause: e);
     }
   }
 
   /// 另存新檔
-  static Future<ProjectFile> saveProjectAs(ProjectFile projectFile) async {
+  static Future<ProjectFile> saveProjectAs(
+    ProjectFile projectFile, {
+    String? dialogTitle,
+  }) async {
     try {
       final content = projectFile.takeContent();
       final outputFileRaw = await _SystemBridge.saveProjectFileDialog(
         defaultName: "${projectFile.nameWithoutExtension}$projectExtension",
+        dialogTitle: dialogTitle,
         content: content,
       );
 
       // 如果使用者取消儲存
       if (outputFileRaw == null) {
-        throw FileException("另存檔案已取消");
+        throw FileException("另存檔案已取消", code: ProjectErrorCode.cancelled);
       }
 
       final outputFile = outputFileRaw.trim();
       if (outputFile.isEmpty) {
-        throw FileException("另存檔案失敗: 無效檔案路徑");
+        throw FileException(
+          "另存檔案失敗: 無效檔案路徑",
+          code: ProjectErrorCode.invalidPath,
+        );
       }
 
       final normalizedPath =
@@ -1881,11 +1996,13 @@ class FileService {
       return ProjectFile(
         fileName: resolvedFileName,
         filePath: normalizedLocalPath,
-        uri: outputUri,
+        uri: Platform.isMacOS
+            ? await createPersistentAccessToken(normalizedLocalPath)
+            : outputUri,
         content: "",
       );
     } catch (e) {
-      throw FileException("另存檔案失敗: ${e.toString()}");
+      throw FileException("另存檔案失敗: ${e.toString()}", cause: e);
     }
   }
 
@@ -1903,12 +2020,18 @@ class FileService {
 
       final contentBytes = utf8.encode(content).length;
       if (contentBytes > maxTotalBytes) {
-        throw FileException("單一專案備份已超過設定的 AutoBackup 容量上限，請提高上限。");
+        throw FileException(
+          "單一專案備份已超過設定的 AutoBackup 容量上限，請提高上限。",
+          code: ProjectErrorCode.backupLimit,
+        );
       }
       final availableBytes = await _availableBackupBytes();
       if (availableBytes != null &&
           availableBytes < contentBytes + (16 * 1024 * 1024)) {
-        throw FileException("AutoBackup 可用空間不足，請清理備份或更換目錄。");
+        throw FileException(
+          "AutoBackup 可用空間不足，請清理備份或更換目錄。",
+          code: ProjectErrorCode.noSpace,
+        );
       }
 
       late final String savedLocation;
@@ -1938,7 +2061,7 @@ class FileService {
       }
       return savedLocation;
     } catch (e) {
-      throw FileException("寫入 AutoBackup 失敗: ${e.toString()}");
+      throw FileException("寫入 AutoBackup 失敗: ${e.toString()}", cause: e);
     }
   }
 
@@ -2103,11 +2226,14 @@ class FileService {
     }
   }
 
-  static Future<String> selectAutoBackupDirectory() async {
+  static Future<String> selectAutoBackupDirectory({String? dialogTitle}) async {
     if (Platform.isAndroid) {
       final selectedUri = await _SystemBridge.selectAutoBackupDirectory();
       if (selectedUri == null || selectedUri.trim().isEmpty) {
-        throw FileException("已取消選擇 AutoBackup 目錄。");
+        throw FileException(
+          "已取消選擇 AutoBackup 目錄。",
+          code: ProjectErrorCode.cancelled,
+        );
       }
       return selectedUri;
     }
@@ -2115,14 +2241,17 @@ class FileService {
     final defaultDir = await _defaultAutoBackupDirectory();
     final currentDir = await _autoBackupDirectory();
     final selectedPath = await FilePicker.platform.getDirectoryPath(
-      dialogTitle: "選擇 AutoBackup 目錄",
+      dialogTitle: dialogTitle ?? "選擇 AutoBackup 目錄",
       initialDirectory: (await currentDir.exists())
           ? currentDir.path
           : defaultDir.parent.path,
     );
 
     if (selectedPath == null || selectedPath.trim().isEmpty) {
-      throw FileException("已取消選擇 AutoBackup 目錄。");
+      throw FileException(
+        "已取消選擇 AutoBackup 目錄。",
+        code: ProjectErrorCode.cancelled,
+      );
     }
 
     await _setCustomAutoBackupDirectoryPath(selectedPath);
@@ -2183,7 +2312,7 @@ class FileService {
         return backupDir.path;
       }
     } catch (e) {
-      throw FileException("開啟 AutoBackup 目錄失敗: ${e.toString()}");
+      throw FileException("開啟 AutoBackup 目錄失敗: ${e.toString()}", cause: e);
     }
 
     throw FileException("此平台不支援直接開啟 AutoBackup 目錄：${backupDir.path}");
@@ -2204,6 +2333,7 @@ class FileService {
 
   /// 匯出文字檔案，並回報使用者是否實際選擇了儲存位置。
   static Future<bool> exportTextWithResult({
+    String? dialogTitle,
     required String content,
     required String fileName,
     required String extension,
@@ -2213,6 +2343,7 @@ class FileService {
 
       final outputFile = await _SystemBridge.saveExportDialog(
         defaultName: "$fileName$extension",
+        dialogTitle: dialogTitle,
         extension: extension,
         content: exportContent, // 傳遞內容以供某些平台 direct save
       );
@@ -2225,7 +2356,7 @@ class FileService {
       }
       return true;
     } catch (e) {
-      throw FileException("匯出檔案失敗: ${e.toString()}");
+      throw FileException("匯出檔案失敗: ${e.toString()}", cause: e);
     }
   }
 
@@ -2238,7 +2369,7 @@ class FileService {
       final fullPath = path.join(dirPath, fileName);
       return await _FileIO.read(fullPath);
     } catch (e) {
-      throw FileException("讀取本地檔案失敗: ${e.toString()}");
+      throw FileException("讀取本地檔案失敗: ${e.toString()}", cause: e);
     }
   }
 
@@ -2249,7 +2380,7 @@ class FileService {
       final fullPath = path.join(dirPath, fileName);
       await _FileIO.write(fullPath, content);
     } catch (e) {
-      throw FileException("寫入本地檔案失敗: ${e.toString()}");
+      throw FileException("寫入本地檔案失敗: ${e.toString()}", cause: e);
     }
   }
 
@@ -2270,7 +2401,7 @@ class FileService {
     try {
       await _FileIO.delete(filePath);
     } catch (e) {
-      throw FileException("刪除檔案失敗: ${e.toString()}");
+      throw FileException("刪除檔案失敗: ${e.toString()}", cause: e);
     }
   }
 
@@ -2279,7 +2410,7 @@ class FileService {
     try {
       return await _SystemBridge.getFileInfo(filePath);
     } catch (e) {
-      throw FileException("獲取檔案資訊失敗: ${e.toString()}");
+      throw FileException("獲取檔案資訊失敗: ${e.toString()}", cause: e);
     }
   }
 

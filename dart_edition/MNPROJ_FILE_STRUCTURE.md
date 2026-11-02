@@ -2,7 +2,7 @@
 
 本文件整理 Monogatari Assistant 專案檔（`.mnproj`）的目前儲存格式，供開發、除錯與資料匯入／匯出時參考。
 
-> 此儲存庫沒有提交實際的 `.mnproj` 範例檔；本文件依目前的讀寫實作整理。現行格式版本為 **1.20**。
+> 此儲存庫沒有提交實際的 `.mnproj` 範例檔；本文件依目前的讀寫實作整理。現行格式版本為 **1.22**。
 
 ## 格式概覽
 
@@ -10,7 +10,7 @@
 - 內容：UTF-8 XML
 - 根節點：`Project`
 - 專案識別：`Project@UUID`，標準 UUID（v4）字串
-- 格式版本：`Project > ver`，目前輸出 `1.20`
+- 格式版本：`Project > ver`，目前輸出 `1.22`
 - 資料單位：每個功能模組以一個 `Type` 節點儲存，並使用其直屬 `Name` 子節點辨識模組。
 - 文字欄位會由 XML codec 處理跳脫與換行編碼；請透過程式 codec 修改，不要以字串取代方式直接編輯。
 
@@ -19,7 +19,7 @@
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <Project UUID="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
-  <ver>1.20</ver>
+  <ver>1.22</ver>
   <Type Version="1"> <Name>WritingGoals</Name> … </Type>
 
   <Type> <Name>BaseInfo</Name> … </Type>
@@ -239,6 +239,20 @@ App 預設目標、每日目標與跨作品每日帳本只存本機，不在專�
 
 ### Characters 與角色狀態
 
+自 1.22 起，`Character/Profile/CharacterType` 使用與介面語言無關的英文值：
+
+| 舊值／繁中標籤 | 1.22 儲存值 |
+| --- | --- |
+| 主角 | `protagonist` |
+| 重要配角 | `majorSupporting` |
+| 次要配角 | `minorSupporting`（預設） |
+| 主要反派 | `majorAntagonist` |
+| 次要反派 | `minorAntagonist` |
+| 其他 | `other` |
+
+讀取舊檔時在記憶體中轉換，保存時輸出 1.22；開啟不會覆寫原檔。未知／自訂角色類型原樣保留，包含前後空白。名稱、正文、關係描述、自訂欄位與 ID 不因語言切換而改寫。即時協作 schema 8 採相同角色值；舊 schema 會被拒絕，避免不同版本誤解角色類型。
+
+
 `Characters` 是完整角色檔，角色節點使用 `Id`、`Name` 和 `NanoID` 屬性，並依 UI 分區儲存：`Profile`、`BasicInfo`、`Appearance`、`Personality`、`Ability`、`Social`、`Other`。其中包含文字欄位、列表、核取方塊、滑桿與自訂欄位；應由 `CharacterCodec` 讀寫，避免手動依賴每一個 UI 欄位名稱。
 
 ```xml
@@ -300,7 +314,7 @@ App 預設目標、每日目標與跨作品每日帳本只存本機，不在專�
 ## 載入、相容性與安全注意事項
 
 - 根節點 `UUID` 缺失或無效時，程式會建立新 UUID，並將專案視為已遷移。
-- 讀取到高於支援版本的檔案時，UI 會顯示相容性警告；目前版本為 `1.20`。
+- 讀取到高於支援版本的檔案時，UI 會顯示相容性警告；目前版本為 `1.22`。
 - 舊檔會經 `ProjectMigrator` 升級。重要切點包括：章節樹結構、時間軸投影、角色快照與專案 UUID。
 - 完全無法解析的 XML 會回退為預設空專案；但物品／地點快照區塊解析失敗會明確報錯，不會靜默遺失資料。
 - 選擇性 XML 匯出會額外寫入 `SelectiveExport > Module` 宣告；它是匯出描述，不是一般 `.mnproj` 必要結構。

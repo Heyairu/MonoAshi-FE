@@ -3,6 +3,7 @@ import "dart:math" as math;
 import "package:flutter/material.dart";
 
 import "character_relationship_graph_mapper.dart";
+import "../models/character_data.dart";
 
 enum CharacterGraphLayoutMode { roles, clusters }
 
@@ -112,11 +113,15 @@ class CharacterGraphLayoutSession {
     final priority = [...missing]
       ..sort((a, b) {
         final aHero =
-            a.character?.characterType == "主角" ||
-            a.character?.characterType == "主要反派";
+            normalizeCharacterType(a.character?.characterType) ==
+                "protagonist" ||
+            normalizeCharacterType(a.character?.characterType) ==
+                "majorAntagonist";
         final bHero =
-            b.character?.characterType == "主角" ||
-            b.character?.characterType == "主要反派";
+            normalizeCharacterType(b.character?.characterType) ==
+                "protagonist" ||
+            normalizeCharacterType(b.character?.characterType) ==
+                "majorAntagonist";
         if (aHero != bHero) return aHero ? -1 : 1;
         return a.id.compareTo(b.id);
       });
@@ -343,12 +348,12 @@ class CharacterRoleLayout {
   Map<String, Offset> positions(CharacterRelationshipGraphData graph) =>
       _layoutNodes(graph, graph.nodes.map((n) => n.id).toSet());
   _CharacterLayoutLane _layoutLane(CharacterRelationshipGraphNode node) {
-    return switch (node.character?.characterType.trim()) {
-      "主角" => _CharacterLayoutLane.protagonist,
-      "重要配角" => _CharacterLayoutLane.importantSupporting,
-      "主要反派" => _CharacterLayoutLane.mainVillain,
-      "次要反派" => _CharacterLayoutLane.secondaryVillain,
-      "其他" => _CharacterLayoutLane.other,
+    return switch (normalizeCharacterType(node.character?.characterType)) {
+      "protagonist" => _CharacterLayoutLane.protagonist,
+      "majorSupporting" => _CharacterLayoutLane.importantSupporting,
+      "majorAntagonist" => _CharacterLayoutLane.mainVillain,
+      "minorAntagonist" => _CharacterLayoutLane.secondaryVillain,
+      "other" => _CharacterLayoutLane.other,
       _ => _CharacterLayoutLane.secondarySupporting,
     };
   }

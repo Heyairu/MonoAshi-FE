@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "dart:async";
 import "dart:math" as math;
 
@@ -288,7 +289,7 @@ class _MonogatariNavigationLayoutState
                     child: IconButton(
                       key: const Key("navigation-launcher"),
                       focusNode: _launcherFocus,
-                      tooltip: "展開導覽",
+                      tooltip: context.l10n.uiExpandNavigation,
                       icon: const Icon(Icons.menu),
                       onPressed: () => _open(pinned: true),
                     ),
@@ -297,7 +298,7 @@ class _MonogatariNavigationLayoutState
               if (widget.visible && _expanded && (widget.modal || !_pinned))
                 Positioned.fill(
                   child: Semantics(
-                    label: "關閉導覽",
+                    label: context.l10n.uiCloseNavigation,
                     button: true,
                     onTap: _close,
                     child: GestureDetector(
@@ -399,8 +400,8 @@ class _MonogatariNavigationLayoutState
       return _NavigationTile(
         key: _destinationKeys[index],
         itemKey: ValueKey("navigation-destination-$index"),
-        label: item.label,
-        tooltip: index == 16 ? "說明模組" : null,
+        label: context.l10n.legacyLabel(item.label),
+        tooltip: index == 16 ? context.l10n.uiHelpModule : null,
         icon: item.icon,
         selected: widget.selectedIndex == index,
         expanded: _expanded,
@@ -415,10 +416,10 @@ class _MonogatariNavigationLayoutState
     }
 
     final toggleLabel = !_expanded
-        ? "展開導覽"
+        ? context.l10n.uiExpandNavigation
         : _pinned
-        ? "收合導覽"
-        : "固定導覽";
+        ? context.l10n.uiCollapseNavigation
+        : context.l10n.uiPinNavigation;
     return SafeArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -474,7 +475,9 @@ class _MonogatariNavigationLayoutState
           : widget.unselectedLabelTextStyle;
       final painter = TextPainter(
         text: TextSpan(
-          text: monogatariNavigationDestinations[index].label,
+          text: context.l10n.legacyLabel(
+            monogatariNavigationDestinations[index].label,
+          ),
           style: style ?? Theme.of(context).textTheme.labelSmall,
         ),
         textDirection: Directionality.of(context),

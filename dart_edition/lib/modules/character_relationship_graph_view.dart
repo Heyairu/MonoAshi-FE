@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "dart:math" as math;
 
 import "package:flutter/material.dart";
@@ -334,9 +335,15 @@ class _CharacterRelationshipGraphViewState
               color: Theme.of(context).colorScheme.outline,
             ),
             const SizedBox(height: 16),
-            Text("尚無人物資料", style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              context.l10n.uiNoCharactersYet,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 8),
-            const Text("請先到角色設定新增人物，再回來建立與查看關係。", textAlign: TextAlign.center),
+            Text(
+              context.l10n.uiAddCharactersInCharacterSettingsBeforeCreatingAnd,
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),
@@ -349,7 +356,7 @@ class _CharacterRelationshipGraphViewState
     actions: [
       NeonIconButton(
         key: const ValueKey("relationship-snapshot-minimize"),
-        label: "最小化時間軸與快照",
+        label: context.l10n.uiMinimizeTimelineAndSnapshots,
         icon: Icons.minimize_rounded,
         onPressed: () => setState(() => _snapshotCardMinimized = true),
       ),
@@ -364,7 +371,7 @@ class _CharacterRelationshipGraphViewState
           localTick: _previewTick,
           allowLocalMode: true,
           hint: _isViewingSnapshot
-              ? "歷史預覽唯讀；每位角色採用此 Tick 前的有效變更。切回預設資料可編輯。"
+              ? context.l10n.uiHistoricalPreviewsAreReadOnlyEachCharacterUses
               : null,
           onModeChanged: (value) => setState(() => _previewMode = value),
           onTickChanged: (value) => setState(() => _previewTick = value),
@@ -402,12 +409,14 @@ class _CharacterRelationshipGraphViewState
                   padding: EdgeInsets.all(AppSpacing.md),
                   child: LargeTitle(
                     icon: Icons.people_alt_rounded,
-                    text: "關係設定",
+                    text: context.l10n.uiCharacterRelationships,
                   ),
                 ),
                 NeonIconButton(
                   key: const ValueKey("relationship-toolbar-toggle"),
-                  label: _toolbarExpanded ? "收合工具列" : "展開工具列",
+                  label: _toolbarExpanded
+                      ? context.l10n.uiCollapseToolbar
+                      : context.l10n.uiExpandToolbar,
                   onPressed: () =>
                       setState(() => _toolbarExpanded = !_toolbarExpanded),
                   icon: _toolbarExpanded
@@ -417,10 +426,10 @@ class _CharacterRelationshipGraphViewState
                 NeonIconButton(
                   key: const ValueKey("relationship-snapshot-toggle"),
                   label: !_snapshotsEnabled
-                      ? "啟用快照"
+                      ? context.l10n.uiEnableSnapshots
                       : _snapshotCardMinimized
-                      ? "顯示快照 Card"
-                      : "關閉快照",
+                      ? context.l10n.uiShowSnapshotCards
+                      : context.l10n.uiCloseSnapshots,
                   icon: Icons.history_toggle_off_outlined,
                   selected: _snapshotsEnabled,
                   onPressed: _toggleSnapshots,
@@ -429,19 +438,19 @@ class _CharacterRelationshipGraphViewState
                   AppMenuButton<CharacterRelationshipDisplayMode>(
                     key: const ValueKey("relationship-display-selector"),
                     value: _displayMode,
-                    labelText: "顯示關係",
-                    options: const [
+                    labelText: context.l10n.uiShowRelationships,
+                    options: [
                       DropdownOption(
                         value: CharacterRelationshipDisplayMode.internal,
-                        label: "內在關係",
+                        label: context.l10n.uiInternalRelationship,
                       ),
                       DropdownOption(
                         value: CharacterRelationshipDisplayMode.external,
-                        label: "外在關係",
+                        label: context.l10n.uiExternalRelationship,
                       ),
                       DropdownOption(
                         value: CharacterRelationshipDisplayMode.both,
-                        label: "全部",
+                        label: context.l10n.uiAll,
                       ),
                     ],
                     onChanged: (value) {
@@ -452,22 +461,24 @@ class _CharacterRelationshipGraphViewState
                   AppMenuButton<CharacterGraphLayoutMode>(
                     key: const ValueKey("relationship-layout-selector"),
                     value: _controller.layoutMode,
-                    labelText: "角色排列",
-                    options: const [
+                    labelText: context.l10n.uiArrangeCharacters,
+                    options: [
                       DropdownOption(
                         value: CharacterGraphLayoutMode.roles,
-                        label: "角色定位",
+                        label: context.l10n.uiLocateCharacter,
                       ),
                       DropdownOption(
                         value: CharacterGraphLayoutMode.clusters,
-                        label: "關係群集",
+                        label: context.l10n.uiRelationshipClusters,
                       ),
                     ],
                     onChanged: (value) {
                       if (value != null) _controller.setLayoutMode(value);
                     },
                   ),
-                  const Text("外在 ━   內在 ┄   拖曳角色可調整位置"),
+                  Text(
+                    context.l10n.uiExternalInternalDragCharactersToReposition,
+                  ),
                   SizedBox(
                     width: constraints.maxWidth,
                     child: RawAutocomplete<String>(
@@ -496,13 +507,14 @@ class _CharacterRelationshipGraphViewState
                                 prefixIcon: const Icon(
                                   Icons.person_search_outlined,
                                 ),
-                                hintText: "搜尋或選擇人物",
+                                hintText:
+                                    context.l10n.uiSearchOrSelectCharacter,
                                 suffixIcon: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     if (_searchController.text.isNotEmpty)
                                       NeonIconButton(
-                                        label: "清除搜尋",
+                                        label: context.l10n.uiClearSearch,
                                         onPressed: () {
                                           _searchController.clear();
                                           setState(() {});
@@ -513,7 +525,7 @@ class _CharacterRelationshipGraphViewState
                                       key: const ValueKey(
                                         "relationship-search-button",
                                       ),
-                                      label: "搜尋並聚焦",
+                                      label: context.l10n.uiSearchAndFocus,
                                       onPressed: () => _focusFirstSearchResult(
                                         characters,
                                         graph,
@@ -570,7 +582,7 @@ class _CharacterRelationshipGraphViewState
                   ),
                   NeonIconButton(
                     key: const ValueKey("neighbors-only-toggle-button"),
-                    label: "只顯示一階鄰居",
+                    label: context.l10n.uiShowDirectNeighborsOnly,
                     onPressed: _controller.selectedNodeId == null
                         ? null
                         : () => _controller.setNeighborsOnly(
@@ -579,47 +591,50 @@ class _CharacterRelationshipGraphViewState
                     icon: Icons.hub_outlined,
                     selected: _controller.neighborsOnly,
                     statusLabel: _controller.selectedNodeId == null
-                        ? "先選擇角色"
+                        ? context.l10n.uiSelectACharacterFirst
                         : null,
                   ),
                   NeonIconButton(
                     key: const ValueKey("global-preview-button"),
-                    label: "全局預覽",
+                    label: context.l10n.uiOverview,
                     onPressed: () => _showGlobalPreview(graph, _viewportSize),
                     icon: Icons.fit_screen_outlined,
                   ),
                   NeonIconButton(
-                    label: "新增關係",
+                    label: context.l10n.uiAddRelationship,
                     onPressed: _isViewingSnapshot
                         ? null
                         : () => _addRelationship(characters),
                     icon: Icons.add_link,
                     accent: NeonAccent.green,
-                    statusLabel: _isViewingSnapshot ? "歷史預覽唯讀" : null,
+                    statusLabel: _isViewingSnapshot
+                        ? context.l10n.uiHistoricalPreviewIsReadOnly
+                        : null,
                   ),
                   NeonIconButton(
-                    label: "自動重新排列",
+                    label: context.l10n.uiRearrangeAutomatically,
                     onPressed: () => _rearrangeGraph(graph),
                     icon: Icons.auto_fix_high_outlined,
                   ),
                   NeonIconButton(
-                    label: "重設縮放",
+                    label: context.l10n.uiResetZoom,
                     onPressed: _controller.resetZoom,
                     icon: Icons.refresh,
                   ),
                   NeonIconButton(
-                    label: "縮小",
+                    label: context.l10n.uiZoomOut,
                     onPressed: () => _controller.zoomBy(0.8, _viewportSize),
                     icon: Icons.zoom_out,
                   ),
                   NeonIconButton(
-                    label: "放大",
+                    label: context.l10n.uiZoomIn,
                     onPressed: () => _controller.zoomBy(1.25, _viewportSize),
                     icon: Icons.zoom_in,
                   ),
                   NeonIconButton(
                     key: const ValueKey("relationship-merge-toggle"),
-                    label: "合併相同的雙向關係",
+                    label:
+                        context.l10n.uiMergeIdenticalBidirectionalRelationships,
                     onPressed: () => _controller.setMergeOpposite(
                       !_controller.mergeOpposite,
                     ),
@@ -737,9 +752,9 @@ class _CharacterRelationshipGraphViewState
       }
     }
     if (matchId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("找不到符合的人物")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.uiNoMatchingCharacters)),
+      );
       return;
     }
     _controller.selectNode(matchId);
@@ -953,13 +968,17 @@ class _CharacterRelationshipGraphViewState
                   children: [
                     const Icon(Icons.link_off_outlined),
                     const SizedBox(width: 10),
-                    const Expanded(child: Text("目前沒有關係；可在此新增，或回到角色設定編輯。")),
+                    Expanded(
+                      child: Text(
+                        context.l10n.uiNoRelationshipsYetAddOneHereOrEdit,
+                      ),
+                    ),
                     TextButton.icon(
                       onPressed: _isViewingSnapshot
                           ? null
                           : () => _addRelationship(characters),
                       icon: const Icon(Icons.add),
-                      label: const Text("新增"),
+                      label: Text(context.l10n.commonAdd),
                     ),
                   ],
                 ),
@@ -1057,7 +1076,9 @@ class _CharacterRelationshipGraphViewState
                     const Icon(Icons.push_pin, size: 12),
                   if (node.character?.characterType.trim().isNotEmpty ?? false)
                     Text(
-                      node.character!.characterType,
+                      context.l10n.characterTypeLabel(
+                        normalizeCharacterType(node.character!.characterType),
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.labelSmall,
@@ -1065,7 +1086,7 @@ class _CharacterRelationshipGraphViewState
                   const SizedBox(height: 4),
                   Flexible(
                     child: Text(
-                      node.label,
+                      node.localizedLabel(context.l10n),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
@@ -1088,7 +1109,8 @@ class _CharacterRelationshipGraphViewState
     CharacterRelationshipGraphEdge edge,
     EdgeLabelPlacement placement,
   ) {
-    final label = "${edge.layerLabel}：${edge.description}";
+    final label =
+        "${context.l10n.legacyLabel(edge.layerLabel)}：${edge.description}";
     final selected = edge.id == _controller.selectedEdgeId;
     final scheme = Theme.of(context).colorScheme;
     return Positioned(
@@ -1171,14 +1193,23 @@ class _CharacterRelationshipGraphViewState
                           child: MediumTitle(
                             icon: Icons.person_rounded,
                             text: edge != null
-                                ? "${graph.nodeById(edge.canonicalSource)?.label} 與 ${graph.nodeById(edge.canonicalTarget)?.label}"
-                                : node!.label,
+                                ? context.l10n.uiAnd(
+                                    (graph
+                                            .nodeById(edge.canonicalSource)
+                                            ?.localizedLabel(context.l10n))
+                                        .toString(),
+                                    (graph
+                                            .nodeById(edge.canonicalTarget)
+                                            ?.localizedLabel(context.l10n))
+                                        .toString(),
+                                  )
+                                : node!.localizedLabel(context.l10n),
                           ),
                         ),
                         if (edge == null)
                           IconButton(
                             icon: Icon(Icons.edit_rounded),
-                            tooltip: "開啟人物編輯",
+                            tooltip: context.l10n.uiOpenCharacterEditor,
                             onPressed: widget.onOpenCharacter == null
                                 ? null
                                 : () => widget.onOpenCharacter!(node!.id),
@@ -1192,13 +1223,15 @@ class _CharacterRelationshipGraphViewState
                                 ? Icons.expand_more
                                 : Icons.expand_less,
                           ),
-                          tooltip: _panelExpanded ? "收合詳細資料" : "展開詳細資料",
+                          tooltip: _panelExpanded
+                              ? context.l10n.uiCollapseDetails
+                              : context.l10n.uiExpandDetails,
                         ),
                         IconButton(
                           color: Colors.red,
                           onPressed: _controller.clearSelection,
                           icon: Icon(Icons.close),
-                          tooltip: "關閉",
+                          tooltip: context.l10n.commonClose,
                         ),
                       ],
                     ),
@@ -1225,7 +1258,9 @@ class _CharacterRelationshipGraphViewState
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [const Text("此名稱目前無法唯一對應到人物資料。請選取連線進行修正。")],
+        children: [
+          Text(context.l10n.uiThisNameDoesNotUniquelyIdentifyACharacter),
+        ],
       );
     }
     final character = node.character!;
@@ -1243,9 +1278,13 @@ class _CharacterRelationshipGraphViewState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (character.roleOrOccupation.trim().isNotEmpty)
-          Text("職業：${character.roleOrOccupation}"),
-        if (character.age.trim().isNotEmpty) Text("年齡：${character.age}"),
-        if (character.gender.trim().isNotEmpty) Text("性別：${character.gender}"),
+          Text(
+            context.l10n.uiOccupation((character.roleOrOccupation).toString()),
+          ),
+        if (character.age.trim().isNotEmpty)
+          Text(context.l10n.uiAge((character.age).toString())),
+        if (character.gender.trim().isNotEmpty)
+          Text(context.l10n.uiGender2((character.gender).toString())),
         if (character.personalitySummary.trim().isNotEmpty) ...[
           const SizedBox(height: 6),
           Text(
@@ -1265,7 +1304,7 @@ class _CharacterRelationshipGraphViewState
               ),
               const SizedBox(width: 6),
               Text(
-                "所屬組織",
+                context.l10n.uiOrganizations,
                 style: Theme.of(
                   context,
                 ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
@@ -1309,20 +1348,20 @@ class _CharacterRelationshipGraphViewState
           ),
         ],
         const SizedBox(height: 6),
-        Text("相鄰關係：$adjacent"),
+        Text(context.l10n.uiAdjacentRelationships((adjacent).toString())),
         OutlinedButton.icon(
           key: ValueKey("relationship-pin-${node.id}"),
           onPressed: () => _controller.togglePin(node.id),
           icon: const Icon(Icons.push_pin_outlined),
           label: Text(
             _controller.layoutSession.pinned.contains(node.id)
-                ? "解除釘選"
-                : "釘選位置",
+                ? context.l10n.uiUnpin
+                : context.l10n.uiPinPosition,
           ),
         ),
         if (_pinnedOverlap(node.id))
           Text(
-            "釘選位置與其他釘選角色重疊，可拖曳調整。",
+            context.l10n.uiThisPinnedPositionOverlapsAnotherPinnedCharacterDrag,
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         for (final related in graph.edges.where(
@@ -1332,9 +1371,11 @@ class _CharacterRelationshipGraphViewState
             dense: true,
             key: ValueKey("relationship-neighbor-${related.id}"),
             title: Text(
-              "${graph.nodeById(related.sourceCharacterId)?.label} ${related.isBidirectional ? '↔' : '→'} ${graph.nodeById(related.targetNodeId)?.label}",
+              "${graph.nodeById(related.sourceCharacterId)?.localizedLabel(context.l10n)} ${related.isBidirectional ? '↔' : '→'} ${graph.nodeById(related.targetNodeId)?.localizedLabel(context.l10n)}",
             ),
-            subtitle: Text("${related.layerLabel}：${related.description}"),
+            subtitle: Text(
+              "${context.l10n.legacyLabel(related.layerLabel)}：${related.description}",
+            ),
             onTap: () => _controller.selectEdge(related.id),
           ),
         const SizedBox(height: 12),
@@ -1350,14 +1391,14 @@ class _CharacterRelationshipGraphViewState
                       sourceCharacterId: node.id,
                     ),
               icon: const Icon(Icons.add_link),
-              label: const Text("新增關係"),
+              label: Text(context.l10n.uiAddRelationship),
             ),
             OutlinedButton.icon(
               onPressed: _isViewingSnapshot
                   ? null
                   : () => _createTargetFromNode(node.id),
               icon: const Icon(Icons.person_add_alt),
-              label: const Text("建立目標人物"),
+              label: Text(context.l10n.uiCreateTargetCharacter),
             ),
           ],
         ),
@@ -1391,18 +1432,21 @@ class _CharacterRelationshipGraphViewState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          "目前顯示：${_displayMode == CharacterRelationshipDisplayMode.both
-              ? '全部'
-              : _displayMode == CharacterRelationshipDisplayMode.external
-              ? '外在'
-              : '內在'}",
+          context.l10n.uiShowing(
+            (_displayMode == CharacterRelationshipDisplayMode.both
+                    ? context.l10n.uiAll
+                    : _displayMode == CharacterRelationshipDisplayMode.external
+                    ? context.l10n.uiExternal
+                    : context.l10n.uiInternal)
+                .toString(),
+          ),
         ),
         if (_displayMode != CharacterRelationshipDisplayMode.both)
           TextButton(
             onPressed: () => setState(
               () => _displayMode = CharacterRelationshipDisplayMode.both,
             ),
-            child: const Text("顯示全部關係"),
+            child: Text(context.l10n.uiShowAllRelationships),
           ),
         for (final channel in channels) ...[
           _buildDirectionDetails(characters, graph, channel, channel.sources),
@@ -1417,8 +1461,8 @@ class _CharacterRelationshipGraphViewState
         if (!edge.isResolved) ...[
           Text(
             edge.resolutionKind == CharacterRelationshipResolutionKind.ambiguous
-                ? "有多位同名人物，請編輯並選擇含 NanoID 的人物。"
-                : "找不到對應人物，可修正名稱或建立新人物。",
+                ? context.l10n.uiSeveralCharactersShareThisNameEditAndSelect
+                : context.l10n.uiNoMatchingCharacterCorrectTheNameOrCreate,
           ),
           if (edge.resolutionKind ==
               CharacterRelationshipResolutionKind.unresolved)
@@ -1427,7 +1471,7 @@ class _CharacterRelationshipGraphViewState
                   ? null
                   : () => _createCharacterForEdge(edge),
               icon: const Icon(Icons.person_add_alt),
-              label: const Text("建立人物"),
+              label: Text(context.l10n.uiCreateCharacter),
             ),
         ],
       ],
@@ -1451,7 +1495,7 @@ class _CharacterRelationshipGraphViewState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              "${graph.nodeById(sourceId)?.label} → ${graph.nodeById(targetId)?.label} · ${edge.layerLabel}",
+              "${graph.nodeById(sourceId)?.localizedLabel(context.l10n)} → ${graph.nodeById(targetId)?.localizedLabel(context.l10n)} · ${context.l10n.legacyLabel(edge.layerLabel)}",
             ),
             Text(edge.description),
             Wrap(
@@ -1465,13 +1509,13 @@ class _CharacterRelationshipGraphViewState
                       ? null
                       : () => _editChannel(characters, edge, sources),
                   icon: const Icon(Icons.edit_outlined),
-                  label: const Text("編輯"),
+                  label: Text(context.l10n.uiEdit),
                 ),
                 TextButton(
                   onPressed: _isViewingSnapshot
                       ? null
                       : () => _repairTarget(sources),
-                  child: const Text("修正目標人物"),
+                  child: Text(context.l10n.uiCorrectTargetCharacter),
                 ),
                 TextButton.icon(
                   key: ValueKey(
@@ -1481,7 +1525,11 @@ class _CharacterRelationshipGraphViewState
                       ? null
                       : () => _deleteChannel(edge, sources),
                   icon: const Icon(Icons.delete_outline),
-                  label: Text("刪除${edge.layerLabel}"),
+                  label: Text(
+                    context.l10n.uiDelete(
+                      (context.l10n.legacyLabel(edge.layerLabel)).toString(),
+                    ),
+                  ),
                 ),
                 TextButton(
                   onPressed: _isViewingSnapshot
@@ -1491,7 +1539,9 @@ class _CharacterRelationshipGraphViewState
                           sources,
                           entireDirection: true,
                         ),
-                  child: const Text("刪除此方向全部關係"),
+                  child: Text(
+                    context.l10n.uiDeleteAllRelationshipsInThisDirection,
+                  ),
                 ),
               ],
             ),
@@ -1516,9 +1566,13 @@ class _CharacterRelationshipGraphViewState
       deleteDirection: entireDirection,
     );
     if (next == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("關係已變更，請重新選取後再操作。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.uiTheRelationshipChangedSelectItAgainBeforeContinuing,
+          ),
+        ),
+      );
       _controller.clearSelection();
       return;
     }
@@ -1535,11 +1589,16 @@ class _CharacterRelationshipGraphViewState
     final sourceId = sources.first.characterId;
     final result = await AppDialog.prompt(
       context: context,
-      title:
-          "${characters[sourceId]?.displayName} → ${sources.first.value.person} · 編輯${edge.layerLabel}關係",
-      labelText: "${edge.layerLabel}關係",
+      title: context.l10n.uiEditRelationship(
+        (characters[sourceId]?.displayName).toString(),
+        (sources.first.value.person).toString(),
+        (context.l10n.legacyLabel(edge.layerLabel)).toString(),
+      ),
+      labelText: context.l10n.uiRelationship(
+        (context.l10n.legacyLabel(edge.layerLabel)).toString(),
+      ),
       initialValue: edge.description,
-      confirmLabel: "儲存",
+      confirmLabel: context.l10n.commonSave,
       allowEmpty: true,
     );
     if (result == null ||
@@ -1559,11 +1618,14 @@ class _CharacterRelationshipGraphViewState
     final session = widget.projectSessionId;
     final confirmed = await AppDialog.confirm(
       context: context,
-      title: "刪除人物關係",
+      title: context.l10n.uiDeleteCharacterRelationship,
       message: entireDirection
-          ? "確定刪除此方向的外在與內在關係？反向關係會保留。"
-          : "確定刪除此方向的${edge.layerLabel}關係「${edge.description}」？另一類型與反向關係會保留。",
-      confirmLabel: "刪除",
+          ? context.l10n.uiDeleteBothExternalAndInternalRelationshipsInThis
+          : context.l10n.uiDeleteTheRelationshipInThisDirectionOtherTypes(
+              (context.l10n.legacyLabel(edge.layerLabel)).toString(),
+              (edge.description).toString(),
+            ),
+      confirmLabel: context.l10n.commonDelete,
       destructive: true,
       icon: Icons.delete_outline,
     );
@@ -1604,9 +1666,13 @@ class _CharacterRelationshipGraphViewState
     final current = ref.read(characterDataProvider);
     final resolution = CharacterRelationshipResolver(current).resolve(person);
     if (!resolution.isResolved) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("請從清單選擇能唯一對應的現有人物。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.uiSelectAnExistingCharacterThatCanBeUniquely,
+          ),
+        ),
+      );
       return;
     }
     final next = updateCharacterRelationshipChannel(
@@ -1620,9 +1686,13 @@ class _CharacterRelationshipGraphViewState
       ),
     );
     if (next == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("關係已變更，請重新選取後再操作。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.uiTheRelationshipChangedSelectItAgainBeforeContinuing,
+          ),
+        ),
+      );
     } else {
       ref.read(characterDataProvider.notifier).setCharacterData(next);
     }
@@ -1666,7 +1736,11 @@ class _CharacterRelationshipGraphViewState
     ).resolve(result.person);
     if (resolution.kind == CharacterRelationshipResolutionKind.ambiguous) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("有多位同名人物，請從清單選擇含 NanoID 的人物")),
+        SnackBar(
+          content: Text(
+            context.l10n.uiSeveralCharactersShareThisNameSelectOneWith,
+          ),
+        ),
       );
       return;
     }
@@ -1719,11 +1793,12 @@ class _CharacterRelationshipGraphViewState
     final rawName = edge.rawTargetPerson.trim();
     final name = await AppDialog.prompt(
       context: context,
-      title: "建立目標人物",
-      message: "建立後，這筆關係會依人物名稱自動連結。",
-      labelText: "人物名稱",
+      title: context.l10n.uiCreateTargetCharacter,
+      message:
+          context.l10n.uiAfterCreationThisRelationshipWillLinkAutomaticallyBy,
+      labelText: context.l10n.uiCharacterName,
       initialValue: rawName,
-      confirmLabel: "建立",
+      confirmLabel: context.l10n.commonCreate,
       icon: Icons.person_add_alt,
     );
     if (name == null ||
@@ -1747,9 +1822,13 @@ class _CharacterRelationshipGraphViewState
       ),
     );
     if (next == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("關係已變更，請重新選取後再操作。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.uiTheRelationshipChangedSelectItAgainBeforeContinuing,
+          ),
+        ),
+      );
       return;
     }
     ref.read(characterDataProvider.notifier).setCharacterData(next);
@@ -1760,10 +1839,10 @@ class _CharacterRelationshipGraphViewState
     final session = widget.projectSessionId;
     final name = await AppDialog.prompt(
       context: context,
-      title: "建立目標人物",
-      message: "新人物建立後，會同時新增由目前人物指向他的關係。",
-      labelText: "人物名稱",
-      confirmLabel: "下一步",
+      title: context.l10n.uiCreateTargetCharacter,
+      message: context.l10n.uiCreatingTheCharacterAlsoAddsARelationshipFrom,
+      labelText: context.l10n.uiCharacterName,
+      confirmLabel: context.l10n.uiNext2,
       icon: Icons.person_add_alt,
     );
     if (name == null ||
@@ -1785,7 +1864,7 @@ class _CharacterRelationshipGraphViewState
         ref.read(characterDataProvider),
       ),
       allowSourceSelection: false,
-      title: "設定新人物關係",
+      title: context.l10n.uiSetUpNewCharacterRelationship,
     );
     if (result != null &&
         mounted &&
@@ -1809,7 +1888,8 @@ class _CharacterRelationshipGraphViewState
   }
 
   Size _edgeLabelSizeFor(CharacterRelationshipGraphEdge edge) {
-    final label = "${edge.layerLabel}：${edge.description}";
+    final label =
+        "${context.l10n.legacyLabel(edge.layerLabel)}：${edge.description}";
     final style = Theme.of(context).textTheme.labelSmall;
     final scaler = MediaQuery.textScalerOf(context);
     final baseFontSize = style?.fontSize ?? 11;
@@ -2037,26 +2117,40 @@ class _RelationshipTargetDialogState extends State<_RelationshipTargetDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text("修正此方向的目標人物"),
+    title: Text(context.l10n.uiCorrectTheTargetInThisDirection),
     content: SizedBox(
       width: 360,
       child: AppComboBoxField(
         key: const ValueKey("relationship-repair-target"),
         controller: _input,
-        labelText: "目標人物",
+        labelText: context.l10n.uiTargetCharacter,
         options: widget.options,
-        hintText: "選擇現有人物；內外關係將一起移至該人物",
+        hintText:
+            context.l10n.uiSelectAnExistingCharacterBothRelationshipTypesMove,
       ),
     ),
     actions: [
       TextButton(
         onPressed: () => Navigator.pop(context),
-        child: const Text("取消"),
+        child: Text(context.l10n.commonCancel),
       ),
       FilledButton(
         onPressed: () => Navigator.pop(context, _input.text.trim()),
-        child: const Text("儲存"),
+        child: Text(context.l10n.commonSave),
       ),
     ],
   );
+}
+
+extension CharacterGraphNodeLocalization on CharacterRelationshipGraphNode {
+  /// Only generated unresolved labels are translated; character names remain
+  /// exactly as authored and graph IDs/layout ordering remain independent.
+  String localizedLabel(AppLocalizations l10n) {
+    if (!isUnresolved) return label;
+    final name = unresolvedPerson?.trim() ?? '';
+    if (unresolvedKind == CharacterRelationshipResolutionKind.ambiguous) {
+      return l10n.relationshipAmbiguousName(name);
+    }
+    return l10n.relationshipUnlinked(name.isEmpty ? l10n.uiUntitled : name);
+  }
 }

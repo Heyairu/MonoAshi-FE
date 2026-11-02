@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "dart:async";
 import "dart:convert";
 import "dart:math";
@@ -81,11 +82,19 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
     content: "中國最偉大、最永久的藝術，就是男人扮女人",
     source: "—— 魯迅（1881-1936）",
   );
-  static final Uri _projectRepoUri = Uri.parse("https://github.com/heyairu/Monogatari-Assistant-FE");
-  static final Uri _KadoURL = Uri.parse("https://www.kadokado.com.tw/user/167702");
+  static final Uri _projectRepoUri = Uri.parse(
+    "https://github.com/heyairu/Monogatari-Assistant-FE",
+  );
+  static final Uri _KadoURL = Uri.parse(
+    "https://www.kadokado.com.tw/user/167702",
+  );
   static final Uri _KoFiURL = Uri.parse("https://ko-fi.com/heyairu");
-  static final Uri _GFormsURL = Uri.parse("https://forms.gle/ETkWCe7VUd6yF6Mo8");
-  static final Uri _GitHubIssueURL = Uri.parse("https://github.com/heyairu/Monogatari-Assistant-FE/issues");
+  static final Uri _GFormsURL = Uri.parse(
+    "https://forms.gle/ETkWCe7VUd6yF6Mo8",
+  );
+  static final Uri _GitHubIssueURL = Uri.parse(
+    "https://github.com/heyairu/Monogatari-Assistant-FE/issues",
+  );
 
   static final Random _random = Random();
 
@@ -340,7 +349,10 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
       if (!mounted) {
         return;
       }
-      AppFeedback.error(context, "載入姓名資料失敗，請稍後再試。");
+      AppFeedback.error(
+        context,
+        context.l10n.uiCouldNotLoadTheNameDataTryAgain,
+      );
     } finally {
       if (!mounted) {
         return;
@@ -360,13 +372,13 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
     if (!mounted) {
       return;
     }
-    AppFeedback.success(context, "已複製姓名結果");
+    AppFeedback.success(context, context.l10n.uiNameResultsCopied);
   }
 
   Future<void> _handleNewProject() async {
     final onNewProject = widget.onNewProject;
     if (onNewProject == null) {
-      _showMessage("目前尚未連接新建專案功能");
+      _showMessage(context.l10n.uiCreatingAProjectIsNotConnectedYet);
       return;
     }
 
@@ -376,7 +388,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
   Future<void> _handleOpenProject() async {
     final onOpenProject = widget.onOpenProject;
     if (onOpenProject == null) {
-      _showMessage("目前尚未連接開啟檔案功能");
+      _showMessage(context.l10n.uiOpeningFilesIsNotConnectedYet);
       return;
     }
 
@@ -386,7 +398,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
   Future<void> _handleOpenRecentProject(RecentProjectEntry entry) async {
     final onOpenRecentProject = widget.onOpenRecentProject;
     if (onOpenRecentProject == null) {
-      _showMessage("目前尚未連接最近檔案功能");
+      _showMessage(context.l10n.uiRecentProjectsAreNotConnectedYet);
       return;
     }
 
@@ -396,7 +408,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
   Future<void> _handleDeleteRecentProject(RecentProjectEntry entry) async {
     final onDeleteRecentProject = widget.onDeleteRecentProject;
     if (onDeleteRecentProject == null) {
-      _showMessage("目前尚未連接刪除最近檔案功能");
+      _showMessage(context.l10n.uiRemovingRecentProjectsIsNotConnectedYet);
       return;
     }
 
@@ -413,7 +425,9 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
 
     final port = P2pEndpoint.parsePort(_localPortController.text);
     setState(() {
-      _localPortError = port == null ? "Port 必須是 1–65535 的整數" : null;
+      _localPortError = port == null
+          ? context.l10n.uiPortMustBeAnIntegerFromTo
+          : null;
     });
     if (port == null) return;
     notifier.updateLocalProjectStatus(widget.localP2pProject);
@@ -430,8 +444,10 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
     setState(() {
       _peerIpError = P2pEndpoint.isPrivateIpv4(host)
           ? null
-          : "請輸入有效的內網 IPv4 位址";
-      _peerPortError = port == null ? "Port 必須是 1–65535 的整數" : null;
+          : context.l10n.uiEnterAValidLocalNetworkIPv4Address;
+      _peerPortError = port == null
+          ? context.l10n.uiPortMustBeAnIntegerFromTo
+          : null;
     });
     if (endpoint == null) return;
 
@@ -458,7 +474,11 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
         builder: (dialogContext) {
           _negotiationDialogContext = dialogContext;
           return AlertDialog(
-            title: Text(bothMissing ? "雙方都沒有同步文件" : "同步文件不同"),
+            title: Text(
+              bothMissing
+                  ? dialogContext.l10n.uiNeitherDeviceHasASyncProject
+                  : dialogContext.l10n.uiDifferentSyncProjects,
+            ),
             content: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 560),
               child: Column(
@@ -467,14 +487,21 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                 children: [
                   Text(
                     bothMissing
-                        ? "本機與對方都沒有記憶體中的目標專案；建立新專案後即可直接協作，不必先儲存檔案。"
-                        : "雙方的 Project UUID 不同，請決定本次同步應採用哪一份文件。",
+                        ? dialogContext
+                              .l10n
+                              .uiNeitherDeviceHasTheTargetProjectInMemory
+                        : dialogContext
+                              .l10n
+                              .uiTheDevicesHaveDifferentProjectUUIDsChooseWhich,
                   ),
                   if (!bothMissing) ...[
                     const SizedBox(height: 16),
-                    _buildP2pOfferPreview("本機", local),
+                    _buildP2pOfferPreview(
+                      dialogContext.l10n.uiThisDevice,
+                      local,
+                    ),
                     const SizedBox(height: 8),
-                    _buildP2pOfferPreview("對方", remote),
+                    _buildP2pOfferPreview(dialogContext.l10n.uiPeer, remote),
                   ],
                 ],
               ),
@@ -482,14 +509,14 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text("取消"),
+                child: Text(dialogContext.l10n.commonCancel),
               ),
               if (bothMissing)
                 FilledButton(
                   onPressed: () => Navigator.of(
                     dialogContext,
                   ).pop(_P2pSelectionAction.prepareLocal),
-                  child: const Text("建立本機專案"),
+                  child: Text(dialogContext.l10n.uiCreateLocalProject),
                 )
               else ...[
                 if (widget.onChooseSyncProject != null ||
@@ -498,19 +525,19 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                     onPressed: () => Navigator.of(
                       dialogContext,
                     ).pop(_P2pSelectionAction.chooseOther),
-                    child: const Text("開啟其他文件"),
+                    child: Text(dialogContext.l10n.uiOpenAnotherFile),
                   ),
                 OutlinedButton(
                   onPressed: () => Navigator.of(
                     dialogContext,
                   ).pop(_P2pSelectionAction.remote),
-                  child: const Text("使用對方文件"),
+                  child: Text(dialogContext.l10n.uiUsePeerSFile),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.of(
                     dialogContext,
                   ).pop(_P2pSelectionAction.local),
-                  child: const Text("使用本機文件"),
+                  child: Text(dialogContext.l10n.uiUseLocalFile),
                 ),
               ],
             ],
@@ -567,7 +594,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
         children: [
           Text(label, style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 4),
-          Text(offer.fileName ?? "沒有可同步文件"),
+          Text(offer.fileName ?? context.l10n.uiNoProjectToSync),
           Text(
             "UUID：${offer.shortUuid}",
             style: Theme.of(context).textTheme.bodySmall,
@@ -584,14 +611,14 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
     );
     if (localPreflight.canCollaborate) {
       if (!localPreflight.canSync) {
-        _showMessage("目前記憶體專案已可即時同步；儲存只用來建立 XML checkpoint。");
+        _showMessage(context.l10n.uiTheInMemoryProjectIsReadyForLive);
         return;
       }
       final onChooseSyncProject = widget.onChooseSyncProject;
       if (onChooseSyncProject != null) {
         await onChooseSyncProject();
       } else {
-        _showMessage("目前專案已儲存且 UUID 有效，等待安全配對。");
+        _showMessage(context.l10n.uiTheProjectIsSavedWithAValidUUID);
       }
       return;
     }
@@ -606,14 +633,18 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text("準備同步專案"),
+          title: Text(dialogContext.l10n.uiPrepareProjectForSync),
           content: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("即時協作只需要記憶體中的有效 Project UUID，不要求先寫入檔案。"),
+                Text(
+                  dialogContext
+                      .l10n
+                      .uiLiveCollaborationRequiresAValidProjectUUIDIn,
+                ),
                 const SizedBox(height: 12),
                 ...issues.map(
                   (issue) => Padding(
@@ -634,7 +665,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text("取消"),
+              child: Text(dialogContext.l10n.commonCancel),
             ),
             if (preflight.issues.contains(
                   P2pProjectPreflightIssue.noLocalProject,
@@ -644,7 +675,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                 onPressed: () => Navigator.of(
                   dialogContext,
                 ).pop(_P2pPreparationAction.createNew),
-                child: const Text("建立記憶體專案"),
+                child: Text(dialogContext.l10n.uiCreateInMemoryProject),
               ),
             if (widget.onChooseSyncProject != null ||
                 widget.onOpenProject != null)
@@ -652,20 +683,20 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                 onPressed: () => Navigator.of(
                   dialogContext,
                 ).pop(_P2pPreparationAction.chooseProject),
-                child: const Text("開啟已儲存文件"),
+                child: Text(dialogContext.l10n.uiOpenSavedFile),
               ),
             if (widget.onSaveProjectAs != null)
               TextButton(
                 onPressed: () => Navigator.of(
                   dialogContext,
                 ).pop(_P2pPreparationAction.saveAs),
-                child: const Text("另存為新作品"),
+                child: Text(dialogContext.l10n.uiSaveAsNewWork),
               ),
             if (widget.onSaveProject != null)
               FilledButton(
                 onPressed: () =>
                     Navigator.of(dialogContext).pop(_P2pPreparationAction.save),
-                child: const Text("儲存"),
+                child: Text(dialogContext.l10n.commonSave),
               ),
           ],
         );
@@ -695,35 +726,35 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
     final messages = <String>[];
     final issues = preflight.issues;
     if (issues.contains(P2pProjectPreflightIssue.noLocalProject)) {
-      messages.add("尚未開啟專案。");
+      messages.add(context.l10n.uiNoProjectIsOpen);
     }
     if (issues.contains(P2pProjectPreflightIssue.localProjectNotPersisted)) {
-      messages.add("目前專案尚未儲存到可重新開啟的位置。");
+      messages.add(context.l10n.uiTheCurrentProjectHasNotBeenSavedTo);
     }
     if (issues.contains(P2pProjectPreflightIssue.localProjectDirty)) {
-      messages.add("目前專案仍有未儲存修改。");
+      messages.add(context.l10n.uiTheCurrentProjectHasUnsavedChanges);
     }
     if (issues.contains(P2pProjectPreflightIssue.localProjectUuidInvalid)) {
-      messages.add("目前專案沒有有效的 Project UUID。");
+      messages.add(context.l10n.uiTheCurrentProjectHasNoValidProjectUUID);
     }
     if (issues.contains(
       P2pProjectPreflightIssue.localProjectFormatUnsupported,
     )) {
-      messages.add("目前專案格式尚不支援 P2P 同步。");
+      messages.add(context.l10n.uiThisProjectFormatDoesNotSupportP2PSync);
     }
     if (issues.contains(P2pProjectPreflightIssue.localProjectHasConflict)) {
-      messages.add("目前專案仍有尚未解決的同步衝突。");
+      messages.add(context.l10n.uiTheCurrentProjectHasUnresolvedSyncConflicts);
     }
     return messages;
   }
 
   String _p2pServiceStatusText(P2pSyncState state) {
     return switch (state.serviceStatus) {
-      P2pServiceStatus.stopped => "服務未開啟",
-      P2pServiceStatus.starting => "正在開啟服務",
-      P2pServiceStatus.listening => "服務中",
-      P2pServiceStatus.stopping => "正在停止服務",
-      P2pServiceStatus.error => "服務錯誤",
+      P2pServiceStatus.stopped => context.l10n.uiServiceOff,
+      P2pServiceStatus.starting => context.l10n.uiStartingService,
+      P2pServiceStatus.listening => context.l10n.uiServiceRunning,
+      P2pServiceStatus.stopping => context.l10n.uiStoppingService,
+      P2pServiceStatus.error => context.l10n.uiServiceError,
     };
   }
 
@@ -739,39 +770,50 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
     P2pSyncState state,
   ) {
     if (_isReceivingRemoteProject(state)) {
-      return "將由對方提供記憶體專案；不必先選擇儲存位置";
+      return context.l10n.uiThePeerWillProvideAnInMemoryProject;
     }
     if (preflight.canCollaborate && !preflight.canSync) {
-      return "記憶體專案可即時同步；尚未建立 XML checkpoint";
+      return context.l10n.uiInMemoryProjectReadyForLiveSyncNo;
     }
-    if (preflight.requiresSave) return "請先建立或開啟一個專案";
+    if (preflight.requiresSave) return context.l10n.uiCreateOrOpenAProjectFirst;
     if (preflight.issues.contains(
       P2pProjectPreflightIssue.localProjectHasConflict,
     )) {
-      return "有尚未解決的同步衝突";
+      return context.l10n.uiUnresolvedSyncConflicts;
     }
     if (preflight.canSync) {
       return switch (state.revisionSummaryRelation) {
-        P2pRevisionSummaryRelation.equal => "已儲存；revision 已同步",
-        P2pRevisionSummaryRelation.localAhead => "已儲存；可通知對方同步",
-        P2pRevisionSummaryRelation.remoteAhead => "已儲存；可下載並套用對方版本",
-        P2pRevisionSummaryRelation.concurrent => "已儲存；可進行欄位級衝突合併",
-        null when state.hasAuthenticatedTransport => "已儲存；等待 revision 協商",
-        null => "已儲存；等待連線協商與安全配對",
+        P2pRevisionSummaryRelation.equal =>
+          context.l10n.uiSavedRevisionsSynchronized,
+        P2pRevisionSummaryRelation.localAhead =>
+          context.l10n.uiSavedReadyToNotifyThePeer,
+        P2pRevisionSummaryRelation.remoteAhead =>
+          context.l10n.uiSavedReadyToDownloadAndApplyThePeer,
+        P2pRevisionSummaryRelation.concurrent =>
+          context.l10n.uiSavedFieldLevelConflictMergingAvailable,
+        null when state.hasAuthenticatedTransport =>
+          context.l10n.uiSavedWaitingForRevisionNegotiation,
+        null =>
+          context.l10n.uiSavedWaitingForConnectionNegotiationAndSecurePairing,
       };
     }
-    return "同步文件尚未就緒";
+    return context.l10n.uiSyncProjectIsNotReady;
   }
 
   String _p2pPairingStatusText(P2pPairingStatus status) {
     return switch (status) {
-      P2pPairingStatus.idle => "尚未配對",
-      P2pPairingStatus.waitingForPeer => "等待對方建立配對 challenge",
-      P2pPairingStatus.comparisonRequired => "等待人工比對配對碼",
-      P2pPairingStatus.trustedLocally => "已加入本機信任清單",
-      P2pPairingStatus.waitingForPeerConfirmation => "本機已確認；等待對方簽章確認",
-      P2pPairingStatus.mutuallyConfirmed => "雙端已確認同一配對 transcript",
-      P2pPairingStatus.error => "配對錯誤",
+      P2pPairingStatus.idle => context.l10n.uiNotPaired,
+      P2pPairingStatus.waitingForPeer =>
+        context.l10n.uiWaitingForThePeerSPairingChallenge,
+      P2pPairingStatus.comparisonRequired =>
+        context.l10n.uiWaitingForManualPairingCodeComparison,
+      P2pPairingStatus.trustedLocally =>
+        context.l10n.uiAddedToThisDeviceSTrustList,
+      P2pPairingStatus.waitingForPeerConfirmation =>
+        context.l10n.uiConfirmedLocallyWaitingForThePeerSSignature,
+      P2pPairingStatus.mutuallyConfirmed =>
+        context.l10n.uiBothDevicesConfirmedTheSamePairingTranscript,
+      P2pPairingStatus.error => context.l10n.uiPairingError,
     };
   }
 
@@ -780,53 +822,68 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
     final untilSeconds =
         state.trustedPeer?.persistentVerificationUntilEpochSeconds;
     if (untilSeconds == null) {
-      return "持久驗證：雙方皆已開啟，配對成功後有效 14 天";
+      return context.l10n.uiPersistentVerificationEnabledOnBothDevicesValidFor;
     }
     final until = DateTime.fromMillisecondsSinceEpoch(
       untilSeconds * 1000,
       isUtc: true,
     ).toLocal();
-    String twoDigits(int value) => value.toString().padLeft(2, "0");
-    final formatted =
-        "${until.year}/${twoDigits(until.month)}/${twoDigits(until.day)} "
-        "${twoDigits(until.hour)}:${twoDigits(until.minute)}";
+    final formatted = context.formats.dateTime(until, seconds: false);
     return state.trustedPeer!.hasPersistentVerificationAt(DateTime.now())
-        ? "持久驗證有效至 $formatted；成功連線會再續簽 14 天"
-        : "持久驗證已到期；本次需重新確認配對碼";
+        ? context.l10n
+              .uiPersistentVerificationExpiresEachSuccessfulConnectionRenewsIt(
+                (formatted).toString(),
+              )
+        : context
+              .l10n
+              .uiPersistentVerificationExpiredConfirmThePairingCodeAgain;
   }
 
   String _p2pRevisionStatusText(P2pSyncState state) {
-    if (state.isRevisionMetadataLoading) return "本機 revision：載入中…";
-    if (state.revisionMetadataError != null) {
-      return "本機 revision：metadata 錯誤";
+    if (state.isRevisionMetadataLoading)
+      return context.l10n.uiLocalRevisionLoading;
+    if (state.revisionMetadataErrorFor(context.l10n) != null) {
+      return context.l10n.uiLocalRevisionMetadataError;
     }
     final graph = state.localRevisionGraph;
     if (graph == null || graph.revisions.isEmpty) {
-      return "本機 revision：尚未建立（成功儲存後建立）";
+      return context.l10n.uiLocalRevisionNotCreatedYetCreatedAfterA;
     }
     if (graph.hasConflict) {
-      return "本機 revision：${graph.headIds.length} 個 concurrent heads";
+      return context.l10n.uiLocalRevisionConcurrentHeads(
+        context.formats.integer(graph.headIds.length),
+      );
     }
     final head = graph.singleHead!;
-    return "本機 revision：${head.shortRevisionId}  ·  ${head.clock.displayLabel}";
+    return context.l10n.uiLocalRevision(
+      (head.shortRevisionId).toString(),
+      (head.clock.displayLabel).toString(),
+    );
   }
 
   String _p2pSecureTransportStatusText(P2pSyncState state) {
     final transport = switch (state.secureTransportStatus) {
-      P2pSecureTransportStatus.inactive => "加密通道：尚未建立",
-      P2pSecureTransportStatus.establishing => "加密通道：正在驗證身分與派生 session key…",
-      P2pSecureTransportStatus.authenticated => "加密通道：已驗證並加密",
-      P2pSecureTransportStatus.error => "加密通道：建立失敗",
+      P2pSecureTransportStatus.inactive =>
+        context.l10n.uiEncryptedChannelNotEstablished,
+      P2pSecureTransportStatus.establishing =>
+        context.l10n.uiEncryptedChannelVerifyingIdentityAndDerivingASession,
+      P2pSecureTransportStatus.authenticated =>
+        context.l10n.uiEncryptedChannelAuthenticatedAndEncrypted,
+      P2pSecureTransportStatus.error =>
+        context.l10n.uiEncryptedChannelConnectionFailed,
     };
     final relation = switch (state.revisionSummaryRelation) {
-      P2pRevisionSummaryRelation.equal => "；revision heads 相同",
-      P2pRevisionSummaryRelation.localAhead => "；本機 revision 較新",
-      P2pRevisionSummaryRelation.remoteAhead => "；對方 revision 較新",
-      P2pRevisionSummaryRelation.concurrent => "；偵測到 concurrent revisions",
+      P2pRevisionSummaryRelation.equal => context.l10n.uiRevisionHeadsMatch,
+      P2pRevisionSummaryRelation.localAhead =>
+        context.l10n.uiLocalRevisionIsNewer,
+      P2pRevisionSummaryRelation.remoteAhead =>
+        context.l10n.uiPeerRevisionIsNewer,
+      P2pRevisionSummaryRelation.concurrent =>
+        context.l10n.uiConcurrentRevisionsDetected,
       null => "",
     };
     final content = state.hasSnapshotContentTransfer
-        ? "；snapshot chunk gate 已啟用"
+        ? context.l10n.uiSnapshotChunkValidationEnabled
         : "";
     return "$transport$relation$content";
   }
@@ -834,31 +891,50 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
   String _p2pSnapshotManifestStatusText(P2pSyncState state) {
     final local = state.localSnapshotManifest;
     final localText = local == null
-        ? "本機 manifest：尚未建立"
-        : "本機 manifest：${local.contentLength} bytes／${local.chunkCount} chunks";
+        ? context.l10n.uiLocalManifestNotCreated
+        : context.l10n.uiLocalManifestBytesChunks(
+            context.formats.integer(local.contentLength),
+            context.formats.integer(local.chunkCount),
+          );
     final remoteText = switch (state.snapshotManifestStatus) {
-      P2pSnapshotManifestStatus.inactive => "對方 manifest：尚未協商",
-      P2pSnapshotManifestStatus.requesting => "對方 manifest：要求中…",
+      P2pSnapshotManifestStatus.inactive =>
+        context.l10n.uiPeerManifestNotNegotiated,
+      P2pSnapshotManifestStatus.requesting =>
+        context.l10n.uiPeerManifestRequesting,
       P2pSnapshotManifestStatus.available =>
-        "對方 manifest：已驗證（${state.remoteSnapshotManifest?.contentLength ?? 0} bytes）",
-      P2pSnapshotManifestStatus.unavailable => "對方 manifest：目前不可用",
-      P2pSnapshotManifestStatus.error => "對方 manifest：驗證失敗",
+        context.l10n.uiPeerManifestVerifiedBytes(
+          context.formats.integer(
+            state.remoteSnapshotManifest?.contentLength ?? 0,
+          ),
+        ),
+      P2pSnapshotManifestStatus.unavailable =>
+        context.l10n.uiPeerManifestCurrentlyUnavailable,
+      P2pSnapshotManifestStatus.error =>
+        context.l10n.uiPeerManifestVerificationFailed,
     };
     return "$localText；$remoteText";
   }
 
   String _p2pRevisionDagStatusText(P2pSyncState state) {
-    if (state.isRevisionGraphLoading) return "Revision DAG：正在交換 graph pages…";
-    if (state.revisionGraphError != null) {
-      return "Revision DAG：${state.revisionGraphError}";
+    if (state.isRevisionGraphLoading)
+      return context.l10n.uiRevisionDAGExchangingGraphPages;
+    if (state.revisionGraphErrorFor(context.l10n) != null) {
+      return "Revision DAG：${state.revisionGraphErrorFor(context.l10n)}";
     }
     final remote = state.remoteRevisionGraph;
-    if (remote == null) return "Revision DAG：尚未交換完整歷史";
+    if (remote == null)
+      return context.l10n.uiRevisionDAGFullHistoryNotYetExchanged;
     final ancestors = state.commonAncestorRevisionIds.length;
     final ack = state.remoteResolutionAck;
     return ack == null
-        ? "Revision DAG：遠端 ${remote.revisions.length} revisions；$ancestors 個 maximal common ancestors；等待 resolve/ACK"
-        : "Revision DAG：對方已 ACK resolve ${ack.resolutionRevisionId.substring(0, 8)}";
+        ? context.l10n
+              .uiRevisionDAGRemoteRevisionsMaximalCommonAncestorsWaiting(
+                context.formats.integer(remote.revisions.length),
+                context.formats.integer(ancestors),
+              )
+        : context.l10n.uiRevisionDAGPeerAcknowledgedResolution(
+            (ack.resolutionRevisionId.substring(0, 8)).toString(),
+          );
   }
 
   Future<void> _openExternalLink(Uri uri) async {
@@ -875,7 +951,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
       if (!mounted) {
         return;
       }
-      _showMessage("無法直接開啟連結，已複製到剪貼簿");
+      _showMessage(context.l10n.uiCouldNotOpenTheLinkItHasBeen);
     }
   }
 
@@ -1059,10 +1135,10 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                       style: TextButtonStyle,
                       onPressed: _handleNewProject,
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.create_outlined, size: 18),
                           SizedBox(width: 4),
-                          Text("New Project"),
+                          Text(context.l10n.uiNewProject),
                         ],
                       ),
                     ),
@@ -1070,10 +1146,10 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                       style: TextButtonStyle,
                       onPressed: _handleOpenProject,
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.folder_open, size: 18),
                           SizedBox(width: 4),
-                          Text("Open File"),
+                          Text(context.l10n.uiOpenFile2),
                         ],
                       ),
                     ),
@@ -1081,11 +1157,11 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                       style: TextButtonStyle,
                       onPressed: () => _openExternalLink(_projectRepoUri),
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.code, size: 18),
                           SizedBox(width: 4),
                           Flexible(
-                            child: Text("Open GitHub Repo for This Project"),
+                            child: Text(context.l10n.uiOpenThisProjectOnGitHub),
                           ),
                         ],
                       ),
@@ -1094,11 +1170,11 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                       style: TextButtonStyle,
                       onPressed: () => _openExternalLink(_KadoURL),
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.person_pin, size: 18),
                           SizedBox(width: 4),
                           Flexible(
-                            child: Text("Heyairu's Profile on KadoKado"),
+                            child: Text(context.l10n.uiHeyairuSKadoKadoProfile),
                           ),
                         ],
                       ),
@@ -1119,11 +1195,11 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                       style: TextButtonStyle,
                       onPressed: () => _openExternalLink(_GFormsURL),
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.feedback_rounded, size: 18),
                           SizedBox(width: 4),
                           Flexible(
-                            child: Text("Comment (on Google Forms)"),
+                            child: Text(context.l10n.uiSendFeedbackGoogleForms),
                           ),
                         ],
                       ),
@@ -1132,11 +1208,13 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                       style: TextButtonStyle,
                       onPressed: () => _openExternalLink(_GitHubIssueURL),
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.feedback_rounded, size: 18),
                           SizedBox(width: 4),
                           Flexible(
-                            child: Text("Comment (on GitHub Issues)"),
+                            child: Text(
+                              context.l10n.uiSendFeedbackGitHubIssues,
+                            ),
                           ),
                         ],
                       ),
@@ -1211,16 +1289,20 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                     const SmallTitle(icon: Icons.folder, text: "Recent"),
                     const SizedBox(height: 12),
                     if (recentProjects.isEmpty)
-                      const AppEmptyState(
-                        title: "尚無最近開啟檔案",
-                        description: "開啟專案後會顯示在這裡",
+                      AppEmptyState(
+                        title: context.l10n.uiNoRecentFiles,
+                        description:
+                            context.l10n.uiProjectsYouOpenWillAppearHere,
                         icon: Icons.history_outlined,
                         compact: true,
                         padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
                       )
                     else
                       ...recentProjects.take(5).map((entry) {
-                        final subtitle = entry.filePath ?? entry.uri ?? "無可用路徑";
+                        final subtitle =
+                            entry.filePath ??
+                            entry.uri ??
+                            context.l10n.uiNoUsablePath;
                         return Row(
                           children: [
                             Expanded(
@@ -1263,7 +1345,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                               ),
                             ),
                             IconButton(
-                              tooltip: "從最近清單移除",
+                              tooltip: context.l10n.uiRemoveFromRecentProjects,
                               onPressed: () =>
                                   _handleDeleteRecentProject(entry),
                               icon: const Icon(Icons.close),
@@ -1287,7 +1369,10 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SmallTitle(icon: Icons.person_outline, text: "姓名產生器"),
+                    SmallTitle(
+                      icon: Icons.person_outline,
+                      text: context.l10n.uiNameGenerator,
+                    ),
                     const SizedBox(height: 16),
                     // Col 1: language, gender, count, generate button.
                     Column(
@@ -1297,25 +1382,25 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "語言",
+                              context.l10n.uiLanguage,
                               style: Theme.of(context).textTheme.labelMedium,
                             ),
                             const SizedBox(height: 6),
                             AppDropdownField<String>(
                               value: _selectedLanguage,
                               textStyle: dropdownTextStyle,
-                              options: const [
+                              options: [
                                 DropdownOption<String>(
                                   value: "JP",
-                                  label: "日式",
+                                  label: context.l10n.uiJapanese,
                                 ),
                                 DropdownOption<String>(
                                   value: "ZH",
-                                  label: "中式",
+                                  label: context.l10n.uiChinese,
                                 ),
                                 DropdownOption<String>(
                                   value: "KR",
-                                  label: "韓式",
+                                  label: context.l10n.uiKorean,
                                 ),
                               ],
                               onChanged: (String? value) {
@@ -1334,31 +1419,31 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "性別",
+                              context.l10n.uiGender,
                               style: Theme.of(context).textTheme.labelMedium,
                             ),
                             const SizedBox(height: 6),
                             AppDropdownField<String>(
                               value: effectiveGenderValue,
                               textStyle: dropdownTextStyle,
-                              options: const [
+                              options: [
                                 DropdownOption<String>(
                                   value: "all",
                                   enabled: false,
-                                  label: "全部（目前不可用）",
+                                  label: context.l10n.uiAllUnavailable,
                                 ),
                                 DropdownOption<String>(
                                   value: "male",
-                                  label: "男性",
+                                  label: context.l10n.uiMale,
                                 ),
                                 DropdownOption<String>(
                                   value: "neutral",
                                   enabled: false,
-                                  label: "中性（目前不可用）",
+                                  label: context.l10n.uiNeutralUnavailable,
                                 ),
                                 DropdownOption<String>(
                                   value: "female",
-                                  label: "女性",
+                                  label: context.l10n.uiFemale,
                                 ),
                               ],
                               onChanged: (String? value) {
@@ -1379,7 +1464,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "生成數",
+                              context.l10n.uiNumberToGenerate,
                               style: Theme.of(context).textTheme.labelMedium,
                             ),
                             const SizedBox(height: 6),
@@ -1411,7 +1496,10 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                           onPressed: _isGeneratingNames ? null : _generateNames,
                           child: Row(
                             children: [
-                              MediumTitle(icon: Icons.east, text: "生成"),
+                              MediumTitle(
+                                icon: Icons.east,
+                                text: context.l10n.uiGenerate,
+                              ),
                               const Spacer(),
                             ],
                           ),
@@ -1430,13 +1518,13 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "結果",
+                                  context.l10n.uiResults,
                                   style: Theme.of(
                                     context,
                                   ).textTheme.labelMedium,
                                 ),
                                 IconButton(
-                                  tooltip: "複製結果",
+                                  tooltip: context.l10n.uiCopyResults,
                                   onPressed: _generatedNames.isEmpty
                                       ? null
                                       : _copyGeneratedNames,
@@ -1458,7 +1546,9 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                               child: SelectionArea(
                                 child: Text(
                                   _generatedNames.isEmpty
-                                      ? "按下「生成」來產生姓名"
+                                      ? context
+                                            .l10n
+                                            .uiSelectGenerateToCreateNames
                                       : _generatedNames.join("\n"),
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 ),
@@ -1486,10 +1576,10 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                   children: [
                     Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: SmallTitle(
                             icon: Icons.sync_alt_outlined,
-                            text: "內容同步",
+                            text: context.l10n.uiContentSync,
                           ),
                         ),
                         Chip(
@@ -1514,13 +1604,18 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "完成簽章配對與 authenticated transport 後，可交換加密 revision、manifest 與 snapshot chunks；接收內容只會進入隔離驗證區。",
+                      context
+                          .l10n
+                          .uiAfterSignedPairingAndAnAuthenticatedConnectionDevices,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Text("本機服務", style: Theme.of(context).textTheme.titleSmall),
+                    Text(
+                      context.l10n.uiLocalService,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
                     const SizedBox(height: 10),
                     Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
@@ -1528,9 +1623,9 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                       runSpacing: 8,
                       children: [
                         if (p2pState.localAddresses.isEmpty)
-                          const AppControlChip(
+                          AppControlChip(
                             avatar: Icon(Icons.lan_outlined, size: 16),
-                            label: "尚未找到可用 LAN IPv4",
+                            label: context.l10n.uiNoUsableLANIPv4AddressFound,
                           )
                         else
                           ...p2pState.localAddresses.map(
@@ -1549,7 +1644,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                           ),
                         IconButton(
                           key: const Key("p2p-refresh-local-addresses-button"),
-                          tooltip: "重新偵測本機 IP",
+                          tooltip: context.l10n.uiDetectLocalIPAgain,
                           constraints: BoxConstraints.tightFor(
                             width: AppControlSize.heightForContext(context),
                             height: AppControlSize.heightForContext(context),
@@ -1569,7 +1664,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                           controller: _localPortController,
                           enabled:
                               !p2pState.isListening && !p2pState.isServiceBusy,
-                          labelText: "本機 Port",
+                          labelText: context.l10n.uiLocalPort,
                           errorText: _localPortError,
                           keyboardType: TextInputType.number,
                           inputFormatters: [
@@ -1587,7 +1682,11 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                                 ? Icons.stop_circle_outlined
                                 : Icons.play_circle_outline,
                           ),
-                          label: Text(p2pState.isListening ? "中斷服務" : "開啟服務"),
+                          label: Text(
+                            p2pState.isListening
+                                ? context.l10n.uiStopService
+                                : context.l10n.uiStartService,
+                          ),
                         );
                         if (constraints.maxWidth >= 280 &&
                             constraints.maxWidth < 350) {
@@ -1617,7 +1716,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      "連線至裝置",
+                      context.l10n.uiConnectToDevice,
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                     const SizedBox(height: 10),
@@ -1634,8 +1733,8 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                           child: AppTextField(
                             key: const Key("p2p-peer-ip-field"),
                             controller: _peerIpController,
-                            labelText: "對方 IP",
-                            hintText: "例如 192.168.1.23",
+                            labelText: context.l10n.uiPeerIP,
+                            hintText: context.l10n.uiForExample,
                             errorText: _peerIpError,
                             keyboardType: TextInputType.url,
                             textInputAction: TextInputAction.next,
@@ -1646,7 +1745,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                           child: AppTextField(
                             key: const Key("p2p-peer-port-field"),
                             controller: _peerPortController,
-                            labelText: "對方 Port",
+                            labelText: context.l10n.uiPeerPort,
                             errorText: _peerPortError,
                             keyboardType: TextInputType.number,
                             textInputAction: TextInputAction.done,
@@ -1674,10 +1773,10 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                           label: Text(
                             p2pState.connectionStatus ==
                                     P2pConnectionStatus.reachableUnpaired
-                                ? "端點已驗證"
+                                ? context.l10n.uiEndpointVerified
                                 : p2pState.isConnecting
-                                ? "連線中…"
-                                : "連線",
+                                ? context.l10n.uiConnecting
+                                : context.l10n.uiConnect,
                           ),
                         ),
                         if (p2pState.hasReachablePeer)
@@ -1689,7 +1788,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                                       .read(p2pSyncProvider.notifier)
                                       .disconnectPeer(),
                             icon: const Icon(Icons.link_off),
-                            label: const Text("中斷連線"),
+                            label: Text(context.l10n.uiDisconnect),
                           ),
                       ],
                     ),
@@ -1708,12 +1807,16 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "裝置身分與配對",
+                            context.l10n.uiDeviceIdentityAndPairing,
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            "本機指紋：${p2pState.localIdentity?.shortFingerprint ?? '初始化中…'}",
+                            context.l10n.uiLocalFingerprint(
+                              (p2pState.localIdentity?.shortFingerprint ??
+                                      context.l10n.uiInitializing)
+                                  .toString(),
+                            ),
                             key: const Key("p2p-local-fingerprint"),
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
@@ -1726,8 +1829,12 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                               p2pState.remotePairingChallenge != null)
                             Text(
                               p2pState.isSingleDeviceConfirmationNegotiated
-                                  ? "確認模式：單端確認（雙方設定皆已開啟）"
-                                  : "確認模式：雙端各自確認（至少一方已關閉單端確認）",
+                                  ? context
+                                        .l10n
+                                        .uiConfirmationOneDeviceEnabledOnBothDevices
+                                  : context
+                                        .l10n
+                                        .uiConfirmationBothDevicesOneOrBothDisabledSingle,
                               key: const Key("p2p-pairing-confirmation-mode"),
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
@@ -1760,27 +1867,30 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                             key: const Key("p2p-revision-dag-status"),
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
-                          if (p2pState.revisionMetadataError != null)
+                          if (p2pState.revisionMetadataErrorFor(context.l10n) !=
+                              null)
                             Text(
-                              p2pState.revisionMetadataError!,
+                              p2pState.revisionMetadataErrorFor(context.l10n)!,
                               key: const Key("p2p-revision-error"),
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
                                     color: Theme.of(context).colorScheme.error,
                                   ),
                             ),
-                          if (p2pState.secureTransportError != null)
+                          if (p2pState.secureTransportErrorFor(context.l10n) !=
+                              null)
                             Text(
-                              p2pState.secureTransportError!,
+                              p2pState.secureTransportErrorFor(context.l10n)!,
                               key: const Key("p2p-secure-transport-error"),
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
                                     color: Theme.of(context).colorScheme.error,
                                   ),
                             ),
-                          if (p2pState.snapshotManifestError != null)
+                          if (p2pState.snapshotManifestErrorFor(context.l10n) !=
+                              null)
                             Text(
-                              p2pState.snapshotManifestError!,
+                              p2pState.snapshotManifestErrorFor(context.l10n)!,
                               key: const Key("p2p-snapshot-manifest-error"),
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
@@ -1789,7 +1899,11 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                             ),
                           if (p2pState.pairingCode != null) ...[
                             const SizedBox(height: 12),
-                            const Text("請確認兩台裝置顯示完全相同的配對碼："),
+                            Text(
+                              context
+                                  .l10n
+                                  .uiConfirmBothDevicesDisplayExactlyTheSamePairing,
+                            ),
                             const SizedBox(height: 6),
                             SelectableText(
                               p2pState.pairingCode!,
@@ -1803,8 +1917,12 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                             const SizedBox(height: 4),
                             Text(
                               p2pState.isSingleDeviceConfirmationNegotiated
-                                  ? "若數字不同請取消配對；任一端確認後，另一端會驗證簽章並自動回簽。"
-                                  : "若數字不同請取消配對；目前需兩端各自確認，完成後才會開啟加密內容通道。",
+                                  ? context
+                                        .l10n
+                                        .uiCancelIfTheCodesDifferAfterEitherDevice
+                                  : context
+                                        .l10n
+                                        .uiCancelIfTheCodesDifferBothDevicesMust,
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
                                     color: Theme.of(context).colorScheme.error,
@@ -1851,7 +1969,9 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                                             );
                                           },
                                     icon: const Icon(Icons.key_outlined),
-                                    label: const Text("開始安全配對"),
+                                    label: Text(
+                                      context.l10n.uiStartSecurePairing,
+                                    ),
                                   ),
                                 if (p2pState.pairingStatus ==
                                     P2pPairingStatus.comparisonRequired)
@@ -1865,7 +1985,9 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                                     icon: const Icon(
                                       Icons.verified_user_outlined,
                                     ),
-                                    label: const Text("確認配對碼相同"),
+                                    label: Text(
+                                      context.l10n.uiConfirmCodesMatch,
+                                    ),
                                   ),
                                 if (p2pState.pairingStatus ==
                                         P2pPairingStatus.waitingForPeer ||
@@ -1879,7 +2001,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                                     onPressed: () => ref
                                         .read(p2pSyncProvider.notifier)
                                         .cancelPairing(),
-                                    child: const Text("取消配對"),
+                                    child: Text(context.l10n.uiCancelPairing),
                                   ),
                               ],
                             ),
@@ -1889,8 +2011,12 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                             const SizedBox(height: 10),
                             Text(
                               p2pState.hasAuthenticatedTransport
-                                  ? "雙方身分與短期 ECDH key 已綁定至同一 transcript；相同 project session 可交換加密 snapshot chunks，接收後仍須通過 quarantine 驗證。"
-                                  : "雙方已簽署同一組 challenge，正在建立 authenticated encrypted transport；建立前不交換 revision summary 或內容。",
+                                  ? context
+                                        .l10n
+                                        .uiBothIdentitiesAndTemporaryECDHKeysAreBound
+                                  : context
+                                        .l10n
+                                        .uiBothDevicesSignedTheSameChallengeEstablishingAuthenticated,
                               key: const Key("p2p-mutually-confirmed-notice"),
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
@@ -1912,12 +2038,13 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "同步文件",
+                            context.l10n.uiSyncProject,
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            widget.localP2pProject?.fileName ?? "尚未開啟專案",
+                            widget.localP2pProject?.fileName ??
+                                context.l10n.uiNoProjectOpen,
                             key: const Key("p2p-project-file-name"),
                           ),
                           const SizedBox(height: 2),
@@ -1928,12 +2055,19 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                           if (p2pState.remoteProjectOffer != null) ...[
                             const SizedBox(height: 6),
                             Text(
-                              "對方文件：${p2pState.remoteProjectOffer!.fileName ?? '沒有可同步文件'}",
+                              context.l10n.uiPeerFile(
+                                (p2pState.remoteProjectOffer!.fileName ??
+                                        context.l10n.uiNoProjectToSync)
+                                    .toString(),
+                              ),
                               key: const Key("p2p-remote-project-file-name"),
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             Text(
-                              "對方 UUID：${p2pState.remoteProjectOffer!.shortUuid}",
+                              context.l10n.uiPeerUUID(
+                                (p2pState.remoteProjectOffer!.shortUuid)
+                                    .toString(),
+                              ),
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],
@@ -1951,16 +2085,22 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                                       : Theme.of(context).colorScheme.error,
                                 ),
                           ),
-                          if (p2pTransferState.message != null ||
-                              p2pTransferState.errorMessage != null) ...[
+                          if (p2pTransferState.messageFor(context.l10n) !=
+                                  null ||
+                              p2pTransferState.errorMessageFor(context.l10n) !=
+                                  null) ...[
                             const SizedBox(height: 6),
                             Text(
-                              p2pTransferState.errorMessage ??
-                                  p2pTransferState.message!,
+                              p2pTransferState.errorMessageFor(context.l10n) ??
+                                  p2pTransferState.messageFor(context.l10n)!,
                               key: const Key("p2p-snapshot-transfer-status"),
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
-                                    color: p2pTransferState.errorMessage == null
+                                    color:
+                                        p2pTransferState.errorMessageFor(
+                                              context.l10n,
+                                            ) ==
+                                            null
                                         ? Theme.of(
                                             context,
                                           ).colorScheme.onSurfaceVariant
@@ -1980,19 +2120,25 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                                 label: Text(
                                   localP2pPreflight.canCollaborate ||
                                           _isReceivingRemoteProject(p2pState)
-                                      ? "更換同步文件"
-                                      : "準備同步文件",
+                                      ? context.l10n.uiChangeSyncProject
+                                      : context.l10n.uiPrepareSyncProject,
                                 ),
                               ),
                               Tooltip(
                                 message:
                                     p2pState.revisionSummaryRelation ==
                                         P2pRevisionSummaryRelation.concurrent
-                                    ? "雙方 revision 並行，必須先進入欄位級衝突處理"
+                                    ? context
+                                          .l10n
+                                          .uiRevisionsDivergedResolveFieldLevelConflictsFirst
                                     : p2pState.revisionSummaryRelation ==
                                           P2pRevisionSummaryRelation.localAhead
-                                    ? "透過 authenticated transport 要求接收端下載目前 snapshot"
-                                    : "僅接受 authenticated transport 中與目前 session 完全相符的遠端 snapshot",
+                                    ? context
+                                          .l10n
+                                          .uiAskTheReceiverToDownloadTheCurrentSnapshot
+                                    : context
+                                          .l10n
+                                          .uiOnlyAcceptARemoteSnapshotThatExactlyMatches,
                                 child: FilledButton.icon(
                                   key: const Key("p2p-immediate-sync-button"),
                                   onPressed:
@@ -2024,12 +2170,12 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                                   label: Text(
                                     p2pTransferState.status ==
                                             P2pSnapshotTransferStatus.applying
-                                        ? "正在套用"
+                                        ? context.l10n.uiApplying
                                         : p2pTransferState.status ==
                                               P2pSnapshotTransferStatus
                                                   .downloading
-                                        ? "正在下載"
-                                        : "立即同步",
+                                        ? context.l10n.uiDownloading
+                                        : context.l10n.uiSyncNow,
                                   ),
                                 ),
                               ),
@@ -2053,7 +2199,9 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                                       ? _handleCompareRemoteSnapshot
                                       : null,
                                   icon: const Icon(Icons.difference_outlined),
-                                  label: const Text('比較遠端版本'),
+                                  label: Text(
+                                    context.l10n.uiCompareRemoteRevision,
+                                  ),
                                 ),
                               if (p2pTransferState.isBusy)
                                 TextButton(
@@ -2065,21 +2213,22 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                                         p2pSnapshotTransferProvider.notifier,
                                       )
                                       .cancel(),
-                                  child: const Text("取消傳輸"),
+                                  child: Text(context.l10n.uiCancelTransfer),
                                 ),
                             ],
                           ),
                         ],
                       ),
                     ),
-                    if (p2pState.message != null ||
-                        p2pState.errorMessage != null) ...[
+                    if (p2pState.messageFor(context.l10n) != null ||
+                        p2pState.errorMessageFor(context.l10n) != null) ...[
                       const SizedBox(height: 12),
                       Text(
-                        p2pState.errorMessage ?? p2pState.message!,
+                        p2pState.errorMessageFor(context.l10n) ??
+                            p2pState.messageFor(context.l10n)!,
                         key: const Key("p2p-operation-message"),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: p2pState.errorMessage == null
+                          color: p2pState.errorMessageFor(context.l10n) == null
                               ? Theme.of(context).colorScheme.onSurfaceVariant
                               : Theme.of(context).colorScheme.error,
                         ),

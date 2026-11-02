@@ -14,6 +14,7 @@
  * limitations under the License.
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "../features/help/help_scope.dart";
 import "../features/help/help_topic.dart";
 import "dart:async";
@@ -118,7 +119,8 @@ class EditorTextBox extends ConsumerStatefulWidget {
 }
 
 class EditorTextBoxState extends ConsumerState<EditorTextBox> {
-  static const _intelliSenseEngine = MosaicIntelliSenseEngine();
+  MosaicIntelliSenseEngine get _intelliSenseEngine =>
+      MosaicIntelliSenseEngine(localizations: context.l10n);
   static const _targetResolver = InlineAnnotationTargetResolver();
   static const _uuid = Uuid();
   final GlobalKey<RemoteTextCursorOverlayState> _remoteCursorLayerKey =
@@ -329,6 +331,14 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
     return true;
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _refreshCompletion();
+    });
+  }
+
   void _refreshCompletion() {
     if (!mounted) return;
     final controller = widget.controller;
@@ -525,9 +535,9 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
     if (parsed.length != 1) return;
     final name = await _showCreateTargetDialog(
       parsed.single.kind,
-      title: "輸入其他顯示文字（不加入別名）",
-      submitLabel: "插入",
-      fieldLabel: "顯示文字",
+      title: context.l10n.uiEnterAlternativeDisplayTextNotAddedAsAn,
+      submitLabel: context.l10n.uiInsert,
+      fieldLabel: context.l10n.uiDisplayText,
     );
     if (!mounted || name == null || controller.rawText != original) return;
     final annotation = parsed.single;
@@ -582,7 +592,7 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
     final originalRawText = controller.rawText;
     final name = await _showCreateTargetDialog(
       InlineAnnotationKind.character,
-      title: "新增別名",
+      title: context.l10n.uiAddAlias,
     );
     if (!mounted || name == null) return;
     ref.read(characterDataProvider.notifier).updateCharacterEntry(characterId, (
@@ -656,25 +666,25 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
   Future<String?> _showCreateTargetDialog(
     InlineAnnotationKind kind, {
     String? title,
-    String submitLabel = "建立",
-    String fieldLabel = "名稱",
+    String? submitLabel,
+    String? fieldLabel,
   }) async {
     var draftName = "";
     final label = switch (kind) {
-      InlineAnnotationKind.character => "人物",
-      InlineAnnotationKind.location => "地點",
-      InlineAnnotationKind.event => "事件",
-      InlineAnnotationKind.foreshadowing => "伏筆",
-      InlineAnnotationKind.plan => "計畫",
-      InlineAnnotationKind.item => "物品",
-      InlineAnnotationKind.emphasis => "重點",
+      InlineAnnotationKind.character => context.l10n.uiCharacter,
+      InlineAnnotationKind.location => context.l10n.uiLocation,
+      InlineAnnotationKind.event => context.l10n.uiEvent,
+      InlineAnnotationKind.foreshadowing => context.l10n.uiForeshadowing,
+      InlineAnnotationKind.plan => context.l10n.uiPlan,
+      InlineAnnotationKind.item => context.l10n.uiItem,
+      InlineAnnotationKind.emphasis => context.l10n.uiKeyPoint,
     };
     return showDialog<String>(
       context: context,
       builder: (dialogContext) => HelpTarget(
         topicId: HelpTopicId.annotations,
         child: AlertDialog(
-          title: Text(title ?? "新增$label"),
+          title: Text(title ?? dialogContext.l10n.uiAdd((label).toString())),
           content: SizedBox(
             width: 320,
             child: TextField(
@@ -683,7 +693,7 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
               decoration: appFieldDecoration(
                 context,
                 decoration: InputDecoration(
-                  labelText: fieldLabel,
+                  labelText: fieldLabel ?? dialogContext.l10n.uiName2,
                   isDense: true,
                 ),
               ),
@@ -699,7 +709,7 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text("取消"),
+              child: Text(dialogContext.l10n.commonCancel),
             ),
             FilledButton(
               key: const ValueKey("mosaic-create-target-submit"),
@@ -709,7 +719,7 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
                   Navigator.of(dialogContext).pop(trimmed);
                 }
               },
-              child: Text(submitLabel),
+              child: Text(submitLabel ?? context.l10n.commonCreate),
             ),
           ],
         ),
@@ -968,9 +978,13 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
         resolutions: resolutions,
       );
       if (!inserted && mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('正文已變更，請重新選取短語')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.uiTheManuscriptHasChangedSelectThePhraseAgain,
+            ),
+          ),
+        );
       }
       _dismissedPhraseStart = null;
       _phraseMenuTriggerStart = null;
@@ -979,9 +993,13 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
       widget.focusNode.requestFocus();
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('無法插入短語：$error')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.uiCouldNotInsertThePhrase((error).toString()),
+          ),
+        ),
+      );
     }
   }
 
@@ -997,7 +1015,9 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
         builder: (dialogContext, update) => HelpTarget(
           topicId: HelpTopicId.phrases,
           child: AlertDialog(
-            title: Text('重新連結「${annotation.displayText}」'),
+            title: Text(
+              dialogContext.l10n.uiRelink((annotation.displayText).toString()),
+            ),
             content: SizedBox(
               width: 420,
               height: 360,
@@ -1007,7 +1027,9 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
                     autofocus: true,
                     decoration: appFieldDecoration(
                       context,
-                      decoration: const InputDecoration(labelText: '搜尋對象'),
+                      decoration: InputDecoration(
+                        labelText: dialogContext.l10n.uiSearchTargets,
+                      ),
                     ),
                     onChanged: (value) =>
                         update(() => query = value.toLowerCase()),
@@ -1037,12 +1059,12 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('取消插入'),
+                child: Text(dialogContext.l10n.uiCancelInsertion),
               ),
               TextButton(
                 onPressed: () =>
                     Navigator.pop(dialogContext, const FlattenPhraseMention()),
-                child: const Text('改為純文字'),
+                child: Text(dialogContext.l10n.uiConvertToPlainText),
               ),
             ],
           ),
@@ -1064,9 +1086,11 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
   void saveSelectionAsPhrase() {
     final selection = widget.controller.selection;
     if (!selection.isValid || selection.isCollapsed) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('請先選取要存為短語的正文內容')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.uiSelectManuscriptTextToSaveAsAPhrase),
+        ),
+      );
       return;
     }
     _saveSelectionAsPhrase();
@@ -1104,9 +1128,11 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
         .where((phrase) => phrase.enabled)
         .toList();
     if (phrases.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('尚無可插入的短語，請先在短語庫新增短語')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.uiNoPhrasesAreAvailableAddAPhraseIn),
+        ),
+      );
       return;
     }
     final selected = await showDialog<String>(
@@ -1114,7 +1140,7 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
       builder: (dialogContext) => HelpTarget(
         topicId: HelpTopicId.phrases,
         child: SimpleDialog(
-          title: const Text('插入短語'),
+          title: Text(dialogContext.l10n.uiInsertPhrase),
           children: [
             for (final phrase in phrases)
               SimpleDialogOption(
@@ -1129,9 +1155,13 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
     if (selected != null) {
       if (controller != widget.controller ||
           controller.rawRevision != revision) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('正文已變更，請重新選取短語')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.uiTheManuscriptHasChangedSelectThePhraseAgain,
+            ),
+          ),
+        );
         return;
       }
       controller.selection = selection.isValid
@@ -1152,13 +1182,13 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
         children: [
           IconButton(
             key: const ValueKey('phrase-library-button'),
-            tooltip: '短語庫',
+            tooltip: context.l10n.uiPhraseLibrary,
             onPressed: () => unawaited(_openPhraseLibrary()),
             icon: const Icon(Icons.library_books_outlined),
           ),
           IconButton(
             key: const ValueKey('insert-phrase-button'),
-            tooltip: '插入短語',
+            tooltip: context.l10n.uiInsertPhrase,
             onPressed: () => unawaited(_showPhrasePicker()),
             icon: const Icon(Icons.add_comment_outlined),
           ),
@@ -1914,8 +1944,14 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
                                         target?.primaryName ??
                                         (annotation.targetId == null
                                             ? annotation.displayText
-                                            : "遺失對象");
-                                    return "原名：$name\n備註：${annotation.note?.isNotEmpty == true ? annotation.note : '無'}";
+                                            : context.l10n.uiMissingTarget);
+                                    return context.l10n.uiOriginalNameNotes(
+                                      (name).toString(),
+                                      (annotation.note?.isNotEmpty == true
+                                              ? annotation.note
+                                              : context.l10n.uiNone)
+                                          .toString(),
+                                    );
                                   },
                                 ),
                               ),
@@ -2007,7 +2043,7 @@ class _MentionSelectionControls extends MaterialTextSelectionControls {
       buttonItems: [
         if (canCut(delegate))
           ContextMenuButtonItem(
-            label: "剪下",
+            label: context.l10n.editorCut,
             onPressed: () {
               delegate.hideToolbar();
               onCopy(true);
@@ -2015,7 +2051,7 @@ class _MentionSelectionControls extends MaterialTextSelectionControls {
           ),
         if (canCopy(delegate))
           ContextMenuButtonItem(
-            label: "複製",
+            label: context.l10n.commonCopy,
             onPressed: () {
               delegate.hideToolbar();
               onCopy(false);
@@ -2023,7 +2059,7 @@ class _MentionSelectionControls extends MaterialTextSelectionControls {
           ),
         if (canPaste(delegate))
           ContextMenuButtonItem(
-            label: "貼上",
+            label: context.l10n.editorPaste,
             onPressed: () {
               delegate.hideToolbar();
               onPaste();
@@ -2031,12 +2067,12 @@ class _MentionSelectionControls extends MaterialTextSelectionControls {
           ),
         if (canSelectAll(delegate))
           ContextMenuButtonItem(
-            label: "全選",
+            label: context.l10n.editorSelectAll,
             onPressed: () => handleSelectAll(delegate),
           ),
         if (!delegate.textEditingValue.selection.isCollapsed)
           ContextMenuButtonItem(
-            label: "新增 Mention",
+            label: context.l10n.uiAddMention,
             onPressed: () {
               delegate.hideToolbar();
               onMention();
@@ -2044,7 +2080,7 @@ class _MentionSelectionControls extends MaterialTextSelectionControls {
           ),
         if (!delegate.textEditingValue.selection.isCollapsed)
           ContextMenuButtonItem(
-            label: '存成短語',
+            label: context.l10n.uiSaveAsPhrase,
             onPressed: () {
               delegate.hideToolbar();
               onSavePhrase();

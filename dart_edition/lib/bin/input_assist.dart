@@ -14,6 +14,7 @@
  * limitations under the License.
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "../ui_library/spacing.dart";
@@ -100,9 +101,15 @@ class _PunctuationPanelState extends State<PunctuationPanel> {
             Container(
               margin: const EdgeInsets.only(right: 8),
               child: SegmentedButton<bool>(
-                segments: const [
-                  ButtonSegment<bool>(value: true, label: Text("全形")),
-                  ButtonSegment<bool>(value: false, label: Text("半形")),
+                segments: [
+                  ButtonSegment<bool>(
+                    value: true,
+                    label: Text(context.l10n.uiFullWidth),
+                  ),
+                  ButtonSegment<bool>(
+                    value: false,
+                    label: Text(context.l10n.uiHalfWidth),
+                  ),
                 ],
                 selected: {isFullWidth},
                 onSelectionChanged: (Set<bool> newSelection) {

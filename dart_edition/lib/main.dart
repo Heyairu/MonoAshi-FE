@@ -32,7 +32,6 @@ import "presentation/providers/locale_providers.dart";
 import "package:flutter/services.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:intl/intl.dart"; // Add intl for date formatting
 import "package:window_manager/window_manager.dart";
 import "bin/appbar.dart";
 import "package:material_ribbon/material_ribbon.dart";
@@ -142,9 +141,7 @@ class _ProjectIoBusyIndicator extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isBusy = ref.watch(
-      projectIoControllerProvider.select(
-        (value) => value.valueOrNull?.isBusy ?? value.isLoading,
-      ),
+      projectIoControllerProvider.select((value) => value.isProjectIoBusy),
     );
 
     if (!isBusy) {
@@ -280,6 +277,8 @@ class _MainAppState extends ConsumerState<MainApp> {
         localizationsDelegates: AppLocalization.delegates,
         theme: ThemeData(
           useMaterial3: true,
+          fontFamily: AppFonts.primary(resolvedLocale),
+          fontFamilyFallback: AppFonts.fallbacks(resolvedLocale),
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6750A4)),
         ),
         home: const AppSplash(),
@@ -293,6 +292,10 @@ class _MainAppState extends ConsumerState<MainApp> {
 
     if (bootstrap.hasError) {
       return MaterialApp(
+        theme: ThemeData(
+          fontFamily: AppFonts.primary(resolvedLocale),
+          fontFamilyFallback: AppFonts.fallbacks(resolvedLocale),
+        ),
         locale: localePreference.locale,
         supportedLocales: supportedAppLocales,
         localeListResolutionCallback: AppLocalization.resolve,
@@ -539,7 +542,7 @@ class _EditorStatusBarState extends ConsumerState<_EditorStatusBar> {
         : projectName;
     final saveTimeText = widget.lastSavedTime == null
         ? "--:--"
-        : DateFormat("HH:mm").format(widget.lastSavedTime!);
+        : context.formats.time(widget.lastSavedTime!);
     final cursor = _positionIndex.lineColumnFromOffset(status.cursorOffset);
 
     return MonogatariStatusBar(
@@ -723,8 +726,7 @@ class _ContentViewState extends ConsumerState<ContentView>
         ModalRoute.of(context)?.isCurrent == false ||
         help?.ownsFocus == true ||
         _topAppBarKey.currentState?.ownsMenuFocus == true ||
-        (ref.read(projectIoControllerProvider).valueOrNull?.blocksEditor ??
-            false) ||
+        ref.read(projectIoControllerProvider).blocksProjectEditor ||
         (editorFocusNode.hasFocus &&
             (_bodyEditorKey.currentState?.hasActiveCompletion == true ||
                 (textController.value.composing.isValid &&
@@ -789,7 +791,9 @@ class _ContentViewState extends ConsumerState<ContentView>
   }
 
   Widget _buildModuleSwitcherButton() {
-    final label = "切換模組，目前為${_currentModule.label}";
+    final label = context.l10n.uiSwitchModuleCurrent(
+      (context.l10n.legacyLabel(_currentModule.label)).toString(),
+    );
     return Tooltip(
       message:
           "$label（${Theme.of(context).platform == TargetPlatform.macOS ? "⌘⇧M" : "Ctrl+Shift+M"}）",
@@ -807,7 +811,7 @@ class _ContentViewState extends ConsumerState<ContentView>
               label: SizedBox(
                 width: 110,
                 child: Text(
-                  "${_currentModule.label} ▾",
+                  "${context.l10n.legacyLabel(_currentModule.label)} ▾",
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1484,8 +1488,8 @@ class _ContentViewState extends ConsumerState<ContentView>
         if (candidates.isEmpty) {
           await AppDialog.message(
             context: context,
-            title: "無可用對象",
-            message: "請先建立相同類型的對象，再重新連結此標記。",
+            title: context.l10n.uiNoTargetsAvailable,
+            message: context.l10n.uiCreateATargetOfTheSameTypeBefore,
           );
           if (mounted) textController.collapseAnnotations();
           break;
@@ -1511,7 +1515,11 @@ class _ContentViewState extends ConsumerState<ContentView>
         await Clipboard.setData(
           ClipboardData(text: result?.rawSyntax ?? rawSyntax),
         );
-        if (mounted) AppFeedback.success(context, "已複製完整標記語法。");
+        if (mounted)
+          AppFeedback.success(
+            context,
+            context.l10n.uiFullAnnotationSyntaxCopied,
+          );
         textController.collapseAnnotations();
         break;
       case InlineAnnotationDetailsAction.updateToPrimaryName:
@@ -1965,9 +1973,9 @@ class _ContentViewState extends ConsumerState<ContentView>
               }
               await AppDialog.message(
                 context: context,
-                title: "錯誤",
+                title: context.l10n.uiError,
                 message: dialogMessage,
-                closeLabel: "確定",
+                closeLabel: context.l10n.commonConfirm,
                 tone: AppFeedbackTone.error,
               );
 
@@ -2667,9 +2675,7 @@ class _ContentViewState extends ConsumerState<ContentView>
     final toolbarMode =
         toolbarPreference ?? ToolbarMode.defaultFor(Theme.of(context).platform);
     final projectIoBusy = ref.watch(
-      projectIoControllerProvider.select(
-        (state) => state.valueOrNull?.isBusy ?? true,
-      ),
+      projectIoControllerProvider.select((state) => state.isProjectIoBusy),
     );
 
     // 根據平台判斷快捷鍵修飾符 (Apple 設備使用 Command，其他使用 Control)
@@ -3391,7 +3397,7 @@ class _ContentViewState extends ConsumerState<ContentView>
                                     key: const ValueKey(
                                       "gauge-dashboard-toggle",
                                     ),
-                                    tooltip: "開啟儀表板",
+                                    tooltip: context.l10n.uiOpenDashboard,
                                     icon: const Icon(Icons.speed_rounded),
                                     onPressed: () {
                                       if (canShowDashboardInline) {
@@ -3502,7 +3508,7 @@ class _ContentViewState extends ConsumerState<ContentView>
       if (tracking.baseline?.readOnly != false ||
           tracking.status != RevisionComparisonStatus.complete ||
           !ref.read(revisionTrackingProvider.notifier).comparisonIsFresh()) {
-        _showMessage("正文已變更，請等待修訂重新計算後再批次拒絕。");
+        _showMessage(context.l10n.uiTheManuscriptChangedWaitForChangesToBe);
         return;
       }
       final updates = <String, ({String folderId, String content})>{};
@@ -3537,7 +3543,9 @@ class _ContentViewState extends ConsumerState<ContentView>
           );
         }
       } catch (_) {
-        _showMessage("批次拒絕的來源已變更；請重新計算差異。");
+        _showMessage(
+          context.l10n.uiTheBatchRejectionSourceHasChangedRecalculateThe,
+        );
         return;
       }
       _recordProjectHistorySnapshot();
@@ -3570,7 +3578,7 @@ class _ContentViewState extends ConsumerState<ContentView>
           current == null ||
           expected == null ||
           current.chapter.chapterContent != expected) {
-        _showMessage("正文已變更，請等待修訂重新計算後再拒絕。");
+        _showMessage(context.l10n.uiTheManuscriptChangedWaitForChangesToBe2);
         return;
       }
       final original =
@@ -3595,7 +3603,7 @@ class _ContentViewState extends ConsumerState<ContentView>
             );
         _recordProjectHistorySnapshot();
       } catch (_) {
-        _showMessage("此區塊位置已失效，請重新計算差異。");
+        _showMessage(context.l10n.uiThisBlockSPositionIsNoLongerValid);
       }
     },
     onRejectRecord: (record, field) {
@@ -3607,7 +3615,7 @@ class _ContentViewState extends ConsumerState<ContentView>
       if (tracking.status != RevisionComparisonStatus.complete ||
           tracking.comparison?.records.contains(record) != true ||
           !ref.read(revisionTrackingProvider.notifier).comparisonIsFresh()) {
-        _showMessage("欄位已變更，請等待修訂重新計算。");
+        _showMessage(context.l10n.uiTheFieldChangedWaitForChangesToBe);
         return;
       }
       final name = field.target.fieldPath.single;
@@ -3617,7 +3625,7 @@ class _ContentViewState extends ConsumerState<ContentView>
       ).records[record.key];
       final currentValue = currentRecord?.fields[name];
       if (currentValue != field.newValue) {
-        _showMessage("欄位已變更，請等待修訂重新計算。");
+        _showMessage(context.l10n.uiTheFieldChangedWaitForChangesToBe);
         return;
       }
       _recordProjectHistorySnapshot();
@@ -3823,7 +3831,9 @@ class _ContentViewState extends ConsumerState<ContentView>
           .read(editorCoordinatorProvider.notifier)
           .navigateToChapter(text.chapterId);
       if (!opened) {
-        _showMessage("章節已刪除；可在修訂窗格查看舊內容。");
+        _showMessage(
+          context.l10n.uiThisChapterWasDeletedViewItsPreviousContent,
+        );
         return;
       }
       onNavigate?.call();
@@ -4158,7 +4168,8 @@ class _ContentViewState extends ConsumerState<ContentView>
     final plan = await notifier.prepareConcurrentMerge(snapshot);
     if (!mounted || plan == null) {
       _showError(
-        ref.read(p2pSyncProvider).revisionMetadataError ?? "無法準備三方合併。",
+        ref.read(p2pSyncProvider).revisionMetadataErrorFor(context.l10n) ??
+            context.l10n.uiCouldNotPrepareTheThreeWayMerge,
       );
       return false;
     }
@@ -4180,7 +4191,9 @@ class _ContentViewState extends ConsumerState<ContentView>
           activeSessionId: activeMergeSession,
           headRevisionIds: graph.headIds,
         )) {
-      _showError("合併期間 revision heads 已變更；未套用過期的衝突選擇。");
+      _showError(
+        context.l10n.uiRevisionHeadsChangedDuringMergingOutdatedConflictChoices,
+      );
       return false;
     }
 
@@ -4188,7 +4201,9 @@ class _ContentViewState extends ConsumerState<ContentView>
     try {
       resolvedData = plan.apply(resolution);
     } catch (error) {
-      _showError("無法套用衝突選擇：$error");
+      _showError(
+        context.l10n.uiCouldNotApplyConflictChoices((error).toString()),
+      );
       return false;
     }
     _isProjectSwitching = true;
@@ -4223,7 +4238,7 @@ class _ContentViewState extends ConsumerState<ContentView>
         formatVersion: FileService.projectVersion,
       );
       if (!mounted || resolvedGraph == null) {
-        _showError("合併文件已寫入，但 resolve revision 建立失敗；請立即重試同步以復原 metadata。");
+        _showError(context.l10n.uiTheMergedFileWasSavedButCreatingThe);
         return false;
       }
       final initialState = ref
@@ -4236,10 +4251,13 @@ class _ContentViewState extends ConsumerState<ContentView>
       _markAsSaved();
       _updateAllWordCounts();
       _editorCoordinatorNotifier.resetAfterProjectLoaded();
-      _showMessage("欄位衝突已解決並建立雙 parent revision；正在等待對方 ACK。");
+      _showMessage(context.l10n.uiFieldConflictsResolvedAndARevisionWithTwo);
       return true;
     } catch (error) {
-      if (mounted) _showError("無法保存 resolve revision：$error");
+      if (mounted)
+        _showError(
+          context.l10n.uiCouldNotSaveTheResolutionRevision((error).toString()),
+        );
       return false;
     } finally {
       _isProjectSwitching = false;
@@ -4248,13 +4266,13 @@ class _ContentViewState extends ConsumerState<ContentView>
 
   Future<bool> _compareVerifiedP2pSnapshot(P2pVerifiedSnapshot snapshot) async {
     if (!mounted || !_isCurrentP2pComparisonSnapshot(snapshot)) {
-      _showError("遠端版本已失效，請重新下載完整 snapshot。");
+      _showError(context.l10n.uiTheRemoteRevisionIsNoLongerValidDownload);
       return false;
     }
     if (FileService.isProjectVersionNewerThanSupported(
       snapshot.manifest.formatVersion,
     )) {
-      _showError("遠端專案格式較新，無法安全比較。");
+      _showError(context.l10n.uiTheRemoteProjectFormatIsNewerAndCannot);
       return false;
     }
     _syncEditorToSelectedChapter();
@@ -4268,7 +4286,7 @@ class _ContentViewState extends ConsumerState<ContentView>
       if (parsed.sourceProjectUuid?.trim().toLowerCase() !=
               snapshot.manifest.projectUuid ||
           parsed.data.projectUUID.trim().toLowerCase() != currentId) {
-        _showError("遠端版本屬於另一個專案，未加入比較。");
+        _showError(context.l10n.uiTheRemoteRevisionBelongsToAnotherProjectAnd);
         return false;
       }
       ref
@@ -4284,10 +4302,13 @@ class _ContentViewState extends ConsumerState<ContentView>
           .setVisible(DashboardMetric.revisionTracking, true);
       setState(() => _showGaugeDashboard = true);
       unawaited(_openRevisionDetails());
-      _showMessage("已載入完整遠端版本供唯讀比較。");
+      _showMessage(context.l10n.uiTheCompleteRemoteRevisionIsAvailableForRead);
       return true;
     } catch (error) {
-      if (mounted) _showError("無法比較遠端版本：$error");
+      if (mounted)
+        _showError(
+          context.l10n.uiCouldNotCompareTheRemoteRevision((error).toString()),
+        );
       return false;
     }
   }
@@ -4295,7 +4316,7 @@ class _ContentViewState extends ConsumerState<ContentView>
   Future<bool> _applyVerifiedP2pSnapshot(P2pVerifiedSnapshot snapshot) async {
     if (_isProjectSwitching || !mounted) return false;
     if (!_isCurrentP2pSnapshot(snapshot)) {
-      _showError("同步 session 或遠端 revision 已變更，請重新下載 snapshot。");
+      _showError(context.l10n.uiTheSyncSessionOrRemoteRevisionChangedDownload);
       return false;
     }
 
@@ -4310,7 +4331,7 @@ class _ContentViewState extends ConsumerState<ContentView>
     final hasLocalUnsavedChanges =
         hasUnsavedChanges && !_hasUnpersistedRemoteDraft;
     if (hasLocalUnsavedChanges) {
-      _showError("目前工作副本已有即時 operation；snapshot 僅供初始化或 checkpoint，不能覆蓋編輯中的專案。");
+      _showError(context.l10n.uiTheWorkingCopyHasLiveOperationsSnapshotsAre);
       return false;
     }
 
@@ -4330,24 +4351,26 @@ class _ContentViewState extends ConsumerState<ContentView>
         context: context,
         barrierDismissible: false,
         builder: (dialogContext) => AlertDialog(
-          title: const Text("儲存並開啟遠端版本？"),
+          title: Text(dialogContext.l10n.uiSaveAndOpenRemoteRevision),
           content: Text(
             currentName == null
-                ? "遠端 snapshot 已完整驗證。請選擇儲存位置；若選擇既有檔案，確認後會覆蓋該檔案。取消不會修改目前編輯器。"
-                : "遠端 snapshot 已完整驗證，但目前文件不能安全地直接套用。請另存副本。",
+                ? dialogContext
+                      .l10n
+                      .uiTheRemoteSnapshotIsFullyVerifiedChooseWhere
+                : dialogContext.l10n.uiTheRemoteSnapshotIsVerifiedButItCannot,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(
                 dialogContext,
               ).pop(_P2pSnapshotApplyChoice.cancel),
-              child: const Text("取消"),
+              child: Text(dialogContext.l10n.commonCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(
                 dialogContext,
               ).pop(_P2pSnapshotApplyChoice.saveAs),
-              child: const Text("選擇儲存位置"),
+              child: Text(dialogContext.l10n.uiChooseSaveLocation),
             ),
           ],
         ),
@@ -4359,7 +4382,9 @@ class _ContentViewState extends ConsumerState<ContentView>
       return false;
     }
     if (!_isCurrentP2pSnapshot(snapshot)) {
-      _showError("確認期間同步 session 已變更，未寫入任何專案。");
+      _showError(
+        context.l10n.uiTheSyncSessionChangedDuringConfirmationNoProject,
+      );
       return false;
     }
 
@@ -4417,7 +4442,7 @@ class _ContentViewState extends ConsumerState<ContentView>
           !_projectIoCoordinator.isCurrent(switchSession) ||
           !_isCurrentP2pSnapshot(snapshot)) {
         if (mounted && _projectIoCoordinator.isCurrent(switchSession)) {
-          _showError("snapshot 已寫入，但同步 session 已失效，因此未切換目前編輯器。");
+          _showError(context.l10n.uiTheSnapshotWasSavedButTheSyncSession);
         }
         return false;
       }
@@ -4442,8 +4467,12 @@ class _ContentViewState extends ConsumerState<ContentView>
       }
       _showMessage(
         choice == _P2pSnapshotApplyChoice.overwriteCurrent
-            ? "遠端 snapshot 已覆蓋並開啟：${loadResult.projectFile.nameWithoutExtension}"
-            : "遠端 snapshot 已另存並開啟：${loadResult.projectFile.nameWithoutExtension}",
+            ? context.l10n.uiRemoteSnapshotOverwrittenAndOpened(
+                (loadResult.projectFile.nameWithoutExtension).toString(),
+              )
+            : context.l10n.uiRemoteSnapshotSavedAsACopyAndOpened(
+                (loadResult.projectFile.nameWithoutExtension).toString(),
+              ),
       );
       await WidgetsBinding.instance.endOfFrame;
       if (!mounted || !_projectIoCoordinator.isCurrent(activeProjectSession)) {
@@ -4461,7 +4490,11 @@ class _ContentViewState extends ConsumerState<ContentView>
       if (mounted && _projectIoCoordinator.isCurrent(switchSession)) {
         final message = error.toString();
         if (!message.contains("另存檔案已取消")) {
-          _showError("無法儲存或開啟遠端 snapshot：$message");
+          _showError(
+            context.l10n.uiCouldNotSaveOrOpenTheRemoteSnapshot(
+              (message).toString(),
+            ),
+          );
         }
         _beginProjectIoSession(currentProject);
       }
@@ -4501,20 +4534,22 @@ class _ContentViewState extends ConsumerState<ContentView>
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
-        title: const Text("允許此 Session 自動套用同步？"),
+        title: Text(dialogContext.l10n.uiAllowAutomaticSyncForThisSession),
         content: Text(
           appliesInMemory
-              ? "遠端 draft 已完整驗證。允許後，此安全 session 的後續 draft 會在本機沒有自行修改時自動套用到編輯器；不會頻繁寫入 .mnproj，直到您手動儲存。"
-              : "遠端 revision 已完整驗證。允許後，此安全 session 在本機乾淨時可自動套用後續版本，不再逐次顯示覆蓋確認。目標專案：${snapshot.manifest.projectUuid.substring(0, 8)}。",
+              ? dialogContext.l10n.uiTheRemoteDraftIsFullyVerifiedIfAllowed
+              : dialogContext.l10n.uiTheRemoteRevisionIsFullyVerifiedIfAllowed(
+                  (snapshot.manifest.projectUuid.substring(0, 8)).toString(),
+                ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text("暫不允許"),
+            child: Text(dialogContext.l10n.uiNotNow),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text("允許此 Session"),
+            child: Text(dialogContext.l10n.uiAllowThisSession),
           ),
         ],
       ),
@@ -4562,10 +4597,15 @@ class _ContentViewState extends ConsumerState<ContentView>
       _editorCoordinatorNotifier.markAsModified();
       _resetProjectHistory();
       _publishLocalP2pProjectStatusNow();
-      _showMessage("遠端 draft 已近即時套用；.mnproj 尚未寫入，手動儲存時才會升格。");
+      _showMessage(context.l10n.uiRemoteDraftAppliedInNearRealTimeThe);
       return true;
     } catch (error) {
-      if (mounted) _showError("無法在記憶體中套用遠端 draft：$error");
+      if (mounted)
+        _showError(
+          context.l10n.uiCouldNotApplyTheRemoteDraftInMemory(
+            (error).toString(),
+          ),
+        );
       return false;
     } finally {
       _isProjectSwitching = false;
@@ -4878,7 +4918,7 @@ class _ContentViewState extends ConsumerState<ContentView>
         !mounted ||
         ModalRoute.of(context)?.isCurrent == false ||
         HelpController.maybeOf(context)?.ownsFocus == true ||
-        (ref.read(projectIoControllerProvider).valueOrNull?.isBusy ?? false)) {
+        ref.read(projectIoControllerProvider).isProjectIoBusy) {
       return;
     }
     final node = FocusManager.instance.primaryFocus;
@@ -4984,7 +5024,7 @@ class _ContentViewState extends ConsumerState<ContentView>
             return HelpTarget(
               topicId: HelpTopicId.importFiles,
               child: AppDialog(
-                title: "匯入模組",
+                title: context.l10n.uiImportModules,
                 icon: Icons.input,
                 content: SizedBox(
                   width: 560,
@@ -4993,17 +5033,37 @@ class _ContentViewState extends ConsumerState<ContentView>
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("來源：${sourceFile.fullFileName}"),
+                        Text(
+                          context.l10n.uiSource(
+                            (sourceFile.fullFileName).toString(),
+                          ),
+                        ),
                         const SizedBox(height: 8),
-                        const Text("勾選的模組會取代目前專案中的對應資料。"),
+                        Text(
+                          context
+                              .l10n
+                              .uiSelectedModulesReplaceTheCorrespondingDataInThis,
+                        ),
                         if (manifest.partialModules.isNotEmpty) ...[
                           const SizedBox(height: 8),
-                          const Text(
-                            "這是細項匯出檔：匯入不會逐項合併，未附的目標資料可能被移除。請先備份，再明確勾選要替換的模組。",
+                          Text(
+                            context
+                                .l10n
+                                .uiThisIsASelectiveExportImportingReplacesWhole,
                           ),
                           if (blocked.isNotEmpty)
                             Text(
-                              "${blocked.map((m) => m.label).join("、")}含必要祖先／依賴，目前已有資料，請改匯入空白專案。",
+                              context.l10n
+                                  .uiIncludesRequiredAncestorsOrDependenciesImportIntoAn(
+                                    (blocked
+                                            .map(
+                                              (m) => context.l10n.legacyLabel(
+                                                m.label,
+                                              ),
+                                            )
+                                            .join("、"))
+                                        .toString(),
+                                  ),
                             ),
                         ],
                         const SizedBox(height: 12),
@@ -5012,11 +5072,21 @@ class _ContentViewState extends ConsumerState<ContentView>
                             CheckboxListTile(
                               key: Key("selective-import-${module.id}"),
                               title: Text(
-                                "${module.label}${manifest.partialModules.contains(module) ? "（細項，替換整個模組）" : ""}",
+                                "${context.l10n.legacyLabel(module.label)}${manifest.partialModules.contains(module) ? context.l10n.uiSelectiveContentReplacesTheEntireModule : ""}",
                               ),
                               subtitle: manifest.partialModules.contains(module)
                                   ? Text(
-                                      "目前 ${itemCount(currentTrees, module)} 項 → 匯入後 ${itemCount(sourceTrees, module)} 項（含結構節點）",
+                                      context.l10n
+                                          .uiCurrentAfterImportIncludingStructuralNodes(
+                                            (itemCount(
+                                              currentTrees,
+                                              module,
+                                            )).toString(),
+                                            (itemCount(
+                                              sourceTrees,
+                                              module,
+                                            )).toString(),
+                                          ),
                                     )
                                   : null,
                               value: selected.contains(module),
@@ -5036,7 +5106,9 @@ class _ContentViewState extends ConsumerState<ContentView>
                         if (preview != null && preview.warnings.isNotEmpty) ...[
                           const Divider(),
                           Text(
-                            "需要稍後修復的引用：${preview.warnings.length}",
+                            context.l10n.uiReferencesRequiringRepair(
+                              context.formats.integer(preview.warnings.length),
+                            ),
                             style: Theme.of(context).textTheme.titleSmall
                                 ?.copyWith(
                                   color: Theme.of(context).colorScheme.error,
@@ -5058,7 +5130,7 @@ class _ContentViewState extends ConsumerState<ContentView>
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(dialogContext).pop(),
-                    child: const Text("取消"),
+                    child: Text(context.l10n.commonCancel),
                   ),
                   FilledButton(
                     key: const Key("selective-import-apply"),
@@ -5067,7 +5139,7 @@ class _ContentViewState extends ConsumerState<ContentView>
                         : () => Navigator.of(
                             dialogContext,
                           ).pop(Set<SelectiveProjectModule>.from(selected)),
-                    child: const Text("套用匯入"),
+                    child: Text(context.l10n.uiApplyImport),
                   ),
                 ],
               ),
@@ -5078,7 +5150,9 @@ class _ContentViewState extends ConsumerState<ContentView>
       if (!mounted || chosen == null) return;
       if (!_projectIoCoordinator.isCurrent(importSession) ||
           _projectDataRevision != importRevision) {
-        _showError("確認期間作品已變更，請重新開始匯入。");
+        _showError(
+          context.l10n.uiTheWorkChangedDuringConfirmationStartTheImport,
+        );
         return;
       }
 
@@ -5104,10 +5178,21 @@ class _ContentViewState extends ConsumerState<ContentView>
       _recordProjectHistorySnapshot();
       final warningSuffix = imported.warnings.isEmpty
           ? ""
-          : "；${imported.warnings.length} 筆引用需要修復";
-      _showMessage("已匯入 ${chosen.length} 個模組$warningSuffix。");
+          : context.l10n.uiReferencesRequiringRepair2(
+              context.formats.integer(imported.warnings.length),
+            );
+      _showMessage(
+        context.l10n.uiModulesImported(
+          context.formats.integer(chosen.length),
+          (warningSuffix).toString(),
+        ),
+      );
     } catch (error) {
-      if (mounted) _showError("匯入失敗：$error");
+      if (mounted) {
+        _showError(
+          context.l10n.uiImportFailed(context.l10n.projectError(error)),
+        );
+      }
     }
   }
 
@@ -5148,11 +5233,17 @@ class _ContentViewState extends ConsumerState<ContentView>
       );
       if (!mounted || result?.status != ExportSaveStatus.saved) return;
       if (_projectIoCoordinator.isCurrent(session)) {
-        _showMessage("匯出完成：${result!.destination ?? fileName}");
+        _showMessage(
+          context.l10n.uiExportComplete(
+            (result!.destination ?? fileName).toString(),
+          ),
+        );
       }
     } catch (error) {
       if (mounted && _projectIoCoordinator.isCurrent(session)) {
-        _showError("匯出失敗：$error");
+        _showError(
+          context.l10n.uiExportFailed(context.l10n.projectError(error)),
+        );
       }
     } finally {
       _exportDialogOpen = false;
@@ -5581,8 +5672,8 @@ class _ContentViewState extends ConsumerState<ContentView>
     if (_hasUnsavedChanges()) {
       final shouldProceed = await ProjectManager.showSaveConfirmDialog(
         context,
-        title: "建立新專案",
-        message: "您有未儲存的變更，是否要在建立新專案前儲存？",
+        title: context.l10n.uiCreateProject,
+        message: context.l10n.uiYouHaveUnsavedChangesSaveBeforeCreatingA,
         onDontShowAgainChanged: (_) async {},
         onSave: _saveProject,
       );
@@ -5623,7 +5714,7 @@ class _ContentViewState extends ConsumerState<ContentView>
       });
       final activeProjectSession = _beginProjectIoSession(result.projectFile);
       _updateAllWordCounts();
-      _showMessage("新專案建立成功！");
+      _showMessage(context.l10n.uiProjectCreated);
       await WidgetsBinding.instance.endOfFrame;
       if (!mounted || !_projectIoCoordinator.isCurrent(activeProjectSession)) {
         return;
@@ -5632,7 +5723,9 @@ class _ContentViewState extends ConsumerState<ContentView>
       _editorCoordinatorNotifier.resetAfterProjectLoaded();
     } catch (e) {
       if (mounted && _projectIoCoordinator.isCurrent(switchSession)) {
-        _showError("建立新專案失敗：${e.toString()}");
+        _showError(
+          context.l10n.uiCouldNotCreateTheProject(context.l10n.projectError(e)),
+        );
         _beginProjectIoSession(currentProject);
       }
     } finally {
@@ -5647,8 +5740,8 @@ class _ContentViewState extends ConsumerState<ContentView>
     if (_hasUnsavedChanges()) {
       final shouldProceed = await ProjectManager.showSaveConfirmDialog(
         context,
-        title: "開啟專案",
-        message: "您有未儲存的變更，是否要在開啟新專案前儲存？",
+        title: context.l10n.uiOpenProject,
+        message: context.l10n.uiYouHaveUnsavedChangesSaveBeforeOpeningAnother,
         onDontShowAgainChanged: (_) async {},
         onSave: _saveProject,
       );
@@ -5703,7 +5796,7 @@ class _ContentViewState extends ConsumerState<ContentView>
           return;
         }
         if (!shouldContinue) {
-          _showError("已取消開啟較新版本檔案。");
+          _showError(context.l10n.uiOpeningTheNewerFileWasCancelled);
           return;
         }
       }
@@ -5727,7 +5820,10 @@ class _ContentViewState extends ConsumerState<ContentView>
       // must not delay the visible total word count.
       _updateAllWordCounts();
       final migrationSuffix = loadResult.wasMigrated
-          ? "（已在記憶體升級至 ${FileService.projectVersion}，${loadResult.migrationWarnings.length} 項警告）"
+          ? context.l10n.uiUpgradedToInMemoryWarnings(
+              (FileService.projectVersion).toString(),
+              context.formats.integer(loadResult.migrationWarnings.length),
+            )
           : "";
       for (final warning in loadResult.migrationWarnings) {
         debugPrint(
@@ -5735,7 +5831,10 @@ class _ContentViewState extends ConsumerState<ContentView>
         );
       }
       _showMessage(
-        "專案開啟成功：${projectFile.nameWithoutExtension}$migrationSuffix",
+        context.l10n.uiProjectOpened2(
+          (projectFile.nameWithoutExtension).toString(),
+          (migrationSuffix).toString(),
+        ),
       );
       await WidgetsBinding.instance.endOfFrame;
       if (!mounted || !_projectIoCoordinator.isCurrent(activeProjectSession)) {
@@ -5758,7 +5857,9 @@ class _ContentViewState extends ConsumerState<ContentView>
       }
     } catch (e) {
       if (mounted && _projectIoCoordinator.isCurrent(switchSession)) {
-        _showError("開啟專案失敗：${e.toString()}");
+        _showError(
+          context.l10n.uiCouldNotOpenTheProject(context.l10n.projectError(e)),
+        );
         _beginProjectIoSession(currentProject);
       }
     } finally {
@@ -5799,7 +5900,9 @@ class _ContentViewState extends ConsumerState<ContentView>
             : null;
         final fileName = rawName is String && rawName.trim().isNotEmpty
             ? rawName.trim()
-            : (path == null ? "未命名.mnproj" : path.split(RegExp(r"[/\\]")).last);
+            : (path == null
+                  ? context.l10n.uiUntitledMnproj
+                  : path.split(RegExp(r"[/\\]")).last);
 
         await _openRecentProject(
           RecentProjectEntry(
@@ -5817,7 +5920,9 @@ class _ContentViewState extends ConsumerState<ContentView>
           ),
         );
       } catch (e) {
-        _showError("開啟專案失敗：${e.toString()}");
+        _showError(
+          context.l10n.uiCouldNotOpenTheProject(context.l10n.projectError(e)),
+        );
       }
       return;
     }
@@ -5833,7 +5938,7 @@ class _ContentViewState extends ConsumerState<ContentView>
         final origPath = idx >= 0 ? rest.substring(idx + sep.length) : "";
         final parts = origPath.split(RegExp(r"[/\\]"));
         final fileName = parts.isEmpty || parts.last.isEmpty
-            ? "未命名.mnproj"
+            ? context.l10n.uiUntitledMnproj
             : parts.last;
 
         await _openRecentProject(
@@ -5848,7 +5953,9 @@ class _ContentViewState extends ConsumerState<ContentView>
               FileService.openProjectFromSecurityScopedBookmark(bookmark),
         );
       } catch (e) {
-        _showError("開啟專案失敗：${e.toString()}");
+        _showError(
+          context.l10n.uiCouldNotOpenTheProject(context.l10n.projectError(e)),
+        );
       }
       return;
     }
@@ -5861,7 +5968,7 @@ class _ContentViewState extends ConsumerState<ContentView>
     }
     final parts = normalizedPath.split(RegExp(r"[/\\]"));
     final fileName = parts.isEmpty || parts.last.isEmpty
-        ? "未命名.mnproj"
+        ? context.l10n.uiUntitledMnproj
         : parts.last;
     final accessToken = await FileService.createPersistentAccessToken(
       normalizedPath,
@@ -5880,7 +5987,7 @@ class _ContentViewState extends ConsumerState<ContentView>
   Future<void> _openProjectFromAndroidUri(String uri) async {
     await _openRecentProject(
       RecentProjectEntry(
-        fileName: "外部專案.mnproj",
+        fileName: context.l10n.uiExternalProjectMnproj,
         uri: uri,
         lastOpenedAtMillis: DateTime.now().millisecondsSinceEpoch,
       ),
@@ -5898,17 +6005,19 @@ class _ContentViewState extends ConsumerState<ContentView>
   }) async {
     if (projectFileLoader == null &&
         (!entry.canReopen || entry.filePath == null)) {
-      _showError("此最近檔案沒有可用的本機路徑，請改用一般「開啟檔案」。");
+      _showError(context.l10n.uiThisRecentFileHasNoUsableLocalPath);
       return;
     }
 
     if (_hasUnsavedChanges()) {
       final shouldProceed = await ProjectManager.showSaveConfirmDialog(
         context,
-        title: launchedExternally ? "開啟專案" : "開啟最近專案",
+        title: launchedExternally
+            ? context.l10n.uiOpenProject
+            : context.l10n.uiOpenRecentProject,
         message: launchedExternally
-            ? "您有未儲存的變更，是否要在開啟新專案前儲存？"
-            : "您有未儲存的變更，是否要在開啟最近專案前儲存？",
+            ? context.l10n.uiYouHaveUnsavedChangesSaveBeforeOpeningAnother
+            : context.l10n.uiYouHaveUnsavedChangesSaveBeforeOpeningA,
         onDontShowAgainChanged: (_) async {},
         onSave: _saveProject,
       );
@@ -5966,7 +6075,7 @@ class _ContentViewState extends ConsumerState<ContentView>
           return;
         }
         if (!shouldContinue) {
-          _showError("已取消開啟較新版本檔案。");
+          _showError(context.l10n.uiOpeningTheNewerFileWasCancelled);
           return;
         }
       }
@@ -5988,7 +6097,10 @@ class _ContentViewState extends ConsumerState<ContentView>
       // Keep word-count refresh independent from recent-project persistence.
       _updateAllWordCounts();
       final migrationSuffix = loadResult.wasMigrated
-          ? "（已在記憶體升級至 ${FileService.projectVersion}，${loadResult.migrationWarnings.length} 項警告）"
+          ? context.l10n.uiUpgradedToInMemoryWarnings(
+              (FileService.projectVersion).toString(),
+              context.formats.integer(loadResult.migrationWarnings.length),
+            )
           : "";
       for (final warning in loadResult.migrationWarnings) {
         debugPrint(
@@ -5996,7 +6108,10 @@ class _ContentViewState extends ConsumerState<ContentView>
         );
       }
       _showMessage(
-        "專案開啟成功：${projectFile.nameWithoutExtension}$migrationSuffix",
+        context.l10n.uiProjectOpened2(
+          (projectFile.nameWithoutExtension).toString(),
+          (migrationSuffix).toString(),
+        ),
       );
       await WidgetsBinding.instance.endOfFrame;
       if (!mounted || !_projectIoCoordinator.isCurrent(activeProjectSession)) {
@@ -6020,7 +6135,15 @@ class _ContentViewState extends ConsumerState<ContentView>
     } catch (e) {
       if (mounted && _projectIoCoordinator.isCurrent(switchSession)) {
         final message = e.toString();
-        _showError("${launchedExternally ? "開啟專案" : "開啟最近專案"}失敗：$message");
+        _showError(
+          context.l10n.uiFailed(
+            (launchedExternally
+                    ? context.l10n.uiOpenProject
+                    : context.l10n.uiOpenRecentProject)
+                .toString(),
+            context.l10n.projectError(e),
+          ),
+        );
         if (projectFileLoader == null &&
             !launchedExternally &&
             message.contains("檔案不存在")) {
@@ -6041,7 +6164,9 @@ class _ContentViewState extends ConsumerState<ContentView>
   Future<void> _deleteRecentProject(RecentProjectEntry entry) async {
     await ref.read(settingsStateProvider.notifier).removeRecentProject(entry);
     if (!mounted) return;
-    _showMessage("已從最近清單移除：${entry.fileName}");
+    _showMessage(
+      context.l10n.uiRemovedFromRecentProjects((entry.fileName).toString()),
+    );
   }
 
   Future<void> _saveProject() async {
@@ -6094,9 +6219,11 @@ class _ContentViewState extends ConsumerState<ContentView>
       if (!mounted) {
         return;
       }
-      _showMessage("專案儲存成功！");
+      _showMessage(context.l10n.uiProjectSaved);
     } catch (e) {
-      _showError("儲存專案失敗：${e.toString()}");
+      _showError(
+        context.l10n.uiCouldNotSaveTheProject(context.l10n.projectError(e)),
+      );
     }
   }
 
@@ -6167,9 +6294,17 @@ class _ContentViewState extends ConsumerState<ContentView>
       if (!mounted) {
         return;
       }
-      _showMessage("專案另存成功：${savedProject.nameWithoutExtension}");
+      _showMessage(
+        context.l10n.uiProjectSavedAs(
+          (savedProject.nameWithoutExtension).toString(),
+        ),
+      );
     } catch (e) {
-      _showError("另存專案失敗：${e.toString()}");
+      _showError(
+        context.l10n.uiCouldNotSaveTheProjectAsANew(
+          context.l10n.projectError(e),
+        ),
+      );
     }
   }
 

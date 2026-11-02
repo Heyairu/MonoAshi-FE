@@ -135,7 +135,7 @@ class _OobeScreenState extends State<OobeScreen> {
     });
     try {
       final selected = await selector(
-        title: "選擇自動備份資料夾",
+        title: context.l10n.uiChooseAutomaticBackupFolder,
         initialDirectory: _preferences.backupDirectory,
       );
       if (!mounted || selected == null || selected.trim().isEmpty) return;
@@ -143,7 +143,11 @@ class _OobeScreenState extends State<OobeScreen> {
         () => _preferences = _preferences.copyWith(backupDirectory: selected),
       );
     } catch (_) {
-      if (mounted) setState(() => _directoryError = "無法選擇資料夾，請再試一次。");
+      if (mounted)
+        setState(
+          () => _directoryError =
+              context.l10n.uiCouldNotSelectAFolderPleaseTryAgain,
+        );
     } finally {
       if (mounted) setState(() => _selectingDirectory = false);
     }
@@ -208,7 +212,11 @@ class _OobeScreenState extends State<OobeScreen> {
             ),
           ),
           child: CustomPaint(
-            painter: _SetupBackground(color: _colors.onSurface),
+            painter: _SetupBackground(
+              color: _colors.onSurface,
+              wordmark: context.l10n.uiMonoAshi,
+              locale: Localizations.localeOf(context),
+            ),
             child: SafeArea(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -399,16 +407,18 @@ class _OobeScreenState extends State<OobeScreen> {
       ),
     ],
     1 => [
-      _paragraph("選擇適合您的閱讀與操作方式。這些選項稍後都能在「設定」中調整。"),
+      _paragraph(context.l10n.uiChooseHowYouPreferToReadAndWork),
       const SizedBox(height: 22),
-      _label("介面主題"),
+      _label(context.l10n.uiInterfaceTheme),
       SettingsModePicker(
         options: [
           for (final mode in AppThemeMode.values)
             SettingsModeOption(
               id: "oobe-theme-${mode.name}",
-              label: _themeName(mode),
-              description: "使用${_themeName(mode)}主題",
+              label: context.l10n.legacyLabel(_themeName(mode)),
+              description: context.l10n.uiUseTheTheme(
+                context.l10n.legacyLabel(_themeName(mode)),
+              ),
               preview: SettingsModePreview(
                 accent: _preferences.themePreset.accent(
                   _preferences.themeColor,
@@ -425,14 +435,16 @@ class _OobeScreenState extends State<OobeScreen> {
       const SizedBox(height: 24),
       _colorAndFontSettings(),
       const SizedBox(height: 24),
-      _label("側邊導覽"),
+      _label(context.l10n.uiSideNavigation),
       SettingsModePicker(
         options: [
           for (final (index, style) in NavigationStyle.values.indexed)
             SettingsModeOption(
               id: "oobe-navigation-${style.name}",
-              label: ["僅圖示", "圖示與文字", "按鈕展開", "懸停展開"][index],
-              description: style.description,
+              label: context.l10n.legacyLabel(
+                ["僅圖示", "圖示與文字", "按鈕展開", "懸停展開"][index],
+              ),
+              description: context.l10n.legacyLabel(style.description),
               preview: SettingsModePreview(
                 accent: _preferences.themePreset.accent(
                   _preferences.themeColor,
@@ -452,16 +464,18 @@ class _OobeScreenState extends State<OobeScreen> {
       _ribbonModeSetting(),
     ],
     2 => [
-      _paragraph("作品會以 .mnproj 專案檔保存在您選擇的位置。依照寫作習慣，決定是否啟用以下功能。"),
+      _paragraph(context.l10n.uiYourWorkIsSavedAsAMnprojProject),
       const SizedBox(height: 22),
       _surface(
         Column(
           children: [
             SwitchListTile(
               key: const Key("oobe-auto-save-switch"),
-              title: const Text("自動儲存"),
+              title: Text(context.l10n.uiAutoSave),
               subtitle: Text(
-                "每 ${_preferences.autoSaveIntervalMinutes} 分鐘寫回目前的專案檔。請先手動儲存一次，選定檔案位置。",
+                context.l10n.uiSaveToTheCurrentProjectFileEveryMinutes(
+                  (_preferences.autoSaveIntervalMinutes).toString(),
+                ),
               ),
               value: _preferences.autoSaveEnabled,
               onChanged: (value) => setState(
@@ -473,12 +487,13 @@ class _OobeScreenState extends State<OobeScreen> {
             LabeledSlider(
               key: const Key("oobe-auto-save-interval"),
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              title: "儲存間隔",
+              title: context.l10n.uiSaveInterval,
               value: _preferences.autoSaveIntervalMinutes.toDouble(),
               min: 1,
               max: 120,
               divisions: 119,
-              valueLabelBuilder: (value) => "${value.round()} 分鐘",
+              valueLabelBuilder: (value) =>
+                  context.l10n.uiMinutes((value.round()).toString()),
               onChanged: !_preferences.autoSaveEnabled
                   ? null
                   : (value) => setState(
@@ -490,9 +505,11 @@ class _OobeScreenState extends State<OobeScreen> {
             const Divider(height: 1),
             SwitchListTile(
               key: const Key("oobe-auto-backup-switch"),
-              title: const Text("自動備份"),
+              title: Text(context.l10n.uiAutomaticBackup),
               subtitle: Text(
-                "每 ${_preferences.autoBackupIntervalMinutes} 分鐘另存備份，保留目前專案的位置；可在設定中管理備份。",
+                context.l10n.uiCreateASeparateBackupEveryMinutesWithoutChanging(
+                  (_preferences.autoBackupIntervalMinutes).toString(),
+                ),
               ),
               value: _preferences.autoBackupEnabled,
               onChanged: (value) => setState(
@@ -504,12 +521,13 @@ class _OobeScreenState extends State<OobeScreen> {
             LabeledSlider(
               key: const Key("oobe-auto-backup-interval"),
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              title: "備份間隔",
+              title: context.l10n.uiBackupInterval,
               value: _preferences.autoBackupIntervalMinutes.toDouble(),
               min: 1,
               max: 120,
               divisions: 119,
-              valueLabelBuilder: (value) => "${value.round()} 分鐘",
+              valueLabelBuilder: (value) =>
+                  context.l10n.uiMinutes((value.round()).toString()),
               onChanged: !_preferences.autoBackupEnabled
                   ? null
                   : (value) => setState(
@@ -525,7 +543,7 @@ class _OobeScreenState extends State<OobeScreen> {
       _backupDirectorySetting(),
       if (widget.selectDirectory == null) ...[
         const SizedBox(height: 12),
-        _paragraph("此平台的自動備份資料夾可於設定中管理。"),
+        _paragraph(context.l10n.uiManageTheAutomaticBackupFolderInSettingsOn),
       ],
       if (_directoryError != null)
         Padding(
@@ -533,10 +551,10 @@ class _OobeScreenState extends State<OobeScreen> {
           child: Text(_directoryError!, style: TextStyle(color: _colors.error)),
         ),
       const SizedBox(height: 22),
-      _paragraph("本程式可離線使用。請記得用「儲存」保存新專案。"),
+      _paragraph(context.l10n.uiThisAppWorksOfflineRememberToSaveNew),
     ],
     3 => [
-      _paragraph("開啟歡迎頁面時，您的名稱會出現在「歡迎訊息」欄位。請輸入您希望出現的名稱。您也可以略過這個步驟。"),
+      _paragraph(context.l10n.uiYourNameAppearsInTheWelcomeMessageOn),
       const SizedBox(height: 16),
       ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480),
@@ -545,9 +563,9 @@ class _OobeScreenState extends State<OobeScreen> {
           controller: _nameController,
           textCapitalization: TextCapitalization.words,
           textInputAction: TextInputAction.done,
-          decoration: const InputDecoration(
-            labelText: "名稱（選填）",
-            hintText: "輸入您的名稱或筆名",
+          decoration: InputDecoration(
+            labelText: context.l10n.uiNameOptional,
+            hintText: context.l10n.uiEnterYourNameOrPenName,
           ),
           onChanged: (name) => setState(
             () => _preferences = _preferences.copyWith(displayName: name),
@@ -555,14 +573,16 @@ class _OobeScreenState extends State<OobeScreen> {
         ),
       ),
       const SizedBox(height: 8),
-      _paragraph("範例：中野梓"),
+      _paragraph(context.l10n.uiExampleAzusaNakano),
       const SizedBox(height: 16),
       CheckboxListTile(
         key: const Key("oobe-default-pen-name"),
         contentPadding: EdgeInsets.zero,
         controlAffinity: ListTileControlAffinity.leading,
-        title: const Text("作為預設筆名"),
-        subtitle: const Text("新建專案時，自動填入作者欄位。"),
+        title: Text(context.l10n.uiUseAsDefaultPenName),
+        subtitle: Text(
+          context.l10n.uiFillInTheAuthorAutomaticallyWhenCreatingA,
+        ),
         value: _preferences.useAsDefaultPenName,
         onChanged: _preferences.displayName.trim().isEmpty
             ? null
@@ -574,28 +594,28 @@ class _OobeScreenState extends State<OobeScreen> {
       ),
     ],
     4 => [
-      _paragraph("進入工作區後，您可以從歡迎頁新建專案，或開啟已有的 .mnproj 檔案。"),
+      _paragraph(context.l10n.uiFromTheWorkspaceHomePageCreateAProject),
       const SizedBox(height: 24),
       _note(
         Icons.create_new_folder_outlined,
-        "01  建立您的作品",
-        "新建專案，填寫作品名稱與故事基本資料。",
+        context.l10n.uiCreateYourWork,
+        context.l10n.uiCreateAProjectAndEnterItsTitleAnd,
       ),
       const SizedBox(height: 16),
       _note(
         Icons.edit_note_outlined,
-        "02  寫下第一個章節",
-        "在「章節」新增資料夾與章節，選取章節後開始撰寫正文。",
+        context.l10n.uiWriteYourFirstChapter,
+        context.l10n.uiAddFoldersAndChaptersInChaptersThenSelect,
       ),
       const SizedBox(height: 16),
       _note(
         Icons.public_outlined,
-        "03  構建您的設定",
-        "用大綱、角色、世界觀與時間軸，整理您的故事。需要協助時可從「說明」選單開啟指南。",
+        context.l10n.uiBuildYourStoryWorld,
+        context.l10n.uiOrganizeYourStoryWithOutlinesCharactersWorldbuildingAnd,
       ),
     ],
     _ => [
-      _paragraph("恭喜！您現在可以開始使用本程式。以下是您的完成報告："),
+      _paragraph(context.l10n.uiYouReReadyToBeginHereIsA),
       const SizedBox(height: 24),
       _surface(
         Padding(
@@ -604,37 +624,103 @@ class _OobeScreenState extends State<OobeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _paragraph(
-                "名稱：${_preferences.displayName.trim().isEmpty ? '未設定' : _preferences.displayName.trim()}",
+                context.l10n.uiName(
+                  (_preferences.displayName.trim().isEmpty
+                          ? context.l10n.uiNotSet
+                          : _preferences.displayName.trim())
+                      .toString(),
+                ),
               ),
               _paragraph(
-                "作為預設筆名：${_preferences.useAsDefaultPenName && _preferences.displayName.trim().isNotEmpty ? '是' : '否'}",
-              ),
-              _paragraph("主題：${_themeName(_preferences.themeMode)}"),
-              _paragraph(
-                "主題顏色：${_preferences.themePreset == AppThemePreset.standard ? _colorName(_preferences.themeColor) : _preferences.themePreset.label}",
-              ),
-              _paragraph("文字大小：${_preferences.fontSize.toInt()}"),
-              _paragraph(
-                "導覽：${["僅圖示", "圖示與文字", "按鈕展開", "懸停展開"][_preferences.navigationStyle.index]}",
+                context.l10n.uiDefaultPenName(
+                  (_preferences.useAsDefaultPenName &&
+                              _preferences.displayName.trim().isNotEmpty
+                          ? context.l10n.uiYes
+                          : context.l10n.uiNo)
+                      .toString(),
+                ),
               ),
               _paragraph(
-                "Ribbon 模式：${_preferences.toolbarMode?.label ?? '自動（${ToolbarMode.defaultFor(Theme.of(context).platform).label}）'}",
+                context.l10n.uiTheme(
+                  context.l10n.legacyLabel(_themeName(_preferences.themeMode)),
+                ),
               ),
               _paragraph(
-                "自動儲存：${_preferences.autoSaveEnabled ? "每 ${_preferences.autoSaveIntervalMinutes} 分鐘" : "關閉"}",
+                context.l10n.uiThemeColor(
+                  (_preferences.themePreset == AppThemePreset.standard
+                          ? context.l10n.legacyLabel(
+                              _colorName(_preferences.themeColor),
+                            )
+                          : context.l10n.legacyLabel(
+                              _preferences.themePreset.label,
+                            ))
+                      .toString(),
+                ),
               ),
               _paragraph(
-                "自動備份：${_preferences.autoBackupEnabled ? "每 ${_preferences.autoBackupIntervalMinutes} 分鐘" : "關閉"}",
+                context.l10n.uiTextSize(
+                  (_preferences.fontSize.toInt()).toString(),
+                ),
               ),
               _paragraph(
-                "自動備份資料夾：${_preferences.backupDirectory ?? "使用預設備份資料夾"}",
+                context.l10n.uiNavigation2(
+                  context.l10n.legacyLabel(
+                    [
+                      "僅圖示",
+                      "圖示與文字",
+                      "按鈕展開",
+                      "懸停展開",
+                    ][_preferences.navigationStyle.index],
+                  ),
+                ),
+              ),
+              _paragraph(
+                context.l10n.uiRibbonMode(
+                  (_preferences.toolbarMode?.label ??
+                          context.l10n.uiAutomatic2(
+                            (ToolbarMode.defaultFor(
+                              Theme.of(context).platform,
+                            ).label).toString(),
+                          ))
+                      .toString(),
+                ),
+              ),
+              _paragraph(
+                context.l10n.uiAutoSave2(
+                  (_preferences.autoSaveEnabled
+                          ? context.l10n.uiEveryMinutes(
+                              (_preferences.autoSaveIntervalMinutes).toString(),
+                            )
+                          : context.l10n.commonClose)
+                      .toString(),
+                ),
+              ),
+              _paragraph(
+                context.l10n.uiAutomaticBackup2(
+                  (_preferences.autoBackupEnabled
+                          ? context.l10n.uiEveryMinutes(
+                              (_preferences.autoBackupIntervalMinutes)
+                                  .toString(),
+                            )
+                          : context.l10n.commonClose)
+                      .toString(),
+                ),
+              ),
+              _paragraph(
+                context.l10n.uiAutomaticBackupFolder(
+                  (_preferences.backupDirectory ??
+                          context.l10n.uiUseDefaultBackupFolder)
+                      .toString(),
+                ),
               ),
             ],
           ),
         ),
       ),
       const SizedBox(height: 18),
-      _paragraph("介面與儲存偏好可在「設定」中修改，名稱可重新開啟初次設定調整。"),
+      _paragraph(
+        context.l10n.uiChangeAppearanceAndStorageOptionsInSettingsReopen,
+      ),
     ],
   };
 
@@ -645,15 +731,18 @@ class _OobeScreenState extends State<OobeScreen> {
       key: const Key("oobe-ribbon-mode-setting"),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _label("Ribbon 模式"),
+        _label(context.l10n.uiRibbonMode2),
         SettingsModePicker(
           options: [
             for (final option in [...ToolbarMode.values, null])
               SettingsModeOption(
                 id: "oobe-toolbar-${option?.name ?? 'automatic'}",
-                label: option?.label ?? "自動",
+                label: option?.label ?? context.l10n.uiAutomatic3,
                 description:
-                    option?.description ?? "依裝置選擇：桌面 Full，手機 Moderate。",
+                    (option == null
+                        ? null
+                        : context.l10n.legacyLabel(option.description)) ??
+                    context.l10n.uiChooseByDeviceFullOnDesktopModerateOn,
                 preview: SettingsModePreview(
                   accent: _preferences.themePreset.accent(
                     _preferences.themeColor,
@@ -673,8 +762,11 @@ class _OobeScreenState extends State<OobeScreen> {
         const SizedBox(height: 8),
         _paragraph(
           mode == null
-              ? "自動使用 ${resolved.label}：${resolved.description}"
-              : resolved.description,
+              ? context.l10n.uiAutomaticallyUsing(
+                  (resolved.label).toString(),
+                  (context.l10n.legacyLabel(resolved.description)).toString(),
+                )
+              : context.l10n.legacyLabel(resolved.description),
         ),
       ],
     );
@@ -685,7 +777,7 @@ class _OobeScreenState extends State<OobeScreen> {
       final colors = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _label("主題顏色"),
+          _label(context.l10n.uiThemeColor2),
           SettingsColorPicker(
             selectedColor: _preferences.themeColor,
             preset: _preferences.themePreset,
@@ -707,7 +799,11 @@ class _OobeScreenState extends State<OobeScreen> {
         key: const Key("oobe-font-size"),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _label("文字大小  ${_preferences.fontSize.toInt()}sp"),
+          _label(
+            context.l10n.uiTextSizeSp(
+              (_preferences.fontSize.toInt()).toString(),
+            ),
+          ),
           Slider(
             value: _preferences.fontSize,
             max: 20,
@@ -741,7 +837,7 @@ class _OobeScreenState extends State<OobeScreen> {
 
   Widget _backupDirectorySetting() {
     final directory = _preferences.backupDirectory;
-    final title = "自動備份資料夾";
+    final title = context.l10n.uiAutomaticBackupFolder2;
     return _surface(
       Padding(
         padding: const EdgeInsets.all(16),
@@ -750,7 +846,7 @@ class _OobeScreenState extends State<OobeScreen> {
           children: [
             _label(title),
             Text(
-              directory ?? "使用預設備份資料夾",
+              directory ?? context.l10n.uiUseDefaultBackupFolder,
               key: const ValueKey("oobe-backup-directory"),
               style: TextStyle(color: _colors.onSurfaceVariant),
             ),
@@ -766,7 +862,7 @@ class _OobeScreenState extends State<OobeScreen> {
                       ? null
                       : _selectBackupDirectory,
                   icon: const Icon(Icons.folder_open),
-                  label: const Text("選擇資料夾"),
+                  label: Text(context.l10n.uiChooseFolder),
                 ),
                 if (directory != null)
                   TextButton(
@@ -778,7 +874,7 @@ class _OobeScreenState extends State<OobeScreen> {
                               clearBackupDirectory: true,
                             ),
                           ),
-                    child: const Text("還原預設"),
+                    child: Text(context.l10n.uiResetToDefault),
                   ),
               ],
             ),
@@ -977,15 +1073,21 @@ class _Brand extends StatelessWidget {
       width: 240,
       height: height,
       fit: BoxFit.contain,
-      semanticLabel: "物語 Assistant",
+      semanticLabel: context.l10n.uiMonogatariAssistant,
     ),
   );
 }
 
 class _SetupBackground extends CustomPainter {
-  const _SetupBackground({required this.color});
+  const _SetupBackground({
+    required this.color,
+    required this.wordmark,
+    required this.locale,
+  });
 
   final Color color;
+  final String wordmark;
+  final Locale locale;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1007,11 +1109,12 @@ class _SetupBackground extends CustomPainter {
       );
     }
     canvas.restore();
-    final wordmark = TextPainter(
+    final painter = TextPainter(
       text: TextSpan(
-        text: "MonoAshi",
+        text: wordmark,
         style: TextStyle(
-          fontFamily: "NotoSansTC",
+          fontFamily: AppFonts.primary(locale),
+          fontFamilyFallback: AppFonts.fallbacks(locale),
           color: color.withValues(alpha: .04),
           fontSize: size.width * .12,
           letterSpacing: 12,
@@ -1023,11 +1126,13 @@ class _SetupBackground extends CustomPainter {
     canvas.save();
     canvas.translate(size.width * .05, size.height * .62);
     canvas.rotate(math.pi / 10);
-    wordmark.paint(canvas, Offset.zero);
+    painter.paint(canvas, Offset.zero);
     canvas.restore();
   }
 
   @override
   bool shouldRepaint(_SetupBackground oldDelegate) =>
-      oldDelegate.color != color;
+      oldDelegate.color != color ||
+      oldDelegate.wordmark != wordmark ||
+      oldDelegate.locale != locale;
 }

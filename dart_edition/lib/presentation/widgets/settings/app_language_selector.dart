@@ -58,17 +58,17 @@ class _AppLanguageSelectorState extends ConsumerState<AppLanguageSelector> {
           value: AppLocalePreference.system,
           child: Text(l10n.languageSystem),
         ),
-        const DropdownMenuItem(
+        DropdownMenuItem(
           value: AppLocalePreference.traditionalChinese,
-          child: Text('繁體中文'),
+          child: Text(context.l10n.uiLiteral4),
         ),
         const DropdownMenuItem(
           value: AppLocalePreference.english,
           child: Text('English'),
         ),
-        const DropdownMenuItem(
+        DropdownMenuItem(
           value: AppLocalePreference.japanese,
-          child: Text('日本語'),
+          child: Text(context.l10n.uiLiteral5),
         ),
       ],
       onChanged: settings.hasValue

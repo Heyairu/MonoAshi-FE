@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "dart:math" as math;
 
 import "package:flutter/gestures.dart" show DragStartBehavior;
@@ -65,8 +66,8 @@ class MiniTimeline extends StatefulWidget {
 
   /// Null fits the viewport; a fixed scale enables horizontal scrolling.
   final double? pixelsPerTick;
-  final String emptyMessage;
-  final String semanticLabel;
+  final String? emptyMessage;
+  final String? semanticLabel;
   final Key? canvasKey;
 
   const MiniTimeline({
@@ -83,8 +84,8 @@ class MiniTimeline extends StatefulWidget {
     this.showPlayhead = true,
     this.height = 120,
     this.pixelsPerTick,
-    this.emptyMessage = "尚無時間軸節點",
-    this.semanticLabel = "微型時間軸",
+    this.emptyMessage,
+    this.semanticLabel,
     this.canvasKey,
   }) : assert(minTick == null || maxTick == null || minTick < maxTick),
        assert(height >= 80),
@@ -252,7 +253,10 @@ class _MiniTimelineState extends State<MiniTimeline> {
                 const TextStyle(fontSize: 11))
             .copyWith(color: scheme.onSurfaceVariant);
     final metrics = TextPainter(
-      text: TextSpan(text: "${widget.currentTick}", style: labelStyle),
+      text: TextSpan(
+        text: context.formats.integer(widget.currentTick),
+        style: labelStyle,
+      ),
       textScaler: textScaler,
       textDirection: TextDirection.ltr,
     )..layout();
@@ -283,16 +287,18 @@ class _MiniTimelineState extends State<MiniTimeline> {
       child: Semantics(
         container: true,
         explicitChildNodes: true,
-        label: widget.semanticLabel,
-        value: widget.showPlayhead ? "Tick ${widget.currentTick}" : "預設資料",
+        label: widget.semanticLabel ?? context.l10n.uiMiniTimeline,
+        value: widget.showPlayhead
+            ? "Tick ${context.formats.integer(widget.currentTick)}"
+            : context.l10n.uiDefaultData,
         slider: interactive && widget.showPlayhead,
         increasedValue:
             interactive && widget.showPlayhead && displayedTick < window.max
-            ? "Tick ${displayedTick + 1}"
+            ? "Tick ${context.formats.integer(displayedTick + 1)}"
             : null,
         decreasedValue:
             interactive && widget.showPlayhead && displayedTick > window.min
-            ? "Tick ${displayedTick - 1}"
+            ? "Tick ${context.formats.integer(displayedTick - 1)}"
             : null,
         onIncrease:
             interactive && widget.showPlayhead && displayedTick < window.max
@@ -374,7 +380,8 @@ class _MiniTimelineState extends State<MiniTimeline> {
                                           horizontal: AppSpacing.lg,
                                         ),
                                         child: Text(
-                                          widget.emptyMessage,
+                                          widget.emptyMessage ??
+                                              context.l10n.uiNoTimelineNodesYet,
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                           textAlign: TextAlign.center,
@@ -414,6 +421,7 @@ class _MiniTimelineState extends State<MiniTimeline> {
                               child: IgnorePointer(
                                 child: CustomPaint(
                                   painter: _MiniTimelinePainter(
+                                    formats: context.formats,
                                     axis: axis,
                                     horizontalScrollController:
                                         _horizontalScrollController,
@@ -527,10 +535,14 @@ class _MiniTimelineState extends State<MiniTimeline> {
         cursor: SystemMouseCursors.resizeLeftRight,
         child: Tooltip(
           message: [
-            "拖動目前時間：${_dragSelectedTick ?? widget.currentTick} Tick",
+            context.l10n.uiDragCurrentTimeTicks(
+              context.formats.integer(_dragSelectedTick ?? widget.currentTick),
+            ),
             ...widget.markers
                 .where((m) => m.tick == widget.currentTick)
-                .map((m) => m.label.isEmpty ? "時間標記" : m.label),
+                .map(
+                  (m) => m.label.isEmpty ? context.l10n.uiTimeMarker : m.label,
+                ),
           ].join("\n"),
           child: Center(
             child: Icon(
@@ -552,9 +564,11 @@ class _MiniTimelineState extends State<MiniTimeline> {
   ) {
     final left = axis.x(interval.startTick).clamp(0.0, axis.width);
     final right = axis.x(interval.endTick).clamp(0.0, axis.width);
-    final label = interval.label.isEmpty ? "未命名節點" : interval.label;
+    final label = interval.label.isEmpty
+        ? context.l10n.uiUntitledNode
+        : interval.label;
     final description =
-        "$label · Tick ${interval.startTick}–${interval.endTick - 1}";
+        "$label · Tick ${context.formats.integer(interval.startTick)}–${context.formats.integer(interval.endTick - 1)}";
     return Positioned(
       left: left,
       top: AppSpacing.xs + row * 20.0,
@@ -587,7 +601,10 @@ class _MiniTimelineState extends State<MiniTimeline> {
   ) {
     final group = markers.where((marker) => marker.tick == tick).toList();
     final description = group
-        .map((m) => "${m.label.isEmpty ? '時間標記' : m.label} · Tick $tick")
+        .map(
+          (m) =>
+              "${m.label.isEmpty ? context.l10n.uiTimeMarker : m.label} · Tick ${context.formats.integer(tick)}",
+        )
         .join("\n");
     final canTap =
         widget.onMarkerTap != null ||
@@ -733,8 +750,10 @@ class _MiniTimelinePainter extends CustomPainter {
   final TextStyle labelStyle;
   final TextScaler textScaler;
   final List<MiniTimelineMarker> markers;
+  final AppFormatters formats;
 
   _MiniTimelinePainter({
+    required this.formats,
     required this.axis,
     required this.horizontalScrollController,
     required this.viewportWidth,
@@ -772,7 +791,10 @@ class _MiniTimelinePainter extends CustomPainter {
 
     final spacing = math.max(
       40.0,
-      math.max(measure("${axis.window.min}"), measure("${axis.window.max}")) +
+      math.max(
+            measure(formats.integer(axis.window.min)),
+            measure(formats.integer(axis.window.max)),
+          ) +
           16,
     );
     final labelCount = math.max(1, (axis.usableWidth / spacing).floor());
@@ -804,7 +826,7 @@ class _MiniTimelinePainter extends CustomPainter {
     var previousRight = double.negativeInfinity;
     for (var tick = firstTick; tick <= lastTick; tick += step) {
       final x = axis.x(tick);
-      text.text = TextSpan(text: "$tick", style: labelStyle);
+      text.text = TextSpan(text: formats.integer(tick), style: labelStyle);
       text.layout();
       if (text.width > size.width - AppSpacing.sm) continue;
       final left = math.min(
@@ -867,6 +889,7 @@ class _MiniTimelinePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _MiniTimelinePainter oldDelegate) =>
+      formats.localeName != oldDelegate.formats.localeName ||
       axis.window.min != oldDelegate.axis.window.min ||
       axis.window.max != oldDelegate.axis.window.max ||
       axis.width != oldDelegate.axis.width ||

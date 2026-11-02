@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "../ui_library/spacing.dart";
@@ -162,7 +163,7 @@ class MonogatariStatusBar extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          "$cursorLine:$cursorColumn",
+                          "${context.formats.integer(cursorLine)}:${context.formats.integer(cursorColumn)}",
                           style: statusTextStyle,
                           strutStyle: statusStrutStyle,
                         ),
@@ -180,8 +181,8 @@ class MonogatariStatusBar extends StatelessWidget {
                         ),
                         Tooltip(
                           message: overwriteMode
-                              ? "Overtype Mode (Ins)"
-                              : "Default Mode (Ins)",
+                              ? context.l10n.uiOvertypeModeIns
+                              : context.l10n.uiInsertModeIns,
                           child: Focus(
                             canRequestFocus: false,
                             descendantsAreFocusable: false,
@@ -212,7 +213,10 @@ class MonogatariStatusBar extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            "$currentWords / $totalWords 字",
+                            context.l10n.uiCharacters(
+                              context.formats.integer(currentWords),
+                              context.formats.integer(totalWords),
+                            ),
                             strutStyle: statusStrutStyle,
                             style: statusTextStyle.copyWith(
                               color: Theme.of(
@@ -294,7 +298,7 @@ class _TabSpacesMenu extends StatelessWidget {
                       children: [
                         _choice(
                           key: const Key("tab-full-width-choice"),
-                          label: "全形",
+                          label: context.l10n.uiFullWidth,
                           selected: fullWidth,
                           onPressed: onFullWidthChanged == null
                               ? null
@@ -302,7 +306,7 @@ class _TabSpacesMenu extends StatelessWidget {
                         ),
                         _choice(
                           key: const Key("tab-half-width-choice"),
-                          label: "半形",
+                          label: context.l10n.uiHalfWidth,
                           selected: !fullWidth,
                           onPressed: onFullWidthChanged == null
                               ? null
@@ -344,7 +348,7 @@ class _TabSpacesMenu extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text("行首留空"),
+                    Text(context.l10n.uiIndentLineStart),
                     Text(autoIndentLineStart ? "ON" : "OFF"),
                   ],
                 ),
@@ -355,14 +359,14 @@ class _TabSpacesMenu extends StatelessWidget {
       ),
     ],
     builder: (context, controller, child) => Tooltip(
-      message: "Tab 插入空格",
+      message: context.l10n.uiInsertSpacesWithTab,
       child: TextButton(
         key: const Key("statusbar-tab-spaces"),
         style: buttonStyle,
         onPressed: () =>
             controller.isOpen ? controller.close() : controller.open(),
         child: Text(
-          "[${fullWidth ? '全形' : '半形'}:$count]",
+          "[${fullWidth ? context.l10n.uiFullWidth : context.l10n.uiHalfWidth}:$count]",
           strutStyle: labelStrutStyle,
         ),
       ),

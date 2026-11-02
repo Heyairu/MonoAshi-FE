@@ -149,7 +149,7 @@ class EditorCoordinatorState {
 const Object _editorCoordinatorUnset = Object();
 
 bool _projectIoBlocksEditor(AsyncValue<ProjectIoStatus> value) {
-  return value.valueOrNull?.blocksEditor ?? value.isLoading;
+  return value.blocksProjectEditor;
 }
 
 class EditorCoordinatorNotifier extends Notifier<EditorCoordinatorState> {
@@ -368,12 +368,14 @@ class EditorCoordinatorNotifier extends Notifier<EditorCoordinatorState> {
   Future<void> recordRecentProject(file_module.ProjectFile projectFile) async {
     try {
       var persistedAccessToken = projectFile.uri;
-      if (projectFile.filePath != null) {
+      if (projectFile.filePath != null &&
+          (persistedAccessToken == null || persistedAccessToken.isEmpty)) {
         final generatedToken = await FileService.createPersistentAccessToken(
           projectFile.filePath,
         );
         if (generatedToken != null && generatedToken.trim().isNotEmpty) {
           persistedAccessToken = generatedToken;
+          projectFile.uri = generatedToken;
         }
       }
 
@@ -472,11 +474,15 @@ class EditorCoordinatorNotifier extends Notifier<EditorCoordinatorState> {
 
     final snapshot = data;
     ref.read(dailyWritingProgressProvider).replaceBaseline(data.projectUUID, {
-      for (final location in chapter_module.ChapterTree.chaptersDepthFirst(data.segmentsData))
+      for (final location in chapter_module.ChapterTree.chaptersDepthFirst(
+        data.segmentsData,
+      ))
         location.chapter.chapterUUID: location.chapter.chapterContent,
     });
     ref.read(projectWritingSessionProvider.notifier).state++;
-    ref.read(projectWritingGoalsProvider.notifier).setGoals(snapshot.writingGoals);
+    ref
+        .read(projectWritingGoalsProvider.notifier)
+        .setGoals(snapshot.writingGoals);
 
     ref.read(projectUuidProvider.notifier).setProjectUuid(snapshot.projectUUID);
     ref

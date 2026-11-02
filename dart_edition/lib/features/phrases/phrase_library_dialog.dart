@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "../help/help_scope.dart";
 import "../help/help_topic.dart";
 import 'package:flutter/material.dart';
@@ -163,16 +164,20 @@ final class _PhraseLibraryDialogState
       builder: (context) => HelpTarget(
         topicId: HelpTopicId.phrases,
         child: AlertDialog(
-          title: const Text('刪除短語？'),
-          content: Text('短碼「${phrase.shortcut}」會從短語庫移除。'),
+          title: Text(context.l10n.uiDeletePhrase),
+          content: Text(
+            context.l10n.uiRemoveShortcutFromThePhraseLibrary(
+              (phrase.shortcut).toString(),
+            ),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('取消'),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('刪除'),
+              child: Text(context.l10n.commonDelete),
             ),
           ],
         ),
@@ -215,9 +220,9 @@ final class _PhraseLibraryDialogState
       ]);
       final saved = await PhraseTransferIo.exportText(source);
       if (mounted && saved) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('短語庫已匯出')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.uiPhraseLibraryExported)),
+        );
       }
     } catch (error) {
       if (mounted) _showError(error);
@@ -233,31 +238,42 @@ final class _PhraseLibraryDialogState
     builder: (dialogContext) => HelpTarget(
       topicId: HelpTopicId.phrases,
       child: AlertDialog(
-        title: Text('短碼「${incoming.shortcut}」發生衝突'),
+        title: Text(
+          dialogContext.l10n.uiShortcutConflicts(
+            (incoming.shortcut).toString(),
+          ),
+        ),
         content: Text(
-          '匯入項目與現有短語的 ID 或短碼相同：\n'
-          '${conflicts.map((item) => '${item.phrase.shortcut}（${item.scope == PhraseScope.global ? '所有專案' : '目前專案'}）').join('、')}\n\n'
-          '可以保留現有項目、覆蓋，或以「$newShortcut」另存一份。',
+          dialogContext.l10n.uiTheImportedPhraseHasTheSameIDOr(
+            (conflicts
+                    .map(
+                      (item) =>
+                          '${item.phrase.shortcut}（${item.scope == PhraseScope.global ? dialogContext.l10n.uiAllProjects : dialogContext.l10n.uiCurrentProject}）',
+                    )
+                    .join('、'))
+                .toString(),
+            (newShortcut).toString(),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('取消匯入'),
+            child: Text(dialogContext.l10n.uiCancelImport),
           ),
           TextButton(
             onPressed: () =>
                 Navigator.pop(dialogContext, PhraseImportChoice.skip),
-            child: const Text('保留現有'),
+            child: Text(dialogContext.l10n.uiKeepExisting),
           ),
           TextButton(
             onPressed: () =>
                 Navigator.pop(dialogContext, PhraseImportChoice.copy),
-            child: const Text('另存一份'),
+            child: Text(dialogContext.l10n.uiSaveACopy),
           ),
           FilledButton(
             onPressed: () =>
                 Navigator.pop(dialogContext, PhraseImportChoice.replace),
-            child: const Text('覆蓋'),
+            child: Text(dialogContext.l10n.uiOverwrite),
           ),
         ],
       ),
@@ -323,8 +339,16 @@ final class _PhraseLibraryDialogState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '已匯入 $imported 筆，保留 $skipped 筆現有短語。'
-              '${mentionsMoved > 0 ? '含 Mention 的短語已限於目前專案，插入前須重新連結。' : ''}',
+              context.l10n.uiImportedExistingPhrasesKept(
+                context.formats.integer(imported),
+                context.formats.integer(skipped),
+                (mentionsMoved > 0
+                        ? context
+                              .l10n
+                              .uiPhrasesWithMentionsAreLimitedToThisProject
+                        : '')
+                    .toString(),
+              ),
             ),
           ),
         );
@@ -394,7 +418,10 @@ final class _PhraseLibraryDialogState
                     children: [
                       Row(
                         children: [
-                          const Text('短語庫', style: TextStyle(fontSize: 20)),
+                          Text(
+                            context.l10n.uiPhraseLibrary,
+                            style: TextStyle(fontSize: 20),
+                          ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Wrap(
@@ -408,24 +435,24 @@ final class _PhraseLibraryDialogState
                                       ? _import
                                       : null,
                                   icon: const Icon(Icons.file_open_outlined),
-                                  label: const Text('匯入'),
+                                  label: Text(context.l10n.uiImport),
                                 ),
                                 OutlinedButton.icon(
                                   onPressed: globalState.hasValue
                                       ? _export
                                       : null,
                                   icon: const Icon(Icons.save_alt),
-                                  label: const Text('匯出'),
+                                  label: Text(context.l10n.uiExport),
                                 ),
                                 FilledButton.icon(
                                   onPressed: () => _openEditor(null, ''),
                                   icon: const Icon(Icons.add),
-                                  label: const Text('新增短語'),
+                                  label: Text(context.l10n.uiAddPhrase),
                                 ),
                                 IconButton(
                                   onPressed: () => Navigator.pop(context),
                                   icon: const Icon(Icons.close),
-                                  tooltip: '關閉',
+                                  tooltip: context.l10n.commonClose,
                                 ),
                               ],
                             ),
@@ -435,7 +462,9 @@ final class _PhraseLibraryDialogState
                       const SizedBox(height: AppSpacing.md),
                       if (globalState.hasError)
                         Text(
-                          '全域短語庫讀取失敗：${globalState.error}',
+                          context.l10n.uiCouldNotLoadTheGlobalPhraseLibrary(
+                            (globalState.error).toString(),
+                          ),
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.error,
                           ),
@@ -444,8 +473,9 @@ final class _PhraseLibraryDialogState
                         controller: _search,
                         decoration: appFieldDecoration(
                           context,
-                          decoration: const InputDecoration(
-                            labelText: '搜尋內容、短碼或標籤',
+                          decoration: InputDecoration(
+                            labelText:
+                                context.l10n.uiSearchContentShortcutsOrTags,
                             prefixIcon: Icon(Icons.search),
                           ),
                         ),
@@ -461,7 +491,11 @@ final class _PhraseLibraryDialogState
                                 result.preview,
                               ),
                             for (final item in disabled)
-                              _tile(item.phrase, item.scope, '已停用'),
+                              _tile(
+                                item.phrase,
+                                item.scope,
+                                context.l10n.uiDisabled,
+                              ),
                           ],
                         ),
                       ),
@@ -483,7 +517,9 @@ final class _PhraseLibraryDialogState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          scope == PhraseScope.global ? '所有專案' : '目前專案',
+          scope == PhraseScope.global
+              ? context.l10n.uiAllProjects
+              : context.l10n.uiCurrentProject,
           style: Theme.of(context).textTheme.labelSmall,
         ),
         Text(
@@ -505,12 +541,14 @@ final class _PhraseLibraryDialogState
     trailing: Wrap(
       children: [
         IconButton(
-          tooltip: '複製短語',
+          tooltip: context.l10n.uiDuplicatePhrase,
           icon: const Icon(Icons.copy),
           onPressed: () => _copyPhrase(phrase, scope),
         ),
         IconButton(
-          tooltip: phrase.enabled ? '停用' : '啟用',
+          tooltip: phrase.enabled
+              ? context.l10n.uiDisable
+              : context.l10n.uiEnable,
           icon: Icon(phrase.enabled ? Icons.visibility_off : Icons.visibility),
           onPressed: () async {
             try {
@@ -531,7 +569,7 @@ final class _PhraseLibraryDialogState
           },
         ),
         IconButton(
-          tooltip: '刪除',
+          tooltip: context.l10n.commonDelete,
           icon: const Icon(Icons.delete_outline),
           onPressed: () => _delete(phrase, scope),
         ),
@@ -727,7 +765,9 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  widget.original == null ? '新增短語' : '編輯短語',
+                  widget.original == null
+                      ? context.l10n.uiAddPhrase
+                      : context.l10n.uiEditPhrase,
                   style: const TextStyle(fontSize: 20),
                 ),
                 const SizedBox(height: 8),
@@ -737,8 +777,8 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                   autofocus: true,
                   decoration: appFieldDecoration(
                     context,
-                    decoration: const InputDecoration(
-                      labelText: '短碼（1–32 位英數、_、-）',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiShortcutLettersDigitsOr,
                     ),
                   ),
                 ),
@@ -746,7 +786,7 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   spacing: AppSpacing.sm,
                   children: [
-                    const Text('所有專案可用'),
+                    Text(context.l10n.uiAvailableInAllProjects),
                     Switch(
                       key: const ValueKey('phrase-global-scope'),
                       value: _scope == PhraseScope.global && !hasMention,
@@ -758,11 +798,12 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                                   : PhraseScope.project;
                             }),
                     ),
-                    if (hasMention) const Text('含 Mention，只能用於目前專案'),
+                    if (hasMention)
+                      Text(context.l10n.uiContainsMentionsCurrentProjectOnly),
                   ],
                 ),
                 const SizedBox(height: 10),
-                const Text('標籤'),
+                Text(context.l10n.uiTags),
                 Wrap(
                   key: const ValueKey('phrase-tags'),
                   spacing: 6,
@@ -781,8 +822,8 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                         controller: _tagInput,
                         decoration: appFieldDecoration(
                           context,
-                          decoration: const InputDecoration(
-                            hintText: '新增標籤',
+                          decoration: InputDecoration(
+                            hintText: context.l10n.uiAddTag,
                             isDense: true,
                           ),
                         ),
@@ -790,7 +831,7 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                       ),
                     ),
                     IconButton(
-                      tooltip: '新增標籤',
+                      tooltip: context.l10n.uiAddTag,
                       onPressed: () => _addTag(_tagInput.text),
                       icon: const Icon(Icons.add),
                     ),
@@ -801,10 +842,12 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                   children: [
                     Icon(Icons.notes_rounded, size: 18, color: colors.primary),
                     const SizedBox(width: 6),
-                    const Text('內容'),
+                    Text(context.l10n.uiContent),
                     Expanded(
                       child: Text(
-                        '提及限目前專案；文字標記可供所有專案使用',
+                        context
+                            .l10n
+                            .uiMentionsAreProjectSpecificTextAnnotationsCanBe,
                         textAlign: TextAlign.end,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colors.onSurfaceVariant,
@@ -818,15 +861,27 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                   spacing: AppSpacing.sm,
                   runSpacing: AppSpacing.sm,
                   children: [
-                    for (final target in const [
-                      (label: '人物', trigger: '@', icon: Icons.person_outline),
+                    for (final target in [
                       (
-                        label: '物品',
+                        label: context.l10n.uiCharacter,
+                        trigger: '@',
+                        icon: Icons.person_outline,
+                      ),
+                      (
+                        label: context.l10n.uiItem,
                         trigger: '*',
                         icon: Icons.inventory_2_outlined,
                       ),
-                      (label: '地點', trigger: '!', icon: Icons.place_outlined),
-                      (label: '事件', trigger: '#', icon: Icons.event_outlined),
+                      (
+                        label: context.l10n.uiLocation,
+                        trigger: '!',
+                        icon: Icons.place_outlined,
+                      ),
+                      (
+                        label: context.l10n.uiEvent,
+                        trigger: '#',
+                        icon: Icons.event_outlined,
+                      ),
                     ])
                       OutlinedButton.icon(
                         key: ValueKey('phrase-insert-${target.trigger}'),
@@ -838,7 +893,7 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                       key: const ValueKey('phrase-insert-mark'),
                       onPressed: _insertMark,
                       icon: const Icon(Icons.highlight_outlined),
-                      label: const Text('標記'),
+                      label: Text(context.l10n.uiAnnotation2),
                     ),
                   ],
                 ),
@@ -916,7 +971,8 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
                       color: Theme.of(context).colorScheme.error,
                     ),
                   ),
-                if (!validation.isValid) const Text('Mosaic 語法不完整'),
+                if (!validation.isValid)
+                  Text(context.l10n.uiIncompleteMosaicSyntax),
               ],
             ),
           ),
@@ -925,9 +981,15 @@ final class _PhraseEditFormState extends State<_PhraseEditForm> {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            TextButton(onPressed: widget.onCancel, child: const Text('返回')),
+            TextButton(
+              onPressed: widget.onCancel,
+              child: Text(context.l10n.uiBack),
+            ),
             const SizedBox(width: AppSpacing.sm),
-            FilledButton(onPressed: _submit, child: const Text('儲存')),
+            FilledButton(
+              onPressed: _submit,
+              child: Text(context.l10n.commonSave),
+            ),
           ],
         ),
       ],

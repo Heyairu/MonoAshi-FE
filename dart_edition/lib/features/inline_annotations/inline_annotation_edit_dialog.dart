@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "../help/help_scope.dart";
 import "../help/help_topic.dart";
 import "package:flutter/material.dart";
@@ -138,15 +139,15 @@ class _InlineAnnotationEditFormState extends State<_InlineAnnotationEditForm> {
   String _formatError(FormatException error) {
     if (_kind != InlineAnnotationKind.emphasis &&
         _targetController.text.trim().isEmpty) {
-      return "此標記類型需要 UUID。";
+      return context.l10n.uiThisAnnotationTypeRequiresAUUID;
     }
-    return "標記資料無效：${error.message}";
+    return context.l10n.uiInvalidAnnotationData((error.message).toString());
   }
 
   @override
   Widget build(BuildContext context) {
     return AppDialog(
-      title: "編輯標記",
+      title: context.l10n.uiEditAnnotation,
       icon: Icons.edit_note_outlined,
       scrollable: true,
       maxWidth: 440,
@@ -173,11 +174,14 @@ class _InlineAnnotationEditFormState extends State<_InlineAnnotationEditForm> {
               decoration: appDropdownFieldDecoration(
                 context,
                 textStyle: Theme.of(context).textTheme.bodyMedium,
-                decoration: _decoration("類型"),
+                decoration: _decoration(context.l10n.uiType),
               ),
               items: [
                 for (final kind in InlineAnnotationKind.values)
-                  DropdownMenuItem(value: kind, child: Text(_kindLabel(kind))),
+                  DropdownMenuItem(
+                    value: kind,
+                    child: Text(_kindLabel(context.l10n, kind)),
+                  ),
               ],
               onChanged: (kind) {
                 if (kind == null) return;
@@ -207,13 +211,13 @@ class _InlineAnnotationEditFormState extends State<_InlineAnnotationEditForm> {
                 decoration: appDropdownFieldDecoration(
                   context,
                   textStyle: Theme.of(context).textTheme.bodyMedium,
-                  decoration: _decoration("狀態"),
+                  decoration: _decoration(context.l10n.uiStatus),
                 ),
                 items: [
                   for (final state in InlineAnnotationState.values)
                     DropdownMenuItem(
                       value: state,
-                      child: Text(_stateLabel(state)),
+                      child: Text(_stateLabel(context.l10n, state)),
                     ),
                 ],
                 onChanged: (state) {
@@ -238,7 +242,7 @@ class _InlineAnnotationEditFormState extends State<_InlineAnnotationEditForm> {
               controller: _displayController,
               decoration: appFieldDecoration(
                 context,
-                decoration: _decoration("顯示文字"),
+                decoration: _decoration(context.l10n.uiDisplayText),
               ),
             ),
             const SizedBox(height: 8),
@@ -260,7 +264,9 @@ class _InlineAnnotationEditFormState extends State<_InlineAnnotationEditForm> {
                     decoration: appDropdownFieldDecoration(
                       context,
                       textStyle: Theme.of(context).textTheme.bodyMedium,
-                      decoration: _decoration("背景色碼"),
+                      decoration: _decoration(
+                        context.l10n.uiBackgroundColorCode,
+                      ),
                     ),
                     items: _colorItems,
                     onChanged: (value) {
@@ -285,7 +291,7 @@ class _InlineAnnotationEditFormState extends State<_InlineAnnotationEditForm> {
                     decoration: appDropdownFieldDecoration(
                       context,
                       textStyle: Theme.of(context).textTheme.bodyMedium,
-                      decoration: _decoration("文字色碼"),
+                      decoration: _decoration(context.l10n.uiTextColorCode),
                     ),
                     items: _colorItems,
                     onChanged: (value) {
@@ -301,7 +307,7 @@ class _InlineAnnotationEditFormState extends State<_InlineAnnotationEditForm> {
               controller: _noteController,
               decoration: appFieldDecoration(
                 context,
-                decoration: _decoration("備註（可留空）"),
+                decoration: _decoration(context.l10n.uiNotesOptional),
               ),
               minLines: 2,
               maxLines: 4,
@@ -313,7 +319,11 @@ class _InlineAnnotationEditFormState extends State<_InlineAnnotationEditForm> {
               decoration: appFieldDecoration(
                 context,
                 textStyle: const TextStyle(fontFamily: "monospace"),
-                decoration: _decoration("完整語法", helperText: "直接修改此欄會優先套用完整語法。"),
+                decoration: _decoration(
+                  context.l10n.uiFullSyntax,
+                  helperText:
+                      context.l10n.uiEditingThisFieldAppliesTheFullSyntaxIn,
+                ),
               ),
               minLines: 2,
               maxLines: 4,
@@ -339,13 +349,13 @@ class _InlineAnnotationEditFormState extends State<_InlineAnnotationEditForm> {
         TextButton(
           style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text("取消"),
+          child: Text(context.l10n.commonCancel),
         ),
         FilledButton(
           key: const ValueKey("inline-annotation-save"),
           style: FilledButton.styleFrom(visualDensity: VisualDensity.compact),
           onPressed: _submit,
-          child: const Text("儲存"),
+          child: Text(context.l10n.commonSave),
         ),
       ],
     );
@@ -353,7 +363,10 @@ class _InlineAnnotationEditFormState extends State<_InlineAnnotationEditForm> {
 
   List<DropdownMenuItem<String>> get _colorItems => [
     for (final code in _colorCodes)
-      DropdownMenuItem(value: code, child: Text(code == "0" ? "0（自動）" : code)),
+      DropdownMenuItem(
+        value: code,
+        child: Text(code == "0" ? context.l10n.uiAutomatic : code),
+      ),
   ];
 
   InputDecoration _decoration(String label, {String? helperText}) {
@@ -368,19 +381,23 @@ class _InlineAnnotationEditFormState extends State<_InlineAnnotationEditForm> {
     );
   }
 
-  static String _kindLabel(InlineAnnotationKind kind) => switch (kind) {
-    InlineAnnotationKind.character => "人物",
-    InlineAnnotationKind.location => "地點",
-    InlineAnnotationKind.event => "事件",
-    InlineAnnotationKind.foreshadowing => "伏筆",
-    InlineAnnotationKind.plan => "計畫",
-    InlineAnnotationKind.item => "物品",
-    InlineAnnotationKind.emphasis => "高亮",
-  };
+  static String _kindLabel(AppLocalizations l10n, InlineAnnotationKind kind) =>
+      switch (kind) {
+        InlineAnnotationKind.character => l10n.uiCharacter,
+        InlineAnnotationKind.location => l10n.uiLocation,
+        InlineAnnotationKind.event => l10n.uiEvent,
+        InlineAnnotationKind.foreshadowing => l10n.uiForeshadowing,
+        InlineAnnotationKind.plan => l10n.uiPlan,
+        InlineAnnotationKind.item => l10n.uiItem,
+        InlineAnnotationKind.emphasis => l10n.uiHighlight,
+      };
 
-  static String _stateLabel(InlineAnnotationState state) => switch (state) {
-    InlineAnnotationState.none => "一般",
-    InlineAnnotationState.start => "開始",
-    InlineAnnotationState.end => "結束",
+  static String _stateLabel(
+    AppLocalizations l10n,
+    InlineAnnotationState state,
+  ) => switch (state) {
+    InlineAnnotationState.none => l10n.uiGeneral,
+    InlineAnnotationState.start => l10n.uiStart,
+    InlineAnnotationState.end => l10n.uiEnd,
   };
 }

@@ -160,7 +160,7 @@ ProjectData _complexProject() {
     fear: "failure",
     relationshipSummary: "friends",
     relationships: const <CharacterRelationship>[relationship],
-    characterType: "主角",
+    characterType: "protagonist",
     organizations: const <CharacterProfileTableEntry>[profile],
     possessions: const <CharacterPossessionEntry>[possession],
     statusEntries: const <CharacterProfileTableEntry>[profile],

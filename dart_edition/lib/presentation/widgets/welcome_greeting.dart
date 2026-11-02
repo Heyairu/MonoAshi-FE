@@ -1,9 +1,9 @@
+import '../../l10n/app_localization.dart';
 import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "../../utils/welcome_greeting.dart";
 import "../providers/global_state_providers.dart";
 
 final welcomeClockProvider = Provider<DateTime Function()>(
@@ -39,21 +39,28 @@ class _WelcomeGreetingState extends ConsumerState<WelcomeGreeting> {
     final theme = Theme.of(context);
     final displayName =
         ref.watch(userProfileProvider).valueOrNull?.displayName.trim() ?? "";
-    final greeting = welcomeGreetingParts(
-      now: ref.watch(welcomeClockProvider)(),
-      displayName: displayName,
-    );
+    final l10n = context.l10n;
+    final name = displayName.isEmpty ? l10n.welcomeUser : displayName;
+    const marker = '\uFFFC';
+    final message = switch (ref.watch(welcomeClockProvider)().hour) {
+      >= 5 && < 12 => l10n.welcomeMorning(marker),
+      >= 12 && < 17 => l10n.welcomeAfternoon(marker),
+      >= 17 && < 22 => l10n.welcomeEvening(marker),
+      _ => l10n.welcomeNight(marker),
+    };
+    final parts = message.split(marker);
     return Text.rich(
       TextSpan(
         children: [
-          TextSpan(text: greeting.prefix),
+          TextSpan(text: parts.first),
           TextSpan(
-            text: '${greeting.name}${greeting.suffix}',
+            text: name,
             style: theme.textTheme.headlineLarge?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.w400,
             ),
           ),
+          TextSpan(text: parts.last),
         ],
       ),
       key: const Key("welcome-greeting"),

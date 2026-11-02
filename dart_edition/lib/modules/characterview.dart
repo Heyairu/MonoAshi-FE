@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "../presentation/widgets/snapshot_panel_card.dart";
 /*
   滑桿儲存格式：
@@ -1034,7 +1035,12 @@ class CharacterCodec {
       },
     );
 
-    return builder.buildDocument().toXmlString(pretty: true, indent: "  ");
+    return builder.buildDocument().toXmlString(
+      pretty: true,
+      indent: "  ",
+      preserveWhitespace: (node) =>
+          node is xml.XmlElement && node.name.local == "CharacterType",
+    );
   }
 
   static const _profileTextFields = <String>[
@@ -1140,7 +1146,11 @@ class CharacterCodec {
             }
           },
         );
-        _writeTextElement(builder, "CharacterType", character.characterType);
+        _writeTextElement(
+          builder,
+          "CharacterType",
+          normalizeCharacterType(character.characterType),
+        );
         _saveProfileTable(
           builder,
           "Organizations",
@@ -1414,10 +1424,9 @@ class CharacterCodec {
       relationships: relationshipsNode == null
           ? fallback.relationships
           : retainedRelationships,
-      characterType:
-          value("CharacterType", fallback.characterType).trim().isEmpty
-          ? defaultCharacterType
-          : value("CharacterType", fallback.characterType),
+      characterType: normalizeCharacterType(
+        value("CharacterType", fallback.characterType),
+      ),
       organizations: loadProfileTable(
         "Organizations",
         "Organization",
@@ -1845,8 +1854,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
   _snapshotEditorContext;
 
   SnapshotPreviewMode get _characterPreviewMode =>
-      _snapshotPreviewModes[selectedCharacter] ??
-      SnapshotPreviewMode.baseline;
+      _snapshotPreviewModes[selectedCharacter] ?? SnapshotPreviewMode.baseline;
 
   bool get _characterSnapshotReadOnly {
     final id = selectedCharacter;
@@ -1927,7 +1935,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
   String _characterTypeFor(String characterId) {
     if (characterId == selectedCharacter) return selectedCharacterType;
     final value = characterData[characterId]?.characterType ?? "";
-    return characterTypeOptions.contains(value) ? value : defaultCharacterType;
+    return normalizeCharacterType(value);
   }
 
   Set<String> get _duplicateCharacterIds {
@@ -2440,7 +2448,10 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                LargeTitle(icon: Icons.person_rounded, text: "角色編輯"),
+                LargeTitle(
+                  icon: Icons.person_rounded,
+                  text: context.l10n.uiCharacterEditor,
+                ),
                 const SizedBox(height: 32),
                 SnapshotWorkspaceLayout(
                   collection: _buildCharacterListSection(),
@@ -2464,24 +2475,24 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            MediumTitle(icon: Icons.group, text: "角色列表"),
+            MediumTitle(icon: Icons.group, text: context.l10n.uiCharacterList),
             const SizedBox(height: 8),
             // 新增角色輸入框
             AddItemInput(
               useNeonStyle: true,
-              title: "角色名稱",
+              title: context.l10n.uiCharacterName2,
               controller: _newCharacterController,
               onAdd: (_) => _addCharacter(),
             ),
             const SizedBox(height: 8),
             CollectionPanel.builder(
-              title: "角色列表",
+              title: context.l10n.uiCharacterList,
               showSectionCard: false,
               minHeight: 200,
               maxHeight: 200,
               itemCount: characters.length,
-              emptyTitle: "尚無角色",
-              emptyDescription: "請新增第一個角色",
+              emptyTitle: context.l10n.uiNoCharacters,
+              emptyDescription: context.l10n.uiAddYourFirstCharacter,
               emptyIcon: Icons.person_add_alt_outlined,
               itemBuilder: (context, index) {
                 final characterId = characters[index];
@@ -2512,7 +2523,13 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                       ),
                     ],
                   ),
-                  subtitle: Text("角色類型：${_characterTypeFor(characterId)}"),
+                  subtitle: Text(
+                    context.l10n.uiCharacterType(
+                      (context.l10n.characterTypeLabel(
+                        _characterTypeFor(characterId),
+                      )).toString(),
+                    ),
+                  ),
                   trailing: ItemActionBar(
                     useNeonStyle: true,
                     actions: [
@@ -2601,11 +2618,11 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       return AppSectionCard(
         padding: EdgeInsets.zero,
         useSectionLayout: false,
-        child: const SizedBox(
+        child: SizedBox(
           height: 400,
           child: AppEmptyState(
-            title: "請選取一個角色",
-            description: "從左側列表選擇要編輯的角色",
+            title: context.l10n.uiSelectACharacter,
+            description: context.l10n.uiSelectACharacterFromTheListOnThe,
             icon: Icons.person_outline,
           ),
         ),
@@ -2621,10 +2638,10 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           TabBar(
             controller: _tabController,
             isScrollable: true,
-            tabs: const [
-              Tab(text: "角色卡"),
-              Tab(text: "自訂資料"),
-              Tab(text: "進階設定"),
+            tabs: [
+              Tab(text: context.l10n.uiCharacterCard),
+              Tab(text: context.l10n.uiCustomData),
+              Tab(text: context.l10n.uiAdvancedSettings),
             ],
           ),
           Padding(
@@ -2655,29 +2672,33 @@ class _CharacterViewState extends ConsumerState<CharacterView>
   }) => [
     NeonIconButton(
       key: const ValueKey("character-snapshot-toolbar-add"),
-      label: "新增快照",
+      label: context.l10n.uiAddSnapshot,
       onPressed: () => _showAddSnapshotDialog(),
       icon: Icons.add_photo_alternate_outlined,
       accent: NeonAccent.green,
     ),
     NeonIconButton(
       key: const ValueKey("character-snapshot-toolbar-copy"),
-      label: "複製快照",
+      label: context.l10n.uiDuplicateSnapshot,
       onPressed: () => _showAddSnapshotDialog(
         sourceState: sourceState ?? selectedEntry.snapshot.state,
-        sourceLabel: selectedEntry.isBaseline ? "預設" : selectedEntry.sceneName,
+        sourceLabel: selectedEntry.isBaseline
+            ? context.l10n.uiDefault
+            : selectedEntry.sceneName,
       ),
       icon: Icons.copy_all_outlined,
     ),
     NeonIconButton(
       key: const ValueKey("character-snapshot-toolbar-delete"),
-      label: "刪除快照",
+      label: context.l10n.uiDeleteSnapshot,
       onPressed: selectedEntry.isBaseline || _characterSnapshotReadOnly
           ? null
           : () => _deleteSnapshot(selectedEntry.change!),
       icon: Icons.delete_outline,
       destructive: true,
-      statusLabel: selectedEntry.isBaseline ? "預設快照不可刪除" : null,
+      statusLabel: selectedEntry.isBaseline
+          ? context.l10n.uiTheDefaultSnapshotCannotBeDeleted
+          : null,
     ),
   ];
 
@@ -2690,7 +2711,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       case 2:
         return _selectedSnapshotChangeId == null
             ? _buildAdvancedSettingsTab()
-            : _buildLockedSnapshotTab("進階設定");
+            : _buildLockedSnapshotTab(context.l10n.uiAdvancedSettings);
       default:
         return Container();
     }
@@ -2791,14 +2812,20 @@ class _CharacterViewState extends ConsumerState<CharacterView>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SmallTitle(icon: Icons.badge_outlined, text: "基本識別"),
+        SmallTitle(
+          icon: Icons.badge_outlined,
+          text: context.l10n.uiBasicIdentity,
+        ),
         const SizedBox(height: 16),
-        _buildNameField("姓名（必填）：", _controllers["name"]!),
-        _buildTextField("身份／職業：", _controllers["roleOrOccupation"]!),
+        _buildNameField(context.l10n.uiNameRequired, _controllers["name"]!),
+        _buildTextField(
+          context.l10n.uiRoleOccupation,
+          _controllers["roleOrOccupation"]!,
+        ),
         const SizedBox(height: 8),
-        _buildTextField("年齡：", _controllers["age"]!),
-        _buildTextField("性別：", _controllers["gender"]!),
-        _buildTextField("生日：", _controllers["birthday"]!),
+        _buildTextField(context.l10n.uiAge2, _controllers["age"]!),
+        _buildTextField(context.l10n.uiGender3, _controllers["gender"]!),
+        _buildTextField(context.l10n.uiBirthday, _controllers["birthday"]!),
         const SizedBox(height: 8),
         _fixedSnapshotControl(
           AliasTerms(
@@ -2822,22 +2849,33 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         const Divider(height: 32),
         _fixedSnapshotControl(
           ExpansionTile(
-            title: SmallTitle(icon: Icons.theater_comedy, text: "角色類型"),
-            subtitle: Text(selectedCharacterType),
+            title: SmallTitle(
+              icon: Icons.theater_comedy,
+              text: context.l10n.uiCharacterType2,
+            ),
+            subtitle: Text(
+              context.l10n.characterTypeLabel(selectedCharacterType),
+            ),
             children: [_buildCharacterTypeOptions(), const SizedBox(height: 8)],
           ),
         ),
         const SizedBox(height: 8),
         ExpansionTile(
-          title: SmallTitle(icon: Icons.face_retouching_natural, text: "外觀摘要"),
-          subtitle: const Text("紀錄角色大致外觀。"),
+          title: SmallTitle(
+            icon: Icons.face_retouching_natural,
+            text: context.l10n.uiAppearanceSummary,
+          ),
+          subtitle: Text(context.l10n.uiDescribeTheCharacterSGeneralAppearance),
           children: [
             const SizedBox(height: 16),
-            _buildTextField("身高：", _controllers["height"]!),
-            _buildTextField("體重：", _controllers["weight"]!),
-            _buildTextField("髮色：", _controllers["hair"]!),
-            _buildTextField("瞳色：", _controllers["eye"]!),
-            _buildTextField("外觀摘要：", _controllers["appearanceSummary"]!),
+            _buildTextField(context.l10n.uiHeight, _controllers["height"]!),
+            _buildTextField(context.l10n.uiWeight, _controllers["weight"]!),
+            _buildTextField(context.l10n.uiHairColor, _controllers["hair"]!),
+            _buildTextField(context.l10n.uiEyeColor, _controllers["eye"]!),
+            _buildTextField(
+              context.l10n.uiAppearanceSummary2,
+              _controllers["appearanceSummary"]!,
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -2846,25 +2884,40 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           initiallyExpanded: _characterSnapshotReadOnly,
           title: SmallTitle(
             icon: Icons.psychology_alt_outlined,
-            text: "性格與故事核心",
+            text: context.l10n.uiPersonalityAndStoryCore,
           ),
-          subtitle: const Text("紀錄角色個性，以及在故事中遇到的困難。"),
+          subtitle: Text(
+            context.l10n.uiDescribeTheCharacterSPersonalityAndTheChallenges,
+          ),
           children: [
             const SizedBox(height: 16),
-            _buildMultilineField("個性：", _controllers["personality"]!),
+            _buildMultilineField(
+              context.l10n.uiPersonality,
+              _controllers["personality"]!,
+            ),
             _buildTextField("MBTI：", _controllers["mbti"]!),
-            _buildTextField("說話風格：", _controllers["speechStyle"]!),
-            _buildTextField("動機：", _controllers["motivation"]!),
-            _buildTextField("目標：", _controllers["goal"]!),
-            _buildTextField("價值觀與信念：", _controllers["valuesAndBeliefs"]!),
-            _buildTextField("恐懼：", _controllers["fear"]!),
+            _buildTextField(
+              context.l10n.uiSpeechStyle,
+              _controllers["speechStyle"]!,
+            ),
+            _buildTextField(
+              context.l10n.uiMotivation,
+              _controllers["motivation"]!,
+            ),
+            _buildTextField(context.l10n.uiGoal, _controllers["goal"]!),
+            _buildTextField(
+              context.l10n.uiValuesAndBeliefs,
+              _controllers["valuesAndBeliefs"]!,
+            ),
+            _buildTextField(context.l10n.uiFear, _controllers["fear"]!),
             const SizedBox(height: 8),
             _buildProfileTableSection<Map<String, String>>(
-              title: "阻礙與解決方式",
+              title: context.l10n.uiObstaclesAndResolutions,
               icon: Icons.warning_amber,
-              firstHeader: "阻礙事件",
-              secondHeader: "解決方式",
-              emptyDescription: "在下方輸入事件與解決方式後新增",
+              firstHeader: context.l10n.uiObstacle,
+              secondHeader: context.l10n.uiResolution,
+              emptyDescription:
+                  context.l10n.uiEnterAnObstacleAndResolutionBelowThenAdd,
               keyPrefix: "hinder",
               entries: hinderEvents,
               firstValueOf: (entry) => entry["event"] ?? "",
@@ -2890,20 +2943,29 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             _characterSnapshotReadOnly,
           )),
           initiallyExpanded: _characterSnapshotReadOnly,
-          title: SmallTitle(icon: Icons.notes_outlined, text: "人物關係描述"),
-          subtitle: const Text("描述角色與其他人的連結。"),
+          title: SmallTitle(
+            icon: Icons.notes_outlined,
+            text: context.l10n.uiCharacterRelationships2,
+          ),
+          subtitle: Text(
+            context.l10n.uiDescribeTheCharacterSConnectionsWithOthers,
+          ),
           children: [
             const SizedBox(height: 16),
-            _buildTextField("人物關係簡述：", _controllers["relationshipSummary"]!),
+            _buildTextField(
+              context.l10n.uiRelationshipSummary,
+              _controllers["relationshipSummary"]!,
+            ),
             const SizedBox(height: 16),
             _buildCharacterRelationshipsTable(),
             const SizedBox(height: 16),
             _buildProfileTableSection(
-              title: "所屬組織",
+              title: context.l10n.uiOrganizations,
               icon: Icons.corporate_fare_outlined,
-              firstHeader: "組織",
-              secondHeader: "身分／職位",
-              emptyDescription: "在下方輸入組織與身分或職位後新增",
+              firstHeader: context.l10n.uiOrganization,
+              secondHeader: context.l10n.uiPositionTitle,
+              emptyDescription:
+                  context.l10n.uiEnterAnOrganizationAndPositionBelowThenAdd,
               keyPrefix: "organization",
               entries: organizations,
               firstValueOf: (entry) => entry.name,
@@ -2911,12 +2973,14 @@ class _CharacterViewState extends ConsumerState<CharacterView>
               selectedIndex: selectedOrganizationIndex,
               firstController: _organizationNameController,
               secondController: _organizationDescriptionController,
-              firstHint: "選擇地點或組織，或自行輸入",
+              firstHint:
+                  context.l10n.uiSelectALocationOrOrganizationOrEnterYour,
               firstFieldBuilder: (context, controller) => AppComboBoxField(
                 controller: controller,
                 options: _worldDirectoryOptionLabels,
-                labelText: "組織",
-                hintText: "選擇地點或組織，或自行輸入",
+                labelText: context.l10n.uiOrganization,
+                hintText:
+                    context.l10n.uiSelectALocationOrOrganizationOrEnterYour,
                 optionMatchesQuery: _matchesWorldDirectoryOption,
                 onSelected: (value) {
                   controller.text = _worldDirectoryTargetName(value);
@@ -2972,16 +3036,20 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             _characterSnapshotReadOnly,
           )),
           initiallyExpanded: _characterSnapshotReadOnly,
-          title: SmallTitle(icon: Icons.sensors_rounded, text: "角色狀態"),
-          subtitle: const Text("角色的大致狀態。"),
+          title: SmallTitle(
+            icon: Icons.sensors_rounded,
+            text: context.l10n.uiCharacterStatus,
+          ),
+          subtitle: Text(context.l10n.uiDescribeTheCharacterSGeneralState),
           children: [
             const SizedBox(height: 16),
             _buildProfileTableSection(
-              title: "角色狀態",
+              title: context.l10n.uiCharacterStatus,
               icon: Icons.monitor_heart_outlined,
-              firstHeader: "狀態",
-              secondHeader: "說明",
-              emptyDescription: "在下方輸入狀態與說明後新增",
+              firstHeader: context.l10n.uiStatus,
+              secondHeader: context.l10n.uiHelp,
+              emptyDescription:
+                  context.l10n.uiEnterAStatusAndDescriptionBelowThenAdd,
               keyPrefix: "status",
               entries: statusEntries,
               firstValueOf: (entry) => entry.name,
@@ -3031,20 +3099,20 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           ],
         ),
         const Divider(height: 32),
-        SmallTitle(icon: Icons.notes_outlined, text: "備註"),
+        SmallTitle(icon: Icons.notes_outlined, text: context.l10n.uiNotes),
         const SizedBox(height: 16),
-        _buildMultilineField("備註：", _controllers["notes"]!),
+        _buildMultilineField(context.l10n.uiNotes2, _controllers["notes"]!),
       ],
     );
   }
 
   Widget _buildCharacterSnapshotCard() {
     if (selectedCharacter == null) {
-      return const SnapshotPanelCard(
+      return SnapshotPanelCard(
         key: ValueKey("character-snapshot-card"),
         child: AppEmptyState(
-          title: "請先選取角色",
-          description: "選取角色後即可預覽時間軸與管理快照",
+          title: context.l10n.uiSelectACharacterFirst2,
+          description: context.l10n.uiSelectACharacterToPreviewTheTimelineAnd,
           icon: Icons.person_outline,
           compact: true,
         ),
@@ -3090,8 +3158,18 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                 key: const ValueKey("character-snapshot-status"),
                 icon: Icons.auto_stories_outlined,
                 text: mode == SnapshotPreviewMode.baseline
-                    ? "故事狀態 · 編輯中：預設資料"
-                    : "故事狀態 · Tick $currentTick · ${event == null ? "唯讀預覽；已開啟跟隨時間軸。" : "編輯中：${event.label}"}",
+                    ? context.l10n.uiStoryStateEditingDefaultData
+                    : context.l10n.uiStoryStateTick(
+                        (currentTick).toString(),
+                        (event == null
+                                ? context
+                                      .l10n
+                                      .uiReadOnlyPreviewFollowingTheTimeline
+                                : context.l10n.uiEditing(
+                                    (event.label).toString(),
+                                  ))
+                            .toString(),
+                      ),
               ),
             ),
           ],
@@ -3101,7 +3179,9 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           subject: (kind: SnapshotSubjectKind.character, id: characterId),
           mode: mode,
           hint: mode != SnapshotPreviewMode.baseline && event != null
-              ? "正在編輯 Scene 快照：阻礙、人物關係、組織、角色狀態、擁有物品與自訂欄位可修改；其餘固定資料已鎖定。"
+              ? context
+                    .l10n
+                    .uiEditingASceneSnapshotObstaclesRelationshipsOrganizationsStatus
               : null,
           autoSelectAtTick: true,
           selectedEventId: _selectedSnapshotChangeId == null
@@ -3134,8 +3214,8 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                     Expanded(
                       child: Text(
                         mode == SnapshotPreviewMode.baseline
-                            ? "預設資料"
-                            : "目前播放頭狀態",
+                            ? context.l10n.uiDefaultData
+                            : context.l10n.uiStateAtPlayhead,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
@@ -3143,11 +3223,13 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                       onPressed: () => _showAddSnapshotDialog(
                         sourceState: current.state,
                         sourceLabel: mode == SnapshotPreviewMode.baseline
-                            ? "預設資料"
-                            : "目前 Tick $currentTick",
+                            ? context.l10n.uiDefaultData
+                            : context.l10n.uiCurrentTick(
+                                (currentTick).toString(),
+                              ),
                       ),
                       icon: Icons.copy_outlined,
-                      label: "複製目前狀態",
+                      label: context.l10n.uiCopyCurrentState,
                     ),
                   ],
                 ),
@@ -3170,8 +3252,10 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           }),
           title: Text(
             mode == SnapshotPreviewMode.baseline
-                ? "預設物品配置"
-                : "Tick $currentTick 的物品配置",
+                ? context.l10n.uiDefaultItemAssignments
+                : context.l10n.uiItemAssignmentsAtTick(
+                    (currentTick).toString(),
+                  ),
           ),
           children: _expandedSnapshotItems.contains(characterId)
               ? [
@@ -3183,16 +3267,23 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         ),
         Row(
           children: [
-            const Expanded(
-              child: SmallTitle(icon: Icons.history, text: "所有快照"),
+            Expanded(
+              child: SmallTitle(
+                icon: Icons.history,
+                text: context.l10n.uiAllSnapshots,
+              ),
             ),
-            Text("共 ${entries.length} 筆（含預設）"),
+            Text(
+              context.l10n.uiTotalIncludingDefault(
+                context.formats.integer(entries.length),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 8),
         ExpansionTile(
           key: ValueKey("character-snapshot-history-$characterId"),
-          title: const Text("快照歷程與編輯"),
+          title: Text(context.l10n.uiSnapshotHistoryAndEditing),
           children: List.generate(entries.length, (index) {
             final entry = entries[index];
             final previous = index == 0
@@ -3221,15 +3312,19 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                           Expanded(
                             child: Text(
                               entry.isBaseline
-                                  ? "預設快照（故事開始前）"
+                                  ? context.l10n.uiDefaultSnapshotBeforeTheStory
                                   : "Tick ${entry.snapshot.resolvedTick} · ${entry.sceneName}",
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                           ),
                           if (entry.usesFallbackTick)
-                            const Tooltip(
-                              message: "Scene 尚未排定或主要 placement 已失效",
-                              child: Chip(label: Text("Fallback Tick")),
+                            Tooltip(
+                              message: context
+                                  .l10n
+                                  .uiTheSceneIsUnscheduledOrItsPrimaryPlacement,
+                              child: Chip(
+                                label: Text(context.l10n.uiFallbackTick),
+                              ),
                             ),
                         ],
                       ),
@@ -3238,13 +3333,19 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                       if (diff.isNotEmpty) ...[
                         const SizedBox(height: 6),
                         Text(
-                          "變更：${diff.keys.join("、")}",
+                          context.l10n.uiChanges2(
+                            (diff.keys.join("、")).toString(),
+                          ),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
                       if (entry.change?.note.trim().isNotEmpty == true) ...[
                         const SizedBox(height: 6),
-                        Text("備註：${entry.change!.note.trim()}"),
+                        Text(
+                          context.l10n.uiNotes3(
+                            (entry.change!.note.trim()).toString(),
+                          ),
+                        ),
                       ],
                       const SizedBox(height: 8),
                       Wrap(
@@ -3256,25 +3357,25 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                             onPressed: () => _showAddSnapshotDialog(
                               sourceState: entry.snapshot.state,
                               sourceLabel: entry.isBaseline
-                                  ? "預設快照"
+                                  ? context.l10n.uiDefaultSnapshot
                                   : entry.sceneName,
                             ),
                             icon: Icons.copy_outlined,
-                            label: "複製快照",
+                            label: context.l10n.uiDuplicateSnapshot,
                           ),
                           if (!entry.isBaseline) ...[
                             NeonIconButton(
                               onPressed: () => _locateSnapshot(entry),
                               icon: Icons.my_location_outlined,
-                              label: "定位快照",
+                              label: context.l10n.uiLocateSnapshot,
                             ),
                             NeonIconButton(
                               onPressed: () => _selectSnapshotForEditing(entry),
                               icon: Icons.edit_outlined,
-                              label: "編輯快照",
+                              label: context.l10n.uiEditSnapshot,
                             ),
                             NeonIconButton(
-                              label: "刪除快照",
+                              label: context.l10n.uiDeleteSnapshot,
                               onPressed: () => _deleteSnapshot(entry.change!),
                               icon: Icons.delete_outline,
                               destructive: true,
@@ -3295,12 +3396,24 @@ class _CharacterViewState extends ConsumerState<CharacterView>
 
   String _snapshotStateSummary(CharacterSnapshotState state) {
     final values = <String>[
-      "阻礙 ${state.conflicts.length}",
-      "人物關係 ${state.relationships.length}",
-      "組織 ${state.organizations.length}",
-      "角色狀態 ${state.statusEntries.length}",
-      "擁有物品 ${state.possessions.length}",
-      "自訂欄位 ${state.customFields.length}",
+      context.l10n.snapshotConflictsCount(
+        context.formats.integer(state.conflicts.length),
+      ),
+      context.l10n.snapshotRelationshipsCount(
+        context.formats.integer(state.relationships.length),
+      ),
+      context.l10n.snapshotOrganizationsCount(
+        context.formats.integer(state.organizations.length),
+      ),
+      context.l10n.snapshotStatusesCount(
+        context.formats.integer(state.statusEntries.length),
+      ),
+      context.l10n.snapshotPossessionsCount(
+        context.formats.integer(state.possessions.length),
+      ),
+      context.l10n.snapshotCustomFieldsCount(
+        context.formats.integer(state.customFields.length),
+      ),
     ];
     return values.join("　");
   }
@@ -3324,16 +3437,20 @@ class _CharacterViewState extends ConsumerState<CharacterView>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text("刪除快照？"),
-        content: const Text("刪除後，這個 Scene 之後的角色狀態會重新推導。"),
+        title: Text(dialogContext.l10n.uiDeleteSnapshot2),
+        content: Text(
+          dialogContext
+              .l10n
+              .uiDeletingThisSnapshotRecalculatesTheCharacterSState,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text("取消"),
+            child: Text(dialogContext.l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text("刪除"),
+            child: Text(dialogContext.l10n.commonDelete),
           ),
         ],
       ),
@@ -3353,8 +3470,8 @@ class _CharacterViewState extends ConsumerState<CharacterView>
 
   Widget _buildLockedSnapshotTab(String title) {
     return AppEmptyState(
-      title: "$title已鎖定",
-      description: "Scene 快照只允許修改五組角色 Table 與自訂欄位；切回「預設」即可編輯固定資料。",
+      title: context.l10n.uiIsLocked((title).toString()),
+      description: context.l10n.uiSceneSnapshotsAllowChangesOnlyToTheFive,
       icon: Icons.lock_outline,
     );
   }
@@ -3425,8 +3542,8 @@ class _CharacterViewState extends ConsumerState<CharacterView>
     late final List<TimelinePlacementData> placements;
     TimelinePlacementData? scopePlacement;
     if (middle != null) {
-      scopeLabel = "中箱：${middle.label}";
-      emptyMessage = "此中箱尚無小箱；新 Scene 會建立在這個中箱中。";
+      scopeLabel = context.l10n.uiEvent2((middle.label).toString());
+      emptyMessage = context.l10n.uiThisEventHasNoScenesYetANew;
       scopePlacement = middle;
       placements = document.placements
           .where(
@@ -3436,8 +3553,8 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           )
           .toList();
     } else if (large != null) {
-      scopeLabel = "大箱：${large.label}";
-      emptyMessage = "找不到指定中箱；新中箱會建立在這個大箱中。";
+      scopeLabel = context.l10n.uiStoryline((large.label).toString());
+      emptyMessage = context.l10n.uiTheSpecifiedEventWasNotFoundANew;
       scopePlacement = large;
       placements = document.placements
           .where(
@@ -3447,8 +3564,8 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           )
           .toList();
     } else {
-      scopeLabel = "全域預覽";
-      emptyMessage = "找不到指定大箱；將建立新的大箱、中箱與 Scene。";
+      scopeLabel = context.l10n.uiGlobalPreview;
+      emptyMessage = context.l10n.uiTheSpecifiedStorylineWasNotFoundANew;
       placements = document.placements
           .where((item) => item.level == TimelineElementLevel.large)
           .toList();
@@ -3585,14 +3702,14 @@ class _CharacterViewState extends ConsumerState<CharacterView>
     final largeName = TextEditingController(
       text: initialLarge?.label.trim().isNotEmpty == true
           ? initialLarge!.label.trim()
-          : "角色快照",
+          : context.l10n.uiCharacterSnapshot,
     );
     final middleName = TextEditingController(
       text: initialMiddle?.label.trim().isNotEmpty == true
           ? initialMiddle!.label.trim()
-          : "角色快照 Scene",
+          : context.l10n.uiCharacterSnapshotScene,
     );
-    final sceneName = TextEditingController(text: "新 Scene");
+    final sceneName = TextEditingController(text: context.l10n.uiNewScene);
     final tick = TextEditingController(text: currentTick.toString());
     var selectedTick = currentTick;
     String? validationMessage;
@@ -3640,7 +3757,9 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           }
 
           return AppDialog(
-            title: sourceLabel == null ? "新增 Scene 快照" : "複製 $sourceLabel",
+            title: sourceLabel == null
+                ? context.l10n.uiAddSceneSnapshot
+                : context.l10n.uiDuplicate((sourceLabel).toString()),
             icon: sourceLabel == null
                 ? Icons.add_photo_alternate_outlined
                 : Icons.copy_all_outlined,
@@ -3660,7 +3779,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                     AppDropdownField<String>(
                       key: const ValueKey("character-snapshot-scene-selector"),
                       value: selectedScene,
-                      labelText: "綁定 Scene",
+                      labelText: context.l10n.uiLinkToScene,
                       options: [
                         for (final sceneId in orderedSceneIds)
                           DropdownOption(
@@ -3668,9 +3787,9 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                             label:
                                 "${sceneIndex[sceneId]!.storyline.storylineName} / ${sceneIndex[sceneId]!.event.storyEvent} / ${sceneIndex[sceneId]!.scene.sceneName}",
                           ),
-                        const DropdownOption(
+                        DropdownOption(
                           value: createValue,
-                          label: "＋ 快速建立新 Scene",
+                          label: context.l10n.uiQuickCreateScene,
                         ),
                       ],
                       onChanged: (value) => setDialogState(
@@ -3695,7 +3814,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                     if (selectedScene == createValue) ...[
                       const SizedBox(height: 16),
                       AppSectionCard(
-                        title: "Scene 階層",
+                        title: context.l10n.uiSceneHierarchy,
                         icon: Icons.account_tree_outlined,
                         padding: const EdgeInsets.all(AppSpacing.lg),
                         child: Column(
@@ -3710,8 +3829,10 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                                         TimelineElementLevel.large,
                                   )
                                   .map((item) => item.label),
-                              labelText: "大箱（可選既有或輸入新名稱）",
-                              hintText: "例如：第一幕",
+                              labelText: context
+                                  .l10n
+                                  .uiStorylineSelectExistingOrEnterAName,
+                              hintText: context.l10n.uiForExampleActOne,
                               onChanged: (_) => setDialogState(() {}),
                               onSelected: (_) {
                                 final matchingLarge = timelineDocument
@@ -3750,8 +3871,11 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                               key: const ValueKey("snapshot-middle-box-combo"),
                               controller: middleName,
                               options: middleOptions,
-                              labelText: "中箱（可選既有或輸入新名稱）",
-                              hintText: "例如：城門衝突",
+                              labelText: context
+                                  .l10n
+                                  .uiEventSelectExistingOrEnterAName,
+                              hintText:
+                                  context.l10n.uiForExampleConflictAtTheGate,
                               onChanged: (_) => setDialogState(() {}),
                               onSelected: (_) => setDialogState(() {}),
                             ),
@@ -3759,8 +3883,9 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                             AppTextField(
                               key: const ValueKey("snapshot-small-box-name"),
                               controller: sceneName,
-                              labelText: "小箱（Scene 名稱）",
-                              hintText: "例如：抵達城門",
+                              labelText: context.l10n.uiSceneName,
+                              hintText:
+                                  context.l10n.uiForExampleArrivingAtTheGate,
                             ),
                           ],
                         ),
@@ -3777,9 +3902,12 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                       AppTextField(
                         key: const ValueKey("snapshot-tick-field"),
                         controller: tick,
-                        labelText: "時間軸 Tick",
-                        helperText:
-                            "可輸入 $timelineMinimumTick～+$timelineMaximumTick，或在上方時間軸點擊／拖動 Scrubber。",
+                        labelText: context.l10n.uiTimelineTick,
+                        helperText: context.l10n
+                            .uiEnterToOrClickOrDragTheScrubber(
+                              (timelineMinimumTick).toString(),
+                              (timelineMaximumTick).toString(),
+                            ),
                         keyboardType: const TextInputType.numberWithOptions(
                           signed: true,
                         ),
@@ -3789,8 +3917,11 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                           setDialogState(() {
                             if (parsed < timelineMinimumTick ||
                                 parsed > timelineMaximumTick) {
-                              validationMessage =
-                                  "Tick 必須介於 $timelineMinimumTick～+$timelineMaximumTick。";
+                              validationMessage = context.l10n
+                                  .uiTickMustBeBetweenAnd(
+                                    (timelineMinimumTick).toString(),
+                                    (timelineMaximumTick).toString(),
+                                  );
                               return;
                             }
                             selectedTick = parsed;
@@ -3803,12 +3934,15 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                     if (sourceState == null)
                       AppDropdownField<String>(
                         value: selectedSource,
-                        labelText: "初始內容",
+                        labelText: context.l10n.uiInitialContent,
                         options: [
-                          const DropdownOption(value: "blank", label: "空白狀態"),
-                          const DropdownOption(
+                          DropdownOption(
+                            value: "blank",
+                            label: context.l10n.uiEmptyState,
+                          ),
+                          DropdownOption(
                             value: "current",
-                            label: "目前播放頭狀態",
+                            label: context.l10n.uiStateAtPlayhead,
                           ),
                           for (
                             var index = 0;
@@ -3818,7 +3952,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                             DropdownOption(
                               value: "entry:$index",
                               label: timelineEntries[index].isBaseline
-                                  ? "預設快照"
+                                  ? context.l10n.uiDefaultSnapshot
                                   : "Tick ${timelineEntries[index].snapshot.resolvedTick} · ${timelineEntries[index].sceneName}",
                             ),
                         ],
@@ -3828,8 +3962,13 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                       )
                     else
                       AppNoticeBanner(
-                        title: "複製來源：${sourceLabel ?? "指定快照"}",
-                        message: "會複製來源當下的完整推導狀態。",
+                        title: context.l10n.uiCopyFrom(
+                          (sourceLabel ?? context.l10n.uiSpecificSnapshot)
+                              .toString(),
+                        ),
+                        message: context
+                            .l10n
+                            .uiCopiesTheCompleteDerivedStateAtTheSource,
                         icon: Icons.copy_outlined,
                       ),
                     if (validationMessage != null) ...[
@@ -3847,7 +3986,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext, false),
-                child: const Text("取消"),
+                child: Text(context.l10n.commonCancel),
               ),
               FilledButton(
                 key: const ValueKey("character-snapshot-dialog-confirm"),
@@ -3858,8 +3997,10 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                           parsedTick < timelineMinimumTick ||
                           parsedTick > timelineMaximumTick)) {
                     setDialogState(() {
-                      validationMessage =
-                          "Tick 必須介於 $timelineMinimumTick～+$timelineMaximumTick。";
+                      validationMessage = context.l10n.uiTickMustBeBetweenAnd(
+                        (timelineMinimumTick).toString(),
+                        (timelineMaximumTick).toString(),
+                      );
                     });
                     return;
                   }
@@ -3868,14 +4009,15 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                           middleName.text.trim().isEmpty ||
                           sceneName.text.trim().isEmpty)) {
                     setDialogState(() {
-                      validationMessage = "請填寫大箱、中箱與小箱名稱。";
+                      validationMessage =
+                          context.l10n.uiEnterNamesForTheStorylineEventAndScene;
                     });
                     return;
                   }
                   if (selectedScene == createValue) selectedTick = parsedTick!;
                   Navigator.pop(dialogContext, true);
                 },
-                child: const Text("建立快照"),
+                child: Text(context.l10n.uiCreateSnapshot),
               ),
             ],
           );
@@ -3935,7 +4077,9 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           sceneUUID: sceneUUID,
           sourcePlacementUUID: placement?.placementUUID,
           fallbackTick: placement?.startTick ?? currentTick,
-          note: sourceLabel == null ? "" : "複製自 $sourceLabel",
+          note: sourceLabel == null
+              ? ""
+              : context.l10n.uiCopiedFrom((sourceLabel).toString()),
         );
     setState(() {
       _snapshotPreviewModes[characterId] = SnapshotPreviewMode.followTimeline;
@@ -3949,7 +4093,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           .setCurrentTick(placement.startTick);
     }
     if (mounted) {
-      AppFeedback.success(context, "已新增 Scene 快照");
+      AppFeedback.success(context, context.l10n.uiSceneSnapshotAdded);
     }
   }
 
@@ -3962,7 +4106,11 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       ref.read(timelineViewProvider.notifier).select(placementUUID);
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("已定位至 Tick ${entry.snapshot.resolvedTick}")),
+      SnackBar(
+        content: Text(
+          context.l10n.uiMovedToTick((entry.snapshot.resolvedTick).toString()),
+        ),
+      ),
     );
   }
 
@@ -3970,36 +4118,40 @@ class _CharacterViewState extends ConsumerState<CharacterView>
     return Column(
       children: [
         ExpansionTile(
-          title: const Text("識別設定"),
-          subtitle: const Text("供角色重名時辨識用的 8 位 NanoID"),
+          title: Text(context.l10n.uiIdentitySettings),
+          subtitle: Text(
+            context.l10n.uiAnCharacterNanoIDDistinguishesCharactersWithTheSame,
+          ),
           children: [
             const SizedBox(height: 16),
             _buildTextField("NanoID：", _controllers["nanoId"]!),
           ],
         ),
         ExpansionTile(
-          title: const Text("詳細基本資料與外觀"),
-          subtitle: Text("居住地、五官與服裝"),
+          title: Text(context.l10n.uiDetailedProfileAndAppearance),
+          subtitle: Text(context.l10n.uiResidenceFeaturesAndClothing),
           children: [_buildBasicInfoTab()],
         ),
         ExpansionTile(
-          title: const Text("性格工具"),
-          subtitle: Text("習慣、陣營與性格量表"),
+          title: Text(context.l10n.uiPersonalityTools),
+          subtitle: Text(context.l10n.uiHabitsAlignmentAndPersonalityScales),
           children: [_buildPersonalityTab()],
         ),
         ExpansionTile(
-          title: const Text("喜好與能力"),
-          subtitle: Text("能力清單與生活技能量表"),
+          title: Text(context.l10n.uiPreferencesAndAbilities),
+          subtitle: Text(context.l10n.uiAbilityListsAndEverydaySkillScales),
           children: [_buildAbilityTab()],
         ),
         ExpansionTile(
-          title: const Text("社交問卷"),
-          subtitle: Text("社交行為、傾向與戀愛概況"),
+          title: Text(context.l10n.uiSocialQuestionnaire),
+          subtitle: Text(context.l10n.uiSocialBehaviorTendenciesAndRomance),
           children: [_buildSocialTab()],
         ),
         ExpansionTile(
-          title: const Text("其他舊欄位"),
-          subtitle: Text("原文姓名、喜惡與其他補充"),
+          title: Text(context.l10n.uiOtherLegacyFields),
+          subtitle: Text(
+            context.l10n.uiOriginalLanguageNamePreferencesAndExtraNotes,
+          ),
           children: [_buildOtherTab()],
         ),
       ],
@@ -4008,10 +4160,10 @@ class _CharacterViewState extends ConsumerState<CharacterView>
 
   String _customFieldTypeLabel(CustomFieldType type) {
     return switch (type) {
-      CustomFieldType.text => "文字",
-      CustomFieldType.number => "滑桿",
-      CustomFieldType.boolean => "核取方塊",
-      CustomFieldType.list => "清單",
+      CustomFieldType.text => context.l10n.uiText,
+      CustomFieldType.number => context.l10n.uiSlider,
+      CustomFieldType.boolean => context.l10n.uiCheckbox,
+      CustomFieldType.list => context.l10n.uiList,
     };
   }
 
@@ -4026,7 +4178,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SmallTitle(icon: Icons.tune, text: "自訂資料"),
+        SmallTitle(icon: Icons.tune, text: context.l10n.uiCustomData),
         const SizedBox(height: 16),
         Wrap(
           spacing: 12,
@@ -4037,7 +4189,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
               width: 320,
               child: AddItemInput(
                 useNeonStyle: true,
-                title: "欄位名稱",
+                title: context.l10n.uiFieldName,
                 controller: _customFieldNameController,
                 onAdd: (_) => _addCustomField(),
               ),
@@ -4046,7 +4198,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
               width: 200,
               child: AppDropdownField<CustomFieldType>(
                 value: _newCustomFieldType,
-                labelText: "型別",
+                labelText: context.l10n.uiDataType,
                 options: CustomFieldType.values
                     .map<DropdownOption<CustomFieldType>>(
                       (type) => DropdownOption(
@@ -4066,9 +4218,9 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         ),
         const SizedBox(height: 20),
         if (fields.isEmpty)
-          const AppEmptyState(
-            title: "尚無自訂資料",
-            description: "輸入欄位名稱並選擇型別後新增",
+          AppEmptyState(
+            title: context.l10n.uiNoCustomData,
+            description: context.l10n.uiEnterAFieldNameSelectItsTypeAnd,
             icon: Icons.tune_outlined,
           )
         else
@@ -4167,7 +4319,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         Expanded(child: editor),
         const SizedBox(width: 8),
         NeonIconButton(
-          label: "移除$key",
+          label: context.l10n.uiRemove((key).toString()),
           onPressed: () => _removeCustomField(key),
           icon: Icons.delete_outline,
           destructive: true,
@@ -4242,22 +4394,34 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 16),
-        _buildTextField("出生地：", _controllers["native"]!),
-        _buildTextField("居住地：", _controllers["live"]!),
-        _buildTextField("住址：", _controllers["address"]!),
+        _buildTextField(context.l10n.uiBirthplace, _controllers["native"]!),
+        _buildTextField(context.l10n.uiResidence, _controllers["live"]!),
+        _buildTextField(context.l10n.uiAddress, _controllers["address"]!),
         const Divider(height: 32),
-        SmallTitle(icon: Icons.face, text: "外觀"),
+        SmallTitle(icon: Icons.face, text: context.l10n.uiAppearance),
         const SizedBox(height: 8),
-        _buildTextField("血型：", _controllers["blood"]!),
-        _buildTextField("膚色：", _controllers["skin"]!),
-        _buildTextField("臉型：", _controllers["faceFeatures"]!),
-        _buildTextField("眼型：", _controllers["eyeFeatures"]!),
-        _buildTextField("耳型：", _controllers["earFeatures"]!),
-        _buildTextField("鼻型：", _controllers["noseFeatures"]!),
-        _buildTextField("嘴型：", _controllers["mouthFeatures"]!),
-        _buildTextField("眉型：", _controllers["eyebrowFeatures"]!),
-        _buildTextField("體格：", _controllers["body"]!),
-        _buildTextField("服裝：", _controllers["dress"]!),
+        _buildTextField(context.l10n.uiBloodType, _controllers["blood"]!),
+        _buildTextField(context.l10n.uiSkinColor, _controllers["skin"]!),
+        _buildTextField(
+          context.l10n.uiFaceShape,
+          _controllers["faceFeatures"]!,
+        ),
+        _buildTextField(context.l10n.uiEyeShape, _controllers["eyeFeatures"]!),
+        _buildTextField(context.l10n.uiEarShape, _controllers["earFeatures"]!),
+        _buildTextField(
+          context.l10n.uiNoseShape,
+          _controllers["noseFeatures"]!,
+        ),
+        _buildTextField(
+          context.l10n.uiMouthShape,
+          _controllers["mouthFeatures"]!,
+        ),
+        _buildTextField(
+          context.l10n.uiEyebrowShape,
+          _controllers["eyebrowFeatures"]!,
+        ),
+        _buildTextField(context.l10n.uiBuild, _controllers["body"]!),
+        _buildTextField(context.l10n.uiClothing, _controllers["dress"]!),
       ],
     );
   }
@@ -4269,17 +4433,38 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 16),
-        _buildTextField("口頭禪、慣用語：", _controllers["language"]!),
-        _buildTextField("興趣：", _controllers["interest"]!),
-        _buildTextField("習慣、癖好：", _controllers["habit"]!),
-        _buildTextField("信仰：", _controllers["belief"]!),
-        _buildTextField("底線", _controllers["limit"]!),
-        _buildTextField("將來想變得如何？", _controllers["future"]!),
-        _buildTextField("最珍視的事物？", _controllers["cherish"]!),
-        _buildTextField("最厭惡的事物？", _controllers["disgust"]!),
-        _buildTextField("最害怕的事物？", _controllers["fear"]!),
-        _buildTextField("最好奇的事物？", _controllers["curious"]!),
-        _buildTextField("最期待的事物？", _controllers["expect"]!),
+        _buildTextField(
+          context.l10n.uiCatchphrasesAndExpressions,
+          _controllers["language"]!,
+        ),
+        _buildTextField(context.l10n.uiInterests, _controllers["interest"]!),
+        _buildTextField(context.l10n.uiHabitsAndQuirks, _controllers["habit"]!),
+        _buildTextField(context.l10n.uiFaith, _controllers["belief"]!),
+        _buildTextField(context.l10n.uiBoundaries, _controllers["limit"]!),
+        _buildTextField(
+          context.l10n.uiWhatDoTheyWantToBecome,
+          _controllers["future"]!,
+        ),
+        _buildTextField(
+          context.l10n.uiWhatDoTheyValueMost,
+          _controllers["cherish"]!,
+        ),
+        _buildTextField(
+          context.l10n.uiWhatDoTheyDespiseMost,
+          _controllers["disgust"]!,
+        ),
+        _buildTextField(
+          context.l10n.uiWhatDoTheyFearMost,
+          _controllers["fear"]!,
+        ),
+        _buildTextField(
+          context.l10n.uiWhatIntriguesThemMost,
+          _controllers["curious"]!,
+        ),
+        _buildTextField(
+          context.l10n.uiWhatDoTheyLookForwardToMost,
+          _controllers["expect"]!,
+        ),
         AppSectionCard(
           padding: EdgeInsets.zero,
           useSectionLayout: false,
@@ -4288,7 +4473,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SmallTitle(icon: Icons.flag, text: "陣營"),
+                SmallTitle(icon: Icons.flag, text: context.l10n.uiAlignment),
                 const SizedBox(height: 8),
                 _buildAlignmentGrid(),
               ],
@@ -4303,7 +4488,10 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SmallTitle(icon: Icons.person, text: "性格特質"),
+                SmallTitle(
+                  icon: Icons.person,
+                  text: context.l10n.uiPersonalityTraits,
+                ),
                 const SizedBox(height: 16),
                 _buildTraitsSliders(),
               ],
@@ -4318,7 +4506,10 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SmallTitle(icon: Icons.directions_run, text: "行事作風"),
+                SmallTitle(
+                  icon: Icons.directions_run,
+                  text: context.l10n.uiApproachToLife,
+                ),
                 const SizedBox(height: 16),
                 _buildApproachSliders(),
               ],
@@ -4326,7 +4517,10 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           ),
         ),
         const Divider(height: 32),
-        _buildMultilineField("其他補充：", _controllers["otherValues"]!),
+        _buildMultilineField(
+          context.l10n.uiAdditionalNotes,
+          _controllers["otherValues"]!,
+        ),
       ],
     );
   }
@@ -4339,7 +4533,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       children: [
         const SizedBox(height: 16),
         CardList(
-          title: "熱愛做的事情",
+          title: context.l10n.uiThingsTheyLoveDoing,
           icon: Icons.favorite,
           items: loveToDoList,
           onAdd: _addLoveToDo,
@@ -4347,7 +4541,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         ),
         const SizedBox(height: 16),
         CardList(
-          title: "想要做還沒做的事情",
+          title: context.l10n.uiThingsTheyWantToTry,
           icon: Icons.star_border,
           items: wantToDoList,
           onAdd: _addWantToDo,
@@ -4355,7 +4549,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         ),
         const SizedBox(height: 16),
         CardList(
-          title: "討厭做的事情",
+          title: context.l10n.uiThingsTheyDislikeDoing,
           icon: Icons.sentiment_very_dissatisfied,
           items: hateToDoList,
           onAdd: _addHateToDo,
@@ -4363,7 +4557,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         ),
         const SizedBox(height: 16),
         CardList(
-          title: "害怕做的事情",
+          title: context.l10n.uiThingsTheyFearDoing,
           icon: Icons.warning_amber,
           items: fearToDoList,
           onAdd: _addFearToDo,
@@ -4371,7 +4565,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         ),
         const SizedBox(height: 16),
         CardList(
-          title: "擅長做的事情",
+          title: context.l10n.uiThingsTheyDoWell,
           icon: Icons.check_circle_outline,
           items: proficientToDoList,
           onAdd: _addProficientToDo,
@@ -4379,7 +4573,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         ),
         const SizedBox(height: 16),
         CardList(
-          title: "不擅長做的事情",
+          title: context.l10n.uiThingsTheyStruggleWith,
           icon: Icons.cancel_outlined,
           items: unProficientToDoList,
           onAdd: _addUnProficientToDo,
@@ -4394,7 +4588,10 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SmallTitle(icon: Icons.school, text: "生活常用技能"),
+                SmallTitle(
+                  icon: Icons.school,
+                  text: context.l10n.uiEverydaySkills,
+                ),
                 const SizedBox(height: 16),
                 _buildCommonAbilitySliders(),
               ],
@@ -4412,11 +4609,20 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 16),
-        _buildMultilineField("來自他人的印象", _controllers["impression"]!),
+        _buildMultilineField(
+          context.l10n.uiOthersImpressions,
+          _controllers["impression"]!,
+        ),
         const SizedBox(height: 8),
-        _buildTextField("最受他人欣賞/喜愛的特點", _controllers["likable"]!),
+        _buildTextField(
+          context.l10n.uiMostAdmiredOrLovedQualities,
+          _controllers["likable"]!,
+        ),
         const SizedBox(height: 8),
-        _buildMultilineField("簡述原生家庭", _controllers["family"]!),
+        _buildMultilineField(
+          context.l10n.uiFamilyBackground,
+          _controllers["family"]!,
+        ),
         const Divider(height: 32),
         AppSectionCard(
           padding: EdgeInsets.zero,
@@ -4426,11 +4632,17 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SmallTitle(icon: Icons.sentiment_satisfied, text: "如何表達「喜歡」"),
+                SmallTitle(
+                  icon: Icons.sentiment_satisfied,
+                  text: context.l10n.uiHowTheyExpressAffection,
+                ),
                 const SizedBox(height: 8),
                 _buildCheckboxGroup(howToShowLove, howToShowLoveLabels),
                 const SizedBox(height: 8),
-                _buildTextField("其他", _controllers["otherShowLove"]!),
+                _buildTextField(
+                  context.l10n.uiOther,
+                  _controllers["otherShowLove"]!,
+                ),
               ],
             ),
           ),
@@ -4444,11 +4656,17 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SmallTitle(icon: Icons.sentiment_satisfied_alt, text: "如何表達好意"),
+                SmallTitle(
+                  icon: Icons.sentiment_satisfied_alt,
+                  text: context.l10n.uiHowTheyShowKindness,
+                ),
                 const SizedBox(height: 8),
                 _buildCheckboxGroup(howToShowGoodwill, howToShowGoodwillLabels),
                 const SizedBox(height: 8),
-                _buildTextField("其他", _controllers["otherGoodwill"]!),
+                _buildTextField(
+                  context.l10n.uiOther,
+                  _controllers["otherGoodwill"]!,
+                ),
               ],
             ),
           ),
@@ -4464,12 +4682,15 @@ class _CharacterViewState extends ConsumerState<CharacterView>
               children: [
                 SmallTitle(
                   icon: Icons.sentiment_very_dissatisfied,
-                  text: "如何應對討厭的人？",
+                  text: context.l10n.uiHowDoTheyHandlePeopleTheyDislike,
                 ),
                 const SizedBox(height: 8),
                 _buildCheckboxGroup(handleHatePeople, handleHatePeopleLabels),
                 const SizedBox(height: 8),
-                _buildTextField("其他", _controllers["otherHatePeople"]!),
+                _buildTextField(
+                  context.l10n.uiOther,
+                  _controllers["otherHatePeople"]!,
+                ),
               ],
             ),
           ),
@@ -4483,7 +4704,10 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SmallTitle(icon: Icons.favorite, text: "戀愛關係"),
+                SmallTitle(
+                  icon: Icons.favorite,
+                  text: context.l10n.uiRomanticRelationships,
+                ),
                 const SizedBox(height: 8),
                 _buildRelationshipSection(),
               ],
@@ -4499,7 +4723,10 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SmallTitle(icon: Icons.group, text: "社交相關項目"),
+                SmallTitle(
+                  icon: Icons.group,
+                  text: context.l10n.uiSocialTendencies,
+                ),
                 const SizedBox(height: 16),
                 _buildSocialItemSliders(),
               ],
@@ -4518,13 +4745,13 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       children: [
         const SizedBox(height: 16),
         _buildCollaborativeCharacterTextField(
-          label: "原文姓名",
+          label: context.l10n.uiOriginalLanguageName,
           controller: _controllers["originalName"]!,
-          hintText: "例如：桜田如羽",
+          hintText: context.l10n.uiForExample2,
         ),
         const SizedBox(height: 16),
         CardList(
-          title: "喜歡的事物",
+          title: context.l10n.uiThingsTheyLike,
           icon: Icons.thumb_up_alt_outlined,
           items: likeItemList,
           onAdd: _addLikeItem,
@@ -4532,7 +4759,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         ),
         const SizedBox(height: 16),
         CardList(
-          title: "憧憬的事物",
+          title: context.l10n.uiThingsTheyAdmire,
           icon: Icons.auto_awesome,
           items: admireItemList,
           onAdd: _addAdmireItem,
@@ -4540,7 +4767,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         ),
         const SizedBox(height: 16),
         CardList(
-          title: "討厭的事物",
+          title: context.l10n.uiThingsTheyDislike,
           icon: Icons.thumb_down_alt_outlined,
           items: hateItemList,
           onAdd: _addHateItem,
@@ -4548,7 +4775,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         ),
         const SizedBox(height: 16),
         CardList(
-          title: "害怕的事物",
+          title: context.l10n.uiThingsTheyFear,
           icon: Icons.bug_report,
           items: fearItemList,
           onAdd: _addFearItem,
@@ -4556,14 +4783,17 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         ),
         const SizedBox(height: 16),
         CardList(
-          title: "習慣的事物",
+          title: context.l10n.uiFamiliarThings,
           icon: Icons.history,
           items: familiarItemList,
           onAdd: _addFamiliarItem,
           onRemove: _deleteFamiliarItem,
         ),
         const SizedBox(height: 16),
-        _buildMultilineField("其他補充", _controllers["otherText"]!),
+        _buildMultilineField(
+          context.l10n.uiAdditionalNotes2,
+          _controllers["otherText"]!,
+        ),
       ],
     );
   }
@@ -4655,34 +4885,38 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       ["守序\n邪惡", "中立\n邪惡", "絕對\n邪惡"],
     ];
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 2,
+    return LayoutBuilder(
+      builder: (context, constraints) => GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: constraints.maxWidth >= 600 ? 3 : 1,
+          mainAxisExtent: MediaQuery.textScalerOf(
+            context,
+          ).scale(80).clamp(80, double.infinity),
+        ),
+        itemCount: 9,
+        itemBuilder: (context, index) {
+          final row = index ~/ 3;
+          final col = index % 3;
+          final alignment = alignments[row][col];
+          return RadioListTile<String>(
+            title: Text(
+              context.l10n.legacyLabel(alignment),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+            value: alignment,
+            groupValue: selectedAlignment,
+            onChanged: (value) {
+              setState(() {
+                selectedAlignment = value;
+                _markAsModified(structuredFields: true);
+              });
+            },
+          );
+        },
       ),
-      itemCount: 9,
-      itemBuilder: (context, index) {
-        final row = index ~/ 3;
-        final col = index % 3;
-        final alignment = alignments[row][col];
-        return RadioListTile<String>(
-          title: Text(
-            alignment,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.labelMedium,
-          ),
-          value: alignment,
-          groupValue: selectedAlignment,
-          onChanged: (value) {
-            setState(() {
-              selectedAlignment = value;
-              _markAsModified(structuredFields: true);
-            });
-          },
-        );
-      },
     );
   }
 
@@ -4706,19 +4940,24 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           child: Wrap(
             spacing: 8,
             runSpacing: 4,
-            children: characterTypeOptions
-                .map(
-                  (type) => SizedBox(
-                    width: optionWidth,
-                    child: RadioListTile<String>(
-                      contentPadding: EdgeInsets.zero,
-                      dense: true,
-                      title: Text(type),
-                      value: type,
-                    ),
-                  ),
-                )
-                .toList(growable: false),
+            children:
+                [
+                      ...characterTypeOptions,
+                      if (!characterTypeOptions.contains(selectedCharacterType))
+                        selectedCharacterType,
+                    ]
+                    .map(
+                      (type) => SizedBox(
+                        width: optionWidth,
+                        child: RadioListTile<String>(
+                          contentPadding: EdgeInsets.zero,
+                          dense: true,
+                          title: Text(context.l10n.characterTypeLabel(type)),
+                          value: type,
+                        ),
+                      ),
+                    )
+                    .toList(growable: false),
           ),
         );
       },
@@ -4764,18 +5003,23 @@ class _CharacterViewState extends ConsumerState<CharacterView>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SmallTitle(icon: Icons.people_outline, text: "人物關係"),
+        SmallTitle(
+          icon: Icons.people_outline,
+          text: context.l10n.uiCharacterRelationships3,
+        ),
         const SizedBox(height: 8),
         AppThreeColumnTable(
           key: const ValueKey("character-relationships-table"),
-          firstHeader: "人物",
-          secondHeader: "外在關係",
-          thirdHeader: "內在關係",
+          firstHeader: context.l10n.uiCharacter,
+          secondHeader: context.l10n.uiExternalRelationship,
+          thirdHeader: context.l10n.uiInternalRelationship,
           bodyHeight: 200,
           onSelectionCleared: clearSelection,
-          emptyState: const AppEmptyState(
-            title: "尚無人物關係",
-            description: "在下方輸入人物、外在關係與內在關係後新增",
+          emptyState: AppEmptyState(
+            title: context.l10n.uiNoCharacterRelationships,
+            description: context
+                .l10n
+                .uiEnterACharacterAndExternalInternalRelationshipsBelow,
             icon: Icons.people_outline,
             compact: true,
           ),
@@ -4825,8 +5069,8 @@ class _CharacterViewState extends ConsumerState<CharacterView>
               AppComboBoxField(
                 controller: _relationshipPersonController,
                 options: _relationshipCharacterOptions,
-                labelText: "人物",
-                hintText: "選擇角色或自行輸入",
+                labelText: context.l10n.uiCharacter,
+                hintText: context.l10n.uiSelectACharacterOrEnterAName,
                 onSelected: (value) {
                   _relationshipPersonController.text = _characterNameFromLabel(
                     value,
@@ -4835,11 +5079,11 @@ class _CharacterViewState extends ConsumerState<CharacterView>
               ),
               AppTextField(
                 controller: _relationshipDescriptionController,
-                labelText: "外在關係（可留空）",
+                labelText: context.l10n.uiExternalRelationshipOptional,
               ),
               AppTextField(
                 controller: _relationshipInternalController,
-                labelText: "內在關係（可留空）",
+                labelText: context.l10n.uiInternalRelationshipOptional,
                 onSubmitted: (_) => _addCharacterRelationship(),
               ),
             ];
@@ -4884,15 +5128,15 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                           ? Icons.add
                           : Icons.save_outlined,
                       tooltip: selectedCharacterRelationshipIndex == null
-                          ? "新增"
-                          : "更新",
+                          ? context.l10n.commonAdd
+                          : context.l10n.uiUpdate,
                       onPressed:
                           _relationshipPersonController.text.trim().isEmpty
                           ? null
                           : _addCharacterRelationship,
                     ),
                     ItemAction.delete(
-                      tooltip: "刪除",
+                      tooltip: context.l10n.commonDelete,
                       onPressed: selectedCharacterRelationshipIndex == null
                           ? null
                           : _deleteCharacterRelationship,
@@ -4958,7 +5202,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           bodyHeight: 200,
           onSelectionCleared: clearSelection,
           emptyState: AppEmptyState(
-            title: "尚無$title",
+            title: context.l10n.uiNoYet((title).toString()),
             description: emptyDescription,
             icon: icon,
             compact: true,
@@ -5000,7 +5244,9 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           secondController: secondController,
           firstLabel: firstHeader,
           firstHint: firstHint,
-          secondLabel: secondFieldLabel ?? "$secondHeader（可留空）",
+          secondLabel:
+              secondFieldLabel ??
+              context.l10n.uiOptional((secondHeader).toString()),
           isEditing: selectedIndex != null,
           canSubmit: (first, second) => first.trim().isNotEmpty,
           firstFieldBuilder: firstFieldBuilder,
@@ -5053,18 +5299,22 @@ class _CharacterViewState extends ConsumerState<CharacterView>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SmallTitle(icon: Icons.inventory_2_outlined, text: "擁有物品"),
+        SmallTitle(
+          icon: Icons.inventory_2_outlined,
+          text: context.l10n.uiPossessions,
+        ),
         const SizedBox(height: 8),
         AppThreeColumnTable(
           key: const ValueKey("possessions-table"),
-          firstHeader: "物品",
-          secondHeader: "數量",
-          thirdHeader: "說明",
+          firstHeader: context.l10n.uiItem,
+          secondHeader: context.l10n.uiQuantity,
+          thirdHeader: context.l10n.uiHelp,
           bodyHeight: 200,
           onSelectionCleared: clearSelection,
-          emptyState: const AppEmptyState(
-            title: "尚無擁有物品",
-            description: "在下方輸入物品、數量與說明後新增",
+          emptyState: AppEmptyState(
+            title: context.l10n.uiNoPossessions,
+            description:
+                context.l10n.uiEnterAnItemQuantityAndDescriptionBelowThen,
             icon: Icons.inventory_2_outlined,
             compact: true,
           ),
@@ -5121,11 +5371,14 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           builder: (context, child) {
             final canSubmit = _possessionNameController.text.trim().isNotEmpty;
             final fields = <Widget>[
-              editorField(_possessionNameController, "物品"),
-              editorField(_possessionQuantityController, "數量"),
+              editorField(_possessionNameController, context.l10n.uiItem),
+              editorField(
+                _possessionQuantityController,
+                context.l10n.uiQuantity,
+              ),
               editorField(
                 _possessionDescriptionController,
-                "說明（可留空）",
+                context.l10n.uiDescriptionOptional,
                 textInputAction: TextInputAction.done,
               ),
             ];
@@ -5138,18 +5391,20 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                       icon: selectedPossessionIndex == null
                           ? Icons.add
                           : Icons.save_outlined,
-                      tooltip: selectedPossessionIndex == null ? "新增" : "更新",
+                      tooltip: selectedPossessionIndex == null
+                          ? context.l10n.commonAdd
+                          : context.l10n.uiUpdate,
                       onPressed: canSubmit ? _submitPossessionEntry : null,
                     ),
                     ItemAction(
                       icon: Icons.sync_alt,
-                      tooltip: "轉換為正式物品",
+                      tooltip: context.l10n.uiConvertToManagedItem,
                       onPressed: selectedPossessionIndex == null
                           ? null
                           : _convertSelectedLegacyPossession,
                     ),
                     ItemAction.delete(
-                      tooltip: "刪除",
+                      tooltip: context.l10n.commonDelete,
                       onPressed: selectedPossessionIndex == null
                           ? null
                           : _deletePossessionEntry,
@@ -5190,8 +5445,8 @@ class _CharacterViewState extends ConsumerState<CharacterView>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const AppNoticeBanner(
-          message: "以下是舊版擁有物品資料。請逐筆轉換為正式物品；此頁已不再新增舊格式資料。",
+        AppNoticeBanner(
+          message: context.l10n.uiTheseAreLegacyPossessionsConvertEachEntryTo,
           icon: Icons.move_down_outlined,
           tone: AppFeedbackTone.warning,
         ),
@@ -5205,15 +5460,16 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             title: Text(possession.name),
             subtitle: Text(
               [
-                if (possession.quantity.isNotEmpty) "數量：${possession.quantity}",
+                if (possession.quantity.isNotEmpty)
+                  context.l10n.uiQuantity2((possession.quantity).toString()),
                 if (possession.description.isNotEmpty) possession.description,
-              ].join("・"),
+              ].join(context.l10n.uiLiteral),
             ),
             trailing: Wrap(
               children: [
                 NeonIconButton(
                   key: ValueKey("legacy-possession-convert-$index"),
-                  label: "轉換為正式物品",
+                  label: context.l10n.uiConvertToManagedItem,
                   onPressed: () {
                     setState(() => selectedPossessionIndex = index);
                     _convertSelectedLegacyPossession();
@@ -5221,7 +5477,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                   icon: Icons.sync_alt,
                 ),
                 NeonIconButton(
-                  label: "刪除舊資料",
+                  label: context.l10n.uiDeleteLegacyEntry,
                   onPressed: () {
                     setState(() {
                       possessions.removeAt(index);
@@ -5293,7 +5549,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
               itemKind: ItemReferenceKind.itemClass,
               name: state.name.isEmpty ? itemClass.name : state.name,
               quantity: allocation.quantity == null
-                  ? "未知"
+                  ? context.l10n.uiUnknown
                   : "${allocation.quantity}${unit.isEmpty ? "" : " $unit"}",
               description: allocation.note.isNotEmpty
                   ? allocation.note
@@ -5346,20 +5602,23 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       children: [
         Row(
           children: [
-            const Expanded(
-              child: SmallTitle(icon: Icons.link_outlined, text: "一般關聯物品"),
+            Expanded(
+              child: SmallTitle(
+                icon: Icons.link_outlined,
+                text: context.l10n.uiRelatedItems,
+              ),
             ),
             FilledButton.tonalIcon(
               key: const Key("character-link-item"),
               onPressed: () => _linkItemToCharacter(characterId),
               icon: const Icon(Icons.add_link),
-              label: const Text("連結物品"),
+              label: Text(context.l10n.uiLinkItem),
             ),
           ],
         ),
         const SizedBox(height: 8),
         if (relatedEntries.isEmpty)
-          const Text("尚未設定一般物品關聯。")
+          Text(context.l10n.uiNoRelatedItemsAreConfigured)
         else
           ...relatedEntries.map(
             (entry) => ListTile(
@@ -5374,7 +5633,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                 [
                   if (entry.relation.role.isNotEmpty) entry.relation.role,
                   if (entry.relation.note.isNotEmpty) entry.relation.note,
-                ].join("・"),
+                ].join(context.l10n.uiLiteral),
               ),
               trailing: Wrap(
                 children: [
@@ -5383,7 +5642,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                       key: ValueKey(
                         "character-open-related-item-${entry.relation.relationId}",
                       ),
-                      label: "開啟物品頁",
+                      label: context.l10n.uiOpenItems,
                       onPressed: () => widget.onOpenItem!(entry.classId!),
                       icon: Icons.open_in_new,
                     ),
@@ -5391,7 +5650,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                     key: ValueKey(
                       "character-unlink-item-${entry.relation.relationId}",
                     ),
-                    label: "解除關聯",
+                    label: context.l10n.uiUnlink,
                     onPressed: () => ref
                         .read(itemWorkspaceProvider.notifier)
                         .removeRelation(entry.relation.relationId),
@@ -5405,25 +5664,25 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         const SizedBox(height: 16),
         Row(
           children: [
-            const Expanded(
+            Expanded(
               child: SmallTitle(
                 icon: Icons.inventory_2_outlined,
-                text: "目前持有物品",
+                text: context.l10n.uiCurrentlyHeldItems,
               ),
             ),
             FilledButton.tonalIcon(
               key: const Key("character-assign-item"),
               onPressed: () => _assignItemToCharacter(characterId),
               icon: const Icon(Icons.inventory_2_outlined),
-              label: const Text("分配物品"),
+              label: Text(context.l10n.uiAssignItem),
             ),
           ],
         ),
         const SizedBox(height: 8),
         if (entries.isEmpty)
-          const AppEmptyState(
-            title: "目前沒有已連結物品",
-            description: "按「分配物品」即可在此頁設定持有人或聚合數量",
+          AppEmptyState(
+            title: context.l10n.uiNoLinkedItems,
+            description: context.l10n.uiSelectAssignItemToSetTheHolderOr,
             icon: Icons.link_off_outlined,
             compact: true,
           )
@@ -5432,11 +5691,11 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             scrollDirection: Axis.horizontal,
             child: DataTable(
               key: const ValueKey("linked-items-table"),
-              columns: const [
-                DataColumn(label: Text("物品")),
-                DataColumn(label: Text("數量"), numeric: true),
-                DataColumn(label: Text("狀態／備註")),
-                DataColumn(label: Text("操作")),
+              columns: [
+                DataColumn(label: Text(context.l10n.uiItem)),
+                DataColumn(label: Text(context.l10n.uiQuantity), numeric: true),
+                DataColumn(label: Text(context.l10n.uiStatusNotes)),
+                DataColumn(label: Text(context.l10n.uiActions)),
               ],
               rows: entries
                   .map(
@@ -5460,7 +5719,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                             key: ValueKey(
                               "character-unassign-item-${entry.id}",
                             ),
-                            label: "清除預設分配",
+                            label: context.l10n.uiClearDefaultAssignment,
                             onPressed: () => _clearCharacterItemAssignment(
                               characterId,
                               entry,
@@ -5482,7 +5741,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
   Future<void> _assignItemToCharacter(String characterId) async {
     final selected = await showProjectObjectSelector(
       context: context,
-      title: "選擇要分配給角色的物品",
+      title: context.l10n.uiSelectAnItemToAssignToTheCharacter,
       allowedKinds: const {
         ProjectObjectKind.itemClass,
         ProjectObjectKind.itemInstance,
@@ -5500,7 +5759,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text("分配「${selected.label}」"),
+          title: Text(context.l10n.uiAssign((selected.label).toString())),
           content: TextFormField(
             key: const Key("character-assignment-quantity"),
             autofocus: true,
@@ -5508,9 +5767,9 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             initialValue: quantityText,
             decoration: appFieldDecoration(
               context,
-              decoration: const InputDecoration(
-                labelText: "數量",
-                helperText: "留空代表數量未知",
+              decoration: InputDecoration(
+                labelText: context.l10n.uiQuantity,
+                helperText: context.l10n.uiLeaveBlankIfTheQuantityIsUnknown,
               ),
             ),
             onChanged: (value) => quantityText = value,
@@ -5518,12 +5777,12 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               key: const Key("character-assignment-confirm"),
               onPressed: () => Navigator.pop(context, true),
-              child: const Text("分配"),
+              child: Text(context.l10n.uiAssign2),
             ),
           ],
         ),
@@ -5534,9 +5793,11 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           : int.tryParse(quantityText.trim());
       if (quantityText.trim().isNotEmpty &&
           (quantity == null || quantity < 0)) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("數量必須是零或正整數。")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.uiQuantityMustBeZeroOrAPositiveInteger),
+          ),
+        );
         return;
       }
     }
@@ -5562,9 +5823,13 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           );
     } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("無法分配物品：$error")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.uiCouldNotAssignTheItem((error).toString()),
+            ),
+          ),
+        );
       }
     }
   }
@@ -5606,22 +5871,24 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       context: context,
       builder: (context) => AlertDialog(
         key: const Key("character-legacy-item-choice"),
-        title: Text("轉換「${legacy.name}」"),
-        content: const Text("會移除角色預設與可定位 Scene 快照中的同名舊資料，並建立正式物品狀態。"),
+        title: Text(context.l10n.uiConvert((legacy.name).toString())),
+        content: Text(
+          context.l10n.uiRemovesMatchingLegacyEntriesFromTheDefaultCharacter,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("取消"),
+            child: Text(context.l10n.commonCancel),
           ),
           OutlinedButton(
             key: const Key("character-legacy-item-existing"),
             onPressed: () => Navigator.pop(context, "existing"),
-            child: const Text("連結既有"),
+            child: Text(context.l10n.uiLinkExisting),
           ),
           FilledButton(
             key: const Key("character-legacy-item-create"),
             onPressed: () => Navigator.pop(context, "create"),
-            child: const Text("建立並轉換"),
+            child: Text(context.l10n.uiCreateAndConvert),
           ),
         ],
       ),
@@ -5631,7 +5898,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
     if (action == "existing") {
       final selected = await showProjectObjectSelector(
         context: context,
-        title: "選擇「${legacy.name}」對應的正式物品",
+        title: context.l10n.uiSelectTheManagedItemFor((legacy.name).toString()),
         allowedKinds: const <ProjectObjectKind>{
           ProjectObjectKind.itemClass,
           ProjectObjectKind.itemInstance,
@@ -5657,28 +5924,39 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         context: context,
         builder: (context) => AlertDialog(
           key: const Key("character-legacy-item-preview"),
-          title: const Text("確認持有物轉換"),
+          title: Text(context.l10n.uiConfirmPossessionConversion),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("預設／baseline：${preview.convertedDefaultOccurrences} 筆"),
-              Text("Scene 快照：${preview.convertedSceneOccurrences} 筆"),
+              Text(
+                context.l10n.uiDefaultBaselineEntries(
+                  (preview.convertedDefaultOccurrences).toString(),
+                ),
+              ),
+              Text(
+                context.l10n.uiSceneSnapshotEntries(
+                  (preview.convertedSceneOccurrences).toString(),
+                ),
+              ),
               if (preview.preservedUnanchoredOccurrences > 0)
                 Text(
-                  "另有 ${preview.preservedUnanchoredOccurrences} 筆舊 CharacterState 無法可靠連結 Scene，將保留原文字。",
+                  context.l10n
+                      .uiLegacyCharacterStateEntriesWithoutReliableSceneLinksTheir(
+                        (preview.preservedUnanchoredOccurrences).toString(),
+                      ),
                 ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               key: const Key("character-legacy-item-confirm"),
               onPressed: () => Navigator.pop(context, true),
-              child: const Text("套用轉換"),
+              child: Text(context.l10n.uiApplyConversion),
             ),
           ],
         ),
@@ -5692,9 +5970,13 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       _commitLegacyPossessionConversion(characterId, result);
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("持有物轉換失敗：$error")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.uiPossessionConversionFailed((error).toString()),
+            ),
+          ),
+        );
       }
     }
   }
@@ -5711,7 +5993,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           key: const Key("character-legacy-item-create-dialog"),
-          title: const Text("建立正式物品"),
+          title: Text(context.l10n.uiCreateManagedItem),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -5719,7 +6001,9 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                 initialValue: name,
                 decoration: appFieldDecoration(
                   context,
-                  decoration: const InputDecoration(labelText: "物品名稱"),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.uiItemName,
+                  ),
                 ),
                 onChanged: (value) => setDialogState(() => name = value),
               ),
@@ -5734,20 +6018,24 @@ class _CharacterViewState extends ConsumerState<CharacterView>
                 initialValue: mode,
                 decoration: appDropdownFieldDecoration(
                   context,
-                  decoration: const InputDecoration(labelText: "物品模式"),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.uiItemMode,
+                  ),
                 ),
-                items: const <DropdownMenuItem<ItemMode>>[
+                items: <DropdownMenuItem<ItemMode>>[
                   DropdownMenuItem(
                     value: ItemMode.dedicated,
-                    child: Text("專用（建立獨立 ID）"),
+                    child: Text(context.l10n.uiDedicatedIndependentID),
                   ),
                   DropdownMenuItem(
                     value: ItemMode.semiDedicated,
-                    child: Text("半專用（Class 內建立一件）"),
+                    child: Text(
+                      context.l10n.uiSemiDedicatedOneInstanceInADefinition,
+                    ),
                   ),
                   DropdownMenuItem(
                     value: ItemMode.generic,
-                    child: Text("非專用（保留數量）"),
+                    child: Text(context.l10n.uiNonDedicatedKeepQuantity),
                   ),
                 ],
                 onChanged: (value) => setDialogState(() {
@@ -5759,13 +6047,13 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               onPressed: name.trim().isEmpty
                   ? null
                   : () => Navigator.pop(context, true),
-              child: const Text("建立"),
+              child: Text(context.l10n.commonCreate),
             ),
           ],
         ),
@@ -5899,7 +6187,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         .toSet();
     final selected = await showProjectObjectSelector(
       context: context,
-      title: "選擇要連結的人物物品",
+      title: context.l10n.uiSelectACharacterRelatedItemToLink,
       allowedKinds: const {
         ProjectObjectKind.itemClass,
         ProjectObjectKind.itemInstance,
@@ -5917,7 +6205,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
             itemKind: itemKind,
             targetId: characterId,
             targetKind: ItemRelationTargetKind.character,
-            role: "相關",
+            role: context.l10n.uiRelated,
           ),
         );
   }
@@ -5929,35 +6217,39 @@ class _CharacterViewState extends ConsumerState<CharacterView>
     Map<String, String> labels,
   ) {
     final entries = values.entries.toList();
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 4,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 4,
+    return LayoutBuilder(
+      builder: (context, constraints) => GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: constraints.maxWidth >= 600 ? 2 : 1,
+          mainAxisExtent: MediaQuery.textScalerOf(
+            context,
+          ).scale(72).clamp(72, double.infinity),
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 4,
+        ),
+        itemCount: entries.length,
+        itemBuilder: (context, index) {
+          final entry = entries[index];
+          return CheckboxListTile(
+            title: Text(
+              context.l10n.legacyLabel(labels[entry.key] ?? entry.key),
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            value: entry.value,
+            dense: true,
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
+            onChanged: (bool? value) {
+              setState(() {
+                values[entry.key] = value ?? false;
+                _markAsModified(structuredFields: true);
+              });
+            },
+          );
+        },
       ),
-      itemCount: entries.length,
-      itemBuilder: (context, index) {
-        final entry = entries[index];
-        return CheckboxListTile(
-          title: Text(
-            labels[entry.key] ?? entry.key,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          value: entry.value,
-          dense: true,
-          controlAffinity: ListTileControlAffinity.leading,
-          contentPadding: EdgeInsets.zero,
-          onChanged: (bool? value) {
-            setState(() {
-              values[entry.key] = value ?? false;
-              _markAsModified(structuredFields: true);
-            });
-          },
-        );
-      },
     );
   }
 
@@ -5969,7 +6261,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       children: [
         ...relationships.map(
           (rel) => RadioListTile<String>(
-            title: Text(rel),
+            title: Text(context.l10n.legacyLabel(rel)),
             value: rel,
             groupValue: selectedRelationship,
             dense: true,
@@ -5984,13 +6276,13 @@ class _CharacterViewState extends ConsumerState<CharacterView>
         ),
         const SizedBox(height: 8),
         _buildCollaborativeCharacterTextField(
-          label: "其他：",
+          label: context.l10n.uiOther2,
           controller: _controllers["otherRelationship"]!,
-          hintText: "其他……",
+          hintText: context.l10n.uiOther3,
         ),
         const SizedBox(height: 8),
         CheckboxListTile(
-          title: const Text("另尋新歡？"),
+          title: Text(context.l10n.uiLookingForNewLove),
           value: isFindNewLove,
           dense: true,
           contentPadding: EdgeInsets.zero,
@@ -6002,7 +6294,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
           },
         ),
         CheckboxListTile(
-          title: const Text("后宮型作品？"),
+          title: Text(context.l10n.uiHaremStory),
           value: isHarem,
           dense: true,
           contentPadding: EdgeInsets.zero,
@@ -6024,9 +6316,9 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       children: List.generate(TraitDefinitions.commonAbilities.length, (index) {
         final def = TraitDefinitions.commonAbilities[index];
         return CharacterSlider(
-          title: def.uiTitle,
-          leftLabel: def.uiLeft,
-          rightLabel: def.uiRight,
+          title: context.l10n.legacyLabel(def.uiTitle),
+          leftLabel: context.l10n.legacyLabel(def.uiLeft),
+          rightLabel: context.l10n.legacyLabel(def.uiRight),
           value: commonAbilityValues[index],
           onChanged: (value) {
             setState(() {
@@ -6044,9 +6336,9 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       children: List.generate(TraitDefinitions.socialItems.length, (index) {
         final def = TraitDefinitions.socialItems[index];
         return CharacterSlider(
-          title: def.uiTitle,
-          leftLabel: def.uiLeft,
-          rightLabel: def.uiRight,
+          title: context.l10n.legacyLabel(def.uiTitle),
+          leftLabel: context.l10n.legacyLabel(def.uiLeft),
+          rightLabel: context.l10n.legacyLabel(def.uiRight),
           value: socialItemValues[index],
           onChanged: (value) {
             setState(() {
@@ -6064,9 +6356,9 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       children: List.generate(TraitDefinitions.approaches.length, (index) {
         final def = TraitDefinitions.approaches[index];
         return CharacterSlider(
-          title: def.uiTitle,
-          leftLabel: def.uiLeft,
-          rightLabel: def.uiRight,
+          title: context.l10n.legacyLabel(def.uiTitle),
+          leftLabel: context.l10n.legacyLabel(def.uiLeft),
+          rightLabel: context.l10n.legacyLabel(def.uiRight),
           value: approachValues[index],
           onChanged: (value) {
             setState(() {
@@ -6084,9 +6376,9 @@ class _CharacterViewState extends ConsumerState<CharacterView>
       children: List.generate(TraitDefinitions.traits.length, (index) {
         final def = TraitDefinitions.traits[index];
         return CharacterSlider(
-          title: def.uiTitle,
-          leftLabel: def.uiLeft,
-          rightLabel: def.uiRight,
+          title: context.l10n.legacyLabel(def.uiTitle),
+          leftLabel: context.l10n.legacyLabel(def.uiLeft),
+          rightLabel: context.l10n.legacyLabel(def.uiRight),
           value: traitsValues[index],
           onChanged: (value) {
             setState(() {
@@ -6493,9 +6785,7 @@ class _CharacterViewState extends ConsumerState<CharacterView>
     _relationshipPersonController.clear();
     _relationshipDescriptionController.clear();
     _relationshipInternalController.clear();
-    selectedCharacterType = characterTypeOptions.contains(data.characterType)
-        ? data.characterType
-        : defaultCharacterType;
+    selectedCharacterType = normalizeCharacterType(data.characterType);
     organizations = List<CharacterProfileTableEntry>.from(data.organizations);
     possessions = List<CharacterPossessionEntry>.from(data.possessions);
     statusEntries = List<CharacterProfileTableEntry>.from(data.statusEntries);
@@ -7229,7 +7519,7 @@ class _SnapshotTimelinePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppSectionCard(
-    title: "簡易時間軸",
+    title: context.l10n.uiCompactTimeline,
     icon: Icons.timeline_outlined,
     padding: const EdgeInsets.all(AppSpacing.lg),
     child: Column(
@@ -7263,7 +7553,7 @@ class _SnapshotTimelinePreview extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          "點擊或拖曳選擇時間 · 菱形表示既有快照",
+          context.l10n.uiClickOrDragToSelectTimeDiamondsMark,
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],

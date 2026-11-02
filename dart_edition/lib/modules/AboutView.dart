@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "../ui_library/layout.dart";
@@ -57,13 +58,16 @@ class AboutView extends StatelessWidget {
             const SizedBox(height: 8),
 
             // 應用名稱
-            Text("MonoAshi v1 RC1", style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              "MonoAshi v1 RC1",
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
 
             const SizedBox(height: 8),
 
             // Codename
             Text(
-              "Codename Hana",
+              context.l10n.uiCodenameHana,
               style: Theme.of(context).textTheme.titleSmall,
             ),
 
@@ -79,9 +83,7 @@ class AboutView extends StatelessWidget {
             Container(
               constraints: const BoxConstraints(maxWidth: 600),
               child: Text(
-                "MonoAshi 是一個專為作家和創作者設計的寫作輔助工具。"
-                "它提供了完整的故事管理功能，包括章節管理、角色設定、世界觀建構等，"
-                "讓您能夠更輕鬆地組織和創作您的故事。",
+                context.l10n.uiMonoAshiIsAWritingAssistantForAuthorsAnd,
                 style: Theme.of(context).textTheme.labelMedium,
                 textAlign: TextAlign.center,
               ),
@@ -100,13 +102,36 @@ class AboutView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("主要功能", style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    context.l10n.uiKeyFeatures,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 16),
-                  _buildFeatureItem(context, Icons.book, "故事設定管理"),
-                  _buildFeatureItem(context, Icons.menu_book, "章節與段落編輯"),
-                  _buildFeatureItem(context, Icons.list, "大綱規劃"),
-                  _buildFeatureItem(context, Icons.public, "世界觀設定"),
-                  _buildFeatureItem(context, Icons.person, "角色資料庫"),
+                  _buildFeatureItem(
+                    context,
+                    Icons.book,
+                    context.l10n.uiStorySettingsManagement,
+                  ),
+                  _buildFeatureItem(
+                    context,
+                    Icons.menu_book,
+                    context.l10n.uiChapterAndParagraphEditing,
+                  ),
+                  _buildFeatureItem(
+                    context,
+                    Icons.list,
+                    context.l10n.uiOutlinePlanning,
+                  ),
+                  _buildFeatureItem(
+                    context,
+                    Icons.public,
+                    context.l10n.uiWorldbuilding,
+                  ),
+                  _buildFeatureItem(
+                    context,
+                    Icons.person,
+                    context.l10n.uiCharacterDatabase,
+                  ),
                 ],
               ),
             ),
@@ -115,7 +140,7 @@ class AboutView extends StatelessWidget {
 
             // 版權信息
             Text(
-              "© 2025~2026 Heyairu(部屋伊琉).",
+              context.l10n.uiHeyairu,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],

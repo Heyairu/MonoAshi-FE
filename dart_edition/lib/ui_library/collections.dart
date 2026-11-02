@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "control_size.dart";
@@ -240,7 +241,7 @@ class ItemActionBar extends StatelessWidget {
           return NeonIconButton(
             icon: action.icon,
             iconSize: iconSize,
-            label: action.tooltip,
+            label: context.l10n.legacyLabel(action.tooltip),
             onPressed: action.onPressed,
             destructive: action.tone == AppFeedbackTone.error,
             accent:
@@ -262,7 +263,7 @@ class ItemActionBar extends StatelessWidget {
         };
 
         return IconButton(
-          tooltip: action.tooltip,
+          tooltip: context.l10n.legacyLabel(action.tooltip),
           style: ButtonStyle(
             minimumSize: WidgetStatePropertyAll<Size>(
               Size.square(AppControlSize.heightForContext(context)),
@@ -294,7 +295,7 @@ class CollectionPanel extends StatelessWidget {
   final IndexedWidgetBuilder? itemBuilder;
   final IndexedWidgetBuilder? separatorBuilder;
   final Widget? emptyState;
-  final String emptyTitle;
+  final String? emptyTitle;
   final String? emptyDescription;
   final IconData emptyIcon;
   final EdgeInsetsGeometry listPadding;
@@ -315,7 +316,7 @@ class CollectionPanel extends StatelessWidget {
     this.actions = const [],
     this.children = const [],
     this.emptyState,
-    this.emptyTitle = "尚無資料",
+    this.emptyTitle,
     this.emptyDescription,
     this.emptyIcon = Icons.inbox_outlined,
     this.listPadding = AppSpacing.listPadding,
@@ -344,7 +345,7 @@ class CollectionPanel extends StatelessWidget {
     this.icon,
     this.actions = const [],
     this.emptyState,
-    this.emptyTitle = "尚無資料",
+    this.emptyTitle,
     this.emptyDescription,
     this.emptyIcon = Icons.inbox_outlined,
     this.listPadding = AppSpacing.listPadding,
@@ -370,7 +371,7 @@ class CollectionPanel extends StatelessWidget {
     this.icon,
     this.actions = const [],
     this.emptyState,
-    this.emptyTitle = "尚無資料",
+    this.emptyTitle,
     this.emptyDescription,
     this.emptyIcon = Icons.inbox_outlined,
     this.listPadding = AppSpacing.listPadding,
@@ -392,7 +393,7 @@ class CollectionPanel extends StatelessWidget {
 
   int get _itemCount => itemCount ?? children!.length;
 
-  Widget _buildList() {
+  Widget _buildList(BuildContext context) {
     if (content != null) {
       return content!;
     }
@@ -400,7 +401,7 @@ class CollectionPanel extends StatelessWidget {
     if (_itemCount == 0) {
       return emptyState ??
           AppEmptyState(
-            title: emptyTitle,
+            title: emptyTitle ?? context.l10n.uiNoDataYet,
             description: emptyDescription,
             icon: emptyIcon,
             compact: true,
@@ -449,7 +450,7 @@ class CollectionPanel extends StatelessWidget {
             color: scheme.surfaceContainerLowest,
           ),
           clipBehavior: Clip.antiAlias,
-          child: _buildList(),
+          child: _buildList(context),
         ),
         if (footer != null) ...[SizedBox(height: footerSpacing), footer!],
       ],

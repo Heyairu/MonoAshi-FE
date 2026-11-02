@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
@@ -50,7 +51,7 @@ Future<ProjectObjectSelection?> showProjectObjectSelector({
   required BuildContext context,
   required Set<ProjectObjectKind> allowedKinds,
   Set<String> excludedKeys = const {},
-  String title = "選擇物件",
+  String? title,
 }) {
   return showDialog<ProjectObjectSelection>(
     context: context,
@@ -65,13 +66,13 @@ Future<ProjectObjectSelection?> showProjectObjectSelector({
 class ProjectObjectSelectorDialog extends ConsumerStatefulWidget {
   final Set<ProjectObjectKind> allowedKinds;
   final Set<String> excludedKeys;
-  final String title;
+  final String? title;
 
   const ProjectObjectSelectorDialog({
     super.key,
     required this.allowedKinds,
     this.excludedKeys = const {},
-    this.title = "選擇物件",
+    this.title,
   });
 
   @override
@@ -107,7 +108,7 @@ class _ProjectObjectSelectorDialogState
 
     return AlertDialog(
       key: const Key("project-object-selector"),
-      title: Text(widget.title),
+      title: Text(widget.title ?? context.l10n.uiChooseObject),
       content: SizedBox(
         width: 620,
         height: 520,
@@ -119,8 +120,8 @@ class _ProjectObjectSelectorDialogState
               autofocus: true,
               decoration: appFieldDecoration(
                 context,
-                decoration: const InputDecoration(
-                  labelText: "搜尋名稱、類型或所屬資訊",
+                decoration: InputDecoration(
+                  labelText: context.l10n.uiSearchNameTypeOrAffiliation,
                   prefixIcon: Icon(Icons.search),
                 ),
               ),
@@ -134,7 +135,7 @@ class _ProjectObjectSelectorDialogState
                   contentPadding: EdgeInsets.zero,
                   dense: true,
                   controlAffinity: ListTileControlAffinity.leading,
-                  title: const Text("顯示封存物品"),
+                  title: Text(context.l10n.uiShowArchivedItems),
                   value: _includeArchived,
                   onChanged: (value) =>
                       setState(() => _includeArchived = value ?? false),
@@ -143,7 +144,7 @@ class _ProjectObjectSelectorDialogState
             const SizedBox(height: 8),
             Expanded(
               child: visible.isEmpty
-                  ? const Center(child: Text("沒有符合條件的物件。"))
+                  ? Center(child: Text(context.l10n.uiNoMatchingObjects))
                   : ListView.separated(
                       key: const Key("project-object-selector-results"),
                       itemCount: visible.length,
@@ -168,7 +169,7 @@ class _ProjectObjectSelectorDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text("取消"),
+          child: Text(context.l10n.commonCancel),
         ),
       ],
     );
@@ -180,7 +181,9 @@ class _ProjectObjectSelectorDialogState
     final locations = <String, String>{};
     void collectLocations(List<LocationData> nodes, [String path = ""]) {
       for (final node in nodes) {
-        final name = node.localName.trim().isEmpty ? "未命名地點" : node.localName;
+        final name = node.localName.trim().isEmpty
+            ? context.l10n.uiUntitledLocation
+            : node.localName;
         final label = path.isEmpty ? name : "$path / $name";
         locations[node.id] = label;
         collectLocations(node.child, label);
@@ -197,10 +200,16 @@ class _ProjectObjectSelectorDialogState
             selection: ProjectObjectSelection(
               kind: ProjectObjectKind.character,
               id: entry.key,
-              label: name.isEmpty ? "未命名人物" : name,
+              label: name.isEmpty ? context.l10n.uiUnnamedCharacter : name,
             ),
-            subtitle:
-                "人物${entry.value.roleOrOccupation.trim().isEmpty ? "" : "・${entry.value.roleOrOccupation}"}",
+            subtitle: context.l10n.uiCharacter2(
+              (entry.value.roleOrOccupation.trim().isEmpty
+                      ? ""
+                      : context.l10n.uiLiteral3(
+                          (entry.value.roleOrOccupation).toString(),
+                        ))
+                  .toString(),
+            ),
             icon: Icons.person_outline,
           ),
         );
@@ -215,7 +224,7 @@ class _ProjectObjectSelectorDialogState
               id: entry.key,
               label: entry.value,
             ),
-            subtitle: "地點",
+            subtitle: context.l10n.uiLocation,
             icon: Icons.place_outlined,
           ),
         );
@@ -226,7 +235,7 @@ class _ProjectObjectSelectorDialogState
     for (final storyline in outline) {
       for (final event in storyline.scenes) {
         final eventName = event.storyEvent.trim().isEmpty
-            ? "未命名事件"
+            ? context.l10n.uiUntitledEvent2
             : event.storyEvent;
         if (widget.allowedKinds.contains(ProjectObjectKind.event)) {
           result.add(
@@ -236,7 +245,9 @@ class _ProjectObjectSelectorDialogState
                 id: event.storyEventUUID,
                 label: eventName,
               ),
-              subtitle: "事件・${storyline.storylineName}",
+              subtitle: context.l10n.uiEvent4(
+                (storyline.storylineName).toString(),
+              ),
               icon: Icons.event_note_outlined,
             ),
           );
@@ -244,7 +255,7 @@ class _ProjectObjectSelectorDialogState
         if (widget.allowedKinds.contains(ProjectObjectKind.scene)) {
           for (final scene in event.scenes) {
             final sceneName = scene.sceneName.trim().isEmpty
-                ? "未命名場景"
+                ? context.l10n.uiUntitledScene2
                 : scene.sceneName;
             result.add(
               _ProjectObjectEntry(
@@ -253,7 +264,9 @@ class _ProjectObjectSelectorDialogState
                   id: scene.sceneUUID,
                   label: "$eventName / $sceneName",
                 ),
-                subtitle: "場景・${storyline.storylineName}",
+                subtitle: context.l10n.uiScene2(
+                  (storyline.storylineName).toString(),
+                ),
                 icon: Icons.movie_outlined,
               ),
             );
@@ -279,12 +292,14 @@ class _ProjectObjectSelectorDialogState
         final className = classState.name.trim().isNotEmpty
             ? classState.name
             : itemClass.name.trim().isEmpty
-            ? "未命名物品 Class"
+            ? context.l10n.uiUntitledItemClass
             : itemClass.name;
         if (widget.allowedKinds.contains(ProjectObjectKind.itemClass)) {
           final allocationText = classState.allocations.isEmpty
-              ? "未分配"
-              : "${classState.allocations.length} 筆分配";
+              ? context.l10n.uiUnallocated
+              : context.l10n.uiAllocations(
+                  context.formats.integer(classState.allocations.length),
+                );
           result.add(
             _ProjectObjectEntry(
               selection: ProjectObjectSelection(
@@ -293,8 +308,11 @@ class _ProjectObjectSelectorDialogState
                 classId: itemClass.classId,
                 label: className,
               ),
-              subtitle:
-                  "物品 Class・${_modeLabel(itemClass.mode)}・$allocationText${itemClass.archived ? "・已封存" : ""}",
+              subtitle: context.l10n.uiItemClass2(
+                (_modeLabel(context.l10n, itemClass.mode)).toString(),
+                (allocationText).toString(),
+                (itemClass.archived ? context.l10n.uiArchived : "").toString(),
+              ),
               icon: Icons.category_outlined,
             ),
           );
@@ -320,9 +338,15 @@ class _ProjectObjectSelectorDialogState
               : instance.name;
           final assignment = <String>[
             if (state.holderCharacterId != null)
-              "持有人：${characters[state.holderCharacterId]?.displayName ?? state.holderCharacterId}",
+              context.l10n.uiHolder2(
+                (characters[state.holderCharacterId]?.displayName ??
+                        state.holderCharacterId)
+                    .toString(),
+              ),
             if (state.locationId != null)
-              "所在地：${locations[state.locationId] ?? state.locationId}",
+              context.l10n.uiLocation3(
+                (locations[state.locationId] ?? state.locationId).toString(),
+              ),
           ];
           result.add(
             _ProjectObjectEntry(
@@ -332,8 +356,14 @@ class _ProjectObjectSelectorDialogState
                 classId: itemClass.classId,
                 label: name,
               ),
-              subtitle:
-                  "單件物品・$className・${assignment.isEmpty ? "未指派" : assignment.join("・")}${instance.archived ? "・已封存" : ""}",
+              subtitle: context.l10n.uiIndividualItem(
+                (className).toString(),
+                (assignment.isEmpty
+                        ? context.l10n.uiUnassigned2
+                        : assignment.join(context.l10n.uiLiteral))
+                    .toString(),
+                (instance.archived ? context.l10n.uiArchived : "").toString(),
+              ),
               icon: Icons.inventory_2_outlined,
             ),
           );
@@ -351,10 +381,10 @@ class _ProjectObjectSelectorDialogState
   }
 }
 
-String _modeLabel(ItemMode mode) => switch (mode) {
-  ItemMode.dedicated => "專用",
-  ItemMode.semiDedicated => "半專用",
-  ItemMode.generic => "非專用",
+String _modeLabel(AppLocalizations l10n, ItemMode mode) => switch (mode) {
+  ItemMode.dedicated => l10n.uiDedicated,
+  ItemMode.semiDedicated => l10n.uiSemiDedicated,
+  ItemMode.generic => l10n.uiNonDedicated,
 };
 
 class _ProjectObjectEntry {

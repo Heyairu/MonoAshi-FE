@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "dart:async";
 import "dart:convert";
 
@@ -290,7 +291,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
         _apiUrlController.text = defaultPreset.apiUrl;
         _modelController.text = defaultPreset.fallbackModels.first;
         _availableModels = defaultPreset.fallbackModels;
-        _errorMessage = "Copilot 安全設定無法載入；API Key 未載入。";
+        _errorMessage = context.l10n.uiCouldNotLoadSecureCopilotSettingsTheAPI;
       });
     }
   }
@@ -521,7 +522,9 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
         if (!_availableModels.contains(_modelController.text.trim())) {
           _modelController.text = _availableModels.first;
         }
-        _statusMessage = "已抓取 ${_availableModels.length} 個模型。";
+        _statusMessage = context.l10n.uiModelsRetrieved(
+          context.formats.integer(_availableModels.length),
+        );
       });
       await _persistSettingsNow();
     } catch (e) {
@@ -622,25 +625,35 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
     if (_confirmedContextHost == destination) return true;
     final supplementalDescription = context.supplementalResources.isEmpty
         ? ""
-        : "，以及${context.supplementalResources.map((resource) => resource.title).join("、")}";
+        : this.context.l10n.uiAlongWith(
+            (context.supplementalResources
+                    .map((resource) => resource.title)
+                    .join("、"))
+                .toString(),
+          );
     final approved = await showDialog<bool>(
       context: this.context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text("傳送作品內容？"),
+        title: Text(dialogContext.l10n.uiSendYourWorkSContent),
         content: Text(
-          "此模式會將目前章節「${context.title}」$supplementalDescription傳送到 "
-          "$destination。資料會直接送往你選擇的模型服務。"
-          "另會附帶 App 內建的 .mnproj 結構說明（不含作品內容）。"
-          "${_apiKeyController.text.trim().isEmpty ? "" : "已設定的 API Key 也會一併傳送。"}",
+          dialogContext.l10n.uiThisModeSendsTheCurrentChapterToData(
+            (context.title).toString(),
+            (supplementalDescription).toString(),
+            (destination).toString(),
+            (_apiKeyController.text.trim().isEmpty
+                    ? ""
+                    : dialogContext.l10n.uiYourConfiguredAPIKeyWillAlsoBeSent)
+                .toString(),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text("取消"),
+            child: Text(dialogContext.l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text("允許本次連線"),
+            child: Text(dialogContext.l10n.uiAllowThisConnection),
           ),
         ],
       ),
@@ -663,16 +676,20 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
     final approved = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text("傳送 API Key？"),
-        content: Text("API Key 將直接傳送到 $destination。請確認這是你信任的模型服務。"),
+        title: Text(dialogContext.l10n.uiSendAPIKey),
+        content: Text(
+          dialogContext.l10n.uiTheAPIKeyWillBeSentDirectlyTo(
+            (destination).toString(),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text("取消"),
+            child: Text(dialogContext.l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text("允許本次連線"),
+            child: Text(dialogContext.l10n.uiAllowThisConnection),
           ),
         ],
       ),
@@ -692,7 +709,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
       if (restoredPrompt != null) {
         _messageController.text = restoredPrompt;
       }
-      _statusMessage = "已取消請求。";
+      _statusMessage = context.l10n.uiRequestCancelled;
       _errorMessage = null;
     });
   }
@@ -705,7 +722,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
     if (prompt.isEmpty) return;
 
     if (model.isEmpty) {
-      setState(() => _errorMessage = "請先選擇或輸入使用模型。");
+      setState(() => _errorMessage = context.l10n.uiSelectOrEnterAModelFirst);
       return;
     }
 
@@ -769,7 +786,8 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
             );
             if (restoredPrompt != null) {
               _messageController.text = restoredPrompt;
-              _statusMessage = "設定已變更，已取消舊請求。";
+              _statusMessage =
+                  context.l10n.uiSettingsChangedThePreviousRequestWasCancelled;
             }
           });
         }
@@ -796,7 +814,9 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
             );
             if (restoredPrompt != null) {
               _messageController.text = restoredPrompt;
-              _statusMessage = "設定已變更，已取消舊請求結果。";
+              _statusMessage = context
+                  .l10n
+                  .uiSettingsChangedThePreviousRequestResultWasDiscarded;
             }
           });
         }
@@ -861,7 +881,9 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
           if (failure.canReportError) {
             _errorMessage = _describeCopilotError(e);
           } else {
-            _statusMessage = "設定已變更，已取消舊請求結果。";
+            _statusMessage = context
+                .l10n
+                .uiSettingsChangedThePreviousRequestResultWasDiscarded;
           }
         });
       }
@@ -873,7 +895,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
   }
 
   String _describeCopilotError(Object error) =>
-      CopilotErrorPolicy.describe(error);
+      context.l10n.copilotError(error);
 
   void _clearConversation() {
     setState(() {
@@ -886,7 +908,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
   Future<void> _clearStoredApiKey() async {
     if (_apiKeyController.text.isEmpty) {
       setState(() {
-        _statusMessage = "目前沒有已儲存的 API Key。";
+        _statusMessage = context.l10n.uiNoAPIKeyIsSaved;
         _errorMessage = null;
       });
       return;
@@ -894,16 +916,16 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
     final approved = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text("清除 API Key？"),
-        content: const Text("這會從此裝置的安全儲存空間移除 API Key。作品與對話內容不會受影響。"),
+        title: Text(dialogContext.l10n.uiClearAPIKey),
+        content: Text(dialogContext.l10n.uiThisRemovesTheAPIKeyFromThisDevice),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text("取消"),
+            child: Text(dialogContext.l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text("清除 Key"),
+            child: Text(dialogContext.l10n.uiClearKey),
           ),
         ],
       ),
@@ -918,11 +940,15 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
     try {
       await _persistSettingsNow();
       if (!mounted) return;
-      setState(() => _statusMessage = "API Key 已從此裝置移除。");
+      setState(
+        () => _statusMessage = context.l10n.uiAPIKeyRemovedFromThisDevice,
+      );
     } catch (error, stackTrace) {
       debugPrint("Copilot API key removal failed: $error\n$stackTrace");
       if (!mounted) return;
-      setState(() => _errorMessage = "無法從此裝置移除 API Key，請稍後再試。");
+      setState(
+        () => _errorMessage = context.l10n.uiCouldNotRemoveTheAPIKeyTryAgain,
+      );
     }
   }
 
@@ -938,8 +964,8 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
   }
 
   Widget _buildWarningCard() {
-    return const AppNoticeBanner(
-      message: "Ask／Plan Beta 已納入功能旗標，只讀取目前章節且不會修改專案；Agent 模式暫不可用。",
+    return AppNoticeBanner(
+      message: context.l10n.uiAskPlanBetaAreControlledByFeatureFlags,
       tone: AppFeedbackTone.warning,
     );
   }
@@ -955,7 +981,10 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
         onExpansionChanged: (expanded) =>
             setState(() => _modelPanelExpanded = expanded),
         leading: const Icon(Icons.tune),
-        title: Text("模型選擇", style: Theme.of(context).textTheme.titleMedium),
+        title: Text(
+          context.l10n.uiModelSelection,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         childrenPadding: const EdgeInsets.fromLTRB(
           AppSpacing.xl,
           0,
@@ -988,14 +1017,19 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
           (preset) => preset.name == _providerController.text,
         )
         ? _providerController.text
-        : "自訂";
+        : _providerPresets.last.name;
 
     return AppDropdownField<String>(
       value: selectedProvider,
-      labelText: "供應商",
+      labelText: context.l10n.uiProvider,
       options: _providerPresets
           .map(
-            (preset) => DropdownOption(value: preset.name, label: preset.name),
+            (preset) => DropdownOption(
+              value: preset.name,
+              label: preset == _providerPresets.last
+                  ? context.l10n.uiCustom
+                  : preset.name,
+            ),
           )
           .toList(),
       onChanged: (value) {
@@ -1036,8 +1070,8 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
                     key: const ValueKey<String>("copilot-model-field"),
                     controller: controller,
                     focusNode: focusNode,
-                    labelText: "使用模型",
-                    hintText: "選擇或輸入模型 ID",
+                    labelText: context.l10n.uiModel,
+                    hintText: context.l10n.uiSelectOrEnterAModelID,
                     prefixIcon: const Icon(Icons.memory),
                     onChanged: (_) => _scheduleSettingsSave(),
                   );
@@ -1079,7 +1113,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
           icon: _isLoadingModels
               ? CircularProgressIndicator()
               : const Icon(Icons.refresh),
-          tooltip: "抓取",
+          tooltip: context.l10n.uiFetch,
           onPressed: _isLoadingModels ? null : _fetchModels,
           style: IconButton.styleFrom(
             foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -1100,7 +1134,9 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
           labelText: "API Key",
           prefixIcon: const Icon(Icons.key),
           suffixIcon: IconButton(
-            tooltip: _showApiKey ? "隱藏 API Key" : "顯示 API Key",
+            tooltip: _showApiKey
+                ? context.l10n.uiHideAPIKey
+                : context.l10n.uiShowAPIKey,
             onPressed: () => setState(() => _showApiKey = !_showApiKey),
             icon: Icon(_showApiKey ? Icons.visibility_off : Icons.visibility),
           ),
@@ -1112,7 +1148,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
             key: const ValueKey<String>("copilot-clear-api-key"),
             onPressed: _isSending ? null : _clearStoredApiKey,
             icon: const Icon(Icons.key_off_outlined),
-            label: const Text("清除已儲存 Key"),
+            label: Text(context.l10n.uiClearSavedKey),
           ),
         ),
       ],
@@ -1128,32 +1164,30 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
       child: ExpansionTile(
         key: const ValueKey<String>("copilot-privacy-limitations-panel"),
         leading: const Icon(Icons.privacy_tip_outlined),
-        title: const Text("隱私、第三方服務與已知限制"),
+        title: Text(context.l10n.uiPrivacyThirdPartyServicesAndLimitations),
         childrenPadding: const EdgeInsets.fromLTRB(
           AppSpacing.xl,
           0,
           AppSpacing.xl,
           AppSpacing.xl,
         ),
-        children: const [
+        children: [
           SizedBox(height: 8),
           _CopilotDisclosureItem(
             icon: Icons.cloud_upload_outlined,
-            text:
-                "Chat 會傳送你輸入的訊息；Ask／Plan 另會傳送畫面標示的作品上下文。資料直接送往你設定的 provider 與 API URL，不經 Monogatari Assistant 伺服器。",
+            text: context.l10n.uiChatSendsYourMessagesAskPlanAlsoSend,
           ),
           _CopilotDisclosureItem(
             icon: Icons.policy_outlined,
-            text:
-                "第三方 provider 是否保存或使用資料，依該服務的條款與帳號設定決定。localhost Ollama 可留在本機，但其他自訂 URL 不一定私密。",
+            text: context.l10n.uiWhetherAProviderStoresOrUsesDataDepends,
           ),
           _CopilotDisclosureItem(
             icon: Icons.history_outlined,
-            text: "對話與 Plan 目前只保留在本次畫面工作階段，不會寫入專案，也不會跨啟動還原。",
+            text: context.l10n.uiConversationsAndPlansExistOnlyForThisScreen,
           ),
           _CopilotDisclosureItem(
             icon: Icons.warning_amber_outlined,
-            text: "AI 回覆可能不正確。Plan 僅供檢視與匯出，不會自動修改作品；Agent 模式目前停用。",
+            text: context.l10n.uiAIResponsesMayBeIncorrectPlansAreFor,
           ),
         ],
       ),
@@ -1173,27 +1207,32 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
           children: [
             Row(
               children: [
-                const MediumTitle(icon: Icons.forum_outlined, text: "對話紀錄"),
-                const Spacer(),
+                Expanded(
+                  child: MediumTitle(
+                    icon: Icons.forum_outlined,
+                    text: context.l10n.uiConversationHistory,
+                  ),
+                ),
                 TextButton.icon(
                   onPressed: _messages.isEmpty || _isSending
                       ? null
                       : _clearConversation,
                   icon: const Icon(Icons.delete_outline),
-                  label: const Text("清空"),
+                  label: Text(context.l10n.uiClearAll),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             CollectionPanel.custom(
-              title: "對話紀錄",
+              title: context.l10n.uiConversationHistory,
               showSectionCard: false,
               minHeight: 420,
               maxHeight: 420,
               content: _messages.isEmpty
-                  ? const AppEmptyState(
-                      title: "尚無對話紀錄",
-                      description: "送出訊息後會顯示在這裡",
+                  ? AppEmptyState(
+                      title: context.l10n.uiNoConversations,
+                      description:
+                          context.l10n.uiMessagesWillAppearHereAfterYouSendThem,
                       icon: Icons.chat_bubble_outline,
                       compact: true,
                     )
@@ -1277,7 +1316,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    isUser ? "你" : "Copilot",
+                    isUser ? context.l10n.uiYou : "Copilot",
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: textColor,
                       fontWeight: FontWeight.w800,
@@ -1299,7 +1338,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
               ] else if (!isUser && message.mode == CopilotMode.ask) ...[
                 const SizedBox(height: 8),
                 Text(
-                  "模型未提供可驗證的結構化來源。",
+                  context.l10n.uiTheModelSuppliedNoVerifiableStructuredSources,
                   style: Theme.of(
                     context,
                   ).textTheme.labelSmall?.copyWith(color: textColor),
@@ -1311,7 +1350,9 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
               ] else if (message.planValidationError case final error?) ...[
                 const SizedBox(height: 8),
                 Text(
-                  "無法驗證 Plan：$error\n已保留模型原始回覆，未套用任何變更。",
+                  context.l10n.uiCouldNotValidateThePlanTheOriginalResponse(
+                    (error).toString(),
+                  ),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: Theme.of(context).colorScheme.error,
                     fontWeight: FontWeight.w700,
@@ -1335,14 +1376,14 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
       children: [
         if (response.citations.isEmpty)
           Text(
-            "模型未提供可驗證來源。",
+            context.l10n.uiTheModelSuppliedNoVerifiableSources,
             style: Theme.of(
               context,
             ).textTheme.labelSmall?.copyWith(color: textColor),
           )
         else ...[
           Text(
-            "來源",
+            context.l10n.uiSources,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: textColor,
               fontWeight: FontWeight.w800,
@@ -1361,7 +1402,9 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
         if (response.uncertainties.isNotEmpty) ...[
           const SizedBox(height: 8),
           Text(
-            "不確定：${response.uncertainties.join("；")}",
+            context.l10n.uiUncertain(
+              (response.uncertainties.join("；")).toString(),
+            ),
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(color: textColor),
@@ -1370,7 +1413,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
         if (response.discardedInvalidCitations) ...[
           const SizedBox(height: 6),
           Text(
-            "已忽略模型提供的無效來源。",
+            context.l10n.uiInvalidSourcesSuppliedByTheModelWereIgnored,
             style: Theme.of(
               context,
             ).textTheme.labelSmall?.copyWith(color: textColor),
@@ -1404,7 +1447,9 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
           : ActionChip(
               avatar: const Icon(Icons.open_in_new_outlined, size: 16),
               label: Text(citation.resourceTitle),
-              tooltip: "開啟來源：${citation.quoteHint}",
+              tooltip: context.l10n.uiOpenSource(
+                (citation.quoteHint).toString(),
+              ),
               onPressed: onOpen,
             ),
     );
@@ -1429,7 +1474,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text("已複製 Plan JSON。")));
+    ).showSnackBar(SnackBar(content: Text(context.l10n.uiPlanJSONCopied)));
   }
 
   String _planExportBaseName(CopilotPlan plan) {
@@ -1455,11 +1500,13 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
       if (!mounted || !exported) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Plan JSON 匯出完成。")));
+      ).showSnackBar(SnackBar(content: Text(context.l10n.uiPlanJSONExported)));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Plan JSON 匯出失敗，請確認儲存位置與檔案權限。")),
+        SnackBar(
+          content: Text(context.l10n.uiCouldNotExportThePlanJSONCheckThe),
+        ),
       );
     }
   }
@@ -1495,13 +1542,13 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
               IconButton(
                 onPressed: () => _copyPlan(plan),
                 icon: const Icon(Icons.copy_outlined),
-                tooltip: "複製 Plan JSON",
+                tooltip: context.l10n.uiCopyPlanJSON,
                 color: textColor,
               ),
               IconButton(
                 onPressed: () => _exportPlan(plan),
                 icon: const Icon(Icons.download_outlined),
-                tooltip: "匯出 Plan JSON",
+                tooltip: context.l10n.uiExportPlanJSON,
                 color: textColor,
               ),
             ],
@@ -1509,7 +1556,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
           if (isStale) ...[
             const SizedBox(height: 4),
             Text(
-              "目前章節已變更，這份計畫可能已過期。",
+              context.l10n.uiTheCurrentChapterChangedThisPlanMayBe,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: Theme.of(context).colorScheme.error,
                 fontWeight: FontWeight.w800,
@@ -1530,7 +1577,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
           if (plan.risks.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
-              "風險：${plan.risks.join("；")}",
+              context.l10n.uiRisk((plan.risks.join("；")).toString()),
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: textColor),
@@ -1539,7 +1586,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
           if (plan.questions.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
-              "待確認：${plan.questions.join("；")}",
+              context.l10n.uiToConfirm((plan.questions.join("；")).toString()),
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: textColor),
@@ -1547,7 +1594,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
           ],
           const SizedBox(height: 6),
           Text(
-            "唯讀計畫・尚未套用任何變更",
+            context.l10n.uiReadOnlyPlanNoChangesApplied,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: textColor,
               fontWeight: FontWeight.w700,
@@ -1559,11 +1606,13 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
   }
 
   String _transmittedContextLabel() {
-    if (_selectedMode != CopilotMode.ask) return "目前章節";
+    if (_selectedMode != CopilotMode.ask) return context.l10n.uiCurrentChapter;
     return switch (_selectedContextScope) {
-      CopilotContextScope.currentChapter => "目前章節",
-      CopilotContextScope.currentChapterWithProjectOverview => "目前章節與專案索引摘要",
-      CopilotContextScope.currentChapterWithSelectedResources => "目前章節與勾選的補充資源",
+      CopilotContextScope.currentChapter => context.l10n.uiCurrentChapter,
+      CopilotContextScope.currentChapterWithProjectOverview =>
+        context.l10n.uiCurrentChapterAndProjectIndexSummary,
+      CopilotContextScope.currentChapterWithSelectedResources =>
+        context.l10n.uiCurrentChapterAndSelectedSupplementalResources,
     };
   }
 
@@ -1581,10 +1630,12 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
             if (_selectedMode == CopilotMode.ask ||
                 _selectedMode == CopilotMode.plan) ...[
               AppNoticeBanner(
-                message:
-                    "${_selectedMode == CopilotMode.ask ? "Ask" : "Plan"} "
-                    "會把${_transmittedContextLabel()}"
-                    "直接傳送到你設定的模型服務；不會修改專案。",
+                message: context.l10n
+                    .uiSendsDirectlyToYourConfiguredModelServiceWithout(
+                      (_selectedMode == CopilotMode.ask ? "Ask" : "Plan")
+                          .toString(),
+                      (_transmittedContextLabel()).toString(),
+                    ),
                 tone: AppFeedbackTone.info,
               ),
               if (_selectedMode == CopilotMode.ask) ...[
@@ -1600,8 +1651,11 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
                       onPressed: _isSending ? null : _selectContextResources,
                       icon: const Icon(Icons.library_add_check_outlined),
                       label: Text(
-                        "選擇補充資源（${_selectedResourceKeys.length}/"
-                        "${CopilotProjectContextBuilder.maxSelectedResources}）",
+                        context.l10n.uiSelectSupplementalResources(
+                          context.formats.integer(_selectedResourceKeys.length),
+                          (CopilotProjectContextBuilder.maxSelectedResources)
+                              .toString(),
+                        ),
                       ),
                     ),
                   ),
@@ -1638,10 +1692,13 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
                   textInputAction: TextInputAction.newline,
                   decoration: InputDecoration(
                     hintText: switch (_selectedMode) {
-                      CopilotMode.chat => "輸入訊息，Shift+Enter 換行，Enter 發送",
-                      CopilotMode.ask => "詢問目前章節內容",
-                      CopilotMode.plan => "描述希望規劃的修改目標",
-                      CopilotMode.agent => "Agent 模式暫不可用",
+                      CopilotMode.chat =>
+                        context.l10n.uiEnterAMessageShiftEnterForANew,
+                      CopilotMode.ask =>
+                        context.l10n.uiAskAboutTheCurrentChapter,
+                      CopilotMode.plan =>
+                        context.l10n.uiDescribeTheChangesYouWantToPlan,
+                      CopilotMode.agent => context.l10n.uiAgentIsUnavailable,
                     },
                     prefixIcon: const Padding(
                       padding: EdgeInsets.only(bottom: 56),
@@ -1660,7 +1717,9 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
                   icon: _isSending
                       ? const Icon(Icons.stop_circle_outlined)
                       : const Icon(Icons.send),
-                  tooltip: _isSending ? "取消請求" : "發送",
+                  tooltip: _isSending
+                      ? context.l10n.uiCancelRequest
+                      : context.l10n.uiSend,
                   onPressed: _isSending
                       ? _cancelActiveRequest
                       : _selectedMode == CopilotMode.agent
@@ -1671,7 +1730,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
             ),
             const SizedBox(height: 16),
             Text(
-              "Shift+Enter 換行、Enter 發送",
+              context.l10n.uiShiftEnterNewLineEnterSend,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -1686,7 +1745,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
       child: AppDropdownField<CopilotMode>(
         key: const ValueKey<String>("copilot-mode-selector"),
         value: _selectedMode,
-        labelText: "模式選擇",
+        labelText: context.l10n.uiModeSelection,
         options: [
           const DropdownOption<CopilotMode>(
             value: CopilotMode.chat,
@@ -1702,9 +1761,9 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
             label: "Plan (Beta)",
             enabled: widget.planEnabled,
           ),
-          const DropdownOption<CopilotMode>(
+          DropdownOption<CopilotMode>(
             value: CopilotMode.agent,
-            label: "Agent (暫不可用)",
+            label: context.l10n.uiAgentUnavailable,
             enabled: false,
           ),
         ],
@@ -1726,19 +1785,19 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
     return AppDropdownField<CopilotContextScope>(
       key: const ValueKey<String>("copilot-context-scope-selector"),
       value: _selectedContextScope,
-      labelText: "Ask 上下文",
-      options: const [
+      labelText: context.l10n.uiAskContext,
+      options: [
         DropdownOption<CopilotContextScope>(
           value: CopilotContextScope.currentChapter,
-          label: "目前章節",
+          label: context.l10n.uiCurrentChapter,
         ),
         DropdownOption<CopilotContextScope>(
           value: CopilotContextScope.currentChapterWithProjectOverview,
-          label: "目前章節＋專案摘要",
+          label: context.l10n.uiCurrentChapterProjectSummary,
         ),
         DropdownOption<CopilotContextScope>(
           value: CopilotContextScope.currentChapterWithSelectedResources,
-          label: "目前章節＋選取資源",
+          label: context.l10n.uiCurrentChapterSelectedResources,
         ),
       ],
       onChanged: _isSending
@@ -1795,7 +1854,7 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
           final dialogHeight = (MediaQuery.sizeOf(dialogContext).height * 0.62)
               .clamp(280.0, 520.0);
           return AlertDialog(
-            title: const Text("選擇 Ask 補充資源"),
+            title: Text(dialogContext.l10n.uiSelectAskSupplementalResources),
             content: SizedBox(
               width: 620,
               height: dialogHeight,
@@ -1809,8 +1868,10 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
                     autofocus: true,
                     decoration: appFieldDecoration(
                       context,
-                      decoration: const InputDecoration(
-                        labelText: "搜尋角色、世界觀、大綱或詞語",
+                      decoration: InputDecoration(
+                        labelText: dialogContext
+                            .l10n
+                            .uiSearchCharactersWorldbuildingOutlinesOrWords,
                         prefixIcon: Icon(Icons.search),
                       ),
                     ),
@@ -1818,15 +1879,21 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "已選 ${selected.length}/"
-                    "${CopilotProjectContextBuilder.maxSelectedResources}；"
-                    "只會傳送勾選項目的內容。",
+                    dialogContext.l10n.uiSelectedOnlySelectedResourcesAreSent(
+                      context.formats.integer(selected.length),
+                      (CopilotProjectContextBuilder.maxSelectedResources)
+                          .toString(),
+                    ),
                     style: Theme.of(dialogContext).textTheme.bodySmall,
                   ),
                   const Divider(height: 20),
                   Expanded(
                     child: filtered.isEmpty
-                        ? const Center(child: Text("沒有符合的資源。"))
+                        ? Center(
+                            child: Text(
+                              dialogContext.l10n.uiNoMatchingResources,
+                            ),
+                          )
                         : ListView.builder(
                             itemCount: filtered.length,
                             itemBuilder: (context, index) {
@@ -1875,17 +1942,17 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
                 onPressed: selected.isEmpty
                     ? null
                     : () => setDialogState(selected.clear),
-                child: const Text("清除"),
+                child: Text(dialogContext.l10n.uiClear),
               ),
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text("取消"),
+                child: Text(dialogContext.l10n.commonCancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(
                   dialogContext,
                 ).pop(Set<String>.unmodifiable(selected)),
-                child: const Text("使用選取項目"),
+                child: Text(dialogContext.l10n.uiUseSelection),
               ),
             ],
           );
@@ -1900,20 +1967,27 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
     try {
       final snapshot = _captureCurrentChapterContext();
       final bytes = utf8.encode(snapshot.content).length;
-      final suffix = snapshot.truncated ? "，已截斷" : "";
+      final suffix = snapshot.truncated ? context.l10n.uiTruncated : "";
       final overviewLabel =
           _selectedMode == CopilotMode.ask &&
               _selectedContextScope ==
                   CopilotContextScope.currentChapterWithProjectOverview
-          ? "＋專案索引摘要（上限 24 KiB）"
+          ? context.l10n.uiProjectIndexSummaryUpToKiB
           : _selectedMode == CopilotMode.ask &&
                 _selectedContextScope ==
                     CopilotContextScope.currentChapterWithSelectedResources
-          ? "＋已選 ${_selectedResourceKeys.length} 個補充資源（上限 32 KiB）"
+          ? context.l10n.uiSelectedResourcesUpToKiB(
+              context.formats.integer(_selectedResourceKeys.length),
+            )
           : "";
-      return "上下文：${snapshot.title}（$bytes bytes$suffix）$overviewLabel";
+      return context.l10n.uiContextBytes(
+        (snapshot.title).toString(),
+        (bytes).toString(),
+        (suffix).toString(),
+        (overviewLabel).toString(),
+      );
     } on FormatException {
-      return "上下文：尚未選擇章節";
+      return context.l10n.uiContextNoChapterSelected;
     }
   }
 

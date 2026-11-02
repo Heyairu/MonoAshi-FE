@@ -1,0 +1,2875 @@
+{
+  "topics": [
+    {
+      "id": "help.home",
+      "title": "Quick Start",
+      "category": "Getting Started",
+      "keywords": [
+        "Getting started",
+        "Quick start",
+        "Home",
+        "Help Center",
+        "Help Center",
+        "Beginner",
+        "Writing fiction"
+      ],
+      "sections": [
+        {
+          "heading": "Start your first work",
+          "paragraphs": [
+            "Monogatari Assistant brings your manuscript, chapters, outline, characters, worldbuilding, items, and timeline into one workspace. This help is bundled with the app and can be read offline."
+          ],
+          "steps": [
+            "On first launch, set up the interface, storage, and your name, then select “Start writing” to enter the workspace.",
+            "Create a work from “File” in the toolbar, then enter its title and author in “Story Settings”.",
+            "Add and select a chapter in “Chapters”, then write your first passage in the manuscript area.",
+            "Use “Save File” to choose a location and save a .mnproj file. After that, use Ctrl+S (Command+S on Apple platforms) to save.",
+            "As you need them, add characters, outline entries, locations, items, and timeline data to organize your cast and plot."
+          ]
+        },
+        {
+          "heading": "Find help for your task",
+          "paragraphs": [
+            "To start writing, read “Chapters” and “Manuscript Editor”. To organize your story's setting, read about characters, worldbuilding, items, and scene snapshots.",
+            "To deliver a manuscript, read “Selective Export”. To protect your work, read “Saving, Backups, and Recovery”. For proofreading, read “Find and Replace”, “Proofreading and Revisions”, and “Revision Tracking and Baselines”.",
+            "To view word count goals, release plans, or foreshadowing progress, read “Dashboard and Writing Progress”. You can open revision details from a gauge."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Read and follow along",
+          "paragraphs": [
+            "Search by feature name, on-screen text, or a problem keyword, such as “missing backups”, “character width”, or “shortcut code”. Use “Related Topics” at the bottom of an article to keep reading.",
+            "Press F1 for help with the current feature. Press Shift+F1, then select a control to learn what it does. Entry points can vary by platform, window width, and version; use the options visible in your app."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "help.using",
+        "help.setup",
+        "pages.chapters",
+        "files.recovery",
+        "help.faq",
+        "dashboard.overview"
+      ]
+    },
+    {
+      "id": "help.using",
+      "title": "Using Help",
+      "category": "Getting Started",
+      "keywords": [
+        "F1",
+        "Shift+F1",
+        "What's This?",
+        "Point-and-click help",
+        "Offline",
+        "Contents",
+        "Search Help"
+      ],
+      "sections": [
+        {
+          "heading": "Open help for the current feature",
+          "paragraphs": [
+            "F1 finds help for the focused control or ribbon area. If there is no specific context, it shows the current page's help. The toolbar's Help menu also offers the help home and contextual help."
+          ],
+          "steps": [
+            "Focus the field you want to understand, or switch to the relevant feature page.",
+            "Press F1 and read the topic and steps.",
+            "Press Esc or the close button to return. Your original dialog and unconfirmed choices are preserved."
+          ]
+        },
+        {
+          "heading": "Identify a control with “What's This?”",
+          "paragraphs": [
+            "Shift+F1 starts point-and-click help. Clicking an item under the question-mark cursor opens help without performing its action. You can also inspect disabled buttons.",
+            "Press Esc or Shift+F1 again to cancel. Native file pickers belong to the operating system and are outside the app's point-and-click help."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Search and read",
+          "paragraphs": [
+            "Enter a feature name, on-screen text, or keyword, then select a result. Separate multiple terms with spaces, for example “regex look-around”; all terms must appear in the same topic.",
+            "Search checks titles, keywords, and article text, with title matches ranked first. If nothing is found, shorten the query or choose “Back to Contents” to clear it.",
+            "In narrow windows, switch between “Contents and Search” and “Read Article”. Previous and next buttons revisit this help window's browsing history. Scroll long articles to find related topics at the bottom."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "help.shortcuts"
+      ]
+    },
+    {
+      "id": "help.shortcuts",
+      "title": "Keyboard Shortcuts",
+      "category": "Getting Started",
+      "keywords": [
+        "F1",
+        "Shift+F1",
+        "Ctrl+F1",
+        "Command",
+        "Shortcuts",
+        "Keyboard",
+        "Fn",
+        "Alt",
+        "Option",
+        "Modules",
+        "Switch Module",
+        "Ctrl+Shift+M"
+      ],
+      "sections": [
+        {
+          "heading": "Help and the toolbar",
+          "paragraphs": [
+            "F1: contextual help. Shift+F1: start or cancel point-and-click help. Esc: cancel picking or close Help.",
+            "Ctrl+F1 expands or collapses the ribbon when it has focus. F10 starts KeyTip navigation when the ribbon has focus. Alt alone does not activate KeyTips."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Switch ribbon tabs and modules",
+          "paragraphs": [
+            "Alt+Left/Right selects the previous/next ribbon tab; Alt+Up/Down selects the previous/next module. Use Option on macOS. Navigation wraps at either end, requires no toolbar focus, and ignores key repeats. Left/Right preserves the original input focus and does not execute tab commands.",
+            "Open the top “Switch Module” button or press Ctrl+Shift+M (Command+Shift+M on macOS). Search by module name, choose with the arrow keys, confirm with Enter, or cancel with Esc. Home, Settings, Help, Manuscript Editor, and About are included.",
+            "Ctrl+0–9 (Command on macOS) opens Home, Manuscript Editor, Chapters, Outline, Characters, Worldbuilding, Timeline, Items, Settings, and Help respectively. Ctrl+, / Command+, also opens Settings.",
+            "Option/Alt+arrow keys take priority for workspace navigation. They do not switch background modules during IME composition, candidate selection, menus, dialogs, point-and-click help, or project loading. Ctrl+Alt/AltGr and combinations with Shift or Command are excluded.",
+            "The Help module has contents, search, and articles, and preserves its reading state when you switch away. F1 still opens a contextual help dialog; Esc closes that dialog and restores focus."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Common workspace commands",
+          "paragraphs": [
+            "Ctrl+N: New File. Ctrl+O: Open File. Ctrl+S: Save. Ctrl+Shift+S: Save As. Ctrl+F: open and focus Find; press again to select the query. Ctrl+Z: Undo. Ctrl+Shift+Z: Redo; Windows/Linux also supports Ctrl+Y. Letter shortcuts use Command on Apple platforms.",
+            "Text fields support standard Select All, Copy, Cut, and Paste. Their scope follows the current focus. Click the manuscript first to avoid changing a search or settings field.",
+            "Enter starts a new line. With automatic line indentation enabled, it inserts your configured spaces. Shift+Enter inserts only a line break. When overwrite mode is allowed, use Ins or the status bar to toggle insert/overwrite."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Find and Replace shortcuts",
+          "paragraphs": [
+            "Ctrl+H expands and focuses Replace; macOS uses Command+Option+F. Use F3/Shift+F3 for the next/previous result on Windows/Linux, or Command+G/Command+Shift+G on macOS.",
+            "In Find, Enter/Shift+Enter moves to the next/previous result. Esc closes Find and returns to the manuscript. During IME composition, Enter commits text first instead of navigating results."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "When a shortcut does not respond",
+          "paragraphs": [
+            "Some keyboards require Fn to send F1. If the operating system intercepts function keys, use the toolbar's Help menu.",
+            "Close active menus or dialogs and check focus. Commands disabled during file operations become available after the operation finishes."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "help.using",
+        "toolbar.mode",
+        "editor.body",
+        "settings.editing"
+      ]
+    },
+    {
+      "id": "files.recovery",
+      "title": "Saving, Backups, and Recovery",
+      "category": "Getting Started",
+      "keywords": [
+        "Undo",
+        "Backup",
+        "checkpoint",
+        "Data loss",
+        "Missing backups",
+        "Restore",
+        "Auto Save"
+      ],
+      "sections": [
+        {
+          "heading": "Choose how to save your work",
+          "paragraphs": [
+            "Save writes the complete work back to the current .mnproj. Save As writes to a new name or location, which becomes the destination for later saves.",
+            "Autosave writes to a known location at an interval. AutoBackup creates additional complete project copies without changing the working file's location or unsaved state.",
+            "Undo/Redo handles mistakes in the current session. Revision tracking compares and manages supported differences. Manuscript .txt/.md exports are for reading or delivery and cannot replace complete project backups."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Recover a work from a backup",
+          "paragraphs": [],
+          "steps": [
+            "If the current work contains changes you need, save them under a different filename first.",
+            "In “Settings → Saving and Backups”, inspect AutoBackup's folder and file count, then open the folder.",
+            "Find candidate .mnproj files by work name and backup time, then load one with “Open File”.",
+            "Inspect the last edited chapters, characters, and outline to confirm you found the version you need.",
+            "Use “Save As” to save the recovered work before continuing, keeping the original backup available for comparison."
+          ]
+        },
+        {
+          "heading": "Missing or outdated backups",
+          "paragraphs": [
+            "Check that automatic backups are enabled, the folder is accessible, the interval has elapsed, and there is free disk space. Android requires permission to access the backup folder.",
+            "Backups are cleaned up according to capacity and retention rules; they are not permanent archives. Save important milestones in a location you manage, and copy needed files before clearing backups.",
+            "Save a complete copy before batch replacement, selective import, item-mode conversion, or upgrading an older project."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "files.saveAs",
+        "settings.autoSave",
+        "settings.backup",
+        "settings.backupDirectory",
+        "revision.overview"
+      ]
+    },
+    {
+      "id": "help.faq",
+      "title": "Frequently Asked Questions",
+      "category": "Getting Started",
+      "keywords": [
+        "Questions",
+        "Cannot save",
+        "Missing backups",
+        "No search results",
+        "Cannot type",
+        "Failure",
+        "Troubleshooting"
+      ],
+      "sections": [
+        {
+          "heading": "Cannot save or find backups",
+          "paragraphs": [
+            "Autosave unavailable: manually save to an accessible location first. A new work without a destination cannot rely on autosave for its first save.",
+            "File access failed: check that the destination is writable, external drives are connected, and system authorization is still valid. Reselect the destination or save elsewhere if needed.",
+            "Missing backups: check that backups are enabled and the correct folder contains files. Changing the backup folder does not move older backups; inspect the previous folder too."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Search, input, and markers",
+          "paragraphs": [
+            "No matches: check the current chapter, disable regular expressions, try literal text, then inspect case, width, and ignore options one at a time.",
+            "Whole-word matching unavailable: regular expressions and queries containing CJK characters, full-width characters, punctuation, or whitespace restrict this option.",
+            "Typing replaces following text: check overwrite mode, switch to insert from the status bar, or disable overwrite in Settings.",
+            "No phrase suggestions: enable smart suggestions, make sure the phrase is enabled, and type ;; directly in the manuscript. Pasting and active IME composition do not trigger suggestions."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Timeline and advanced features",
+          "paragraphs": [
+            "Unexpected item or character state: check the current tick, the scene linked to the snapshot, and whether that scene has multiple placements.",
+            "Copilot Ask/Plan missing: availability depends on build flags. Plan provides proposals and validation only, with no automatic apply action.",
+            "Older projects are migrated in memory when opened, preserving the original file until you save. Unsupported newer formats are rejected; use a compatible app version."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Dashboard and progress",
+          "paragraphs": [
+            "Dashboard missing: enable “Home → Display Panels → Dashboard”. In a narrow window, use “Open Dashboard” on the right.",
+            "Gauge removed: scroll to the bottom of the dashboard and add it again with “Add Gauge”.",
+            "Plan or foreshadowing progress unchanged: check “Completed” or “Revealed” in Planning.",
+            "The revision rings show additions and revisions as shares of total changes. Open the details to assess what actually remains to be reviewed."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "If the problem persists",
+          "paragraphs": [
+            "Record the app version, operating system, steps, expected and actual results, and complete error text. Try reproducing the issue with a minimal test work and include the reproduction steps."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "files.recovery",
+        "search.overview",
+        "settings.editing",
+        "editor.phrases",
+        "timeline.snapshots",
+        "pages.about",
+        "dashboard.overview"
+      ]
+    },
+    {
+      "id": "help.setup",
+      "title": "First Launch and Display Name",
+      "category": "Getting Started",
+      "keywords": [
+        "OOBE",
+        "Initial setup",
+        "First launch",
+        "Start writing",
+        "Name",
+        "Default pen name"
+      ],
+      "sections": [
+        {
+          "heading": "Complete initial setup",
+          "paragraphs": [
+            "First-launch setup introduces Welcome, appearance, storage and backups, your name, getting started, and completion. Settings are saved when you select “Start writing”."
+          ],
+          "steps": [
+            "Choose a theme, text size, navigation style, and toolbar mode, and inspect the previews.",
+            "Choose whether to enable autosave and backups, and set their separate intervals and the backup folder.",
+            "Enter your name. Select “Use as Default Pen Name” if new works should use it as the author.",
+            "Review the completion page and select “Start writing” to enter the workspace."
+          ]
+        },
+        {
+          "heading": "Skip your name or leave setup early",
+          "paragraphs": [
+            "You may skip the name step. This discards unsaved name edits on that page and keeps your previous name and pen-name preference. A blank name does not enable the default pen name.",
+            "If you close the app before completing setup, it appears again next time. Devices that completed setup normally enter the workspace directly. Projects opened from a file manager wait until setup is complete."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Change preferences later",
+          "paragraphs": [
+            "Appearance, editing, storage, and backup preferences can be changed in Settings. On desktop, launch the app with --oobe to reopen setup.",
+            "The default pen name fills new projects only and never overwrites an existing author. Display language can follow the system or use Traditional Chinese, English, or Japanese; it applies and saves locally immediately, without finishing setup. Other setup choices save on completion. The interface and offline help support all three languages; project content and built-in writing material keep their original language."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "pages.welcome",
+        "pages.settings",
+        "settings.autoSave",
+        "settings.backup"
+      ]
+    },
+    {
+      "id": "pages.welcome",
+      "title": "Home and New Projects",
+      "category": "Features",
+      "keywords": [
+        "Welcome",
+        "New work",
+        "Home",
+        "Name",
+        "Pen name",
+        "Initial setup"
+      ],
+      "sections": [
+        {
+          "heading": "Start a writing session",
+          "paragraphs": [
+            "Home is your starting point. Use “File” in the toolbar to create or open a work. First-time users can begin with Quick Start."
+          ],
+          "steps": [
+            "Create a work or open an existing .mnproj.",
+            "Confirm the title, author, and synopsis in Story Settings.",
+            "Select a chapter, start editing, and save manually for the first time."
+          ]
+        },
+        {
+          "heading": "Recent files and local network connections",
+          "paragraphs": [
+            "Recent files let you return quickly to existing works. If a file moved, use Open File to locate it again. Removing a recent entry is different from deleting the work from disk.",
+            "Home also has local network connection and sync controls. Before connecting another device, read “Local Network Sync and Collaboration” and check the endpoints, work, and pairing code."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Your name and greeting",
+          "paragraphs": [
+            "Home chooses a greeting from the device's local time and uses your setup name. If no name is set, it uses a generic name in the current display language.",
+            "If you selected the default pen name in setup, new works fill in that author automatically. Existing authors stay unchanged and can be edited individually in Story Settings."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "help.home",
+        "help.setup",
+        "files.new",
+        "files.open",
+        "sync.overview"
+      ]
+    },
+    {
+      "id": "pages.story",
+      "title": "Story Settings",
+      "category": "Features",
+      "keywords": [
+        "Book Title",
+        "Author",
+        "Synopsis",
+        "Type",
+        "Tags",
+        "Work title",
+        "Story Settings"
+      ],
+      "sections": [
+        {
+          "heading": "Record basic work information",
+          "paragraphs": [
+            "Story Settings stores the title, author, synopsis, genre, and basic planning information. Start with the essentials and add detail as the work develops."
+          ],
+          "steps": [
+            "Enter a recognizable work title and author or pen name.",
+            "Fill in genre, creative purpose, and synopsis, and add any tags you need.",
+            "Continue in Chapters or Outline, then use “Save File” to save the complete work."
+          ]
+        },
+        {
+          "heading": "Examples and saving",
+          "paragraphs": [
+            "For a first synopsis, describe what the protagonist wants, what stands in the way, and what happens if they fail. Put detailed events in the outline.",
+            "The work title is project content. Use Save As if you also want to change the filename on disk. A default pen name affects only new works; edit an existing author here."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "pages.outline",
+        "pages.chapters",
+        "files.saveAs"
+      ]
+    },
+    {
+      "id": "pages.chapters",
+      "title": "Chapters",
+      "category": "Features",
+      "keywords": [
+        "Chapter Tree",
+        "Folder",
+        "Add Chapter",
+        "Order",
+        "Rename",
+        "Search chapters"
+      ],
+      "sections": [
+        {
+          "heading": "Build the chapter structure",
+          "paragraphs": [
+            "Use folders to group manuscripts, such as “Part One → Chapter One, Chapter Two”. Chapters hold the text; folders organize the hierarchy."
+          ],
+          "steps": [
+            "Create root folders or subfolders as needed.",
+            "Use “Add Chapter” to create a manuscript and give it a recognizable name.",
+            "Select a chapter and write in the manuscript area. After switching, check the chapter name first.",
+            "Use sorting and renaming in the chapter tree to reorganize it, then save the work."
+          ]
+        },
+        {
+          "heading": "Find chapters and avoid mistakes",
+          "paragraphs": [
+            "The chapter search finds folder and chapter names. To find words inside the manuscript, use the toolbar's Find command.",
+            "Check the chapters inside a folder before deleting or reorganizing it. Save a copy before removing important content or making large structural changes, and distinguish structural edits from manuscript edits."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "editor.body",
+        "search.overview",
+        "files.export_selective",
+        "files.recovery",
+        "dashboard.overview"
+      ]
+    },
+    {
+      "id": "pages.outline",
+      "title": "Outline",
+      "category": "Features",
+      "keywords": [
+        "Storyline",
+        "Event",
+        "Scene",
+        "Scene",
+        "placement",
+        "Plot",
+        "Outline"
+      ],
+      "sections": [
+        {
+          "heading": "Break the story into units you can arrange",
+          "paragraphs": [
+            "Storylines group plot threads, events describe what happens, and scenes connect the timeline with state snapshots. A placement represents one occurrence of a scene on the timeline."
+          ],
+          "steps": [
+            "Create storylines first and organize the main conflict and direction of development.",
+            "Add events and scenes within a storyline, with summaries and links to characters, locations, or items.",
+            "Place scenes on the timeline and check event order.",
+            "Use chapters and Planning to check narrative order, foreshadowing, and release progress."
+          ]
+        },
+        {
+          "heading": "Narrative order and story time",
+          "paragraphs": [
+            "Chapters are the order readers encounter the story; the timeline is the order events happen. For example, write a flashback in Chapter One but place its scene earlier on the timeline.",
+            "Scenes with the same name are not necessarily the same record. Link snapshots to the correct scene using the selector; typing a name into text does not create a tracked link."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "pages.timeline",
+        "timeline.snapshots",
+        "pages.plans",
+        "pages.chapters"
+      ]
+    },
+    {
+      "id": "pages.timeline",
+      "title": "Timeline",
+      "category": "Features",
+      "keywords": [
+        "Timeline",
+        "Tick",
+        "placement",
+        "Scene",
+        "Scene placement",
+        "Move scenes"
+      ],
+      "sections": [
+        {
+          "heading": "Understand scenes and placements",
+          "paragraphs": [
+            "A scene is the scene record; a placement is one occurrence on the timeline; a tick is a position used to order events and resolve state. Characters, locations, and items show their state at the current tick."
+          ],
+          "steps": [
+            "Create events and scenes in the outline first.",
+            "Place a scene on the timeline and check its track and position.",
+            "Choose a time position, then inspect the corresponding state in Characters, Worldbuilding, or Items.",
+            "Move a placement to change story timing, then inspect the related snapshots."
+          ]
+        },
+        {
+          "heading": "What moving or removing a placement changes",
+          "paragraphs": [
+            "Snapshots link to scenes. When a scene's position changes, displayed state follows the newly resolved position.",
+            "A scene can have several placements. You can specify a source when creating a snapshot; otherwise a fixed rule selects one. Removing a placement keeps the snapshot and uses its fallback time, so removing a placement does not delete history."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "pages.outline",
+        "timeline.snapshots",
+        "pages.characters",
+        "pages.world",
+        "pages.items"
+      ]
+    },
+    {
+      "id": "pages.characters",
+      "title": "Characters",
+      "category": "Features",
+      "keywords": [
+        "Character",
+        "Characters",
+        "Properties",
+        "Alias",
+        "Possessions",
+        "Character Snapshot"
+      ],
+      "sections": [
+        {
+          "heading": "Create reusable character references",
+          "paragraphs": [
+            "Character profiles bring names, properties, and settings together. You can refer to them from manuscript markers, the relationship graph, events, and item links."
+          ],
+          "steps": [
+            "Create a character and enter a name and the basic information you need.",
+            "Add aliases, descriptions, and properties. Distinguish people with similar or identical names early.",
+            "Use an object selector in other features to choose this character and create a tracked link.",
+            "To record a change in the story, choose the corresponding scene and add a snapshot."
+          ]
+        },
+        {
+          "heading": "Baseline settings and changes in the story",
+          "paragraphs": [
+            "Keep fixed background information in the character profile and scene-specific changes in snapshots. For example, check a character acquiring an item in a scene against the tracked item link and timeline.",
+            "Tracked links use IDs to stay connected. “Update Manuscript Mentions When Aliases Change” updates markers for the same character whose display text exactly matches the old alias; unmarked prose is outside its scope."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "pages.relationships",
+        "timeline.snapshots",
+        "pages.items",
+        "editor.annotations"
+      ]
+    },
+    {
+      "id": "pages.relationships",
+      "title": "Character Relationships",
+      "category": "Features",
+      "keywords": [
+        "Character Relationships",
+        "Relationship graph",
+        "Source character",
+        "Target character",
+        "Character Relationships"
+      ],
+      "sections": [
+        {
+          "heading": "Create character relationships",
+          "paragraphs": [
+            "Create character profiles first, then organize their connections in Relationships. Links use character IDs, so select the correct people rather than relying on identical names."
+          ],
+          "steps": [
+            "Create the characters at both ends in Characters.",
+            "Open Relationships and choose the source and target characters.",
+            "Enter the relationship and confirm that its endpoints and direction match the story.",
+            "Review the graph and related data, then save the work."
+          ]
+        },
+        {
+          "heading": "When a relationship looks wrong",
+          "paragraphs": [
+            "Check whether you selected another character with the same name, then verify the source and target. Renaming a character is different from creating another character with the same name.",
+            "If a character was deleted or replaced by selective import, check that both endpoints are still valid and reselect the intended characters."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "pages.characters",
+        "files.import_selective"
+      ]
+    },
+    {
+      "id": "pages.world",
+      "title": "Worldbuilding",
+      "category": "Features",
+      "keywords": [
+        "World setting",
+        "Location",
+        "Location tree",
+        "Child Location",
+        "Controller",
+        "Location snapshots"
+      ],
+      "sections": [
+        {
+          "heading": "Organize locations in a hierarchy",
+          "paragraphs": [
+            "Build a location tree such as “Country → City → Building → Room”. Every node has its own settings and state."
+          ],
+          "steps": [
+            "Create locations and any child nodes, entering names, types, and descriptions.",
+            "Use selectors in events, characters, or items to link locations.",
+            "To record a scene-specific change, select the scene and create a location snapshot.",
+            "Return to the timeline, change the time position, and check existence, accessibility, or control."
+          ]
+        },
+        {
+          "heading": "Parent/child nodes and disappearing locations",
+          "paragraphs": [
+            "Each node's state is saved independently. Changing a parent does not mean all children were changed. Review each entry before creating snapshots in a batch.",
+            "For a location destroyed or removed within the story, use “Exists at This Point” in a snapshot. Permanent deletion affects the subtree, snapshots, and references; review the listed consequences first."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "timeline.snapshots",
+        "pages.items",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "pages.items",
+      "title": "Items and Snapshots",
+      "category": "Features",
+      "keywords": [
+        "Item",
+        "Class",
+        "instance",
+        "Dedicated",
+        "Semi-dedicated",
+        "Non-dedicated",
+        "Holder",
+        "Quantity",
+        "Archive"
+      ],
+      "sections": [
+        {
+          "heading": "Choose a tracking mode first",
+          "paragraphs": [
+            "A class defines a kind of item; an instance is one individual item that can be tracked independently.",
+            "Dedicated: one class with one independent instance, such as a unique ancestral sword. Semi-dedicated: several instances of the same kind, such as specific weapons that need individual records. Non-dedicated: aggregate allocations, such as coins or supplies."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Create, allocate, and inspect items",
+          "paragraphs": [],
+          "steps": [
+            "Create an item class, choose a suitable mode, and enter its name and description.",
+            "Edit the individual item in dedicated mode, create instances as needed in semi-dedicated mode, or edit quantities in non-dedicated mode.",
+            "Use selectors to link a holder, location, event, or scene instead of just typing a name in notes.",
+            "Choose a scene and create a snapshot recording ownership, quantity, or state at that point.",
+            "Change the time position, then check items and quantities from a character or location page."
+          ]
+        },
+        {
+          "heading": "Mode conversion and history",
+          "paragraphs": [
+            "Mode conversion shows a preview first. If quantities are unknown, links are incomplete, or data changed after previewing, complete the data and preview again. Save a copy before converting.",
+            "Archived data preserves history and is hidden from the current management list by default. Use a snapshot when an item disappears in the story, and check reference effects before permanent deletion."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "timeline.snapshots",
+        "pages.characters",
+        "pages.world",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "pages.plans",
+      "title": "Planning",
+      "category": "Features",
+      "keywords": [
+        "Foreshadowing",
+        "Revealed",
+        "Release Plans",
+        "Completed",
+        "Idea",
+        "Idea folders"
+      ],
+      "sections": [
+        {
+          "heading": "Foreshadowing, plans, and ideas",
+          "paragraphs": [
+            "Foreshadowing records clues to plant or reveal. Release plans track work to complete. Idea folders hold thoughts you have not yet assigned to a chapter."
+          ],
+          "steps": [
+            "Add foreshadowing with a name and description, then mark it “Revealed” when resolved.",
+            "Add a release plan with a name and description, then mark it “Completed” when finished.",
+            "Save a spontaneous setting or passage as an idea and organize it in a topical folder.",
+            "Check placement in the outline and chapters. Use foreshadowing or plan markers in the manuscript when you need a link."
+          ]
+        },
+        {
+          "heading": "A practical example",
+          "paragraphs": [
+            "For example, create foreshadowing called “The Old Key at the Door”, mark it where it appears, and describe the planned reveal in its notes. Update its state after the reveal to find clues still unresolved.",
+            "Maintain completion states according to your actual progress. Save the project after changing the checkboxes."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "pages.outline",
+        "editor.annotations",
+        "files.save",
+        "dashboard.overview"
+      ]
+    },
+    {
+      "id": "pages.glossary",
+      "title": "Word Reference",
+      "category": "Features",
+      "keywords": [
+        "Words",
+        "Entries",
+        "Part of Speech",
+        "Sentiment",
+        "Meaning",
+        "Example",
+        "Category",
+        "Dictionary"
+      ],
+      "sections": [
+        {
+          "heading": "Build your own word reference",
+          "paragraphs": [
+            "Use categories and subcategories to organize words, their parts of speech, emotional polarity, and multiple meanings and examples. Collect synonyms, emotional descriptions, or expressions common in your work."
+          ],
+          "steps": [
+            "Create or select a category, then add an entry.",
+            "Select an entry and fill in its name, part of speech, and polarity. Use a custom part of speech if necessary.",
+            "Enter meanings and examples. Use “Add Group” for additional usages.",
+            "Return to the reference while writing and use expressions in context."
+          ]
+        },
+        {
+          "heading": "Import, export, and category management",
+          "paragraphs": [
+            "Choose a source from “Import / Export”, then review new and merged categories and new and reused entry counts in the preview before confirming.",
+            "Export selected categories or all words. Before removing an entry from a category, read the confirmation and distinguish unlinking it from deleting its data."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "editor.phrases",
+        "pages.palettes",
+        "editor.body"
+      ]
+    },
+    {
+      "id": "pages.palettes",
+      "title": "Text Palettes",
+      "category": "Features",
+      "keywords": [
+        "Color swatches",
+        "Palette",
+        "Color",
+        "Color cells",
+        "Hue",
+        "Grayscale",
+        "Entries",
+        "Import palettes"
+      ],
+      "sections": [
+        {
+          "heading": "Organize descriptive vocabulary by color",
+          "paragraphs": [
+            "Text Palettes puts terms in color cells to help find color-related descriptions. For example, collect “indigo” or “sea mist” in a blue cell. It organizes vocabulary; selecting a cell does not apply a text color to your manuscript."
+          ],
+          "steps": [
+            "Choose a hue or grayscale, then find the desired color cell.",
+            "Use “Add Entry” to enter and save a description.",
+            "Select an existing term to edit it, or use “Sort by Text” in the cell's actions.",
+            "Search for a term and return to its cell from the results."
+          ]
+        },
+        {
+          "heading": "Save and exchange palettes",
+          "paragraphs": [
+            "Use “Import or Export Palettes” to exchange data. Custom palettes have separate local storage; export a palette to move it to another device.",
+            "If you see “Not saved to disk yet” or a load failure, keep the current content and use Retry. Confirm saving succeeded before leaving."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "pages.glossary",
+        "editor.body"
+      ]
+    },
+    {
+      "id": "pages.proofreading",
+      "title": "Proofreading and Revisions",
+      "category": "Features",
+      "keywords": [
+        "Proofreading",
+        "Filler words",
+        "Quotation marks",
+        "Brackets",
+        "Punctuation anomalies",
+        "Line endings",
+        "Revisions"
+      ],
+      "sections": [
+        {
+          "heading": "Check the current text",
+          "paragraphs": [
+            "Proofreading checks quote/bracket closure, unusual punctuation, punctuation consistency, filler words, and line-ending rules. Results are suggestions; voice, poetry, and special formatting still require the author's judgment."
+          ],
+          "steps": [
+            "Select the chapter to proofread and confirm its length and contents.",
+            "Choose language settings and the checks appropriate for your manuscript.",
+            "Review each result, locate its original sentence using the position, and read the surrounding context.",
+            "Apply supported fixes only where you confirm a change is needed. Save a copy before standardizing punctuation in bulk.",
+            "Check the edited text again and confirm its meaning is unchanged."
+          ]
+        },
+        {
+          "heading": "Adjust checks and read the results",
+          "paragraphs": [
+            "Line-ending detection can exempt commas, dashes, ellipses, colons, or semicolons, avoiding flags for deliberate writing choices.",
+            "Expand filler-word results to see locations. The filler ratio is observational; it does not mean every listed word must be deleted. Resolve dictionary loading or error states before interpreting results."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Use with revision tracking",
+          "paragraphs": [
+            "Set a comparison baseline before proofreading, then review manuscript and setting changes afterward. Proofreading identifies possible problems; revision tracking compares differences between versions."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "revision.overview",
+        "search.overview",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "pages.copilot",
+      "title": "Copilot",
+      "category": "Features",
+      "keywords": [
+        "AI",
+        "Chat",
+        "Ask",
+        "Plan",
+        "API Key",
+        "Models",
+        "provider",
+        "API URL",
+        "Connection failure"
+      ],
+      "sections": [
+        {
+          "heading": "Configure a connection and start chatting",
+          "paragraphs": [
+            "Copilot uses your configured provider, API URL, and model. API keys stay in local secure storage; project content is sent directly to the selected provider."
+          ],
+          "steps": [
+            "Configure the provider, API URL, model, and any required API key in Copilot.",
+            "Check the destination host and the scope of content to be sent.",
+            "Test the connection with a short question before adding questions about your work.",
+            "Read the response and verify it against your story settings. Save anything you need separately."
+          ]
+        },
+        {
+          "heading": "Chat, Ask, and Plan",
+          "paragraphs": [
+            "Chat sends conversation messages. Ask can include the current chapter and either a project overview or supplemental resources; overview and supplemental resources cannot both be selected as the scope.",
+            "Plan produces read-only proposals that you can inspect, validate, and export. It has no automatic apply action. Ask/Plan availability depends on build settings, and Agent is not yet available.",
+            "Ask/Plan limits content size; long chapters or resources may be truncated. Check the scope before sending so you do not assume omitted settings were included."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Connection issues and retention",
+          "paragraphs": [
+            "Custom cloud URLs require HTTPS; HTTP is allowed only for local loopback. On connection failure, check the URL, model name, key, and the provider's error response.",
+            "Conversations and Plans do not persist across app launches. Save important results before leaving. Remove the API key from the Copilot page when it is no longer needed."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "integrations.mcp",
+        "help.faq",
+        "files.save"
+      ]
+    },
+    {
+      "id": "pages.settings",
+      "title": "Settings",
+      "category": "Features",
+      "keywords": [
+        "Preferences",
+        "Settings categories",
+        "Appearance",
+        "Theme",
+        "Font size",
+        "Language",
+        "Sync",
+        "Integrations",
+        "Display language",
+        "Date formats",
+        "Number formats",
+        "Percentages",
+        "Font",
+        "Font fallback"
+      ],
+      "sections": [
+        {
+          "heading": "Expand settings by purpose",
+          "paragraphs": [
+            "Select a category heading to expand or collapse it. Appearance and Interface includes themes, fonts, navigation, and toolbars; Editing and Input includes suggestions, overwrite mode, indentation, and word counting.",
+            "Saving and Backups manages autosave and AutoBackup. Sync and Connections manages pairing preferences. General includes exit confirmation. External Integrations provides MCP."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Adjust common preferences",
+          "paragraphs": [],
+          "steps": [
+            "Start in Appearance and Interface with the theme, text size, and navigation preview cards.",
+            "Use Toolbar Mode to choose Full, Moderate, Concise, or Automatic.",
+            "Set indentation and suggestions for your writing habits, then review saving and backup settings.",
+            "Return to the manuscript and write a short passage to check appearance and input behavior."
+          ]
+        },
+        {
+          "heading": "Platform support and availability",
+          "paragraphs": [
+            "Interface and toolbar preferences are local to each device; check them after switching devices. “General → Display language” applies and saves immediately. Follow System matches the device's ordered language preferences, falling back to Traditional Chinese. Manual choices ignore later system changes. A failed save restores the last saved choice.",
+            "The MCP sidecar supports Windows, macOS, and Linux only. P2P requires local network connectivity. Check authorization and status before using an integration."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Language, date/number formats, and fonts",
+          "paragraphs": [
+            "Changing language updates the interface, offline help, and display formats while keeping the current help topic, history, and query. Complete help is available without a network connection.",
+            "Dates follow the display language. Times use the device's local timezone and a 24-hour clock. Choosing English or Japanese does not change the system clock or timezone. Number, percentage, and size formatting affects display only, not counts or actual values.",
+            "Traditional Chinese uses NotoSansTC, Japanese uses NotoSansJP, and English uses NotoSans. Fonts are bundled with the app; mixed text uses fallback fonts without downloading them. Manuscripts are not translated, renamed, or reformatted in storage."
+          ],
+          "steps": [
+            "In “General → Display language”, choose 繁體中文, English, 日本語, or Follow System.",
+            "Return to your previous screen and check dates, counts, percentages, and help articles. No restart is required.",
+            "In narrow windows or with larger system text, scroll to see all content. Changing font size does not alter the manuscript."
+          ]
+        }
+      ],
+      "relatedIds": [
+        "toolbar.mode",
+        "settings.editing",
+        "settings.autoSave",
+        "settings.backup",
+        "integrations.mcp",
+        "sync.overview"
+      ]
+    },
+    {
+      "id": "pages.about",
+      "title": "About Monogatari Assistant",
+      "category": "Features",
+      "keywords": [
+        "Version",
+        "Author",
+        "About",
+        "Report a problem",
+        "Error messages",
+        "Operating system"
+      ],
+      "sections": [
+        {
+          "heading": "Check your app version",
+          "paragraphs": [
+            "About shows the app name, version, and author information. Check the version first when comparing features across devices or investigating project-format compatibility."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Prepare a reproducible bug report",
+          "paragraphs": [],
+          "steps": [
+            "Record the app version, OS version, and device type.",
+            "List the steps from opening the work to encountering the problem.",
+            "Describe expected and actual results separately, including the error text.",
+            "If only one work is affected, keep its original file and try reproducing the problem in a simplified test work."
+          ]
+        }
+      ],
+      "relatedIds": [
+        "help.faq",
+        "files.open",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "timeline.snapshots",
+      "title": "Scene Snapshots and State Changes",
+      "category": "Features",
+      "keywords": [
+        "Scene",
+        "Scene",
+        "Snapshots",
+        "Tick",
+        "placement",
+        "Fallback position",
+        "Exists at This Point",
+        "Historical state"
+      ],
+      "sections": [
+        {
+          "heading": "Snapshots record story state",
+          "paragraphs": [
+            "Character, location, and item snapshots record a scene's state: who is where, what they hold, and whether a location exists at that point. Story-state snapshots serve a different purpose from project-file backups."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Add and inspect snapshots",
+          "paragraphs": [],
+          "steps": [
+            "Create the scene in the outline first and place it on the timeline as needed.",
+            "Select a character, location, or item, add a snapshot, and choose its scene.",
+            "If the scene has multiple placements, choose the desired source placement.",
+            "Enter its state at that point, inspect the preview, and confirm.",
+            "Change position in the mini timeline or main timeline and inspect states before and after the change."
+          ]
+        },
+        {
+          "heading": "Position resolution and common questions",
+          "paragraphs": [
+            "Without a specified source, position is chosen by earliest tick, track order, then placement ID. If the scene is unscheduled or its source placement was removed, the data remains and uses a fallback tick.",
+            "Moving a scene changes the position at which snapshots display. For unexpected states, check the scene, source placement, and current tick first.",
+            "Record story-world destruction or disappearance with state such as “Exists at This Point”. Permanent deletion may clear links and history; read the impact preview first."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "pages.timeline",
+        "pages.characters",
+        "pages.world",
+        "pages.items",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "toolbar.overview",
+      "title": "Toolbar and Common Actions",
+      "category": "Editing Tools",
+      "keywords": [
+        "Ribbon",
+        "Home",
+        "File",
+        "Search",
+        "Workspace Panels",
+        "Dashboard",
+        "Disabled buttons"
+      ],
+      "sections": [
+        {
+          "heading": "Find the command you need",
+          "paragraphs": [
+            "Ribbon tabs are ordered File → Home → Search, with Home selected initially. File offers New, Open, Save, Save As, Import, and Export; Home contains text editing, phrases, and related actions.",
+            "The Search tab contains six search conditions. Enter the query and replacement in the search bar next to the manuscript."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Narrow windows or missing buttons",
+          "paragraphs": [
+            "Full, Moderate, and Concise share commands. Check the tab, then horizontally scroll where possible. In icon-only mode, hover or focus to read a tooltip.",
+            "On desktop, “Home → Display Panels” toggles navigation, the sidebar, and the dashboard to organize your writing space."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "When a command is disabled",
+          "paragraphs": [
+            "Some commands are unavailable while file work is in progress or no valid selection exists. Finish the current operation and check the editing target.",
+            "Use Shift+F1 and select a control if you are unsure what it does. Disabled controls also have help."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Switch modules and tabs",
+          "paragraphs": [
+            "“Switch Module” is available in all three toolbar modes; narrow windows show the current module's icon. Search all modules, including Home, Settings, and Help.",
+            "Alt+Left/Right (Option+Left/Right on macOS) changes ribbon tabs; Alt+Up/Down changes modules. Arrow navigation does not execute tab commands. F10 still starts KeyTips inside the ribbon."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "toolbar.mode",
+        "search.overview",
+        "editor.phrases",
+        "revision.overview",
+        "dashboard.overview"
+      ]
+    },
+    {
+      "id": "dashboard.overview",
+      "title": "Dashboard and Writing Progress",
+      "category": "Editing Tools",
+      "keywords": [
+        "Dashboard",
+        "Add Gauge",
+        "Remove Gauge",
+        "Chapter Count",
+        "Book Word Count",
+        "Word count goals",
+        "Daily Goal",
+        "Default",
+        "This File Only",
+        "Release Plans",
+        "Prefigure Resolution",
+        "Track Revisions",
+        "Two rings",
+        "Progress",
+        "Open Dashboard"
+      ],
+      "sections": [
+        {
+          "heading": "Open and arrange your workspace",
+          "paragraphs": [
+            "On desktop, show or hide the dashboard from “Home → Display Panels → Dashboard”. It sits on the right of the editor and scrolls independently.",
+            "At narrow widths, the dashboard collapses into an “Open Dashboard” button and opens as a dialog. Widen the window to restore the side panel. Hide unused navigation or sidebars to free more writing space."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "What the six gauges represent",
+          "paragraphs": [
+            "Daily Goal: today's net added count across all local works versus the goal, initially 1,000. Additions increase it and deletions decrease it. Opening, importing, and remote sync do not count.",
+            "Chapter Word Count: the selected chapter's count versus its goal. Without a selected chapter, it shows “—” and prompts you to choose one.",
+            "Book Word Count: the current work's total and its goal. Add it with “Add Gauge”.",
+            "Release Plans: completed plans divided by all plans. Update the Completed checkboxes in Planning to change progress.",
+            "Foreshadowing Resolution: revealed entries divided by all entries. Check and update foreshadowing in Planning as clues are resolved.",
+            "Revision tracking: additions and edits/removals in the current project relative to its baseline. The outer and inner rings show each count as a share of the total."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Add, remove, and inspect gauges",
+          "paragraphs": [
+            "Daily Goal, Chapter Word Count, Update Plans, Foreshadowing, and Revision Tracking are shown initially. Each gauge can appear only once. After all are added, the add button indicates that every gauge is already visible.",
+            "Remove Gauge hides that gauge. Plans, foreshadowing, and manuscript data remain. Tracking also continues when the revision gauge is hidden."
+          ],
+          "steps": [
+            "Click a gauge to see its current value, target, or total in the information menu. Hover over it to see a tooltip.",
+            "Choose Remove Gauge from its information menu to hide it.",
+            "To add or restore a gauge, scroll to the bottom of the dashboard, click Add Gauge, and choose one that is not currently shown."
+          ]
+        },
+        {
+          "heading": "Set chapter or book word-count targets",
+          "paragraphs": [
+            "The default targets are 2,000 words for a chapter and 100,000 for the book. Defaults are stored locally and apply to projects without overrides. This File Only saves overrides with the project; each can be restored to its default. Changing defaults does not clear file overrides.",
+            "A chapter with 1,000 words against a target of 2,000 shows 50%. Beyond the target, the ring stops at 100% while the count still shows the actual value."
+          ],
+          "steps": [
+            "Click the Chapter Word Count or Book Word Count gauge.",
+            "Choose Set Word-Count Target, select Default or This File Only, and enter an integer from 1 to 999,999,999.",
+            "Click Apply and check the new target and progress. Cancel keeps the previous target."
+          ]
+        },
+        {
+          "heading": "Read the revision gauge's two rings",
+          "paragraphs": [
+            "Outer ring, additions: manuscript lines added plus setting records added or changed. Inner ring, edits: manuscript lines removed plus setting records removed or changed.",
+            "Changing several fields in one setting record counts once in each ring. Replacing manuscript text counts the actual added and removed lines. Changing only the final newline counts once in each category.",
+            "For example, 8 additions and 2 edits produce rings of 80% and 20%. These ratios show the composition of changes; use the details to assess whether review is complete.",
+            "Counts represent differences between the current content and the baseline, not cumulative keystrokes or words typed. Click the gauge to check the baseline and status, such as Not Tracking, Calculating, or Comparison Complete."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Open revision details from the gauge",
+          "paragraphs": [],
+          "steps": [
+            "Click Revision Tracking. If no baseline exists, click Start Tracking first.",
+            "Choose View Revision Details to open the details pane to the left of the dashboard on desktop.",
+            "Drag the pane divider to adjust its width. In a narrow window, the pane overlays the right side of the editor.",
+            "Select All, Manuscript, or Settings and the desired scope. Use Previous/Next to locate differences. The pane stays open after navigation for continued review.",
+            "When finished, use Collapse Revision Pane. Continue with the revision-tracking article for accepting, rejecting, and checkpoints."
+          ]
+        },
+        {
+          "heading": "Empty gauges, unchanged progress, and storage",
+          "paragraphs": [
+            "If there are no plans or foreshadowing entries, add them in Planning. Gauges follow their completed/revealed checkboxes; update those states yourself after writing the relevant passages.",
+            "If a gauge is missing, check that the dashboard is visible, scroll down, and inspect the Add Gauge list.",
+            "If the revision gauge does not change, confirm that tracking has started, the correct baseline is selected, and comparison has finished. For calculation failures or unavailable sources, inspect the error and source status first.",
+            "Gauge layout belongs to the current workspace. Targets are saved: defaults and daily targets locally, file-specific targets with the project. Daily totals count full-width characters plus half-width words across projects by local date, continue while hidden, and do not sync across devices. Undo/redo adjusts eligible changes; discarding a draft subtracts them. Retry statistical errors from the daily information menu. An abnormal shutdown may lose recent records not yet written to disk."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "toolbar.overview",
+        "pages.chapters",
+        "pages.plans",
+        "revision.overview",
+        "settings.editing"
+      ]
+    },
+    {
+      "id": "toolbar.mode",
+      "title": "Toolbar Modes",
+      "category": "Editing Tools",
+      "keywords": [
+        "Full",
+        "Moderate",
+        "Concise",
+        "Automatic",
+        "Expand",
+        "Collapse",
+        "Toolbar Modes"
+      ],
+      "sections": [
+        {
+          "heading": "How the three modes differ",
+          "paragraphs": [
+            "Full shows the complete Ribbon with groups and commands, suitable for wide desktop windows. Moderate uses a single row of icons and labels to save vertical space. Concise uses one row of icons identified by tooltips.",
+            "Automatic uses the platform default: Full on desktop and Moderate on mobile. It does not choose based on window width."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Switch modes and keep your settings",
+          "paragraphs": [],
+          "steps": [
+            "Open Toolbar Mode from the toolbar or Settings → Appearance & Interface → Toolbar Mode.",
+            "Select a mode preview card. The selected card has a border and checkmark.",
+            "After switching, check the current tab and scroll horizontally if needed to see the remaining commands."
+          ]
+        },
+        {
+          "heading": "Expand, collapse, and restart",
+          "paragraphs": [
+            "Expand switches to Full; Collapse in Full switches to Concise. The current tab is preserved and the project is unchanged.",
+            "A manually chosen mode is saved locally and survives restart. Returning to Automatic uses the platform default. When the Ribbon has focus, Ctrl+F1 expands or collapses it."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "toolbar.overview",
+        "help.shortcuts",
+        "pages.settings"
+      ]
+    },
+    {
+      "id": "editor.body",
+      "title": "Manuscript Editing",
+      "category": "Editing Tools",
+      "keywords": [
+        "Manuscript",
+        "input",
+        "cursor",
+        "selection",
+        "newline",
+        "indentation",
+        "overwrite",
+        "writing"
+      ],
+      "sections": [
+        {
+          "heading": "Start editing a chapter",
+          "paragraphs": [],
+          "steps": [
+            "Create and select a chapter in Chapters.",
+            "Click the manuscript, check the cursor position, and type or paste content.",
+            "To rewrite a passage, select it first, then type its replacement.",
+            "Save with the toolbar or keyboard shortcut and confirm that the file operation completes."
+          ]
+        },
+        {
+          "heading": "Newlines, indentation, and overwrite",
+          "paragraphs": [
+            "Enter inserts a newline and, if automatic indentation is enabled, the configured leading spaces. Shift+Enter inserts only a newline. Tab uses the configured number and width of spaces.",
+            "If typing replaces characters after the cursor, check overwrite mode. When overwrite is enabled in settings, Ins or the status bar toggles it. Disabling the feature uses insert mode."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Text commands and annotations",
+          "paragraphs": [
+            "Select All, Cut, Copy, Paste, and Undo affect the focused field. Click the manuscript first to avoid changing a search box or setting by mistake.",
+            "Displayed text for character or location annotations may differ from the stored syntax. Create actual links through the annotation interface. Save frequently reused text as a phrase."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "pages.chapters",
+        "settings.editing",
+        "editor.annotations",
+        "editor.phrases",
+        "search.overview",
+        "files.save"
+      ]
+    },
+    {
+      "id": "editor.punctuation",
+      "title": "Punctuation Panel",
+      "category": "Editing Tools",
+      "keywords": [
+        "punctuation",
+        "symbols",
+        "Full-width",
+        "Half-width",
+        "Quotation marks",
+        "Brackets"
+      ],
+      "sections": [
+        {
+          "heading": "Insert punctuation",
+          "paragraphs": [
+            "The punctuation panel offers full-width, half-width, and other symbols that may be difficult to type on a keyboard."
+          ],
+          "steps": [
+            "Select a chapter and position the cursor. Select a passage first if you want to replace it.",
+            "Open the toolbar's punctuation panel and choose the required width and symbol.",
+            "After inserting, check the surrounding text and matching brackets or quotation marks before continuing."
+          ]
+        },
+        {
+          "heading": "Make formatting consistent",
+          "paragraphs": [
+            "Inserting punctuation is a local edit. To check consistency across a passage, use punctuation normalization and bracket matching in Proofreading."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "editor.body",
+        "pages.proofreading"
+      ]
+    },
+    {
+      "id": "editor.annotations",
+      "title": "Manuscript Markers and Annotations",
+      "category": "Editing Tools",
+      "keywords": [
+        "Mention",
+        "Annotation",
+        "UUID",
+        "character links",
+        "location links",
+        "notes",
+        "Highlight"
+      ],
+      "sections": [
+        {
+          "heading": "Link manuscript text to project records",
+          "paragraphs": [
+            "Annotations can link characters, locations, events, foreshadowing, or plans, and can add notes or highlighting. Links store the target's identifier; typing its name alone does not create a link."
+          ],
+          "steps": [
+            "Create the characters, locations, or other records you want to reference first.",
+            "Locate the manuscript text to annotate and choose a type from the annotation menu.",
+            "Confirm the target in the selector, create the annotation, and check its displayed text.",
+            "Continue editing the manuscript and save to retain all annotation data."
+          ]
+        },
+        {
+          "heading": "Displayed text and stored content",
+          "paragraphs": [
+            "The screen shows readable text; the project stores the complete annotation syntax and target identifier. Renaming a target preserves its link through the identifier. Simple highlighting requires no referenced object.",
+            "Create or adjust annotations through the interface instead of assembling syntax manually. If a target was deleted or belongs to another project, relink it or convert the annotation to plain text."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Notes, phrases, and export",
+          "paragraphs": [
+            "Notes hold supplementary information for the author. Passages containing annotations can also be saved as phrases; check their reference targets when using them in another project.",
+            "A normal manuscript export is intended for readers. It cannot replace a .mnproj project that preserves structure and relationships."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "pages.characters",
+        "pages.plans",
+        "editor.phrases",
+        "files.export_selective"
+      ]
+    },
+    {
+      "id": "editor.phrases",
+      "title": "Project Phrase Library",
+      "category": "Editing Tools",
+      "keywords": [
+        "PoppinSense",
+        "Poppin IntelliSense",
+        ";;",
+        "shortcodes",
+        "Phrase Library",
+        "templates",
+        "repeated passages"
+      ],
+      "sections": [
+        {
+          "heading": "Create reusable content",
+          "paragraphs": [
+            "The phrase library belongs to the current project. It stores content, shortcodes, and tags, and supports creating, editing, duplicating, disabling, and deleting phrases. Use it for common expressions, fixed passages, or annotated content."
+          ],
+          "steps": [
+            "Open Home → Phrases and create a phrase. You can also select manuscript text and choose Save Selection as Phrase.",
+            "Enter a recognizable name, shortcode, and tags, and check the content to insert.",
+            "Return to the manuscript, position the cursor, and use Insert Phrase or type ;; to search.",
+            "Select a suggestion and check that its expanded text fits the surrounding passage."
+          ]
+        },
+        {
+          "heading": "Trigger and dismiss suggestions",
+          "paragraphs": [
+            "The manual menu opened with a slash or backslash also offers phrases. Accepting a suggestion replaces its input range. Esc dismisses suggestions and keeps the original input.",
+            "Pasting and IME composition do not trigger suggestions. If none appear, check Settings → Editing & Input → Enable Poppin IntelliSense and whether the phrase is enabled."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Effects of editing and deleting phrases",
+          "paragraphs": [
+            "Inserted text becomes manuscript content. Editing or deleting a phrase does not automatically rewrite passages already inserted.",
+            "When a phrase from another project contains character or location annotations, explicitly relink them or convert them to plain text. Matching names do not establish that they refer to the same object."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "editor.body",
+        "editor.annotations",
+        "settings.editing"
+      ]
+    },
+    {
+      "id": "editor.selectAll",
+      "title": "Select All",
+      "category": "Editing Tools",
+      "keywords": [
+        "Select All",
+        "Ctrl+A",
+        "Command+A",
+        "select everything"
+      ],
+      "sections": [
+        {
+          "heading": "Select text in the current field",
+          "paragraphs": [],
+          "steps": [
+            "Click the manuscript or the field you want to edit first.",
+            "Use Select All and check the highlighted range before copying, cutting, or typing."
+          ]
+        },
+        {
+          "heading": "Scope and cautions",
+          "paragraphs": [
+            "Select All selects the current field or manuscript chapter, not the entire project. Typing afterward replaces the selection."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "editor.body",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "editor.cut",
+      "title": "Cut",
+      "category": "Editing Tools",
+      "keywords": [
+        "Cut",
+        "Ctrl+X",
+        "Command+X",
+        "move text"
+      ],
+      "sections": [
+        {
+          "heading": "Move a passage",
+          "paragraphs": [],
+          "steps": [
+            "Select the text to move and use Cut.",
+            "Click the destination, paste, and check the result."
+          ]
+        },
+        {
+          "heading": "Scope and cautions",
+          "paragraphs": [
+            "Cut moves the selected text to the clipboard and removes it from its original location. Use Copy if you want to keep the original."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "editor.body",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "editor.copy",
+      "title": "Copy",
+      "category": "Editing Tools",
+      "keywords": [
+        "Copy",
+        "Ctrl+C",
+        "Command+C",
+        "Clipboard"
+      ],
+      "sections": [
+        {
+          "heading": "Copy selected content",
+          "paragraphs": [],
+          "steps": [
+            "Select the text you need first.",
+            "Copy it, then paste at the destination."
+          ]
+        },
+        {
+          "heading": "Scope and cautions",
+          "paragraphs": [
+            "Copy leaves the original text intact. It is useful for transferring passages; save the complete project as .mnproj."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "editor.body",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "editor.paste",
+      "title": "Paste",
+      "category": "Editing Tools",
+      "keywords": [
+        "Paste",
+        "Ctrl+V",
+        "Command+V",
+        "Clipboard"
+      ],
+      "sections": [
+        {
+          "heading": "Paste clipboard content",
+          "paragraphs": [],
+          "steps": [
+            "Click the destination field and position the cursor, or select the text to replace.",
+            "Paste, then check newlines, punctuation, and surrounding text."
+          ]
+        },
+        {
+          "heading": "Scope and cautions",
+          "paragraphs": [
+            "Pasting replaces any selection. Pasting a phrase trigger does not open suggestions; type it directly or use the phrase menu to expand a phrase."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "editor.body",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "editor.undo",
+      "title": "Undo",
+      "category": "Editing Tools",
+      "keywords": [
+        "Undo",
+        "Ctrl+Z",
+        "Command+Z",
+        "Undo",
+        "accidental deletion"
+      ],
+      "sections": [
+        {
+          "heading": "Undo the latest operation",
+          "paragraphs": [],
+          "steps": [
+            "Check the focused field and current chapter, then use Undo.",
+            "Check whether the content has returned to the intended state. Undo further operations one at a time if needed."
+          ]
+        },
+        {
+          "heading": "Scope and cautions",
+          "paragraphs": [
+            "Undo availability depends on the current field and project history. To recover content across restarts, use project backups or supported revision baselines. Undo is not a permanent backup."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "editor.body",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "editor.redo",
+      "title": "Redo",
+      "category": "Editing Tools",
+      "keywords": [
+        "Redo",
+        "Ctrl+Shift+Z",
+        "Command+Shift+Z",
+        "Redo"
+      ],
+      "sections": [
+        {
+          "heading": "Reapply an undone operation",
+          "paragraphs": [],
+          "steps": [
+            "Confirm that you previously used Undo.",
+            "Use Redo and check the restored content."
+          ]
+        },
+        {
+          "heading": "Scope and cautions",
+          "paragraphs": [
+            "New edits after Undo may make the old redo branch unavailable. Save important versions separately."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "editor.body",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "revision.overview",
+      "title": "Revision Tracking and Baselines",
+      "category": "Editing Tools",
+      "keywords": [
+        "Track Revisions",
+        "Track Changes",
+        "checkpoint",
+        "comparison baseline",
+        "Accept",
+        "Reject",
+        "Dashboard",
+        "differences"
+      ],
+      "sections": [
+        {
+          "heading": "Start comparing project changes",
+          "paragraphs": [
+            "Revision tracking compares current content against a fixed baseline, covering the manuscript and supported structured settings. Normal saving does not automatically advance the baseline."
+          ],
+          "steps": [
+            "On desktop, show the dashboard from Home → Visible Panels.",
+            "Start tracking from the revision gauge's menu, or select an existing baseline.",
+            "After editing, open revision details and select All, Manuscript, or Settings, with the current chapter or whole-project scope.",
+            "Select a difference to locate its text or object. Read the before/after values before deciding how to handle it."
+          ]
+        },
+        {
+          "heading": "Details pane and narrow windows",
+          "paragraphs": [
+            "Choose View Revision Details from the revision gauge. On desktop, a pane opens to the left of the dashboard; drag its divider to resize it. When space is limited, it overlays the editor's right side.",
+            "The pane stays open after locating a difference for continuous review. Use Collapse Revision Pane when finished. If a narrow window shows only Open Dashboard, open the dashboard first, then the details."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "What accepting and rejecting mean",
+          "paragraphs": [
+            "Accept keeps the current content and marks that exact difference as handled. Subsequent edits create new pending differences.",
+            "Reject restores baseline values for supported manuscript differences or scalar fields. Added/deleted objects and relationship collections cannot all be rejected directly; use the actions provided on screen.",
+            "Batch actions affect only the current visible filters and scope. Check them first. If differences are stale or targets have changed, compare again."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Checkpoints and gauge readings",
+          "paragraphs": [
+            "Creating a local checkpoint immediately selects it as the baseline. Reopening a local session selects the latest checkpoint; choose older baselines manually. Read-only P2P sources maintain a separate selection.",
+            "The outer ring shows additions; the inner ring shows edits/removals. Manuscript changes count lines, and a changed setting record counts once in both rings. This is not a word count. Hiding the gauge does not stop tracking.",
+            "Only supported data types are compared. An empty list does not guarantee every type of project data is unchanged. Keep .mnproj backups for complete recovery."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "pages.proofreading",
+        "files.recovery",
+        "toolbar.overview",
+        "sync.overview",
+        "dashboard.overview"
+      ]
+    },
+    {
+      "id": "settings.editing",
+      "title": "Input, Indentation, and Suggestions",
+      "category": "Editing Tools",
+      "keywords": [
+        "Poppin IntelliSense",
+        "overwrite",
+        "Ins",
+        "insert mode",
+        "Tab",
+        "full-width spaces",
+        "indentation",
+        "word counting"
+      ],
+      "sections": [
+        {
+          "heading": "Adjust input behavior",
+          "paragraphs": [
+            "Open Settings → Editing & Input. Poppin IntelliSense offers suggestions when entering annotation types, slashes, or backslashes, and also handles phrase operations.",
+            "Enable Overwrite Mode allows Ins or the status bar to toggle overwrite. Disabling it uses insert mode. If characters disappear as you type, check the status bar first."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Set paragraph indentation",
+          "paragraphs": [],
+          "steps": [
+            "Set Tab Space Count to choose how many spaces Tab or automatic indentation inserts.",
+            "Choose whether to use full-width spaces. When disabled, half-width spaces are used.",
+            "With Automatic Leading Spaces enabled, Enter inserts a newline and the configured spaces.",
+            "Use Shift+Enter for a newline only. Test the behavior in the manuscript."
+          ]
+        },
+        {
+          "heading": "Word counts and alias updates",
+          "paragraphs": [
+            "Choose the word-count mode here. Make sure the same mode is used before comparing counts.",
+            "Update Manuscript Mentions When Renaming an Alias only affects annotations for the same character whose displayed text equals the old alias. It does not replace every matching string."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "editor.body",
+        "editor.phrases",
+        "editor.annotations",
+        "pages.settings"
+      ]
+    },
+    {
+      "id": "files.new",
+      "title": "New File",
+      "category": "Files and Backups",
+      "keywords": [
+        "new",
+        "new project",
+        "Ctrl+N",
+        "Command+N",
+        "Default pen name"
+      ],
+      "sections": [
+        {
+          "heading": "Create a blank project",
+          "paragraphs": [],
+          "steps": [
+            "Save any current content you want to keep first.",
+            "Choose File → New and respond to the unsaved-changes prompt.",
+            "Enter the title and author in Story Settings, then add chapters.",
+            "Choose a filename and location on the first save."
+          ]
+        },
+        {
+          "heading": "Author and location for new projects",
+          "paragraphs": [
+            "If a default pen name was enabled during setup, new projects use it as the author. You can still change it for each project.",
+            "A new project has no save location yet. Even with autosave enabled, save manually once first."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "pages.story",
+        "pages.chapters",
+        "files.save",
+        "help.setup"
+      ]
+    },
+    {
+      "id": "files.open",
+      "title": "Open File",
+      "category": "Files and Backups",
+      "keywords": [
+        "Open",
+        "mnproj",
+        "Ctrl+O",
+        "Command+O",
+        "older versions",
+        "new file format",
+        "file permissions"
+      ],
+      "sections": [
+        {
+          "heading": "Open an existing project",
+          "paragraphs": [],
+          "steps": [
+            "Save your current project, then choose File → Open.",
+            "Select a .mnproj file in the system file picker.",
+            "Wait for loading and read any migration or reference warnings.",
+            "Check the title and chapters to confirm you opened the intended project."
+          ]
+        },
+        {
+          "heading": "Format compatibility and upgrades",
+          "paragraphs": [
+            "Supported older formats are migrated in memory first; the original file is not overwritten until saving. To keep it, use Save As to create a copy in the new format.",
+            "Unsupported newer formats are rejected. Open them with a compatible app version; do not just change the extension or format-version number. Old data is not matched to same-named objects when no reliable reference target exists."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "If a file will not open",
+          "paragraphs": [
+            "Check that the file exists, the device is mounted, and system access is authorized. If only one file fails, preserve it and try a backup.",
+            "Use Import for partial data files. Ordinary .txt/.md manuscripts do not contain the full project structure."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "files.saveAs",
+        "files.import_selective",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "files.save",
+      "title": "Save File",
+      "category": "Files and Backups",
+      "keywords": [
+        "Save",
+        "saving",
+        "Ctrl+S",
+        "Command+S",
+        "first save",
+        "write failure"
+      ],
+      "sections": [
+        {
+          "heading": "Save the complete project",
+          "paragraphs": [
+            "Save writes the manuscript and project data to the current .mnproj location. An updated screen does not mean writing has finished; check the operation result."
+          ],
+          "steps": [
+            "Choose File → Save File or press Ctrl+S; use Command+S on Apple platforms.",
+            "For the first save, choose an accessible location and filename.",
+            "Wait for the file operation. If an error appears, address it and save again."
+          ]
+        },
+        {
+          "heading": "If saving fails",
+          "paragraphs": [
+            "Check disk space, folder permissions, and external-device connections. If system access has expired, select the location again when prompted.",
+            "If the original location is temporarily unavailable, save a copy to a writable location. Automatic backups create separate copies and do not mean the current file has finished saving."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "files.saveAs",
+        "settings.autoSave",
+        "settings.backup"
+      ]
+    },
+    {
+      "id": "files.saveAs",
+      "title": "Save As",
+      "category": "Files and Backups",
+      "keywords": [
+        "save elsewhere",
+        "copy",
+        "rename",
+        "new location",
+        "branch version"
+      ],
+      "sections": [
+        {
+          "heading": "Create another complete project copy",
+          "paragraphs": [
+            "Save As saves the entire current project under a new name or location, which becomes the destination for future saves. Use it for another version or a copy before major changes."
+          ],
+          "steps": [
+            "Choose File → Save As.",
+            "Choose a destination folder and a recognizable filename, such as MyStory_before_review.mnproj.",
+            "After completion, check the current location before continuing to edit."
+          ]
+        },
+        {
+          "heading": "Choose which copy to work on",
+          "paragraphs": [
+            "To keep working on the original, reopen it after creating the copy. If you stay in the new file, subsequent saves go to the new location.",
+            "Before choosing an existing filename, check whether you intend to overwrite it. Changing the location does not move old backups or separate reference materials."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "files.save",
+        "files.open",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "files.import_selective",
+      "title": "Selective Import",
+      "category": "Files and Backups",
+      "keywords": [
+        "partial import",
+        "Import Preview",
+        "Modules",
+        "replace data",
+        "XML",
+        "Markdown",
+        "reference warnings"
+      ],
+      "sections": [
+        {
+          "heading": "Understand an import's effects",
+          "paragraphs": [
+            "Partial import replaces the selected modules in the current project with source data. Unselected modules stay unchanged. Save a separate copy before importing."
+          ],
+          "steps": [
+            "Choose the source file and wait for available content to load.",
+            "Select only the modules to replace, such as Characters, World Settings, Items, or Outline.",
+            "Read reference warnings and check relationships between the source and current project.",
+            "Apply after confirming, then check the corresponding pages and cross-module references.",
+            "Save when the result is as expected."
+          ]
+        },
+        {
+          "heading": "Partial data and relationships",
+          "paragraphs": [
+            "For example, importing only characters while retaining the outline may leave old outline references unable to resolve to the new characters. Relink invalid references with the selector; matching names alone are insufficient.",
+            "TXT/Markdown are reading copies. Use XML to exchange original annotations and structure. Fine-grained XML still replaces selected modules; import into a blank project when necessary ancestors or dependencies are included. Older apps may ignore fine-grained scope, so save a copy first."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Cancel and recover",
+          "paragraphs": [
+            "Canceling in the confirmation interface or opening Help does not apply the import. An applied partial import creates a project-history entry; in the same session you can Undo and check the result, or recover from your earlier copy."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "files.saveAs",
+        "files.export_selective",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "files.export_selective",
+      "title": "Selective Export",
+      "category": "Files and Backups",
+      "keywords": [
+        "Export",
+        "submission",
+        "txt",
+        "md",
+        "Markdown",
+        "XML",
+        "lossless",
+        "partial data"
+      ],
+      "sections": [
+        {
+          "heading": "Choose a format for the delivery purpose",
+          "paragraphs": [
+            "Choose manuscript delivery (TXT/Markdown), readable settings (Markdown), or partial-project exchange (XML). Word/PDF are reserved but not yet available. Use .mnproj to preserve the complete project."
+          ],
+          "steps": [
+            "Open File → Export. Export uses a snapshot of the project taken when the dialog opened.",
+            "Choose a purpose and format. Expand checkbox lists for chapters, outlines, characters, locations, or items to select individual entries. Parent selections affect children; collapsing or searching does not change selections.",
+            "Choose a single document or separate-file ZIP. Generate Preview to inspect content and the file tree, then Export Files and choose a destination. Canceling does not report success; failures can be retried.",
+            "Open an output file and spot-check chapter order, content, and encoding against the recipient's needs."
+          ]
+        },
+        {
+          "heading": "Reading copies, data exchange, and ZIP files",
+          "paragraphs": [
+            "TXT/Markdown output reader-facing text without internal XML blocks. XML preserves original annotations, identifiers, and relevant snapshots for the selected scope. Fine-grained import is not an item-by-item merge; read about replacement effects first.",
+            "A manuscript ZIP contains one file per manuscript, preserving folder hierarchy and order; settings and exchange data are split by module. Deep or long paths are shortened, with the full hierarchy kept in export-manifest.json. Importing an entire ZIP is not yet supported. Partial exports do not replace full project backups."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "files.save",
+        "files.import_selective",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "settings.autoSave",
+      "title": "Autosave Interval",
+      "category": "Files and Backups",
+      "keywords": [
+        "Auto Save",
+        "interval",
+        "minutes",
+        "schedule",
+        "not saved"
+      ],
+      "sections": [
+        {
+          "heading": "Set up automatic project saving",
+          "paragraphs": [],
+          "steps": [
+            "Save manually once to establish a usable file location.",
+            "Enable Autosave in Settings → Storage & Backups.",
+            "Choose a save interval from 1 to 120 minutes.",
+            "Continue writing. You can still save manually after important changes."
+          ]
+        },
+        {
+          "heading": "Autosave versus backups",
+          "paragraphs": [
+            "Autosave writes back to the current project without keeping a separate historical version. Enable AutoBackup separately to retain copies.",
+            "Autosave cannot finish without a usable location, valid access, or a writable disk. Try saving manually and address the error. Turning autosave off preserves its interval setting."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "files.save",
+        "settings.backup",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "settings.backup",
+      "title": "Automatic Backup Interval",
+      "category": "Files and Backups",
+      "keywords": [
+        "AutoBackup",
+        "Automatic Backup",
+        "Backup Interval",
+        "backup failure",
+        "retention period"
+      ],
+      "sections": [
+        {
+          "heading": "Create scheduled project copies",
+          "paragraphs": [
+            "AutoBackup creates separate .mnproj backups at intervals without changing the current project location or unsaved state."
+          ],
+          "steps": [
+            "Enable AutoBackup in Settings → Storage & Backups.",
+            "Set a backup interval from 1 to 120 minutes.",
+            "Check that the backup folder is accessible. Android requires choosing and authorizing a folder.",
+            "Set a sufficient size limit, then inspect the folder later to confirm backups were created."
+          ]
+        },
+        {
+          "heading": "Retention rules and important versions",
+          "paragraphs": [
+            "Backup filenames contain the project name and timestamp. After each successful write, backups with the same project name are pruned by capacity, a maximum of 100 generations, and a 30-day retention period.",
+            "Copy final drafts or milestones to a location you manage for long-term retention. Turning off automatic backups stops scheduled new copies."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Handle backup failures",
+          "paragraphs": [
+            "If one project's backup already exceeds the limit, raise the limit. If the disk is full, free space or choose another folder. Raising the configured limit does not create actual disk space."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "settings.backupDirectory",
+        "settings.backupCapacity",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "settings.backupDirectory",
+      "title": "Backup Folder and Management",
+      "category": "Files and Backups",
+      "keywords": [
+        "backup folder",
+        "backup directory",
+        "SAF",
+        "Choose Again",
+        "Delete All Backups",
+        "Reset"
+      ],
+      "sections": [
+        {
+          "heading": "Choose and inspect a backup location",
+          "paragraphs": [],
+          "steps": [
+            "Open the AutoBackup section in Settings → Storage & Backups.",
+            "Select or reselect a folder and grant system access.",
+            "Check the displayed location, total size, and copy count. On supported platforms, use Open to inspect the files."
+          ]
+        },
+        {
+          "heading": "Change folders and restore defaults",
+          "paragraphs": [
+            "Choosing a new folder does not move existing backups. Check the old folder for older versions. Canceling the system picker retains the previous setting.",
+            "Supported platforms can restore the default folder. Android uses a system-authorized folder and may not offer the same reset option. Reselect if access expires."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Delete All Backups",
+          "paragraphs": [
+            "Clear All Backups deletes the currently managed backup set. Copy any files needed for long-term storage or recovery elsewhere first, then read the confirmation.",
+            "Check the remaining count after cleanup. If file access fails, fix folder permissions or device connections before retrying."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "settings.backup",
+        "settings.backupCapacity",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "settings.backupCapacity",
+      "title": "Backup Storage Limit",
+      "category": "Files and Backups",
+      "keywords": [
+        "capacity",
+        "MB",
+        "limit",
+        "out of space",
+        "backup cleanup"
+      ],
+      "sections": [
+        {
+          "heading": "Set the backup retention capacity",
+          "paragraphs": [
+            "Maximum Backup Size limits retained backups with the same project name, not the current project size or writing length. Allow enough room for several full copies. The combined size of different projects in the folder may exceed this setting."
+          ],
+          "steps": [
+            "Check the current backup size and copy count.",
+            "Adjust the MB limit for the size of one project and the number of versions you want.",
+            "Check free disk space and confirm that later backups are created normally."
+          ]
+        },
+        {
+          "heading": "Estimates and limits",
+          "paragraphs": [
+            "For a project of about 10 MB, keeping about ten copies needs at least 100 MB plus headroom. Actual retention also depends on project growth, generation limits, and expiration.",
+            "A single backup larger than the limit is rejected. A higher limit does not replace disk space. Save important versions separately so cleanup cannot remove them."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "settings.backup",
+        "settings.backupDirectory",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "search.overview",
+      "title": "Find and Replace",
+      "category": "Find and Replace",
+      "keywords": [
+        "find",
+        "Search",
+        "Replace",
+        "Ctrl+F",
+        "Command+F",
+        "no results",
+        "current chapter"
+      ],
+      "sections": [
+        {
+          "heading": "Find the right content before replacing",
+          "paragraphs": [
+            "Manuscript search examines the text currently being edited. Help search and chapter-name search are separate. Switch chapters first if your target is elsewhere."
+          ],
+          "steps": [
+            "Open the search bar from the toolbar or Ctrl+F (Command+F on Apple platforms).",
+            "Enter your query. Start with regular expressions off to verify plain-text results.",
+            "Use Previous/Next and inspect the highlighted range and surrounding text.",
+            "To replace text, expand the replacement row, enter the new text, and replace one match first.",
+            "Only consider Replace All after confirming the result. Save a copy before large changes."
+          ]
+        },
+        {
+          "heading": "Six search options",
+          "paragraphs": [
+            "Case, whole-word, regular-expression, character-width, ignore-punctuation, and ignore-whitespace options are on the Ribbon's Search tab. The search bar's options button switches to that tab. Changes update the results.",
+            "Regular expressions require exact case and width and disable whole-word matching. Ignore punctuation and whitespace apply only to plain-text search."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Missing or excessive matches",
+          "paragraphs": [
+            "Check the chapter and query, then toggle options one at a time. Unfinished IME composition does not update results; finish choosing characters first.",
+            "Ignoring whitespace or punctuation can make a match span separate fragments. Check the entire highlighted range before replacing."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "search.input",
+        "search.replacement",
+        "search.replaceAll",
+        "search.useRegexp",
+        "files.recovery"
+      ]
+    },
+    {
+      "id": "search.input",
+      "title": "Search Text",
+      "category": "Find and Replace",
+      "keywords": [
+        "query",
+        "Search Text",
+        "keywords",
+        "IME",
+        "IME composition"
+      ],
+      "sections": [
+        {
+          "heading": "Enter a query and verify results",
+          "paragraphs": [],
+          "steps": [
+            "Select the chapter to search, then enter a word or phrase in the search field.",
+            "Finish IME character selection and wait for results to update.",
+            "Inspect each match with Previous/Next and adjust options on the Ribbon Search tab if needed."
+          ]
+        },
+        {
+          "heading": "Search examples",
+          "paragraphs": [
+            "Enter a character's name, such as Alex, directly. Enable case matching to distinguish Hero from hero, or width matching to distinguish １ from 1.",
+            "If nothing matches, shorten the query and disable regular expressions. The search bar searches manuscript content, not every settings page."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "search.overview",
+        "search.matchCase",
+        "search.matchWidth"
+      ]
+    },
+    {
+      "id": "search.replacement",
+      "title": "Replacement Text",
+      "category": "Find and Replace",
+      "keywords": [
+        "Replacement Text",
+        "substitution",
+        "delete matches",
+        "empty string"
+      ],
+      "sections": [
+        {
+          "heading": "Set replacement text",
+          "paragraphs": [],
+          "steps": [
+            "Search first and verify the current match range.",
+            "Expand the replacement row and enter the replacement text.",
+            "Try Replace Current Match once before deciding whether to process all matches."
+          ]
+        },
+        {
+          "heading": "Empty text is different from a space",
+          "paragraphs": [
+            "Leaving the replacement field empty deletes matches. Entering one space replaces them with a space. Confirm that this is intended before Replace All.",
+            "To rename a character or another structured record, use its settings page first. Replacing manuscript text does not update the object's data throughout the project."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "search.replace",
+        "search.replaceAll",
+        "pages.characters"
+      ]
+    },
+    {
+      "id": "search.previous",
+      "title": "Previous Search Result",
+      "category": "Find and Replace",
+      "keywords": [
+        "Previous",
+        "search results",
+        "navigation",
+        "highlight"
+      ],
+      "sections": [
+        {
+          "heading": "View the previous match",
+          "paragraphs": [
+            "When the search bar has results, this button changes the current match. Navigation does not edit the manuscript."
+          ],
+          "steps": [
+            "Enter a query and confirm there are results.",
+            "Click Previous and read the surrounding text.",
+            "Before replacing, verify this match's highlighted range."
+          ]
+        },
+        {
+          "heading": "If there are no results to navigate",
+          "paragraphs": [
+            "Check that the query is nonempty, the chapter is correct, and the options are not too restrictive. Try plain-text search if needed."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "search.overview",
+        "search.input",
+        "search.replace"
+      ]
+    },
+    {
+      "id": "search.next",
+      "title": "Next Search Result",
+      "category": "Find and Replace",
+      "keywords": [
+        "Next",
+        "search results",
+        "navigation",
+        "highlight"
+      ],
+      "sections": [
+        {
+          "heading": "View the next match",
+          "paragraphs": [
+            "When the search bar has results, this button changes the current match. Navigation does not edit the manuscript."
+          ],
+          "steps": [
+            "Enter a query and confirm there are results.",
+            "Click Next and read the surrounding text.",
+            "Before replacing, verify this match's highlighted range."
+          ]
+        },
+        {
+          "heading": "If there are no results to navigate",
+          "paragraphs": [
+            "Check that the query is nonempty, the chapter is correct, and the options are not too restrictive. Try plain-text search if needed."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "search.overview",
+        "search.input",
+        "search.replace"
+      ]
+    },
+    {
+      "id": "search.replace",
+      "title": "Replace Current Result",
+      "category": "Find and Replace",
+      "keywords": [
+        "single replacement",
+        "replace current",
+        "Replace Current Result"
+      ],
+      "sections": [
+        {
+          "heading": "Check changes one at a time",
+          "paragraphs": [],
+          "steps": [
+            "Enter search and replacement text.",
+            "Use Previous/Next to locate the match to change.",
+            "Check the highlighted range, then replace it.",
+            "Check the new sentence before moving to other results."
+          ]
+        },
+        {
+          "heading": "For changes that need context",
+          "paragraphs": [
+            "A word can have different meanings in different sentences. Replacing one at a time helps assess context. For example, check whether a name occurs in dialogue or a character reference before changing it.",
+            "An empty replacement field deletes matches. If the result is unexpected, Undo and inspect it before further batch changes."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "search.replacement",
+        "search.next",
+        "search.replaceAll",
+        "editor.undo"
+      ]
+    },
+    {
+      "id": "search.replaceAll",
+      "title": "Replace All",
+      "category": "Find and Replace",
+      "keywords": [
+        "batch replacement",
+        "replace every match",
+        "bulk changes",
+        "replacement failure"
+      ],
+      "sections": [
+        {
+          "heading": "Apply a batch change",
+          "paragraphs": [
+            "Replace All modifies matching text in the current editor according to the current search conditions. Verify the chapter, query, options, and replacement text first."
+          ],
+          "steps": [
+            "Save a separate full-project copy first.",
+            "Navigate several results, especially checking ranges affected by ignored punctuation, whitespace, or regular expressions.",
+            "Try one replacement to confirm its effect, then use Replace All.",
+            "Wait for completion, spot-check changed passages, and search again to verify remaining matches."
+          ]
+        },
+        {
+          "heading": "If changes do not apply or look wrong",
+          "paragraphs": [
+            "No matches, invalid regex syntax, timeouts, or excessive output can prevent completion. Narrow the query or use simpler conditions and retry.",
+            "Search again after manuscript changes rather than relying on old ranges. Undo accidental changes in the current session or recover from your earlier copy."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "search.replace",
+        "search.useRegexp",
+        "files.saveAs",
+        "editor.undo"
+      ]
+    },
+    {
+      "id": "search.matchCase",
+      "title": "Match Case",
+      "category": "Find and Replace",
+      "keywords": [
+        "case sensitivity",
+        "English",
+        "Hero",
+        "hero",
+        "case sensitive"
+      ],
+      "sections": [
+        {
+          "heading": "Distinguish uppercase and lowercase letters",
+          "paragraphs": [
+            "When enabled, Hero and hero differ. When disabled, plain-text search can ignore case."
+          ],
+          "steps": [
+            "Search for Hero and inspect the results.",
+            "Toggle Match Case and check which matches appear or disappear.",
+            "Before replacement, decide which capitalization variants should change."
+          ]
+        },
+        {
+          "heading": "If the option cannot be changed",
+          "paragraphs": [
+            "Regex mode always matches case. Turn regex off to restore the plain-text case option."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "search.overview",
+        "search.useRegexp"
+      ]
+    },
+    {
+      "id": "search.wholeWord",
+      "title": "Whole Words",
+      "category": "Find and Replace",
+      "keywords": [
+        "whole word",
+        "word",
+        "word boundaries",
+        "whole word",
+        "cannot enable"
+      ],
+      "sections": [
+        {
+          "heading": "Match complete words only",
+          "paragraphs": [
+            "In plain-text search, Match Whole Word requires complete word boundaries. For example, searching cat can exclude the same letters inside longer English words."
+          ],
+          "steps": [
+            "Enter an English word in plain-text mode.",
+            "Enable Match Whole Word.",
+            "Inspect matches to verify the boundaries."
+          ]
+        },
+        {
+          "heading": "Chinese text and disabled conditions",
+          "paragraphs": [
+            "This option is unavailable in regex mode. It also cannot be enabled when the query contains full-width characters, Chinese text, punctuation, or whitespace.",
+            "This is not a Chinese word segmenter. Search Chinese phrases directly and judge each result in context."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "search.input",
+        "search.useRegexp"
+      ]
+    },
+    {
+      "id": "search.useRegexp",
+      "title": "Regular Expressions",
+      "category": "Find and Replace",
+      "keywords": [
+        "regex",
+        "regexp",
+        "regex",
+        "look-around",
+        "backreference",
+        "pattern",
+        "numbers"
+      ],
+      "sections": [
+        {
+          "heading": "Find text using patterns",
+          "paragraphs": [
+            "Regex finds classes of text: [0-9]+ matches consecutive half-width digits, and 第[0-9]+章 matches headings such as 第12章. Here ? and * are regex operators, not ordinary wildcard characters."
+          ],
+          "steps": [
+            "Save a copy, enter a simple pattern, and enable regex.",
+            "Navigate the results and check the match ranges.",
+            "Test one replacement before considering batch changes."
+          ]
+        },
+        {
+          "heading": "Interaction with other options",
+          "paragraphs": [
+            "Regex always matches case and width and disables whole-word matching. Ignore punctuation and whitespace affect only plain-text search; they do not strip characters for regex.",
+            "For example, [0-9]+ does not match full-width digits merely because the plain-text width option is off. Design the pattern for the intended content."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Syntax limits and errors",
+          "paragraphs": [
+            "Native Rust search does not support look-around or backreferences. Use simple patterns supported by every search path to keep search and replacement consistent.",
+            "Fix invalid pattern syntax first. Zero-length-only matches are not treated as ordinary results. Simplify patterns that are too complex or produce too many matches."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "search.overview",
+        "search.replaceAll",
+        "search.matchCase",
+        "search.matchWidth"
+      ]
+    },
+    {
+      "id": "search.matchWidth",
+      "title": "Match Character Width",
+      "category": "Find and Replace",
+      "keywords": [
+        "character width",
+        "full-width digits",
+        "half-width digits",
+        "full-width １",
+        "width"
+      ],
+      "sections": [
+        {
+          "heading": "Distinguish full-width and half-width text",
+          "paragraphs": [
+            "When enabled, forms such as １ and 1 match separately. When disabled, plain-text search matches supported width equivalents."
+          ],
+          "steps": [
+            "Enter a character to search for, such as 1.",
+            "Toggle Match Width and inspect matches for 1 and １.",
+            "Before replacing, decide whether both forms should be unified."
+          ]
+        },
+        {
+          "heading": "Regex limitations",
+          "paragraphs": [
+            "Regex mode fixes this option on. Turn regex off to use plain-text width matching."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "search.overview",
+        "search.useRegexp"
+      ]
+    },
+    {
+      "id": "search.ignorePunctuation",
+      "title": "Ignore Punctuation",
+      "category": "Find and Replace",
+      "keywords": [
+        "ignore punctuation",
+        "skip punctuation",
+        "Comma",
+        "Punctuation"
+      ],
+      "sections": [
+        {
+          "heading": "Match across punctuation",
+          "paragraphs": [
+            "Plain-text search can ignore punctuation. For example, a query for hello can match hel,lo. This option does not itself delete punctuation from the manuscript."
+          ],
+          "steps": [
+            "Enter a plain-text word or phrase.",
+            "Enable Ignore Punctuation and inspect each match range.",
+            "Test one replacement to verify punctuation after replacing the entire range."
+          ]
+        },
+        {
+          "heading": "Where this applies",
+          "paragraphs": [
+            "This option does not affect regex search. Ignoring punctuation can add unexpected matches; do not replace all without inspecting ranges."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "search.ignoreWhitespace",
+        "search.replace",
+        "search.useRegexp"
+      ]
+    },
+    {
+      "id": "search.ignoreWhitespace",
+      "title": "Ignore Whitespace",
+      "category": "Find and Replace",
+      "keywords": [
+        "ignore whitespace",
+        "skip spaces",
+        "Tab",
+        "newline",
+        "whitespace characters"
+      ],
+      "sections": [
+        {
+          "heading": "Match across whitespace",
+          "paragraphs": [
+            "Plain-text search can ignore spaces, tabs, and newlines. For example, hello can match hel lo, including text across lines. This option does not itself remove manuscript whitespace."
+          ],
+          "steps": [
+            "Enter a plain-text query and enable Ignore Whitespace.",
+            "Navigate matches and check especially for spans across paragraphs.",
+            "Try one replacement first and check newlines and paragraph structure."
+          ]
+        },
+        {
+          "heading": "Avoid accidentally merging paragraphs",
+          "paragraphs": [
+            "Replacement affects the full match range, potentially including its whitespace and newlines. Save a copy before bulk operations.",
+            "Regex search does not use this ignore setting; express whitespace in the regex itself."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "search.ignorePunctuation",
+        "search.replaceAll",
+        "search.useRegexp"
+      ]
+    },
+    {
+      "id": "integrations.mcp",
+      "title": "Read-only MCP Integration",
+      "category": "Connections and Integrations",
+      "keywords": [
+        "MCP",
+        "Host",
+        "sidecar",
+        "read-only",
+        "authorization",
+        "revoke access",
+        "External Integrations"
+      ],
+      "sections": [
+        {
+          "heading": "Let external tools read the current project",
+          "paragraphs": [
+            "MCP allows hosts supporting stdio MCP to read the authorized project's summary, chapters, characters, world settings, outline, and glossary. It provides no editing tools. The sidecar supports Windows, macOS, and Linux only."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Enable and connect",
+          "paragraphs": [],
+          "steps": [
+            "Open the project to authorize in the app.",
+            "Enable MCP Read-Only Integration in Settings → External Integrations.",
+            "Use Copy MCP Host Configuration and paste it into your host's MCP settings.",
+            "Have the host start the connection and confirm it reads the currently authorized project.",
+            "When finished, use Revoke Current Authorization to end access."
+          ]
+        },
+        {
+          "heading": "Expiration, project switching, and connection failures",
+          "paragraphs": [
+            "Authorization expires after 8 hours by default. After revoking access or switching projects, enable it again and create a new connection. Old settings cannot keep reading a newly opened project.",
+            "If connection fails, check that the app is running, a project is open, authorization is valid, and the host uses the configuration just copied. Follow your host's interface for startup and configuration."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "pages.settings",
+        "pages.copilot",
+        "files.open"
+      ]
+    },
+    {
+      "id": "sync.overview",
+      "title": "Local Network Sync and Collaboration",
+      "category": "Connections and Integrations",
+      "keywords": [
+        "P2P",
+        "LAN",
+        "Wi-Fi",
+        "IPv4",
+        "Port",
+        "pairing",
+        "Conflict",
+        "Sync",
+        "collaboration",
+        "firewall"
+      ],
+      "sections": [
+        {
+          "heading": "Prepare for a connection",
+          "paragraphs": [
+            "Both devices must communicate over LAN TCP and use compatible app versions. A reachable endpoint alone is insufficient; pairing is required to exchange project data."
+          ],
+          "steps": [
+            "Save the current project on each device first.",
+            "Check Wi-Fi IPv4 and Port in the home page's LAN connection area. Confirm that the other service is running and both endpoints can communicate.",
+            "Select the project and device in the sync interface, check the pairing code, and authorize.",
+            "Read the status and preview. If data diverges, resolve conflicts or save a copy first."
+          ]
+        },
+        {
+          "heading": "Pairing preferences and conflicts",
+          "paragraphs": [
+            "Allow One-Sided Pairing Confirmation works only when both devices enable it. Persistent Verification (14 days) also requires both devices; successful connections renew its expiry.",
+            "Full snapshot exchange checks size, hash, and project format. Compare both sides when a conflict appears. If unsure, save a copy and check manually."
+          ],
+          "steps": []
+        },
+        {
+          "heading": "Connection troubleshooting order",
+          "paragraphs": [
+            "Check the network and endpoints first, then the other service and firewall permissions. Sharing a Wi-Fi network does not guarantee the router permits communication between devices.",
+            "For incompatible versions, save both projects before upgrading to compatible versions. Sync and collaboration do not replace backups; save important versions separately."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "pages.settings",
+        "files.recovery",
+        "revision.overview"
+      ]
+    },
+    {
+      "id": "dialogs.overview",
+      "title": "Action Dialogs",
+      "category": "Other Help",
+      "keywords": [
+        "dialog",
+        "confirm",
+        "Cancel",
+        "Back",
+        "preview",
+        "not applied"
+      ],
+      "sections": [
+        {
+          "heading": "Read before confirming",
+          "paragraphs": [
+            "Dialogs typically select data, adjust options, or confirm effects. Read titles and warnings first, especially the scope of deletion, import, and mode changes."
+          ],
+          "steps": [
+            "Check the current target and selections.",
+            "If a preview is available, inspect differences, counts, and reference effects.",
+            "Submit only after checking. Use Cancel or Back if you do not want to apply changes."
+          ]
+        },
+        {
+          "heading": "Read help during an operation",
+          "paragraphs": [
+            "F1 opens help for the current feature. Closing Help returns to the original dialog with unconfirmed selections retained. Opening Help does not confirm the original operation.",
+            "Native file pickers are managed by the operating system. Use their own Cancel and Confirm buttons; the app's point-to-help feature is not supported there."
+          ],
+          "steps": []
+        }
+      ],
+      "relatedIds": [
+        "help.using",
+        "files.import_selective",
+        "files.export_selective",
+        "pages.items"
+      ]
+    }
+  ],
+  "contentVersion": 2,
+  "locale": "en"
+}

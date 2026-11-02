@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -164,7 +165,7 @@ class _RemoteCaretMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Semantics(
-      label: "${position.cursor.ipAddress} 的游標",
+      label: context.l10n.uiSCursor((position.cursor.ipAddress).toString()),
       child: SizedBox(
         key: ValueKey<String>("remote-caret-${position.cursor.replicaId}"),
         width: 2,
@@ -228,9 +229,13 @@ class ChapterRemotePresenceBadges extends ConsumerWidget {
         children: [
           for (final cursor in cursors)
             Semantics(
-              label: "${cursor.ipAddress} 正在編輯此章節",
+              label: context.l10n.uiIsEditingThisChapter(
+                (cursor.ipAddress).toString(),
+              ),
               child: Tooltip(
-                message: "${cursor.ipAddress} 正在編輯此章節",
+                message: context.l10n.uiIsEditingThisChapter(
+                  (cursor.ipAddress).toString(),
+                ),
                 child: Container(
                   key: ValueKey(
                     "chapter-presence-$chapterId-${cursor.replicaId}",

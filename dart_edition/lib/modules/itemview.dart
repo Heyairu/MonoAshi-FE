@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:uuid/uuid.dart";
@@ -75,7 +76,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
   void _createClass([String? requestedName]) {
     final name = requestedName?.trim().isNotEmpty == true
         ? requestedName!.trim()
-        : "新物品";
+        : context.l10n.uiNewItem;
     final creation = createDedicatedItem(
       request: DedicatedItemCreationRequest(
         classId: _uuid.v4(),
@@ -107,11 +108,15 @@ class _ItemViewState extends ConsumerState<ItemView> {
         .toList(growable: false);
     final confirmed = await AppDialog.confirm(
       context: context,
-      title: "封存物品",
-      message:
-          "要封存「${itemClass.name.trim().isEmpty ? "未命名物品" : itemClass.name}」嗎？"
-          "現有關聯與歷史快照會保留，${activeInstances.length} 件單件物品會一併封存。",
-      confirmLabel: "封存",
+      title: context.l10n.uiArchiveItem,
+      message: context.l10n.uiArchiveExistingLinksAndHistoricalSnapshotsWillBe(
+        (itemClass.name.trim().isEmpty
+                ? context.l10n.uiUnnamedItem
+                : itemClass.name)
+            .toString(),
+        context.formats.integer(activeInstances.length),
+      ),
+      confirmLabel: context.l10n.uiArchive,
     );
     if (!confirmed || !mounted) return;
 
@@ -182,7 +187,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
     final instance = ItemInstanceData(
       instanceId: _uuid.v4(),
       classId: itemClass.classId,
-      name: "${itemClass.name}（單件）",
+      name: context.l10n.uiIndividual((itemClass.name).toString()),
     );
     ref.read(itemWorkspaceProvider.notifier).putInstance(instance);
   }
@@ -277,9 +282,11 @@ class _ItemViewState extends ConsumerState<ItemView> {
   }
 
   void _showStalePreviewMessage() {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("物品或 Scene 已更新，請重新開啟預覽後再提交。")));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.uiTheItemOrSceneChangedReopenThePreview),
+      ),
+    );
   }
 
   Map<String, String> _sceneLabels() {
@@ -340,9 +347,13 @@ class _ItemViewState extends ConsumerState<ItemView> {
   ) async {
     final targets = _relationTargets();
     if (targets.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("請先建立人物、地點或事件，再新增物品關聯。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.uiCreateACharacterLocationOrEventBeforeAdding,
+          ),
+        ),
+      );
       return;
     }
     var itemKind = ItemReferenceKind.itemClass;
@@ -354,7 +365,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text("新增物品關聯"),
+          title: Text(context.l10n.uiAddItemLink),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -370,7 +381,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   initialValue: "${itemKind.name}:$itemId",
                   decoration: appDropdownFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "物品"),
+                    decoration: InputDecoration(labelText: context.l10n.uiItem),
                   ),
                   items: [
                     DropdownMenuItem(
@@ -382,7 +393,11 @@ class _ItemViewState extends ConsumerState<ItemView> {
                       DropdownMenuItem(
                         value:
                             "${ItemReferenceKind.instance.name}:${instance.instanceId}",
-                        child: Text("單件：${instance.name}"),
+                        child: Text(
+                          context.l10n.uiIndividual2(
+                            (instance.name).toString(),
+                          ),
+                        ),
                       ),
                   ],
                   onChanged: (value) {
@@ -401,13 +416,13 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   label: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "${_targetKindLabel(target.kind)}：${target.label}",
+                      "${_targetKindLabel(context.l10n, target.kind)}：${target.label}",
                     ),
                   ),
                   onPressed: () async {
                     final selected = await showProjectObjectSelector(
                       context: context,
-                      title: "選擇連結目標",
+                      title: context.l10n.uiChooseLinkTarget,
                       allowedKinds: const {
                         ProjectObjectKind.character,
                         ProjectObjectKind.location,
@@ -430,14 +445,18 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   onChanged: (value) => role = value,
                   decoration: appFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "關係／用途"),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiRelationshipPurpose,
+                    ),
                   ),
                 ),
                 TextField(
                   onChanged: (value) => note = value,
                   decoration: appFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "備註"),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiNotes,
+                    ),
                   ),
                 ),
               ],
@@ -446,12 +465,12 @@ class _ItemViewState extends ConsumerState<ItemView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               key: const Key("item-relation-confirm"),
               onPressed: () => Navigator.pop(context, true),
-              child: const Text("新增關聯"),
+              child: Text(context.l10n.uiAddLink),
             ),
           ],
         ),
@@ -482,9 +501,11 @@ class _ItemViewState extends ConsumerState<ItemView> {
         )
         .toList(growable: false);
     if (targets.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("請先建立人物或地點，再新增數量分配。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.uiCreateACharacterOrLocationBeforeAddingA),
+        ),
+      );
       return;
     }
     var target = targets.first;
@@ -494,7 +515,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text("新增數量分配"),
+          title: Text(context.l10n.uiAddQuantityAllocation),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -510,14 +531,16 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   initialValue: "${target.kind.name}:${target.id}",
                   decoration: appDropdownFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "分配對象"),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiAllocateTo,
+                    ),
                   ),
                   items: targets
                       .map(
                         (value) => DropdownMenuItem(
                           value: "${value.kind.name}:${value.id}",
                           child: Text(
-                            "${_targetKindLabel(value.kind)}：${value.label}",
+                            "${_targetKindLabel(context.l10n, value.kind)}：${value.label}",
                           ),
                         ),
                       )
@@ -538,9 +561,10 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   onChanged: (value) => quantityText = value,
                   decoration: appFieldDecoration(
                     context,
-                    decoration: const InputDecoration(
-                      labelText: "數量",
-                      helperText: "留空代表數量未知",
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiQuantity,
+                      helperText:
+                          context.l10n.uiLeaveBlankIfTheQuantityIsUnknown,
                     ),
                   ),
                 ),
@@ -548,7 +572,9 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   onChanged: (value) => note = value,
                   decoration: appFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "備註"),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiNotes,
+                    ),
                   ),
                 ),
               ],
@@ -557,12 +583,12 @@ class _ItemViewState extends ConsumerState<ItemView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               key: const Key("item-allocation-confirm"),
               onPressed: () => Navigator.pop(context, true),
-              child: const Text("新增分配"),
+              child: Text(context.l10n.uiAddAllocation),
             ),
           ],
         ),
@@ -574,9 +600,11 @@ class _ItemViewState extends ConsumerState<ItemView> {
         ? null
         : int.tryParse(normalizedQuantity);
     if (normalizedQuantity.isNotEmpty && (quantity == null || quantity < 0)) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("數量必須是零或正整數，也可以留空表示未知。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.uiQuantityMustBeZeroOrAPositiveInteger2),
+        ),
+      );
       return;
     }
     final allocation = ItemAllocationData(
@@ -627,9 +655,11 @@ class _ItemViewState extends ConsumerState<ItemView> {
         )
         .toList(growable: false);
     if (scenes.isEmpty || targets.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("轉移前需要至少一個場景及另一個人物或地點。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.uiATransferRequiresAtLeastOneSceneAnd),
+        ),
+      );
       return;
     }
     var placementId = scenes.first.placementId;
@@ -650,7 +680,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text("轉移聚合數量"),
+          title: Text(context.l10n.uiTransferAggregateQuantity),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -666,7 +696,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                 ),
                 AppDropdownField<String>(
                   value: placementId,
-                  labelText: "綁定 Scene",
+                  labelText: context.l10n.uiLinkToScene,
                   options: scenes
                       .map(
                         (scene) => DropdownOption(
@@ -692,14 +722,16 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   initialValue: "${target.kind.name}:${target.id}",
                   decoration: appDropdownFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "轉移至"),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiTransferTo,
+                    ),
                   ),
                   items: targets
                       .map(
                         (value) => DropdownMenuItem(
                           value: "${value.kind.name}:${value.id}",
                           child: Text(
-                            "${_targetKindLabel(value.kind)}：${value.label}",
+                            "${_targetKindLabel(context.l10n, value.kind)}：${value.label}",
                           ),
                         ),
                       )
@@ -720,7 +752,9 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   onChanged: (value) => quantityText = value,
                   decoration: appFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "轉移數量"),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiQuantityToTransfer,
+                    ),
                   ),
                 ),
                 if (source.quantity == null)
@@ -729,9 +763,11 @@ class _ItemViewState extends ConsumerState<ItemView> {
                     onChanged: (value) => sourceAfterText = value,
                     decoration: appFieldDecoration(
                       context,
-                      decoration: const InputDecoration(
-                        labelText: "轉移後來源數量",
-                        helperText: "來源數量未知，必須明確設定",
+                      decoration: InputDecoration(
+                        labelText: context.l10n.uiSourceQuantityAfterTransfer,
+                        helperText: context
+                            .l10n
+                            .uiSourceQuantityIsUnknownSetItExplicitly,
                       ),
                     ),
                   ),
@@ -748,9 +784,12 @@ class _ItemViewState extends ConsumerState<ItemView> {
                     onChanged: (value) => destinationAfterText = value,
                     decoration: appFieldDecoration(
                       context,
-                      decoration: const InputDecoration(
-                        labelText: "轉移後目的數量",
-                        helperText: "目的數量未知，必須明確設定",
+                      decoration: InputDecoration(
+                        labelText:
+                            context.l10n.uiDestinationQuantityAfterTransfer,
+                        helperText: context
+                            .l10n
+                            .uiDestinationQuantityIsUnknownSetItExplicitly,
                       ),
                     ),
                   ),
@@ -758,7 +797,9 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   onChanged: (value) => note = value,
                   decoration: appFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "備註"),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiNotes,
+                    ),
                   ),
                 ),
               ],
@@ -767,12 +808,12 @@ class _ItemViewState extends ConsumerState<ItemView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               key: const Key("item-transfer-confirm"),
               onPressed: () => Navigator.pop(context, true),
-              child: const Text("建立轉移快照"),
+              child: Text(context.l10n.uiCreateTransferSnapshot),
             ),
           ],
         ),
@@ -839,9 +880,13 @@ class _ItemViewState extends ConsumerState<ItemView> {
   }) async {
     final scenes = _placedScenes();
     if (scenes.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("請先將 Scene 放入時間軸，再拆出單件物品。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.uiAddTheSceneToTheTimelineBeforeSeparating,
+          ),
+        ),
+      );
       return;
     }
     var placementId = scenes.first.placementId;
@@ -869,7 +914,9 @@ class _ItemViewState extends ConsumerState<ItemView> {
               .firstOrNull;
           return AlertDialog(
             title: Text(
-              targetMode == ItemMode.dedicated ? "建立專用單件" : "從聚合數量拆出單件",
+              targetMode == ItemMode.dedicated
+                  ? context.l10n.uiCreateDedicatedItem
+                  : context.l10n.uiSeparateItemFromAggregateQuantity,
             ),
             content: SingleChildScrollView(
               child: Column(
@@ -886,7 +933,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   ),
                   AppDropdownField<String>(
                     value: placementId,
-                    labelText: "建立於 Scene",
+                    labelText: context.l10n.uiCreatedInScene,
                     options: scenes
                         .map(
                           (scene) => DropdownOption(
@@ -903,10 +950,16 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   ),
                   Text(
                     sceneSource == null
-                        ? "所選 Scene 尚無這筆聚合分配。"
+                        ? context
+                              .l10n
+                              .uiThisAggregateAllocationDoesNotExistInThe
                         : sceneSource.quantity == null
-                        ? "所選 Scene 的來源數量未知。"
-                        : "所選 Scene 的來源數量：${sceneSource.quantity}",
+                        ? context
+                              .l10n
+                              .uiSourceQuantityIsUnknownInTheSelectedScene
+                        : context.l10n.uiSourceQuantityInSelectedScene(
+                            (sceneSource.quantity).toString(),
+                          ),
                     key: const Key("item-materialize-preview"),
                   ),
                   TextFormField(
@@ -915,7 +968,9 @@ class _ItemViewState extends ConsumerState<ItemView> {
                     onChanged: (value) => instanceName = value,
                     decoration: appFieldDecoration(
                       context,
-                      decoration: const InputDecoration(labelText: "單件名稱"),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.uiIndividualItemName,
+                      ),
                     ),
                   ),
                   if (sceneSource?.quantity == null && sceneSource != null)
@@ -925,9 +980,12 @@ class _ItemViewState extends ConsumerState<ItemView> {
                       onChanged: (value) => sourceAfterText = value,
                       decoration: appFieldDecoration(
                         context,
-                        decoration: const InputDecoration(
-                          labelText: "拆出後來源數量",
-                          helperText: "來源數量未知，必須明確設定",
+                        decoration: InputDecoration(
+                          labelText:
+                              context.l10n.uiSourceQuantityAfterSeparation,
+                          helperText: context
+                              .l10n
+                              .uiSourceQuantityIsUnknownSetItExplicitly,
                         ),
                       ),
                     ),
@@ -936,7 +994,9 @@ class _ItemViewState extends ConsumerState<ItemView> {
                     onChanged: (value) => note = value,
                     decoration: appFieldDecoration(
                       context,
-                      decoration: const InputDecoration(labelText: "轉換備註"),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.uiConversionNotes,
+                      ),
                     ),
                   ),
                 ],
@@ -945,14 +1005,14 @@ class _ItemViewState extends ConsumerState<ItemView> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text("取消"),
+                child: Text(context.l10n.commonCancel),
               ),
               FilledButton(
                 key: const Key("item-materialize-confirm"),
                 onPressed: sceneSource == null
                     ? null
                     : () => Navigator.pop(context, true),
-                child: const Text("建立單件"),
+                child: Text(context.l10n.uiCreateIndividualItem),
               ),
             ],
           );
@@ -1002,9 +1062,13 @@ class _ItemViewState extends ConsumerState<ItemView> {
       ref
           .read(timelineViewProvider.notifier)
           .setCurrentTick(selectedScene.startTick);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("已從聚合數量建立單件物品。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.uiCreatedAnIndividualItemFromTheAggregateQuantity,
+          ),
+        ),
+      );
     } on ArgumentError catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(error.message?.toString() ?? "$error")),
@@ -1022,9 +1086,13 @@ class _ItemViewState extends ConsumerState<ItemView> {
   ) async {
     final scenes = _placedScenes();
     if (scenes.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("請先將 Scene 放入時間軸，再轉為非專用。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.uiAddTheSceneToTheTimelineBeforeConverting,
+          ),
+        ),
+      );
       return;
     }
     var placementId = scenes.first.placementId;
@@ -1060,7 +1128,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
               )
               .toSet();
           return AlertDialog(
-            title: const Text("安全轉為非專用"),
+            title: Text(context.l10n.uiSafelyConvertToNonDedicated),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -1077,7 +1145,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   ),
                   AppDropdownField<String>(
                     value: placementId,
-                    labelText: "轉換 Scene",
+                    labelText: context.l10n.uiConversionScene,
                     options: scenes
                         .map(
                           (scene) => DropdownOption(
@@ -1094,17 +1162,27 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "將彙總 ${activeStates.length} 件當時存在的單件，建立 ${groupedTargets.length} 筆聚合分配。",
+                    context.l10n
+                        .uiAggregateExistingIndividualItemsIntoQuantityAllocations(
+                          context.formats.integer(activeStates.length),
+                          context.formats.integer(groupedTargets.length),
+                        ),
                     key: const Key("item-demotion-preview"),
                   ),
                   const SizedBox(height: 8),
-                  const Text("原 Class、instance ID、快照與一般關聯會保留為封存歷史。"),
+                  Text(
+                    context
+                        .l10n
+                        .uiTheOriginalClassInstanceIDsSnapshotsAndGeneral,
+                  ),
                   TextField(
                     key: const Key("item-demotion-note"),
                     onChanged: (value) => note = value,
                     decoration: appFieldDecoration(
                       context,
-                      decoration: const InputDecoration(labelText: "轉換備註"),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.uiConversionNotes,
+                      ),
                     ),
                   ),
                 ],
@@ -1113,12 +1191,12 @@ class _ItemViewState extends ConsumerState<ItemView> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text("取消"),
+                child: Text(context.l10n.commonCancel),
               ),
               FilledButton(
                 key: const Key("item-demotion-confirm"),
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text("建立聚合 Class"),
+                child: Text(context.l10n.uiCreateAggregateClass),
               ),
             ],
           );
@@ -1182,9 +1260,11 @@ class _ItemViewState extends ConsumerState<ItemView> {
         _selectedClassId = result.targetClass.classId;
         _selectedClassSnapshotId = result.targetClassChange.stateChangeId;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("已建立新的非專用聚合 Class。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.uiCreatedANewNonDedicatedAggregateClass),
+        ),
+      );
     } on ArgumentError catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(error.message?.toString() ?? "$error")),
@@ -1229,8 +1309,12 @@ class _ItemViewState extends ConsumerState<ItemView> {
         if (sources.length != 1 ||
             (sources.single.quantity != null && sources.single.quantity != 1)) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("轉為專用前只能剩下一筆、數量為 1 的聚合分配；可先轉為半專用逐件拆分。"),
+            SnackBar(
+              content: Text(
+                context
+                    .l10n
+                    .uiConvertingToDedicatedModeRequiresOneAllocationWith,
+              ),
             ),
           );
           return;
@@ -1247,7 +1331,11 @@ class _ItemViewState extends ConsumerState<ItemView> {
         mode == ItemMode.dedicated) {
       if (instances.length > 1) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("目前有多個固定 ID，不能直接合併為一件專用物品。")),
+          SnackBar(
+            content: Text(
+              context.l10n.uiMultipleFixedIDsCannotBeMergedDirectlyInto,
+            ),
+          ),
         );
         return;
       }
@@ -1263,7 +1351,13 @@ class _ItemViewState extends ConsumerState<ItemView> {
           false;
       if (remainingStock) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("仍有未拆分的聚合數量，請先逐件拆分後再轉為專用。")),
+          SnackBar(
+            content: Text(
+              context
+                  .l10n
+                  .uiSeparateAllRemainingAggregateQuantitiesBeforeConvertingTo,
+            ),
+          ),
         );
         return;
       }
@@ -1294,16 +1388,20 @@ class _ItemViewState extends ConsumerState<ItemView> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("搬移世界設定物品"),
-        content: Text("將 $count 筆世界設定物品搬到獨立物品頁。原物品 ID、內容與來源路徑會保留。"),
+        title: Text(context.l10n.uiMoveWorldbuildingItems),
+        content: Text(
+          context.l10n.uiMoveWorldbuildingItemsToTheItemsPageIDs(
+            (count).toString(),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("取消"),
+            child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text("搬移"),
+            child: Text(context.l10n.uiMove),
           ),
         ],
       ),
@@ -1330,7 +1428,15 @@ class _ItemViewState extends ConsumerState<ItemView> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          "已搬移 ${result.migratedCount} 筆物品${result.warnings.isEmpty ? "" : "，${result.warnings.length} 筆需留意"}",
+          context.l10n.uiMovedItems(
+            (result.migratedCount).toString(),
+            (result.warnings.isEmpty
+                    ? ""
+                    : context.l10n.uiNeedAttention(
+                        context.formats.integer(result.warnings.length),
+                      ))
+                .toString(),
+          ),
         ),
       ),
     );
@@ -1342,9 +1448,11 @@ class _ItemViewState extends ConsumerState<ItemView> {
   }) async {
     final scenes = _placedScenes();
     if (scenes.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("請先將 Scene 放入時間軸，再新增物品快照。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.uiAddTheSceneToTheTimelineBeforeAdding),
+        ),
+      );
       return;
     }
     var placementId = nearestSceneChoice(
@@ -1366,7 +1474,11 @@ class _ItemViewState extends ConsumerState<ItemView> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text(sourceState == null ? "新增物品場景快照" : "複製物品場景快照"),
+          title: Text(
+            sourceState == null
+                ? context.l10n.uiAddItemSceneSnapshot
+                : context.l10n.uiDuplicateItemSceneSnapshot,
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1382,7 +1494,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                 ),
                 AppDropdownField<String>(
                   value: placementId,
-                  labelText: "綁定 Scene",
+                  labelText: context.l10n.uiLinkToScene,
                   options: scenes
                       .map(
                         (scene) => DropdownOption(
@@ -1399,7 +1511,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text("此時已存在"),
+                  title: Text(context.l10n.uiExistsAtThisPoint),
                   value: exists,
                   onChanged: (value) => setDialogState(() => exists = value),
                 ),
@@ -1408,7 +1520,9 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   onChanged: (value) => status = value,
                   decoration: appFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "狀態"),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiStatus,
+                    ),
                   ),
                 ),
                 DropdownButtonFormField<String>(
@@ -1422,17 +1536,26 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   initialValue: holderCharacterId ?? "",
                   decoration: appDropdownFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "持有人"),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiHolder,
+                    ),
                   ),
                   items: [
-                    const DropdownMenuItem(value: "", child: Text("未設定")),
+                    DropdownMenuItem(
+                      value: "",
+                      child: Text(context.l10n.uiNotSet),
+                    ),
                     if (holderCharacterId != null &&
                         !characters.any(
                           (value) => value.id == holderCharacterId,
                         ))
                       DropdownMenuItem(
                         value: holderCharacterId,
-                        child: Text("找不到：$holderCharacterId"),
+                        child: Text(
+                          context.l10n.uiNotFound(
+                            (holderCharacterId).toString(),
+                          ),
+                        ),
                       ),
                     for (final character in characters)
                       DropdownMenuItem(
@@ -1454,15 +1577,22 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   initialValue: locationId ?? "",
                   decoration: appDropdownFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "所在地"),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiLocation2,
+                    ),
                   ),
                   items: [
-                    const DropdownMenuItem(value: "", child: Text("未設定")),
+                    DropdownMenuItem(
+                      value: "",
+                      child: Text(context.l10n.uiNotSet),
+                    ),
                     if (locationId != null &&
                         !locations.any((value) => value.id == locationId))
                       DropdownMenuItem(
                         value: locationId,
-                        child: Text("找不到：$locationId"),
+                        child: Text(
+                          context.l10n.uiNotFound((locationId).toString()),
+                        ),
                       ),
                     for (final location in locations)
                       DropdownMenuItem(
@@ -1479,11 +1609,15 @@ class _ItemViewState extends ConsumerState<ItemView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text(sourceState == null ? "新增快照" : "複製快照"),
+              child: Text(
+                sourceState == null
+                    ? context.l10n.uiAddSnapshot
+                    : context.l10n.uiDuplicateSnapshot,
+              ),
             ),
           ],
         ),
@@ -1541,7 +1675,9 @@ class _ItemViewState extends ConsumerState<ItemView> {
     final scenes = _placedScenes();
     if (scenes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("請先將 Scene 放入時間軸，再新增單件物品快照。")),
+        SnackBar(
+          content: Text(context.l10n.uiAddTheSceneToTheTimelineBeforeAdding2),
+        ),
       );
       return;
     }
@@ -1565,7 +1701,13 @@ class _ItemViewState extends ConsumerState<ItemView> {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           title: Text(
-            "${sourceState == null ? '新增' : '複製'}「${instance.name}」場景快照",
+            context.l10n.uiSceneSnapshot(
+              (sourceState == null
+                      ? context.l10n.commonAdd
+                      : context.l10n.commonCopy)
+                  .toString(),
+              (instance.name).toString(),
+            ),
           ),
           content: SingleChildScrollView(
             child: Column(
@@ -1582,7 +1724,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                 ),
                 AppDropdownField<String>(
                   value: placementId,
-                  labelText: "綁定 Scene",
+                  labelText: context.l10n.uiLinkToScene,
                   options: scenes
                       .map(
                         (scene) => DropdownOption(
@@ -1599,7 +1741,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text("此時已存在"),
+                  title: Text(context.l10n.uiExistsAtThisPoint),
                   value: exists,
                   onChanged: (value) => setDialogState(() => exists = value),
                 ),
@@ -1608,7 +1750,9 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   onChanged: (value) => status = value,
                   decoration: appFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "狀態"),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiStatus,
+                    ),
                   ),
                 ),
                 DropdownButtonFormField<String>(
@@ -1622,17 +1766,26 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   initialValue: holderCharacterId ?? "",
                   decoration: appDropdownFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "持有人"),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiHolder,
+                    ),
                   ),
                   items: [
-                    const DropdownMenuItem(value: "", child: Text("未設定")),
+                    DropdownMenuItem(
+                      value: "",
+                      child: Text(context.l10n.uiNotSet),
+                    ),
                     if (holderCharacterId != null &&
                         !characters.any(
                           (value) => value.id == holderCharacterId,
                         ))
                       DropdownMenuItem(
                         value: holderCharacterId,
-                        child: Text("找不到：$holderCharacterId"),
+                        child: Text(
+                          context.l10n.uiNotFound(
+                            (holderCharacterId).toString(),
+                          ),
+                        ),
                       ),
                     for (final character in characters)
                       DropdownMenuItem(
@@ -1654,15 +1807,22 @@ class _ItemViewState extends ConsumerState<ItemView> {
                   initialValue: locationId ?? "",
                   decoration: appDropdownFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "所在地"),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiLocation2,
+                    ),
                   ),
                   items: [
-                    const DropdownMenuItem(value: "", child: Text("未設定")),
+                    DropdownMenuItem(
+                      value: "",
+                      child: Text(context.l10n.uiNotSet),
+                    ),
                     if (locationId != null &&
                         !locations.any((value) => value.id == locationId))
                       DropdownMenuItem(
                         value: locationId,
-                        child: Text("找不到：$locationId"),
+                        child: Text(
+                          context.l10n.uiNotFound((locationId).toString()),
+                        ),
                       ),
                     for (final location in locations)
                       DropdownMenuItem(
@@ -1679,12 +1839,16 @@ class _ItemViewState extends ConsumerState<ItemView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               key: const Key("item-instance-snapshot-confirm"),
               onPressed: () => Navigator.pop(context, true),
-              child: Text(sourceState == null ? "新增快照" : "複製快照"),
+              child: Text(
+                sourceState == null
+                    ? context.l10n.uiAddSnapshot
+                    : context.l10n.uiDuplicateSnapshot,
+              ),
             ),
           ],
         ),
@@ -1792,21 +1956,23 @@ class _ItemViewState extends ConsumerState<ItemView> {
           children: [
             Row(
               children: [
-                const LargeTitle(
+                LargeTitle(
                   icon: Icons.inventory_2_outlined,
-                  text: "物品設定",
+                  text: context.l10n.uiItemSettings,
                 ),
                 const Spacer(),
                 if (worldItemCount > 0)
                   NeonIconButton(
                     key: const Key("item-migrate-world"),
-                    label: "搬移世界設定中的 $worldItemCount 筆物品",
+                    label: context.l10n.uiMoveItemsFromWorldbuilding(
+                      (worldItemCount).toString(),
+                    ),
                     onPressed: _migrateWorldItems,
                     icon: Icons.move_down_outlined,
                   ),
                 NeonIconButton(
                   key: const Key("item-add-class"),
-                  label: "新增物品",
+                  label: context.l10n.uiAddItem,
                   onPressed: _createClass,
                   icon: Icons.add_circle_outline,
                   accent: NeonAccent.green,
@@ -1837,11 +2003,13 @@ class _ItemViewState extends ConsumerState<ItemView> {
                           ),
                         ),
                         timeline: selected == null
-                            ? const SnapshotPanelCard(
+                            ? SnapshotPanelCard(
                                 key: ValueKey("item-snapshot-card"),
                                 child: AppEmptyState(
-                                  title: "請先選取物品",
-                                  description: "選取物品後即可預覽時間軸與管理快照",
+                                  title: context.l10n.uiSelectAnItemFirst,
+                                  description: context
+                                      .l10n
+                                      .uiSelectAnItemToPreviewItsTimelineAnd,
                                   icon: Icons.inventory_2_outlined,
                                   compact: true,
                                 ),
@@ -1874,15 +2042,18 @@ class _ItemViewState extends ConsumerState<ItemView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const MediumTitle(icon: Icons.inventory_2_outlined, text: "物品清單"),
+        MediumTitle(
+          icon: Icons.inventory_2_outlined,
+          text: context.l10n.uiItemList,
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: _searchController,
           decoration: appFieldDecoration(
             context,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               prefixIcon: Icon(Icons.search),
-              labelText: "搜尋物品",
+              labelText: context.l10n.uiSearchItems,
             ),
           ),
           onChanged: (_) => setState(() {}),
@@ -1898,13 +2069,16 @@ class _ItemViewState extends ConsumerState<ItemView> {
                     child: AppDropdownField<String>(
                       key: const Key("item-mode-filter"),
                       value: _modeFilter,
-                      labelText: "管理模式",
+                      labelText: context.l10n.uiManagementMode,
                       options: [
-                        const DropdownOption(value: _allFilter, label: "全部"),
+                        DropdownOption(
+                          value: _allFilter,
+                          label: context.l10n.uiAll,
+                        ),
                         for (final mode in ItemMode.values)
                           DropdownOption(
                             value: mode.name,
-                            label: _modeLabel(mode),
+                            label: _modeLabel(context.l10n, mode),
                           ),
                       ],
                       onChanged: (value) =>
@@ -1916,11 +2090,20 @@ class _ItemViewState extends ConsumerState<ItemView> {
                     child: AppDropdownField<String>(
                       key: const Key("item-assignment-filter"),
                       value: _assignmentFilter,
-                      labelText: "歸屬",
-                      options: const [
-                        DropdownOption(value: _allFilter, label: "全部"),
-                        DropdownOption(value: "assigned", label: "已有歸屬"),
-                        DropdownOption(value: "unassigned", label: "尚無歸屬"),
+                      labelText: context.l10n.uiOwnership,
+                      options: [
+                        DropdownOption(
+                          value: _allFilter,
+                          label: context.l10n.uiAll,
+                        ),
+                        DropdownOption(
+                          value: "assigned",
+                          label: context.l10n.uiAssigned,
+                        ),
+                        DropdownOption(
+                          value: "unassigned",
+                          label: context.l10n.uiUnassigned,
+                        ),
                       ],
                       onChanged: (value) => setState(
                         () => _assignmentFilter = value ?? _allFilter,
@@ -1933,9 +2116,12 @@ class _ItemViewState extends ConsumerState<ItemView> {
               AppDropdownField<String>(
                 key: const Key("item-category-filter"),
                 value: _categoryFilter,
-                labelText: "分類",
+                labelText: context.l10n.uiCategory,
                 options: [
-                  const DropdownOption(value: _allFilter, label: "全部分類"),
+                  DropdownOption(
+                    value: _allFilter,
+                    label: context.l10n.uiAllCategories,
+                  ),
                   for (final category in categories)
                     DropdownOption(value: category, label: category),
                 ],
@@ -1950,15 +2136,15 @@ class _ItemViewState extends ConsumerState<ItemView> {
           child: LayoutBuilder(
             builder: (context, constraints) => CollectionPanel.builder(
               key: const Key("item-class-collection"),
-              title: "物品清單",
+              title: context.l10n.uiItemList,
               showSectionCard: false,
               minHeight: constraints.maxHeight,
               maxHeight: constraints.maxHeight,
               controller: _classListScrollController,
               showScrollbar: true,
               itemCount: classes.length,
-              emptyTitle: "尚無物品",
-              emptyDescription: "新增第一個物品",
+              emptyTitle: context.l10n.uiNoItemsYet,
+              emptyDescription: context.l10n.uiAddYourFirstItem,
               emptyIcon: Icons.inventory_2_outlined,
               itemBuilder: (context, index) {
                 final itemClass = classes[index];
@@ -1991,11 +2177,17 @@ class _ItemViewState extends ConsumerState<ItemView> {
                       color: Theme.of(context).colorScheme.primary,
                     ),
                     title: Text(
-                      itemClass.name.trim().isEmpty ? "未命名物品" : itemClass.name,
+                      itemClass.name.trim().isEmpty
+                          ? context.l10n.uiUnnamedItem
+                          : itemClass.name,
                     ),
                     subtitle: Text(
-                      "${_modeLabel(itemClass.mode)} · $instanceCount 件單件 · "
-                      "$relationCount 個關聯${assigned ? " · 已有歸屬" : ""}",
+                      context.l10n.uiIndividualItemsLinks(
+                        (_modeLabel(context.l10n, itemClass.mode)).toString(),
+                        (instanceCount).toString(),
+                        (relationCount).toString(),
+                        (assigned ? context.l10n.uiAssigned2 : "").toString(),
+                      ),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -2008,8 +2200,8 @@ class _ItemViewState extends ConsumerState<ItemView> {
                         ),
                         ItemActionBar.editDelete(
                           useNeonStyle: true,
-                          editTooltip: "編輯物品",
-                          deleteTooltip: "封存物品",
+                          editTooltip: context.l10n.uiEditItem,
+                          deleteTooltip: context.l10n.uiArchiveItem,
                           onEdit: () => _selectClass(itemClass.classId),
                           onDelete: () => _archiveClass(itemClass, workspace),
                         ),
@@ -2023,7 +2215,11 @@ class _ItemViewState extends ConsumerState<ItemView> {
           ),
         ),
         const SizedBox(height: 8),
-        AddItemInput(useNeonStyle: true, title: "物品", onAdd: _createClass),
+        AddItemInput(
+          useNeonStyle: true,
+          title: context.l10n.uiItem,
+          onAdd: _createClass,
+        ),
       ],
     );
   }
@@ -2040,16 +2236,17 @@ class _ItemViewState extends ConsumerState<ItemView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const MediumTitle(icon: Icons.info_outline, text: "物品詳情"),
+        MediumTitle(icon: Icons.info_outline, text: context.l10n.uiItemDetails),
         const SizedBox(height: 8),
         Expanded(
           child: Container(
             decoration: _detailPanelDecoration(context),
-            child: const Material(
+            child: Material(
               type: MaterialType.transparency,
               child: AppEmptyState(
-                title: "選擇或新增物品",
-                description: "物品的模式、快照、歸屬與關聯會顯示在這裡",
+                title: context.l10n.uiSelectOrAddAnItem,
+                description:
+                    context.l10n.uiItemModeSnapshotsOwnershipAndLinksAppearHere,
                 icon: Icons.inventory_2_outlined,
               ),
             ),
@@ -2066,7 +2263,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const MediumTitle(icon: Icons.info_outline, text: "物品詳情"),
+        MediumTitle(icon: Icons.info_outline, text: context.l10n.uiItemDetails),
         const SizedBox(height: 8),
         Expanded(
           child: Container(
@@ -2113,8 +2310,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
         .toList(growable: false);
     final tick = ref.watch(timelineViewProvider).currentTick;
     final previewMode =
-        _classPreviewModes[itemClass.classId] ??
-        SnapshotPreviewMode.baseline;
+        _classPreviewModes[itemClass.classId] ?? SnapshotPreviewMode.baseline;
     final snapshot = previewMode == SnapshotPreviewMode.baseline
         ? itemClass.defaultState
         : ref.watch(
@@ -2157,14 +2353,14 @@ class _ItemViewState extends ConsumerState<ItemView> {
             snapshotActionsBuilder: (event) => [
               NeonIconButton(
                 key: const Key("item-add-snapshot"),
-                label: "新增 Scene 快照",
+                label: context.l10n.uiAddSceneSnapshot,
                 onPressed: () => _addClassSnapshot(itemClass),
                 icon: Icons.add_photo_alternate_outlined,
                 accent: NeonAccent.green,
               ),
               NeonIconButton(
                 key: const Key("item-copy-snapshot"),
-                label: "複製快照",
+                label: context.l10n.uiDuplicateSnapshot,
                 icon: Icons.copy_all_outlined,
                 onPressed: () => _addClassSnapshot(
                   itemClass,
@@ -2181,7 +2377,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
               ),
               NeonIconButton(
                 key: const Key("item-delete-selected-snapshot"),
-                label: "刪除目前快照",
+                label: context.l10n.uiDeleteCurrentSnapshot,
                 onPressed: selectedSnapshotChange == null
                     ? null
                     : () {
@@ -2194,7 +2390,9 @@ class _ItemViewState extends ConsumerState<ItemView> {
                       },
                 icon: Icons.delete_outline,
                 destructive: true,
-                statusLabel: selectedSnapshotChange == null ? "尚未選取快照" : null,
+                statusLabel: selectedSnapshotChange == null
+                    ? context.l10n.uiNoSnapshotSelected
+                    : null,
               ),
             ],
           ),
@@ -2202,18 +2400,30 @@ class _ItemViewState extends ConsumerState<ItemView> {
           Card(
             child: ListTile(
               leading: const Icon(Icons.movie_outlined),
-              title: const Text("目前故事狀態"),
+              title: Text(context.l10n.uiCurrentStoryState),
               subtitle: Text(
                 snapshot == null
-                    ? "無快照"
+                    ? context.l10n.uiNoSnapshots
                     : [
-                        snapshot.exists ? "存在" : "尚未存在",
-                        snapshot.status.isEmpty ? "未設定狀態" : snapshot.status,
+                        snapshot.exists
+                            ? context.l10n.uiExists
+                            : context.l10n.uiDoesNotExistYet,
+                        snapshot.status.isEmpty
+                            ? context.l10n.uiStateNotSet
+                            : snapshot.status,
                         if (snapshot.holderCharacterId != null)
-                          "持有人：${targetLabels["${ItemRelationTargetKind.character.name}:${snapshot.holderCharacterId}"] ?? snapshot.holderCharacterId}",
+                          context.l10n.uiHolder2(
+                            (targetLabels["${ItemRelationTargetKind.character.name}:${snapshot.holderCharacterId}"] ??
+                                    snapshot.holderCharacterId)
+                                .toString(),
+                          ),
                         if (snapshot.locationId != null)
-                          "所在地：${targetLabels["${ItemRelationTargetKind.location.name}:${snapshot.locationId}"] ?? snapshot.locationId}",
-                      ].join("・"),
+                          context.l10n.uiLocation3(
+                            (targetLabels["${ItemRelationTargetKind.location.name}:${snapshot.locationId}"] ??
+                                    snapshot.locationId)
+                                .toString(),
+                          ),
+                      ].join(context.l10n.uiLiteral),
               ),
             ),
           ),
@@ -2221,7 +2431,11 @@ class _ItemViewState extends ConsumerState<ItemView> {
             ExpansionTile(
               key: const Key("item-class-snapshot-history"),
               leading: const Icon(Icons.history),
-              title: Text("快照歷程（${classChanges.length}）"),
+              title: Text(
+                context.l10n.uiSnapshotHistory(
+                  context.formats.integer(classChanges.length),
+                ),
+              ),
               children: classChanges
                   .map(
                     (change) => ListTile(
@@ -2234,7 +2448,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                       subtitle: Text(
                         change.patch.status?.value?.isNotEmpty == true
                             ? change.patch.status!.value!
-                            : "連結此 Scene",
+                            : context.l10n.uiLinkThisScene,
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -2246,7 +2460,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                             ),
                           ),
                           NeonIconButton(
-                            label: "移除快照",
+                            label: context.l10n.uiRemoveSnapshot,
                             onPressed: () => ref
                                 .read(itemWorkspaceProvider.notifier)
                                 .removeClassStateChange(change.stateChangeId),
@@ -2341,7 +2555,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                               key: ValueKey(
                                 "item-instance-add-snapshot-${instance.instanceId}",
                               ),
-                              label: "新增 Scene 快照",
+                              label: context.l10n.uiAddSceneSnapshot,
                               onPressed: () => _addInstanceSnapshot(instance),
                               icon: Icons.add_photo_alternate_outlined,
                               accent: NeonAccent.green,
@@ -2350,7 +2564,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                               key: ValueKey(
                                 "item-instance-copy-snapshot-${instance.instanceId}",
                               ),
-                              label: "複製快照",
+                              label: context.l10n.uiDuplicateSnapshot,
                               icon: Icons.copy_all_outlined,
                               onPressed: () => _addInstanceSnapshot(
                                 instance,
@@ -2384,7 +2598,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                               key: ValueKey(
                                 "item-instance-delete-selected-snapshot-${instance.instanceId}",
                               ),
-                              label: "刪除目前快照",
+                              label: context.l10n.uiDeleteCurrentSnapshot,
                               onPressed: selectedChange == null
                                   ? null
                                   : () {
@@ -2402,7 +2616,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                               icon: Icons.delete_outline,
                               destructive: true,
                               statusLabel: selectedChange == null
-                                  ? "尚未選取快照"
+                                  ? context.l10n.uiNoSnapshotSelected
                                   : null,
                             ),
                           ],
@@ -2449,7 +2663,11 @@ class _ItemViewState extends ConsumerState<ItemView> {
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   if (change != null) ...[
-                                    Text("編輯中：${event!.label}"),
+                                    Text(
+                                      context.l10n.uiEditing(
+                                        (event!.label).toString(),
+                                      ),
+                                    ),
                                     const SizedBox(height: AppSpacing.md),
                                   ],
                                   ItemSnapshotStateEditor(
@@ -2514,14 +2732,24 @@ class _ItemViewState extends ConsumerState<ItemView> {
                                   );
                             return Text(
                               [
-                                state?.exists == false ? "此場景尚未存在" : "此場景存在",
+                                state?.exists == false
+                                    ? context.l10n.uiDoesNotExistInThisScene
+                                    : context.l10n.uiExistsInThisScene,
                                 if (state?.status.isNotEmpty == true)
                                   state!.status,
                                 if (state?.holderCharacterId != null)
-                                  "持有人：${targetLabels["${ItemRelationTargetKind.character.name}:${state!.holderCharacterId}"] ?? state.holderCharacterId}",
+                                  context.l10n.uiHolder2(
+                                    (targetLabels["${ItemRelationTargetKind.character.name}:${state!.holderCharacterId}"] ??
+                                            state.holderCharacterId)
+                                        .toString(),
+                                  ),
                                 if (state?.locationId != null)
-                                  "所在地：${targetLabels["${ItemRelationTargetKind.location.name}:${state!.locationId}"] ?? state.locationId}",
-                              ].join("・"),
+                                  context.l10n.uiLocation3(
+                                    (targetLabels["${ItemRelationTargetKind.location.name}:${state!.locationId}"] ??
+                                            state.locationId)
+                                        .toString(),
+                                  ),
+                              ].join(context.l10n.uiLiteral),
                             );
                           },
                         ),
@@ -2542,7 +2770,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                         subtitle: Text(
                           change.patch.status?.value?.isNotEmpty == true
                               ? change.patch.status!.value!
-                              : "連結此 Scene",
+                              : context.l10n.uiLinkThisScene,
                         ),
                         trailing: RevisionRecordMarker(
                           recordKey: ProjectRecordKey(
@@ -2566,8 +2794,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
         .toList(growable: false);
     final tick = ref.watch(timelineViewProvider).currentTick;
     final previewMode =
-        _classPreviewModes[itemClass.classId] ??
-        SnapshotPreviewMode.baseline;
+        _classPreviewModes[itemClass.classId] ?? SnapshotPreviewMode.baseline;
     final snapshot = previewMode == SnapshotPreviewMode.baseline
         ? itemClass.defaultState
         : ref.watch(
@@ -2615,7 +2842,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           if (change != null) ...[
-            Text("編輯中：${event!.label}"),
+            Text(context.l10n.uiEditing((event!.label).toString())),
             const SizedBox(height: AppSpacing.md),
           ],
           ItemSnapshotStateEditor(
@@ -2670,7 +2897,10 @@ class _ItemViewState extends ConsumerState<ItemView> {
             initialValue: itemClass.name,
             decoration: appFieldDecoration(
               context,
-              decoration: const InputDecoration(labelText: "名稱", isDense: true),
+              decoration: InputDecoration(
+                labelText: context.l10n.uiName2,
+                isDense: true,
+              ),
             ),
             onChanged: (value) => _updateClass(
               itemClass.copyWith(
@@ -2689,8 +2919,8 @@ class _ItemViewState extends ConsumerState<ItemView> {
             initialValue: itemClass.unit,
             decoration: appFieldDecoration(
               context,
-              decoration: const InputDecoration(
-                labelText: "數量單位",
+              decoration: InputDecoration(
+                labelText: context.l10n.uiQuantityUnit,
                 isDense: true,
               ),
             ),
@@ -2706,7 +2936,10 @@ class _ItemViewState extends ConsumerState<ItemView> {
             initialValue: itemClass.category,
             decoration: appFieldDecoration(
               context,
-              decoration: const InputDecoration(labelText: "分類", isDense: true),
+              decoration: InputDecoration(
+                labelText: context.l10n.uiCategory,
+                isDense: true,
+              ),
             ),
             onChanged: (value) =>
                 _updateClass(itemClass.copyWith(category: value)),
@@ -2715,7 +2948,10 @@ class _ItemViewState extends ConsumerState<ItemView> {
         const SizedBox(height: 16),
         Row(
           children: [
-            Text("管理模式", style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              context.l10n.uiManagementMode,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             RevisionFieldMarker(
               recordKey: ProjectRecordKey(
                 kind: ProjectRecordKind.itemClass,
@@ -2733,7 +2969,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                 (mode) => ButtonSegment(
                   value: mode,
                   icon: Icon(_modeIcon(mode)),
-                  label: Text(_modeLabel(mode)),
+                  label: Text(_modeLabel(context.l10n, mode)),
                 ),
               )
               .toList(growable: false),
@@ -2753,8 +2989,8 @@ class _ItemViewState extends ConsumerState<ItemView> {
             maxLines: 8,
             decoration: appFieldDecoration(
               context,
-              decoration: const InputDecoration(
-                labelText: "設定說明",
+              decoration: InputDecoration(
+                labelText: context.l10n.uiDescription,
                 alignLabelWithHint: true,
                 isDense: true,
               ),
@@ -2775,7 +3011,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
           children: [
             Expanded(
               child: Text(
-                "單件物品",
+                context.l10n.uiIndividualItems,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
@@ -2785,7 +3021,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                 key: const Key("item-add-instance"),
                 onPressed: () => _createInstance(itemClass),
                 icon: const Icon(Icons.add),
-                label: const Text("新增單件"),
+                label: Text(context.l10n.uiAddIndividualItem),
               ),
           ],
         ),
@@ -2801,9 +3037,9 @@ class _ItemViewState extends ConsumerState<ItemView> {
         else
           const SizedBox.shrink(),
         if (itemClass.mode != ItemMode.generic && instances.isEmpty)
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-            child: Text("尚未建立單件物品。"),
+            child: Text(context.l10n.uiNoIndividualItemsCreatedYet),
           )
         else if (itemClass.mode != ItemMode.generic)
           ...instances.map(
@@ -2826,20 +3062,23 @@ class _ItemViewState extends ConsumerState<ItemView> {
         Row(
           children: [
             Expanded(
-              child: Text("關聯", style: Theme.of(context).textTheme.titleMedium),
+              child: Text(
+                context.l10n.uiLinks,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
             ),
             FilledButton.tonalIcon(
               key: const Key("item-add-relation"),
               onPressed: () => _addRelation(itemClass, instances),
               icon: const Icon(Icons.add_link),
-              label: const Text("新增關聯"),
+              label: Text(context.l10n.uiAddLink),
             ),
           ],
         ),
         if (relations.isEmpty)
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-            child: Text("尚未連結人物、地點或事件。"),
+            child: Text(context.l10n.uiNoCharactersLocationsOrEventsLinkedYet),
           )
         else
           ...relations.map(
@@ -2852,10 +3091,10 @@ class _ItemViewState extends ConsumerState<ItemView> {
               ),
               subtitle: Text(
                 [
-                  _targetKindLabel(relation.targetKind),
+                  _targetKindLabel(context.l10n, relation.targetKind),
                   if (relation.role.isNotEmpty) relation.role,
                   if (relation.note.isNotEmpty) relation.note,
-                ].join("・"),
+                ].join(context.l10n.uiLiteral),
               ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -2867,7 +3106,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                     ),
                   ),
                   NeonIconButton(
-                    label: "移除關聯",
+                    label: context.l10n.uiRemoveLink,
                     onPressed: () => ref
                         .read(itemWorkspaceProvider.notifier)
                         .removeRelation(relation.relationId),
@@ -2902,16 +3141,28 @@ class _ItemViewState extends ConsumerState<ItemView> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
           child: Text(switch (itemClass.mode) {
-            ItemMode.generic => "非專用模式以 Class 與聚合分配管理，不建立單件 ID。",
-            ItemMode.semiDedicated => "半專用模式保留尚未識別的聚合數量，並可在 Scene 中逐件拆出固定 ID。",
-            ItemMode.dedicated => "此區顯示轉為專用前的歷史聚合數量。",
+            ItemMode.generic =>
+              context.l10n.uiNonDedicatedModeUsesClassesAndAggregateAllocations,
+            ItemMode.semiDedicated =>
+              context
+                  .l10n
+                  .uiSemiDedicatedModeKeepsUnidentifiedAggregateQuantitiesAnd,
+            ItemMode.dedicated =>
+              context
+                  .l10n
+                  .uiThisSectionShowsHistoricalAggregateQuantitiesFromBefore,
           }),
         ),
         Row(
           children: [
             Expanded(
               child: Text(
-                "數量分配：$knownTotal${unit.isEmpty ? "" : " $unit"}${hasUnknown ? "，另有未知數量" : ""}",
+                context.l10n.uiAllocatedQuantity(
+                  (knownTotal).toString(),
+                  (unit.isEmpty ? "" : " $unit").toString(),
+                  (hasUnknown ? context.l10n.uiPlusAnUnknownQuantity : "")
+                      .toString(),
+                ),
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
@@ -2920,14 +3171,14 @@ class _ItemViewState extends ConsumerState<ItemView> {
                 key: const Key("item-add-allocation"),
                 onPressed: () => _addAllocation(itemClass),
                 icon: const Icon(Icons.add),
-                label: const Text("新增分配"),
+                label: Text(context.l10n.uiAddAllocation),
               ),
           ],
         ),
         if (allocations.isEmpty)
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-            child: Text("尚未分配數量。"),
+            child: Text(context.l10n.uiNoQuantityAllocatedYet),
           )
         else
           ...allocations.map((allocation) {
@@ -2947,22 +3198,25 @@ class _ItemViewState extends ConsumerState<ItemView> {
                     : Icons.inventory_2_outlined,
               ),
               title: Text(
-                hasTarget ? targetLabels[targetKey] ?? "找不到分配對象" : "未分配",
+                hasTarget
+                    ? targetLabels[targetKey] ??
+                          context.l10n.uiAllocationTargetNotFound
+                    : context.l10n.uiUnallocated,
               ),
               subtitle: Text(
                 [
                   allocation.quantity == null
-                      ? "數量未知"
+                      ? context.l10n.uiUnknownQuantity
                       : "${allocation.quantity}${unit.isEmpty ? "" : " $unit"}",
                   if (allocation.note.isNotEmpty) allocation.note,
-                ].join("・"),
+                ].join(context.l10n.uiLiteral),
               ),
               trailing: Wrap(
                 children: [
                   if (itemClass.mode != ItemMode.dedicated)
                     NeonIconButton(
                       key: ValueKey("item-transfer-${allocation.allocationId}"),
-                      label: "轉移數量",
+                      label: context.l10n.uiQuantityToTransfer,
                       onPressed: !allowSceneActions
                           ? null
                           : () => _transferAllocation(
@@ -2977,7 +3231,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                       key: ValueKey(
                         "item-materialize-${allocation.allocationId}",
                       ),
-                      label: "拆出單件物品",
+                      label: context.l10n.uiSeparateIndividualItem,
                       onPressed: !allowSceneActions
                           ? null
                           : () => _materializeAllocation(itemClass, allocation),
@@ -2985,7 +3239,7 @@ class _ItemViewState extends ConsumerState<ItemView> {
                     ),
                   if (editDefaults && itemClass.mode != ItemMode.dedicated)
                     NeonIconButton(
-                      label: "移除預設分配",
+                      label: context.l10n.uiRemoveDefaultAllocation,
                       onPressed:
                           itemClass.defaultState.allocations.any(
                             (value) =>
@@ -3008,18 +3262,19 @@ class _ItemViewState extends ConsumerState<ItemView> {
   }
 }
 
-String _modeLabel(ItemMode mode) => switch (mode) {
-  ItemMode.dedicated => "專用",
-  ItemMode.semiDedicated => "半專用",
-  ItemMode.generic => "非專用",
+String _modeLabel(AppLocalizations l10n, ItemMode mode) => switch (mode) {
+  ItemMode.dedicated => l10n.uiDedicated,
+  ItemMode.semiDedicated => l10n.uiSemiDedicated,
+  ItemMode.generic => l10n.uiNonDedicated,
 };
 
-String _targetKindLabel(ItemRelationTargetKind kind) => switch (kind) {
-  ItemRelationTargetKind.character => "人物",
-  ItemRelationTargetKind.location => "地點",
-  ItemRelationTargetKind.event => "事件",
-  ItemRelationTargetKind.scene => "場景",
-};
+String _targetKindLabel(AppLocalizations l10n, ItemRelationTargetKind kind) =>
+    switch (kind) {
+      ItemRelationTargetKind.character => l10n.uiCharacter,
+      ItemRelationTargetKind.location => l10n.uiLocation,
+      ItemRelationTargetKind.event => l10n.uiEvent,
+      ItemRelationTargetKind.scene => l10n.uiScene4,
+    };
 
 class _RelationTarget {
   final String id;

@@ -1,8 +1,8 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "dart:math" as math;
 
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:intl/intl.dart";
 
 import "../../models/writing_goal_data.dart";
 import "../providers/writing_progress_provider.dart";
@@ -116,12 +116,16 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
                 const SizedBox(height: AppSpacing.md),
               ],
               if (settings.metrics.isEmpty)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                  child: Text("新增儀表，查看寫作進度。"),
+                  child: Text(
+                    context.l10n.uiAddAGaugeToViewYourWritingProgress,
+                  ),
                 ),
               PopupMenuButton<DashboardMetric>(
-                tooltip: canAdd ? "新增儀表" : "已顯示全部儀表",
+                tooltip: canAdd
+                    ? context.l10n.uiAddGauge
+                    : context.l10n.uiAllGaugesAreAlreadyShown,
                 enabled: canAdd,
                 onSelected: (metric) => ref
                     .read(gaugeDashboardProvider.notifier)
@@ -129,7 +133,10 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
                 itemBuilder: (context) => [
                   for (final metric in DashboardMetric.values)
                     if (!settings.metrics.contains(metric))
-                      PopupMenuItem(value: metric, child: Text(metric.label)),
+                      PopupMenuItem(
+                        value: metric,
+                        child: Text(context.l10n.legacyLabel(metric.label)),
+                      ),
                 ],
                 icon: Icon(
                   Icons.add_rounded,
@@ -185,10 +192,15 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
     };
     if (values == null) return _buildRevisionGauge();
     final (value, maximum, color) = values;
-    final format = NumberFormat.decimalPattern();
+    final format = context.formats.integer;
     final detail = maximum == 0
-        ? "尚無${metric == DashboardMetric.updatePlans ? "計畫" : "伏筆"}"
-        : "${format.format(value)} / ${format.format(maximum)}${metric.hasWordGoal ? " 字" : " 項"}";
+        ? context.l10n.uiNoYet(
+            (metric == DashboardMetric.updatePlans
+                    ? context.l10n.uiPlan
+                    : context.l10n.uiForeshadowing)
+                .toString(),
+          )
+        : "${format(value)} / ${format(maximum)}${metric.hasWordGoal ? context.l10n.uiWords : context.l10n.uiEntries4}";
     final hasChapter =
         metric != DashboardMetric.chapterWords ||
         ref.watch(editorSelectionProvider.select((s) => s.selectedChapID)) !=
@@ -201,14 +213,16 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
         ? (value / maximum).clamp(0.0, 1.0)
         : 0.0;
     final status = dailyUnavailable
-        ? "統計暫時無法使用"
+        ? context.l10n.uiStatisticsTemporarilyUnavailable
         : !hasChapter
-        ? "請選擇章節"
+        ? context.l10n.uiChooseAChapter
         : detail;
     final percentage = maximum == 0 || !hasChapter || dailyUnavailable
-        ? "尚無進度"
-        : "${(progress * 100).round()}%";
-    final unit = metric.hasWordGoal ? "字" : "項";
+        ? context.l10n.uiNoProgressYet
+        : context.formats.percent(progress, fractionDigits: 0);
+    final unit = metric.hasWordGoal
+        ? context.l10n.uiWords2
+        : context.l10n.uiEntries5;
 
     return MenuAnchor(
       key: ValueKey("gauge-${metric.name}"),
@@ -228,26 +242,44 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    "${metric.label}資訊",
+                    context.l10n.uiInformation(
+                      (context.l10n.legacyLabel(metric.label)).toString(),
+                    ),
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    "目前：${hasChapter && !dailyUnavailable ? format.format(value) : "—"} $unit",
+                    context.l10n.uiCurrent(
+                      (hasChapter && !dailyUnavailable ? format(value) : "—")
+                          .toString(),
+                      (unit).toString(),
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    "${metric.hasWordGoal ? "目標" : "總計"}：${format.format(maximum)} $unit",
+                    "${metric.hasWordGoal ? context.l10n.uiGoal2 : context.l10n.uiTotal}：${format(maximum)} $unit",
                   ),
                   if (metric == DashboardMetric.dailyWords) ...[
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      '${ref.watch(dailyWritingProgressProvider).day} · 本機所有作品合計',
+                      context.l10n.uiAllLocalWorks(
+                        (ref.watch(dailyWritingProgressProvider).day)
+                            .toString(),
+                      ),
                     ),
-                    const Text('全形字元＋半形單字；新增減去刪除'),
-                    if (value < 0) Text('今日淨減 ${format.format(-value)} 字'),
+                    Text(
+                      context
+                          .l10n
+                          .uiFullWidthCharactersHalfWidthWordsAdditionsMinus,
+                    ),
+                    if (value < 0)
+                      Text(
+                        context.l10n.uiNetDecreaseTodayWords(
+                          (format(-value)).toString(),
+                        ),
+                      ),
                     if (ref.watch(dailyWritingProgressProvider).isPending)
-                      const Text('統計處理中…'),
+                      Text(context.l10n.uiProcessingStatistics),
                     if (ref.watch(dailyWritingProgressProvider).ledger.warning
                         case final warning?)
                       Text(warning),
@@ -260,12 +292,26 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
                                 .retry();
                           } catch (_) {}
                         },
-                        child: const Text('統計無法保存，點此重試'),
+                        child: Text(
+                          context.l10n.uiCouldNotSaveStatisticsClickToRetry,
+                        ),
                       ),
                   ] else if (metric.hasWordGoal) ...[
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      '來源：${ref.watch(projectWritingGoalsProvider).overrideFor(metric == DashboardMetric.chapterWords ? WritingGoalKind.chapter : WritingGoalKind.total) == null ? "預設" : "僅限本檔案"}',
+                      context.l10n.uiSource(
+                        (ref
+                                        .watch(projectWritingGoalsProvider)
+                                        .overrideFor(
+                                          metric == DashboardMetric.chapterWords
+                                              ? WritingGoalKind.chapter
+                                              : WritingGoalKind.total,
+                                        ) ==
+                                    null
+                                ? context.l10n.uiDefault
+                                : context.l10n.uiThisFileOnly)
+                            .toString(),
+                      ),
                     ),
                   ],
                   if (maximum == 0 || !hasChapter || dailyUnavailable) ...[
@@ -280,7 +326,7 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
                 autofocus: true,
                 onPressed: () => _editGoal(metric, maximum),
                 leadingIcon: const Icon(Icons.flag_outlined, size: 20),
-                child: const Text("設定字數目標"),
+                child: Text(context.l10n.uiSetWordCountGoal),
               ),
             const Divider(height: 1),
             MenuItemButton(
@@ -293,17 +339,18 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
                   .read(gaugeDashboardProvider.notifier)
                   .setVisible(metric, false),
               leadingIcon: const Icon(Icons.delete_outline_rounded, size: 20),
-              child: const Text("刪除儀表"),
+              child: Text(context.l10n.uiRemoveGauge),
             ),
           ],
         ),
       ],
       builder: (context, controller, child) => Semantics(
         button: true,
-        label: metric.label,
+        label: context.l10n.legacyLabel(metric.label),
         value: "$status，$percentage",
         child: Tooltip(
-          message: "${metric.label}：$percentage\n$status",
+          message:
+              "${context.l10n.legacyLabel(metric.label)}：$percentage\n$status",
           excludeFromSemantics: true,
           child: InkWell(
             key: ValueKey("gauge-open-${metric.name}"),
@@ -321,13 +368,13 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
                     CompactRadialGauge(
                       progress: progress,
                       currentValue: hasChapter && !dailyUnavailable
-                          ? format.format(value)
+                          ? format(value)
                           : "—",
-                      targetValue: "/ ${format.format(maximum)} $unit",
+                      targetValue: "/ ${format(maximum)} $unit",
                       color: color,
                     ),
                     Text(
-                      metric.label,
+                      context.l10n.legacyLabel(metric.label),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.labelSmall,
                     ),
@@ -345,19 +392,28 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
     final tracking = ref.watch(revisionTrackingProvider);
     final summary = RevisionGaugeSummary.fromComparison(tracking.comparison);
     final colors = Theme.of(context).colorScheme;
-    final format = NumberFormat.decimalPattern();
+    final format = context.formats.integer;
     final status = switch (tracking.status) {
-      RevisionComparisonStatus.notStarted => "尚未開始追蹤",
-      RevisionComparisonStatus.computing => "計算中",
-      RevisionComparisonStatus.failed => tracking.error ?? "計算失敗",
-      RevisionComparisonStatus.unavailable => tracking.error ?? "比較來源尚未取得",
-      RevisionComparisonStatus.complete => summary.total == 0 ? "尚無校訂" : "比較完成",
+      RevisionComparisonStatus.notStarted => context.l10n.uiTrackingNotStarted,
+      RevisionComparisonStatus.computing => context.l10n.uiCalculating,
+      RevisionComparisonStatus.failed =>
+        tracking.error ?? context.l10n.uiCalculationFailed,
+      RevisionComparisonStatus.unavailable =>
+        tracking.error ?? context.l10n.uiComparisonSourceIsNotAvailableYet,
+      RevisionComparisonStatus.complete =>
+        summary.total == 0
+            ? context.l10n.uiNoRevisionsYet
+            : context.l10n.uiComparisonComplete,
     };
-    final additions = format.format(summary.additions);
-    final revisions = format.format(summary.revisions);
-    final description =
-        "外環新增：$additions 筆（${(summary.additionsFraction * 100).round()}%）\n"
-        "內環校訂：$revisions 筆（${(summary.revisionsFraction * 100).round()}%）\n$status";
+    final additions = format(summary.additions);
+    final revisions = format(summary.revisions);
+    final description = context.l10n.uiOuterRingAdditionsInnerRingRevisions(
+      (additions).toString(),
+      context.formats.integer((summary.additionsFraction * 100).round()),
+      (revisions).toString(),
+      context.formats.integer((summary.revisionsFraction * 100).round()),
+      (status).toString(),
+    );
     return MenuAnchor(
       key: const ValueKey("gauge-revisionTracking"),
       crossAxisUnconstrained: false,
@@ -375,27 +431,38 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text("追蹤校訂資訊", style: Theme.of(context).textTheme.titleSmall),
+                  Text(
+                    context.l10n.uiRevisionTrackingInformation,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    "外環新增：$additions 筆",
+                    context.l10n.uiOuterRingAdditions((additions).toString()),
                     style: TextStyle(color: colors.primary),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    "內環校訂：$revisions 筆",
+                    context.l10n.uiInnerRingRevisions((revisions).toString()),
                     style: TextStyle(color: colors.tertiary),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(status),
                   if (tracking.baseline != null) ...[
                     const SizedBox(height: AppSpacing.sm),
-                    Text("比較基準：${tracking.baseline!.label}"),
+                    Text(
+                      context.l10n.uiComparisonBaseline(
+                        (tracking.baseline!.label).toString(),
+                      ),
+                    ),
                   ],
                   const SizedBox(height: AppSpacing.md),
-                  const Text("正文按變動行、設定按資料筆數統計。修改會在新增與校訂各計一筆。"),
+                  Text(
+                    context
+                        .l10n
+                        .uiManuscriptChangesAreCountedByChangedLinesSettings,
+                  ),
                   const SizedBox(height: AppSpacing.sm),
-                  const Text("兩環顯示各類計數占合計的比例。"),
+                  Text(context.l10n.uiEachRingShowsItsCountAsAShare),
                 ],
               ),
             ),
@@ -406,14 +473,14 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
                     widget.onStartRevision ??
                     () => ref.read(revisionTrackingProvider.notifier).start(),
                 leadingIcon: const Icon(Icons.play_arrow_rounded, size: 20),
-                child: const Text("開始追蹤"),
+                child: Text(context.l10n.uiStartTracking),
               ),
             if (widget.onOpenRevision != null)
               MenuItemButton(
                 autofocus: tracking.baseline != null,
                 onPressed: widget.onOpenRevision,
                 leadingIcon: const Icon(Icons.rate_review_outlined, size: 20),
-                child: const Text("查看校訂明細"),
+                child: Text(context.l10n.uiViewRevisionDetails),
               ),
             const Divider(height: 1),
             MenuItemButton(
@@ -425,14 +492,14 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
                   .read(gaugeDashboardProvider.notifier)
                   .setVisible(DashboardMetric.revisionTracking, false),
               leadingIcon: const Icon(Icons.delete_outline_rounded, size: 20),
-              child: const Text("刪除儀表"),
+              child: Text(context.l10n.uiRemoveGauge),
             ),
           ],
         ),
       ],
       builder: (context, controller, child) => Semantics(
         button: true,
-        label: "追蹤校訂",
+        label: context.l10n.uiTrackRevisions,
         value: description,
         child: Tooltip(
           message: description,
@@ -458,7 +525,10 @@ class _RadialGaugeDashboardState extends ConsumerState<RadialGaugeDashboard> {
                       color: colors.primary,
                       secondaryColor: colors.tertiary,
                     ),
-                    Text("追蹤校訂", style: Theme.of(context).textTheme.labelSmall),
+                    Text(
+                      context.l10n.uiTrackRevisions,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
                   ],
                 ),
               ),

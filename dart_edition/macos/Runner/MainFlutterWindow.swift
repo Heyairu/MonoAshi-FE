@@ -155,7 +155,7 @@ class MainFlutterWindow: NSWindow {
           result(FlutterError(code: "BOOKMARK_CREATE_FAILED", message: error.localizedDescription, details: nil))
         }
 
-      case "openProjectFromSecurityScopedBookmark":
+      case "openProjectFromSecurityScopedBookmark", "writeProjectFromSecurityScopedBookmark":
         guard
           let args = call.arguments as? [String: Any],
           let bookmark = args["bookmark"] as? String,
@@ -166,10 +166,16 @@ class MainFlutterWindow: NSWindow {
         }
 
         do {
-          let payload = try self.openProjectFromSecurityScopedBookmark(bookmark)
+          let isWrite = call.method == "writeProjectFromSecurityScopedBookmark"
+          let content = isWrite ? args["content"] as? String : nil
+          if isWrite && content == nil {
+            result(FlutterError(code: "INVALID_ARGS", message: "content is required", details: nil))
+            return
+          }
+          let payload = try self.accessProjectFromSecurityScopedBookmark(bookmark, writeContent: content)
           result(payload)
         } catch {
-          result(FlutterError(code: "BOOKMARK_OPEN_FAILED", message: error.localizedDescription, details: nil))
+          result(FlutterError(code: self.projectFileErrorCode(error), message: error.localizedDescription, details: nil))
         }
 
       default:
@@ -200,7 +206,32 @@ class MainFlutterWindow: NSWindow {
     return bookmarkData.base64EncodedString()
   }
 
-  private func openProjectFromSecurityScopedBookmark(_ base64Bookmark: String) throws -> [String: Any] {
+  private func projectFileErrorCode(_ error: Error) -> String {
+    let failure = error as NSError
+    if failure.domain == NSCocoaErrorDomain {
+      switch failure.code {
+      case NSFileNoSuchFileError, NSFileReadNoSuchFileError:
+        return "FILE_MISSING"
+      case NSFileWriteOutOfSpaceError:
+        return "NO_SPACE"
+      case NSFileReadCorruptFileError, NSFileReadInapplicableStringEncodingError:
+        return "INVALID_DATA"
+      case NSFileReadNoPermissionError, NSFileWriteNoPermissionError:
+        return "PERMISSION_DENIED"
+      default:
+        break
+      }
+    }
+    if failure.domain == "MonogatariAssistant" && failure.code == 1 {
+      return "BOOKMARK_INVALID"
+    }
+    return "BOOKMARK_ACCESS_FAILED"
+  }
+
+  private func accessProjectFromSecurityScopedBookmark(
+    _ base64Bookmark: String,
+    writeContent: String? = nil
+  ) throws -> [String: Any] {
     guard let bookmarkData = Data(base64Encoded: base64Bookmark) else {
       throw NSError(
         domain: "MonogatariAssistant",
@@ -228,15 +259,6 @@ class MainFlutterWindow: NSWindow {
       url.stopAccessingSecurityScopedResource()
     }
 
-    let data = try Data(contentsOf: url)
-    guard let content = String(data: data, encoding: .utf8) else {
-      throw NSError(
-        domain: "MonogatariAssistant",
-        code: 3,
-        userInfo: [NSLocalizedDescriptionKey: "File content is not UTF-8 text"]
-      )
-    }
-
     var resolvedBookmark = base64Bookmark
     if isStale {
       let refreshedBookmark = try url.bookmarkData(
@@ -245,6 +267,16 @@ class MainFlutterWindow: NSWindow {
         relativeTo: nil
       )
       resolvedBookmark = refreshedBookmark.base64EncodedString()
+    }
+
+    let content: String
+    if let writeContent {
+      // A file-scoped grant does not grant access to sibling temporary files.
+      // Keep the scope active for the entire write and balance it with defer.
+      try writeContent.write(to: url, atomically: false, encoding: .utf8)
+      content = ""
+    } else {
+      content = try String(contentsOf: url, encoding: .utf8)
     }
 
     return [

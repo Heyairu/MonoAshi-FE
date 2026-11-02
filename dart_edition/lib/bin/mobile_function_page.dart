@@ -14,6 +14,7 @@
  * limitations under the License.
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "slidebar.dart";
@@ -50,9 +51,15 @@ class MonogatariMobileLayout extends StatelessWidget {
           NavigationBar(
             selectedIndex: isEditorMode ? 1 : 0,
             onDestinationSelected: onDestinationSelected,
-            destinations: const [
-              NavigationDestination(icon: Icon(Icons.dashboard), label: "功能"),
-              NavigationDestination(icon: Icon(Icons.edit_note), label: "編輯器"),
+            destinations: [
+              NavigationDestination(
+                icon: Icon(Icons.dashboard),
+                label: context.l10n.uiFeatures,
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.edit_note),
+                label: context.l10n.uiEditor,
+              ),
             ],
           ),
         ],

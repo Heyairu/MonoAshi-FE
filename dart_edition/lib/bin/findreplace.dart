@@ -14,6 +14,7 @@
  * limitations under the License.
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "../features/help/help_scope.dart";
 import "../features/help/help_topic.dart";
 import "package:flutter/foundation.dart" show kIsWeb;
@@ -1840,7 +1841,10 @@ Future<void> performReplace(
           }
         } catch (e) {
           if (context.mounted) {
-            AppFeedback.error(context, "正則表達式錯誤: $e");
+            AppFeedback.error(
+              context,
+              context.l10n.uiInvalidRegularExpression((e).toString()),
+            );
           }
           return;
         }
@@ -1942,7 +1946,10 @@ Future<void> performReplaceAll(
     if (context.mounted &&
         _replaceAllGenerations[textController] == generation &&
         textController.textRevision == textRevision) {
-      AppFeedback.error(context, "全部取代失敗：$error");
+      AppFeedback.error(
+        context,
+        context.l10n.uiReplaceAllFailed((error).toString()),
+      );
     }
     return;
   } finally {
@@ -1963,17 +1970,32 @@ Future<void> performReplaceAll(
   if (!result.succeeded) {
     switch (result.failureReason!) {
       case ReplaceAllFailureReason.invalidRegularExpression:
-        final String details = result.failureDetails ?? "格式無效";
-        AppFeedback.error(context, "正則表達式錯誤：$details");
+        final String details =
+            result.failureDetails ?? context.l10n.uiInvalidFormat;
+        AppFeedback.error(
+          context,
+          context.l10n.uiInvalidRegularExpression2((details).toString()),
+        );
         break;
       case ReplaceAllFailureReason.matchLimitExceeded:
-        AppFeedback.error(context, "全部取代已取消：匹配數超過 $maxMatches 筆，請縮小搜尋範圍。");
+        AppFeedback.error(
+          context,
+          context.l10n.uiReplaceAllCancelledMoreThanMatchesNarrowYour(
+            (maxMatches).toString(),
+          ),
+        );
         break;
       case ReplaceAllFailureReason.outputLimitExceeded:
-        AppFeedback.error(context, "全部取代已取消：結果超過允許的文字大小，請分段處理。");
+        AppFeedback.error(
+          context,
+          context.l10n.uiReplaceAllCancelledTheResultingTextIsToo,
+        );
         break;
       case ReplaceAllFailureReason.timeLimitExceeded:
-        AppFeedback.error(context, "全部取代已取消：運算時間超過限制，請縮小搜尋範圍。");
+        AppFeedback.error(
+          context,
+          context.l10n.uiReplaceAllCancelledTheTimeLimitWasExceeded,
+        );
         break;
     }
     return;
@@ -1989,11 +2011,12 @@ Future<void> performReplaceAll(
     final double approximateMiB = (newText.length * 2) / (1024 * 1024);
     final bool confirmed = await AppDialog.confirm(
       context: context,
-      title: "確認大量取代",
-      message:
-          "將取代 ${result.replacementCount} 處，"
-          "結果約 ${approximateMiB.toStringAsFixed(1)} MiB。確定繼續嗎？",
-      confirmLabel: "繼續取代",
+      title: context.l10n.uiConfirmLargeReplacement,
+      message: context.l10n.uiMatchesToReplaceEstimatedResultMiBContinue(
+        context.formats.integer(result.replacementCount),
+        context.formats.decimal(approximateMiB, minimumFractionDigits: 1),
+      ),
+      confirmLabel: context.l10n.uiContinueReplacing,
       barrierDismissible: false,
       icon: Icons.warning_amber_rounded,
     );
@@ -2014,7 +2037,10 @@ Future<void> performReplaceAll(
       maxResults: result.replacementCount + 1,
     );
     if (matches.length != result.replacementCount) {
-      AppFeedback.error(context, "全部取代已取消：無法安全映射標記範圍。");
+      AppFeedback.error(
+        context,
+        context.l10n.uiReplaceAllCancelledAnnotationRangesCouldNotBe,
+      );
       return;
     }
     final replacements = <String>[];
@@ -2031,7 +2057,12 @@ Future<void> performReplaceAll(
       if (regexpMatch == null ||
           regexpMatch.start != 0 ||
           regexpMatch.end != match.end - match.start) {
-        AppFeedback.error(context, "全部取代已取消：無法安全映射正則標記範圍。");
+        AppFeedback.error(
+          context,
+          context
+              .l10n
+              .uiReplaceAllCancelledRegularExpressionAnnotationRangesCould,
+        );
         return;
       }
       replacements.add(_expandRegexpReplacement(replaceText, regexpMatch));
@@ -2046,7 +2077,10 @@ Future<void> performReplaceAll(
       );
     }
     if (verifiedText != newText) {
-      AppFeedback.error(context, "全部取代已取消：標記投影驗證失敗。");
+      AppFeedback.error(
+        context,
+        context.l10n.uiReplaceAllCancelledAnnotationProjectionValidationFailed,
+      );
       return;
     }
     for (var index = matches.length - 1; index >= 0; index--) {
@@ -2983,7 +3017,7 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                           controller: widget.findController,
                           focusNode: _findFocus,
                           decoration: InputDecoration(
-                            labelText: "搜尋……",
+                            labelText: context.l10n.uiSearch2,
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: AppSpacing.md,
                               vertical: AppSpacing.sm,
@@ -3010,7 +3044,7 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        "${(widget.currentMatchIndex ?? -1) + 1}/${widget.totalMatches}",
+                        "${context.formats.integer((widget.currentMatchIndex ?? -1) + 1)}/${context.formats.integer(widget.totalMatches!)}",
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: Theme.of(
@@ -3035,7 +3069,7 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                         );
                       },
                       color: Theme.of(context).colorScheme.onSurface,
-                      tooltip: "上一個",
+                      tooltip: context.l10n.uiPrevious,
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(
                         minWidth: 32,
@@ -3055,7 +3089,7 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                         );
                       },
                       color: Theme.of(context).colorScheme.onSurface,
-                      tooltip: "下一個",
+                      tooltip: context.l10n.uiNext,
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(
                         minWidth: 32,
@@ -3078,7 +3112,9 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                         });
                       },
                       color: Theme.of(context).colorScheme.onSurface,
-                      tooltip: _isExpanded ? "收合" : "展開取代",
+                      tooltip: _isExpanded
+                          ? context.l10n.uiCollapse
+                          : context.l10n.uiExpandReplace,
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(
                         minWidth: 32,
@@ -3103,7 +3139,7 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                       color: _showOptions
                           ? Theme.of(context).colorScheme.primary
                           : Theme.of(context).colorScheme.onSurface,
-                      tooltip: "搜尋選項",
+                      tooltip: context.l10n.uiSearchOptions,
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(
                         minWidth: 32,
@@ -3132,7 +3168,7 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                             controller: widget.replaceController,
                             focusNode: _replaceFocus,
                             decoration: InputDecoration(
-                              labelText: "取代為……",
+                              labelText: context.l10n.uiReplaceWith,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: AppSpacing.md,
                                 vertical: AppSpacing.sm,
@@ -3163,7 +3199,7 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                         },
                         icon: const Icon(Icons.find_replace, size: 16),
                         label: Text(
-                          "取代",
+                          context.l10n.uiReplace,
                           style: Theme.of(context).textTheme.labelSmall,
                         ),
                         style: ElevatedButton.styleFrom(
@@ -3195,7 +3231,7 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                         },
                         icon: const Icon(Icons.library_add_check, size: 16),
                         label: Text(
-                          "全部",
+                          context.l10n.uiAll,
                           style: Theme.of(context).textTheme.labelSmall,
                         ),
                         style: ElevatedButton.styleFrom(
@@ -3240,8 +3276,8 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                       runSpacing: 4,
                       children: [
                         _buildOptionChip(
-                          label: "大小寫需相同",
-                          tooltip: "大小寫需相同",
+                          label: context.l10n.uiMatchCase,
+                          tooltip: context.l10n.uiMatchCase,
                           value: useRegexp ? true : widget.options.matchCase,
                           enabled: !disableMatchCase,
                           onChanged: (value) {
@@ -3252,8 +3288,8 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                           },
                         ),
                         _buildOptionChip(
-                          label: "全字拼寫相符",
-                          tooltip: "全字拼寫相符",
+                          label: context.l10n.uiWholeWords,
+                          tooltip: context.l10n.uiWholeWords,
                           value: widget.options.wholeWord,
                           enabled: !disableWholeWord,
                           onChanged: (value) {
@@ -3264,8 +3300,8 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                           },
                         ),
                         _buildOptionChip(
-                          label: "使用正則表示",
-                          tooltip: "使用正則表示",
+                          label: context.l10n.uiRegularExpression,
+                          tooltip: context.l10n.uiRegularExpression,
                           value: widget.options.useRegexp,
                           onChanged: (value) {
                             setState(() {
@@ -3280,8 +3316,8 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                           },
                         ),
                         _buildOptionChip(
-                          label: "全半形須相符",
-                          tooltip: "全半形須相符",
+                          label: context.l10n.uiMatchCharacterWidth,
+                          tooltip: context.l10n.uiMatchCharacterWidth,
                           value: useRegexp ? true : widget.options.matchWidth,
                           enabled: !disableMatchWidth,
                           onChanged: (value) {
@@ -3292,8 +3328,8 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                           },
                         ),
                         _buildOptionChip(
-                          label: "略過標點符號",
-                          tooltip: "略過標點符號",
+                          label: context.l10n.uiIgnorePunctuation,
+                          tooltip: context.l10n.uiIgnorePunctuation,
                           value: widget.options.ignorePunctuation,
                           onChanged: (value) {
                             setState(() {
@@ -3303,8 +3339,8 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                           },
                         ),
                         _buildOptionChip(
-                          label: "略過空白字元",
-                          tooltip: "略過空白字元",
+                          label: context.l10n.uiIgnoreWhitespace,
+                          tooltip: context.l10n.uiIgnoreWhitespace,
                           value: widget.options.ignoreWhitespace,
                           onChanged: (value) {
                             setState(() {
@@ -3527,7 +3563,7 @@ class _FindReplaceFloatingWindowState extends State<FindReplaceFloatingWindow> {
                         SizedBox(
                           width: 80,
                           child: Text(
-                            "尋找內容:",
+                            context.l10n.uiFind,
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   color: Theme.of(
@@ -3572,7 +3608,7 @@ class _FindReplaceFloatingWindowState extends State<FindReplaceFloatingWindow> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              "${(widget.currentMatchIndex ?? -1) + 1}/${widget.totalMatches}",
+                              "${context.formats.integer((widget.currentMatchIndex ?? -1) + 1)}/${context.formats.integer(widget.totalMatches!)}",
                               style: Theme.of(context).textTheme.labelSmall
                                   ?.copyWith(
                                     fontWeight: FontWeight.w600,
@@ -3653,7 +3689,9 @@ class _FindReplaceFloatingWindowState extends State<FindReplaceFloatingWindow> {
                                     : Icons.expand_more,
                                 size: 20,
                               ),
-                              tooltip: _isExpanded ? "摺疊" : "展開取代",
+                              tooltip: _isExpanded
+                                  ? context.l10n.uiCollapse2
+                                  : context.l10n.uiExpandReplace,
                             ),
                           ),
                         ),
@@ -3675,7 +3713,7 @@ class _FindReplaceFloatingWindowState extends State<FindReplaceFloatingWindow> {
                                   : Theme.of(context).colorScheme.onSurface,
                               padding: EdgeInsets.zero,
                               icon: Icon(Icons.tune, size: 18),
-                              tooltip: "搜尋選項",
+                              tooltip: context.l10n.uiSearchOptions,
                             ),
                           ),
                         ),
@@ -3706,7 +3744,7 @@ class _FindReplaceFloatingWindowState extends State<FindReplaceFloatingWindow> {
                           SizedBox(
                             width: 80,
                             child: Text(
-                              "取代為:",
+                              context.l10n.uiReplaceWith2,
                               style: Theme.of(context).textTheme.labelSmall
                                   ?.copyWith(
                                     color: Theme.of(
@@ -3766,7 +3804,7 @@ class _FindReplaceFloatingWindowState extends State<FindReplaceFloatingWindow> {
                                   ).colorScheme.onSecondaryContainer,
                                 ),
                                 child: Tooltip(
-                                  message: "取代",
+                                  message: context.l10n.uiReplace,
                                   child: const Icon(
                                     Icons.find_replace,
                                     size: 16,
@@ -3803,7 +3841,7 @@ class _FindReplaceFloatingWindowState extends State<FindReplaceFloatingWindow> {
                                   ).colorScheme.onTertiaryContainer,
                                 ),
                                 child: Tooltip(
-                                  message: "全部取代",
+                                  message: context.l10n.uiReplaceAll,
                                   child: const Icon(
                                     Icons.library_add_check,
                                     size: 16,
@@ -3843,7 +3881,7 @@ class _FindReplaceFloatingWindowState extends State<FindReplaceFloatingWindow> {
                             runSpacing: 4,
                             children: [
                               _buildOptionChip(
-                                label: "大小寫需相同",
+                                label: context.l10n.uiMatchCase,
                                 value: useRegexp
                                     ? true
                                     : widget.options.matchCase,
@@ -3856,7 +3894,7 @@ class _FindReplaceFloatingWindowState extends State<FindReplaceFloatingWindow> {
                                 },
                               ),
                               _buildOptionChip(
-                                label: "全字拼寫相符",
+                                label: context.l10n.uiWholeWords,
                                 value: widget.options.wholeWord,
                                 enabled: !disableWholeWord,
                                 onChanged: (value) {
@@ -3867,7 +3905,7 @@ class _FindReplaceFloatingWindowState extends State<FindReplaceFloatingWindow> {
                                 },
                               ),
                               _buildOptionChip(
-                                label: "使用正則表示",
+                                label: context.l10n.uiRegularExpression,
                                 value: widget.options.useRegexp,
                                 onChanged: (value) {
                                   setState(() {
@@ -3883,7 +3921,7 @@ class _FindReplaceFloatingWindowState extends State<FindReplaceFloatingWindow> {
                                 },
                               ),
                               _buildOptionChip(
-                                label: "全半形須相符",
+                                label: context.l10n.uiMatchCharacterWidth,
                                 value: useRegexp
                                     ? true
                                     : widget.options.matchWidth,
@@ -3896,7 +3934,7 @@ class _FindReplaceFloatingWindowState extends State<FindReplaceFloatingWindow> {
                                 },
                               ),
                               _buildOptionChip(
-                                label: "略過標點符號",
+                                label: context.l10n.uiIgnorePunctuation,
                                 value: widget.options.ignorePunctuation,
                                 onChanged: (value) {
                                   setState(() {
@@ -3906,7 +3944,7 @@ class _FindReplaceFloatingWindowState extends State<FindReplaceFloatingWindow> {
                                 },
                               ),
                               _buildOptionChip(
-                                label: "略過空白字元",
+                                label: context.l10n.uiIgnoreWhitespace,
                                 value: widget.options.ignoreWhitespace,
                                 onChanged: (value) {
                                   setState(() {

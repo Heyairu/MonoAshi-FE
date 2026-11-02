@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "control_shape.dart";
@@ -139,7 +140,7 @@ class AppNoticeBanner extends StatelessWidget {
               if (onDismiss != null)
                 IconButton(
                   visualDensity: VisualDensity.standard,
-                  tooltip: "關閉",
+                  tooltip: context.l10n.commonClose,
                   onPressed: onDismiss,
                   color: visuals.foregroundColor,
                   icon: const Icon(Icons.close),

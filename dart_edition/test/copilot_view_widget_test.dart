@@ -13,6 +13,7 @@ import "package:monogatari_assistant/features/copilot/data/copilot_http_transpor
 import "package:monogatari_assistant/features/copilot/data/copilot_settings_store.dart";
 import "package:monogatari_assistant/features/copilot/domain/copilot_models.dart";
 import "package:monogatari_assistant/modules/copliot.dart";
+import "package:monogatari_assistant/l10n/app_localization.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 final class _MemorySecureStore implements CopilotSecureKeyValueStore {
@@ -74,6 +75,49 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
   });
+
+  testWidgets(
+    'Japanese custom provider has a stable value across locale changes',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({'copilot_provider': '自訂'});
+      tester.view.physicalSize = const Size(480, 1100);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final store = CopilotSettingsStore(secureStore: _MemorySecureStore());
+      for (final locale in [
+        const Locale('ja'),
+        const Locale('en'),
+        const Locale('zh', 'TW'),
+      ]) {
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              locale: locale,
+              localizationsDelegates: AppLocalization.delegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: CopilotView(settingsStore: store),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        final provider = tester
+            .widgetList<AppDropdownField<String>>(
+              find.byType(AppDropdownField<String>),
+            )
+            .singleWhere(
+              (field) => field.options.any((option) => option.value == '自訂'),
+            );
+        expect(provider.value, '自訂');
+        expect(
+          provider.options.singleWhere((option) => option.value == '自訂').label,
+          lookupAppLocalizations(locale).uiCustom,
+        );
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 
   Future<void> pumpCopilot(
     WidgetTester tester, {

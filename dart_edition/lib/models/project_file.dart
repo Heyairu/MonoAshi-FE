@@ -1,4 +1,5 @@
 import "package:path/path.dart" as path;
+import "project_operation_error.dart";
 
 const String projectFileExtension = ".mnproj";
 
@@ -100,8 +101,17 @@ class AutoBackupCleanupResult {
 
 class FileException implements Exception {
   final String message;
+  final Object? cause;
+  final ProjectErrorCode code;
 
-  FileException(this.message);
+  FileException(this.message, {this.cause, ProjectErrorCode? code})
+    : code =
+          code ??
+          (cause is FileException
+              ? cause.code
+              : cause == null
+              ? ProjectErrorCode.unknown
+              : classifyProjectError(cause));
 
   @override
   String toString() => "FileException: $message";

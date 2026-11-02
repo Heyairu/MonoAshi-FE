@@ -1,16 +1,20 @@
 # i18n 與 Localization 實作規劃
 
-更新日期：2026-11-01  
-狀態：P1 語系基礎與入口已實作；其餘介面及內容翻譯仍依階段進行。  
+更新日期：2026-11-02
+狀態：P1 語系基礎、P2 共用操作與 P3 功能模組已實作；P4 已補齊三語完整離線說明、共用日期／數字格式與字型政策；原生發布資源另行驗收。P5 語言審校與原生多平台實機驗收仍是發布工作。
 第一階段語言：**繁體中文、英文、日文**（使用者已確認）。
 
-已落地：`gen-l10n`／ARB、語系解析、系統跟隨、即時切換、本機偏好、依序寫入與失敗回復、UI 字型與 Quill 繁中 adapter，以及 OOBE 首頁／標題／導覽和一般設定相關文案。三個 App 分支共用 delegate 與解析規則。其餘 OOBE 內容、Ribbon、功能模組與多語 Help 尚未完成；實際功能範圍見 [GUIDE.md](GUIDE.md)。
+已落地：`gen-l10n`／ARB、語系解析、系統跟隨、即時切換、本機偏好、依序寫入與失敗回復、UI 字型與 Quill 繁中 adapter，以及 OOBE 首頁／標題／導覽和一般設定相關文案。三個 App 分支共用 delegate 與解析規則。後續已完成其餘 OOBE、Ribbon、導覽、檔案／編輯操作及功能模組文案，三語 ARB 各 2,344 筆；三語 Help 各有完整 64 篇、167 個章節、258 段內文與 230 個步驟，切換語系會更新快取。實際功能範圍見 [GUIDE.md](GUIDE.md)。
 
 語言在 OOBE 透過共用選單直接寫入 SettingsStateNotifier，獨立於 `OobePreferences` 的完成草稿；不再把語言複製進草稿，避免完成引導時用舊值覆蓋較新的即時選擇。
 
 生成工具鏈備註：本機 Dart 3.13 SDK 與既有 analyzer 7.6.0／Freezed 2.5.8 的一般 `build_runner` 解析遇到 `Missing implementation of visitDotShorthandPropertyAccess`。本次使用相同鎖定的 Freezed，在暫存環境以未改動的 model 與最小外部型別宣告產生 `app_state_data.freezed.dart`，再以實際 App 依賴進行編譯、分析與測試；沒有手改生成檔或升級相依。一般全專案 Freezed 重建仍需另外解決 SDK／generator 相容性，不能將本次功能測試視為該工具鏈問題已修復。
 
 P1 驗證紀錄：語系解析、儲存、切換、OOBE、設定版面、導覽、主題及 Help 的 111 項組合測試，以及正式 MainApp 分支 2 項、三語窄螢幕／200% 縮放 3 項，合計 116 項通過。全專案靜態分析為 0 error／0 warning，另有 183 項風格 info；變更檔格式檢查通過。初始化政策工具仍報出 5 處：`main.dart` 的寫作進度初始化與 listener 片段，以及 `writing_goal_dialog.dart` 的三個專案／目標讀取；均非本次新增的語系初始化讀取。因此不宣稱整條既有 CI pipeline 已通過。
+
+P2–P4 驗證（2026-11-02）：完整 Flutter 回歸 1,324 項通過、4 項略過；另以最終人物問卷、訊息 descriptor、三語資源與實際 asset bundle、色票、寫作目標及關係圖重跑 35 項通過。舊 1.20／1.21、六種中文角色類型、自訂值（含前後空白）、UUID、原文與恢復資料的往返保存已覆蓋。檔案格式為 1.22、協作 schema 為 8。此回歸紀錄早於本次 P4 全文補齊；目前三語 Help 保留相同 64 個 topic ID、章節／段落／步驟結構與 related links；本機原生多平台實機及語言審校不由這些自動測試取代。
+
+P4 補齊驗證（2026-11-02）：三語 Help 全文、快速切換載入競態、搜尋／歷史保留、英日窄螢幕 200% 文字縮放、日期／數字／百分比／容量、字型實際 cmap／字重與 bundle，以及啟動／錯誤字型皆已覆蓋。67 項格式／Help／時間軸／切換測試與 26 項日期 bootstrap／OOBE 測試通過。完整回歸初跑為 1,347 通過、4 略過、1 個舊文案斷言失敗（仍期待 `3000`，實際顯示 `3,000`）；更新斷言並加驗輸入欄仍為 `2000` 後，同檔 3 項重跑全數通過，因此 1,348 個非略過案例均有通過紀錄。沒有重跑整套第二次。最終靜態分析 0 error／0 warning、226 info；111 個變更 Dart 檔格式檢查與 `git diff --check` 通過。日期符號只快取註冊狀態，每次初始化回傳新 Future，已驗證不同 widget 工作階段均可完成。原生平台的字形視覺審查與人工語言審校仍待 P5。
 
 ## 1. 目標與範圍
 
@@ -72,7 +76,8 @@ dart_edition/
     app_locale.dart           # 可選語言、名稱與偏好正規化
     locale_resolution.dart    # 純函式解析與回退策略
     l10n_extensions.dart      # context.l10n
-    locale_formatters.dart    # 日期／數字顯示格式
+    app_formatters.dart       # 日期／數字顯示格式
+    app_fonts.dart            # 離線字型與語系回退順序
     ribbon_localizations.dart # App ARB 到套件 labels 的 adapter
   assets/help/
     zh_TW.json                # 保留現有路徑，由 locale manifest 對應
@@ -175,16 +180,17 @@ App 的命令 label、disabled reason、tooltip 與語意文字放入 App ARB。
 - 非同步載入採請求版本或 locale 比對，快速切換時不得讓較舊結果覆蓋較新結果。
 - `id`、`relatedIds` 與 F1 topic 維持一致；保留目前 topic 和瀏覽歷史。搜尋 query 可保留，結果以新語系重新計算。
 - 翻譯 title、category、keywords、sections；三語均檢查重複／缺漏 topic 和無效連結。日文搜尋驗證無空格關鍵詞，不假設所有 query 都以空格分詞。
-- 開發期缺少個別文章可逐 topic 回退繁中並標示來源語言；正式三語發布時要求目前 64 個主題及新增主題完整，不能以回退充當完成。
+- 正式資源以 `assets/help/manifest.json`（contentVersion 2）校驗語系、版本、完整 ID 集合；錯誤提供重試，不把缺漏靜默回退成另一語言。三語每篇章節／段落／步驟數的一致性由 `offline_help_localization_test.dart` 驗證。
+- 搜尋涵蓋標題、分類、關鍵詞與全文，英文不分大小寫，輸入法的全形 ASCII／空格正規化後照常搜尋；日文不必分詞。
 - `didyouknow.json` 是引用內容，先保留原文與來源標示；`name_eastAsia.json`、`fillerwords.json`、內建詞語資料按內容語言選擇。使用者已編輯或匯入的詞庫不因 UI locale 被覆蓋。
 
 ### 5.4 日期、數字、字型與版面
 
-- Formatter 明確接收 resolved locale；避免依賴可變的全域 `Intl.defaultLocale`。在啟動階段初始化所需日期符號，避免切換後才出現未初始化錯誤。
-- 使用語系日期 skeleton，例如 `yMd`／`yMMMd`，時間採已明確定義的顯示策略；此階段沿用裝置本地時區。介面語言本身不表示使用者所在國家或時區。
+- `context.formats`／`AppFormatters` 明確接收有效語系，不讀寫全域 `Intl.defaultLocale`。啟動時載入 intl 隨附日期符號，獨立元件亦能同步初始化；不需網路。
+- 日期使用 `yMd`（英文月／日／年、繁中與日文年／月／日），時間維持 24 小時制；日期時間轉為裝置本地時區。介面語言不改變時區。
 - 數字、百分比、進度與「字／詞／項」使用 formatter／ARB；既有 grapheme 及 `WordCountMode` 演算法保持獨立，切換日文不改變計數結果。
-- 輸入顯示可本地化，寫入 XML／JSON、manifest、協定與檔名時間戳仍使用既有機器格式；不把千分位字串當數值保存。
-- Theme 的主要 UI 字型使用 resolved locale：繁中 NotoSansTC、日文 NotoSansJP、英文 NotoSans，保留既有混合文字 fallback。作品編輯器的字型偏好另行保留。
+- 顯示的整數／小數、百分比與二進位容量使用共用 formatter；容量沿用 B／KB／MB 標籤與 1024 進位。可編輯數字欄保持可解析的原值；XML／JSON、manifest、協定、ID 與檔名時間戳不使用本地化字串。
+- `AppFonts` 統一主要字型與回退：繁中 NotoSansTC、日文 NotoSansJP、英文 NotoSans；優先目前語系的 CJK 字形，保留 Latin／其他既有回退。啟動、錯誤、明暗 Theme 與 OOBE 背景採同一政策。八個字型資產均隨 App 提供，測試實際 cmap／variable weight 與 asset manifest；作品文字與自訂樣式保持原值。
 - 對固定寬度、固定高度、手動換行、`Row` 中未加彈性約束的 label 做盤點；Tooltip／semantics 不可因視覺截斷而遺失完整訊息。
 - 驗證繁中、英文、日文與 30–50% 長度膨脹的測試文案，涵蓋手機窄寬、桌面最小視窗及 200% 文字縮放；新增版面採 `EdgeInsetsDirectional` 等方向性 API。
 - 原生 App 名稱、iOS bundle localization、macOS 選單、Windows／Linux 資源與安裝程式逐平台盤點；原生系統 UI 的語言可能與 App 手動偏好不同，發布說明需描述實測行為。

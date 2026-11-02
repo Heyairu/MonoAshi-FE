@@ -9,7 +9,8 @@ import "package:characters/characters.dart";
 /// version. XML is a checkpoint/persistence format and never appears in a
 /// realtime operation.
 abstract final class CollaborationSchema {
-  static const int currentVersion = 7;
+  // Schema 8 uses locale-independent character role identifiers (project 1.22).
+  static const int currentVersion = 8;
   static const String projectTextDocumentPrefix = "projectText:";
   static const int maximumOperationsPerBatch = 128;
   static const int maximumInsertedTextBytes = 24 * 1024;

@@ -109,7 +109,12 @@ void main() {
     await mount(tester, container);
     await tester.tap(find.text('預設'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('本檔案仍使用專屬目標 3000 字'), findsOneWidget);
+    expect(find.textContaining('本檔案仍使用專屬目標 3,000 字'), findsOneWidget);
+    // Grouped presentation must not leak into the editable numeric value.
+    expect(
+      tester.widget<TextFormField>(find.byType(TextFormField)).controller!.text,
+      '2000',
+    );
     await tester.enterText(find.byType(TextFormField), '2500');
     await tester.tap(find.text('套用'));
     await tester.pumpAndSettle();

@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
@@ -367,13 +368,17 @@ class LabeledSlider extends StatelessWidget {
        assert(divisions == null || divisions > 0),
        assert(inlineTitleWidth > 0);
 
-  String _formatValue(double sliderValue) {
+  String _formatValue(BuildContext context, double sliderValue) {
     if (valueLabelBuilder != null) {
       return valueLabelBuilder!(sliderValue);
     }
     return sliderValue == sliderValue.roundToDouble()
-        ? sliderValue.toStringAsFixed(0)
-        : sliderValue.toStringAsFixed(1);
+        ? context.formats.integer(sliderValue.toInt(), grouping: false)
+        : context.formats.decimal(
+            sliderValue,
+            minimumFractionDigits: 1,
+            grouping: false,
+          );
   }
 
   Widget _buildControl(BuildContext context) {
@@ -395,7 +400,7 @@ class LabeledSlider extends StatelessWidget {
           min: min,
           max: max,
           divisions: divisions,
-          label: _formatValue(value),
+          label: _formatValue(context, value),
           onChanged: onChanged,
           onChangeStart: onChangeStart,
           onChangeEnd: onChangeEnd,
@@ -424,7 +429,7 @@ class LabeledSlider extends StatelessWidget {
         if (showValue) ...[
           const SizedBox(width: 8),
           Text(
-            _formatValue(value),
+            _formatValue(context, value),
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: colorScheme.primary,
               fontWeight: FontWeight.bold,
@@ -497,13 +502,17 @@ class IconedSlider extends StatelessWidget {
        assert(divisions == null || divisions > 0),
        assert(inlineTitleWidth > 0);
 
-  String _formatValue(double sliderValue) {
+  String _formatValue(BuildContext context, double sliderValue) {
     if (valueLabelBuilder != null) {
       return valueLabelBuilder!(sliderValue);
     }
     return sliderValue == sliderValue.roundToDouble()
-        ? sliderValue.toStringAsFixed(0)
-        : sliderValue.toStringAsFixed(1);
+        ? context.formats.integer(sliderValue.toInt(), grouping: false)
+        : context.formats.decimal(
+            sliderValue,
+            minimumFractionDigits: 1,
+            grouping: false,
+          );
   }
 
   Widget _buildControl(BuildContext context) {
@@ -522,7 +531,7 @@ class IconedSlider extends StatelessWidget {
         if (showValue) ...[
           const SizedBox(width: 8),
           Text(
-            _formatValue(value),
+            _formatValue(context, value),
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: colorScheme.primary,
               fontWeight: FontWeight.bold,
@@ -535,7 +544,7 @@ class IconedSlider extends StatelessWidget {
             min: min,
             max: max,
             divisions: divisions,
-            label: _formatValue(value),
+            label: _formatValue(context, value),
             onChanged: onChanged,
             onChangeStart: onChangeStart,
             onChangeEnd: onChangeEnd,
@@ -563,7 +572,7 @@ class InlineEditableText extends StatefulWidget {
   final VoidCallback? onEdit;
   final ValueChanged<String> onSubmitted;
   final VoidCallback? onCanceled;
-  final String emptyText;
+  final String? emptyText;
   final String? hintText;
   final TextStyle? style;
   final int maxLines;
@@ -581,7 +590,7 @@ class InlineEditableText extends StatefulWidget {
     required this.onSubmitted,
     this.onEdit,
     this.onCanceled,
-    this.emptyText = "（未命名）",
+    this.emptyText,
     this.hintText,
     this.style,
     this.maxLines = 1,
@@ -662,7 +671,9 @@ class _InlineEditableTextState extends State<InlineEditableText> {
             onTap: widget.editOnTap ? widget.onEdit : null,
             onDoubleTap: widget.editOnTap ? null : widget.onEdit,
             child: Text(
-              widget.value.isEmpty ? widget.emptyText : widget.value,
+              widget.value.isEmpty
+                  ? (widget.emptyText ?? context.l10n.uiUntitled)
+                  : widget.value,
               maxLines: widget.maxLines,
               overflow: widget.maxLines == 1 ? TextOverflow.ellipsis : null,
               textAlign: widget.textAlign,
@@ -678,14 +689,14 @@ class _InlineEditableTextState extends State<InlineEditableText> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                tooltip: "儲存",
+                tooltip: context.l10n.commonSave,
                 visualDensity: VisualDensity.standard,
                 onPressed: _submit,
                 icon: const Icon(Icons.check),
               ),
               if (widget.onCanceled != null)
                 IconButton(
-                  tooltip: "取消",
+                  tooltip: context.l10n.commonCancel,
                   visualDensity: VisualDensity.standard,
                   onPressed: widget.onCanceled,
                   icon: const Icon(Icons.close),

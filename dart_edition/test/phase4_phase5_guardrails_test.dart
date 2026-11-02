@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:monogatari_assistant/l10n/app_localization.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter/services.dart";
 import "package:flutter_test/flutter_test.dart";
@@ -200,12 +201,29 @@ void main() {
 
     expect(find.text("別名"), findsOneWidget);
     expect(find.text("角色類型"), findsOneWidget);
-    expect(find.text(defaultCharacterType), findsOneWidget);
-    expect(find.text("角色類型：$defaultCharacterType"), findsOneWidget);
+    expect(
+      find.text(
+        lookupAppLocalizations(
+          defaultAppLocale,
+        ).characterTypeLabel(defaultCharacterType),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.text(
+        "角色類型：${lookupAppLocalizations(defaultAppLocale).characterTypeLabel(defaultCharacterType)}",
+      ),
+      findsOneWidget,
+    );
     await expandSection("角色類型");
     for (final characterType in characterTypeOptions) {
       expect(
-        find.widgetWithText(RadioListTile<String>, characterType),
+        find.widgetWithText(
+          RadioListTile<String>,
+          lookupAppLocalizations(
+            defaultAppLocale,
+          ).characterTypeLabel(characterType),
+        ),
         findsOneWidget,
       );
     }
@@ -229,7 +247,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1200));
     expect(
       container.read(characterDataProvider)[alice.characterId]!.characterType,
-      "主角",
+      "protagonist",
     );
 
     await expandSection("人物關係描述");
@@ -409,25 +427,54 @@ void main() {
     await tester.tap(relationshipRow);
     await tester.pumpAndSettle();
 
-    final relationshipEditor = find.byWidgetPredicate(
-      (widget) =>
-          widget is AppTwoColumnTableEditor && widget.firstLabel == "人物",
+    final relationshipTable = find.byKey(
+      const ValueKey("character-relationships-table"),
     );
+    final relationshipEditor = find
+        .ancestor(of: relationshipTable, matching: find.byType(Column))
+        .first;
     expect(
-      tester.widget<AppTwoColumnTableEditor>(relationshipEditor).isEditing,
+      tester
+          .widget<AppThreeColumnTableRow>(
+            find
+                .descendant(
+                  of: relationshipTable,
+                  matching: find.byType(AppThreeColumnTableRow),
+                )
+                .first,
+          )
+          .selected,
       isTrue,
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(
-      tester.widget<AppTwoColumnTableEditor>(relationshipEditor).isEditing,
+      tester
+          .widget<AppThreeColumnTableRow>(
+            find
+                .descendant(
+                  of: relationshipTable,
+                  matching: find.byType(AppThreeColumnTableRow),
+                )
+                .first,
+          )
+          .selected,
       isFalse,
     );
 
     await tester.tap(find.text("Bob"));
     await tester.pumpAndSettle();
     expect(
-      tester.widget<AppTwoColumnTableEditor>(relationshipEditor).isEditing,
+      tester
+          .widget<AppThreeColumnTableRow>(
+            find
+                .descendant(
+                  of: relationshipTable,
+                  matching: find.byType(AppThreeColumnTableRow),
+                )
+                .first,
+          )
+          .selected,
       isTrue,
     );
     final relationshipDeleteButton = find.descendant(
@@ -476,10 +523,12 @@ void main() {
     await tester.tap(relationshipSection);
     await tester.pumpAndSettle();
 
-    final relationshipEditor = find.byWidgetPredicate(
-      (widget) =>
-          widget is AppTwoColumnTableEditor && widget.firstLabel == "人物",
+    final relationshipTable = find.byKey(
+      const ValueKey("character-relationships-table"),
     );
+    final relationshipEditor = find
+        .ancestor(of: relationshipTable, matching: find.byType(Column))
+        .first;
     final combo = find.descendant(
       of: relationshipEditor,
       matching: find.byType(AppComboBoxField),
@@ -502,7 +551,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.widget<TextField>(personField).controller!.text, "Bob");
 
-    final relationshipField = _findTextFieldByLabel(tester, "關係");
+    final relationshipField = _findTextFieldByLabel(tester, "外在關係（可留空）");
     await tester.enterText(relationshipField, "朋友");
     await tester.pump();
     final addButton = find.descendant(

@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "../ui_library/spacing.dart";
@@ -110,14 +111,14 @@ class _PunctuationPanelState extends State<PunctuationPanel> {
                   ButtonSegment<bool>(
                     value: true,
                     label: Text(
-                      "全",
+                      context.l10n.uiFull,
                       style: Theme.of(context).textTheme.labelSmall,
                     ),
                   ),
                   ButtonSegment<bool>(
                     value: false,
                     label: Text(
-                      "半",
+                      context.l10n.uiHalf,
                       style: Theme.of(context).textTheme.labelSmall,
                     ),
                   ),

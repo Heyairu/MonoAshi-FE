@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "../ui_library/forms.dart";
 
@@ -42,7 +43,11 @@ class _AliasTermsState extends State<AliasTerms> {
   void _commit() {
     final text = _editor.text.trim();
     if (text.isEmpty || (text != _original && widget.values.contains(text))) {
-      setState(() => _error = text.isEmpty ? "請輸入別名" : "別名已存在");
+      setState(
+        () => _error = text.isEmpty
+            ? context.l10n.uiEnterAnAlias
+            : context.l10n.uiAliasAlreadyExists,
+      );
       return;
     }
     final next = [...widget.values];
@@ -51,7 +56,9 @@ class _AliasTermsState extends State<AliasTerms> {
     } else {
       final index = next.indexOf(_original!);
       if (index < 0) {
-        setState(() => _error = "此別名已移除，請取消後重試");
+        setState(
+          () => _error = context.l10n.uiThisAliasWasRemovedCancelAndTryAgain,
+        );
         return;
       }
       next[index] = text;
@@ -67,7 +74,7 @@ class _AliasTermsState extends State<AliasTerms> {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Text("別名"),
+      Text(context.l10n.uiAlias),
       const SizedBox(height: 8),
       Wrap(
         spacing: 7,
@@ -77,7 +84,7 @@ class _AliasTermsState extends State<AliasTerms> {
           for (final value in widget.values)
             InputChip(
               label: Text(value),
-              tooltip: "編輯「$value」",
+              tooltip: context.l10n.uiEdit2((value).toString()),
               onPressed: () => _begin(value),
               onDeleted: () =>
                   widget.onChanged([...widget.values]..remove(value)),
@@ -85,7 +92,7 @@ class _AliasTermsState extends State<AliasTerms> {
           if (!_editing)
             ActionChip(
               avatar: const Icon(Icons.add, size: 18),
-              label: const Text("新增別名"),
+              label: Text(context.l10n.uiAddAlias),
               onPressed: () => _begin(),
             ),
           if (_editing)
@@ -101,7 +108,7 @@ class _AliasTermsState extends State<AliasTerms> {
                         context,
                         decoration: InputDecoration(
                           isDense: true,
-                          hintText: "輸入別名",
+                          hintText: context.l10n.uiEnterAlias,
                           errorText: _error,
                         ),
                       ),
@@ -109,12 +116,12 @@ class _AliasTermsState extends State<AliasTerms> {
                     ),
                   ),
                   IconButton(
-                    tooltip: "儲存",
+                    tooltip: context.l10n.commonSave,
                     onPressed: _commit,
                     icon: const Icon(Icons.check),
                   ),
                   IconButton(
-                    tooltip: "取消",
+                    tooltip: context.l10n.commonCancel,
                     onPressed: () => setState(() => _editing = false),
                     icon: const Icon(Icons.close),
                   ),

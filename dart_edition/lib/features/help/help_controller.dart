@@ -1,6 +1,7 @@
 // Copyright 2025-2026 Heyairu（部屋伊琉）
 // Licensed under the Apache License, Version 2.0.
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import 'dart:async';
 import 'package:flutter/gestures.dart' show GestureBinding;
 import 'package:flutter/material.dart';
@@ -16,9 +17,9 @@ class HelpController extends ChangeNotifier {
   HelpController({
     required this.navigatorKey,
     Future<HelpCatalog> Function()? loadCatalog,
-  }) : loadCatalog = loadCatalog ?? HelpCatalog.load;
+  }) : loadCatalog = loadCatalog;
   final GlobalKey<NavigatorState> navigatorKey;
-  final Future<HelpCatalog> Function() loadCatalog;
+  final Future<HelpCatalog> Function()? loadCatalog;
   final selectedTopic = ValueNotifier(HelpTopicId.home);
   final pickerFocus = FocusNode(debugLabel: 'Help picker', skipTraversal: true);
   final viewerFocus = FocusNode(debugLabel: 'Help viewer', skipTraversal: true);
@@ -41,6 +42,7 @@ class HelpController extends ChangeNotifier {
   FocusNode? _originFocus;
   String _originTopic = HelpTopicId.home;
   Future<HelpCatalog>? _catalog;
+  String? _catalogKey;
 
   static HelpController? maybeOf(BuildContext context) =>
       context.getInheritedWidgetOfExactType<_HelpAccess>()?.controller;
@@ -137,9 +139,19 @@ class HelpController extends ChangeNotifier {
         builder: (context) {
           _viewerRoute = ModalRoute.of<void>(context);
           return HelpViewer(
+            catalogKey: HelpAssets.cacheKey(context.l10n.localeName),
             topic: selectedTopic,
             focusNode: viewerFocus,
-            loadCatalog: () => _catalog ??= loadCatalog(),
+            loadCatalog: () {
+              final locale = context.l10n.localeName;
+              final key = HelpAssets.cacheKey(locale);
+              if (_catalogKey != key) {
+                _catalogKey = key;
+                _catalog = null;
+              }
+              return _catalog ??=
+                  loadCatalog?.call() ?? HelpCatalog.load(localeName: locale);
+            },
             retryCatalog: () {
               _catalog = null;
             },
@@ -285,7 +297,7 @@ class _AppHelpHostState extends State<AppHelpHost> with WidgetsBindingObserver {
           children: [
             widget.child,
             if (controller.isPicking)
-              const Positioned(
+              Positioned(
                 left: 16,
                 right: 16,
                 bottom: 16,
@@ -295,7 +307,7 @@ class _AppHelpHostState extends State<AppHelpHost> with WidgetsBindingObserver {
                     child: Padding(
                       padding: EdgeInsets.all(12),
                       child: Text(
-                        '點選項目查看說明，Esc 取消',
+                        context.l10n.uiSelectAControlToViewHelpEscCancels,
                         textAlign: TextAlign.center,
                       ),
                     ),

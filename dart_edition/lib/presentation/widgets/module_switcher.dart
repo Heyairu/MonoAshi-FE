@@ -1,6 +1,7 @@
 // Copyright 2025-2026 Heyairu（部屋伊琉）
 // Licensed under the Apache License, Version 2.0.
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../features/navigation/app_module.dart';
@@ -27,9 +28,10 @@ class _ModuleSwitcherState extends State<ModuleSwitcher> {
   late AppModule _selected = widget.current;
   List<AppModule> get _matches => AppModule.all
       .where(
-        (module) => module.label.toLowerCase().contains(
-          _query.text.trim().toLowerCase(),
-        ),
+        (module) => context.l10n
+            .legacyLabel(module.label)
+            .toLowerCase()
+            .contains(_query.text.trim().toLowerCase()),
       )
       .toList();
 
@@ -93,7 +95,7 @@ class _ModuleSwitcherState extends State<ModuleSwitcher> {
         Theme.of(context).platform == TargetPlatform.macOS ||
         Theme.of(context).platform == TargetPlatform.iOS;
     return AlertDialog(
-      title: const Text('切換模組'),
+      title: Text(context.l10n.uiSwitchModule),
       content: SizedBox(
         width: 440,
         height: 480,
@@ -104,8 +106,8 @@ class _ModuleSwitcherState extends State<ModuleSwitcher> {
               controller: _query,
               focusNode: _focus,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: '搜尋模組',
+              decoration: InputDecoration(
+                labelText: context.l10n.uiSearchModules,
                 prefixIcon: Icon(Icons.search),
               ),
               onChanged: (_) => setState(() {
@@ -122,7 +124,7 @@ class _ModuleSwitcherState extends State<ModuleSwitcher> {
             const SizedBox(height: 8),
             Expanded(
               child: matches.isEmpty
-                  ? const Center(child: Text('找不到符合的模組'))
+                  ? Center(child: Text(context.l10n.uiNoMatchingModules))
                   : ListView(
                       controller: _scroll,
                       itemExtent: _rowHeight,
@@ -132,9 +134,9 @@ class _ModuleSwitcherState extends State<ModuleSwitcher> {
                             key: ValueKey('module-choice-${module.id.name}'),
                             selected: module == _selected,
                             leading: Icon(module.icon),
-                            title: Text(module.label),
+                            title: Text(context.l10n.legacyLabel(module.label)),
                             subtitle: module == widget.current
-                                ? const Text('目前模組')
+                                ? Text(context.l10n.uiCurrentModule)
                                 : null,
                             trailing: module.digit == null
                                 ? null
@@ -152,7 +154,7 @@ class _ModuleSwitcherState extends State<ModuleSwitcher> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(context.l10n.commonCancel),
         ),
       ],
     );

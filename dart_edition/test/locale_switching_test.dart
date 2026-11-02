@@ -152,7 +152,7 @@ void main() {
         AppLocalePreference.japanese,
         key: 'oobe-language',
       );
-      expect(find.text('ヤッホー！MonoAshi へようこそ'), findsOneWidget);
+      expect(find.text('ヤッホー！ものアシへようこそ'), findsOneWidget);
       expect(tester.state(find.byType(MainApp)), same(appState));
       expect(tester.state(find.byType(OobeScreen)), same(setupState));
       expect(tester.takeException(), isNull);
@@ -177,10 +177,23 @@ void main() {
       await tester.pump();
       final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
       expect(app.locale, const Locale('ja'));
+      expect(app.theme!.textTheme.bodyMedium!.fontFamily, 'NotoSansJP');
+      expect(
+        app.theme!.textTheme.bodyMedium!.fontFamilyFallback,
+        AppFonts.fallbacks(const Locale('ja')),
+      );
       expect(app.localizationsDelegates, AppLocalization.delegates);
       pending.completeError(StateError('setup unavailable'));
       await tester.pumpAndSettle();
       expect(find.textContaining('初期化に失敗しました：'), findsOneWidget);
+      final failureTheme = tester
+          .widget<MaterialApp>(find.byType(MaterialApp))
+          .theme!;
+      expect(failureTheme.textTheme.bodyMedium!.fontFamily, 'NotoSansJP');
+      expect(
+        failureTheme.textTheme.bodyMedium!.fontFamilyFallback,
+        AppFonts.fallbacks(const Locale('ja')),
+      );
       expect(
         tester
             .widget<MaterialApp>(find.byType(MaterialApp))

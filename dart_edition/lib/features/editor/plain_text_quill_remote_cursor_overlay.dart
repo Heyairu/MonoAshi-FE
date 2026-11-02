@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "package:flutter_quill/flutter_quill.dart";
 import "../../ui_library/spacing.dart";
@@ -176,7 +177,7 @@ class _PlainTextQuillRemoteCaretMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Semantics(
-      label: "${position.cursor.ipAddress} 的游標",
+      label: context.l10n.uiSCursor((position.cursor.ipAddress).toString()),
       child: SizedBox(
         key: ValueKey<String>(
           "plain-text-quill-remote-caret-${position.cursor.replicaId}",

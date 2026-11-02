@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
@@ -63,7 +64,7 @@ class RevisionFieldMarker extends ConsumerWidget {
       RevisionChangeKind.modified => Colors.orange.shade800,
     };
     return Semantics(
-      label: "$field 修訂：$label",
+      label: context.l10n.uiChanges((field).toString(), (label).toString()),
       button: true,
       child: TextButton(
         onPressed: () => ref
@@ -113,7 +114,7 @@ class RevisionRecordMarker extends ConsumerWidget {
       RevisionChangeKind.modified => "Modified",
     };
     return Semantics(
-      label: "項目修訂：$label",
+      label: context.l10n.uiItemChanges((label).toString()),
       button: true,
       child: TextButton(
         onPressed: () => ref

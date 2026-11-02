@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter/services.dart";
@@ -572,7 +573,7 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
       categoryId,
       categoryTree,
     );
-    return category?.name ?? "未知類別";
+    return category?.name ?? context.l10n.uiUnknownCategory;
   }
 
   String _normalizeTerm(String value) {
@@ -586,7 +587,7 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
         return custom;
       }
     }
-    return entry.partOfSpeech.label;
+    return context.l10n.legacyLabel(entry.partOfSpeech.label);
   }
 
   void _deduplicateEntriesByTerm(
@@ -672,7 +673,7 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
       context: context,
       title: title,
       message: message,
-      confirmLabel: "刪除",
+      confirmLabel: context.l10n.commonDelete,
       destructive: true,
     );
   }
@@ -783,7 +784,7 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
     final String jsonContent = jsonEncode(payload);
 
     final String? savedPath = await FilePicker.platform.saveFile(
-      dialogTitle: "匯出詞語",
+      dialogTitle: context.l10n.uiExportWordReference,
       fileName: defaultName,
       type: FileType.custom,
       allowedExtensions: ["json"],
@@ -801,7 +802,7 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
       if (!mounted) return;
       AppFeedback.error(
         context,
-        "匯出失敗：無法寫入檔案",
+        context.l10n.uiExportFailedCouldNotWriteTheFile,
         duration: const Duration(seconds: 2),
       );
       return;
@@ -811,7 +812,10 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
     final String name = resolvedPath.replaceAll("\\", "/").split("/").last;
     AppFeedback.success(
       context,
-      "匯出完成：$name\n$resolvedPath",
+      context.l10n.uiExportComplete2(
+        (name).toString(),
+        (resolvedPath).toString(),
+      ),
       duration: const Duration(seconds: 3),
     );
   }
@@ -891,7 +895,7 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
 
       if (newEntrySamples.length < 6) {
         final String term = importedEntry.term.trim();
-        newEntrySamples.add(term.isEmpty ? "(空白詞條)" : term);
+        newEntrySamples.add(term.isEmpty ? context.l10n.uiEmptyEntry : term);
       }
       return pseudoId;
     }
@@ -920,7 +924,9 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
           newCategoryCount++;
           if (newCategorySamples.length < 6) {
             newCategorySamples.add(
-              incoming.name.trim().isEmpty ? "(未命名分類)" : incoming.name,
+              incoming.name.trim().isEmpty
+                  ? context.l10n.uiUnnamedCategory
+                  : incoming.name,
             );
           }
         } else {
@@ -962,7 +968,7 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
       context: context,
       builder: (context) {
         return AppDialog(
-          title: "匯入預覽",
+          title: context.l10n.uiImportPreview,
           icon: Icons.preview_outlined,
           content: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 460),
@@ -971,21 +977,41 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("將新增分類：${summary.newCategoryCount}"),
-                  Text("將合併到既有分類：${summary.mergedCategoryCount}"),
-                  Text("將匯入新詞條：${summary.newEntryCount}"),
-                  Text("將重用既有詞條：${summary.reusedEntryCount}"),
-                  Text("將新增分類條目連結：${summary.newLinkCount}"),
+                  Text(
+                    context.l10n.uiCategoriesToAdd(
+                      (summary.newCategoryCount).toString(),
+                    ),
+                  ),
+                  Text(
+                    context.l10n.uiCategoriesToMerge(
+                      (summary.mergedCategoryCount).toString(),
+                    ),
+                  ),
+                  Text(
+                    context.l10n.uiNewEntriesToImport(
+                      (summary.newEntryCount).toString(),
+                    ),
+                  ),
+                  Text(
+                    context.l10n.uiExistingEntriesToReuse(
+                      (summary.reusedEntryCount).toString(),
+                    ),
+                  ),
+                  Text(
+                    context.l10n.uiCategoryEntryLinksToAdd(
+                      (summary.newLinkCount).toString(),
+                    ),
+                  ),
                   if (summary.newCategorySamples.isNotEmpty) ...[
                     const SizedBox(height: 10),
-                    const Text("新增分類（最多顯示 6 筆）"),
+                    Text(context.l10n.uiNewCategoriesUpToShown),
                     const SizedBox(height: 4),
                     for (final String item in summary.newCategorySamples)
                       Text("- $item"),
                   ],
                   if (summary.newEntrySamples.isNotEmpty) ...[
                     const SizedBox(height: 10),
-                    const Text("新增詞條（最多顯示 6 筆）"),
+                    Text(context.l10n.uiNewEntriesUpToShown),
                     const SizedBox(height: 4),
                     for (final String item in summary.newEntrySamples)
                       Text("- $item"),
@@ -997,11 +1023,11 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text("確認匯入"),
+              child: Text(context.l10n.uiConfirmImport),
             ),
           ],
         );
@@ -1035,7 +1061,7 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
       if (!mounted) return;
       AppFeedback.error(
         context,
-        "匯入檔案格式錯誤",
+        context.l10n.uiInvalidImportFileFormat,
         duration: const Duration(seconds: 1),
       );
       return;
@@ -1157,7 +1183,12 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
     if (!mounted) return;
     AppFeedback.success(
       context,
-      "匯入完成：新增類別 $createdCategoryCount、匯入新詞條 $createdEntryCount、重用既有詞條 $reusedEntryCount、連結詞條 $linkedEntryCount",
+      context.l10n.uiImportCompleteNewCategoriesNewEntriesReusedEntries(
+        (createdCategoryCount).toString(),
+        (createdEntryCount).toString(),
+        (reusedEntryCount).toString(),
+        (linkedEntryCount).toString(),
+      ),
       duration: const Duration(seconds: 2),
     );
   }
@@ -1192,8 +1223,10 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
 
   Future<void> _addCategory({String? parentId}) async {
     final String? name = await _showTextInputDialog(
-      title: parentId == null ? "新增分類" : "新增子分類",
-      hint: "輸入分類名稱",
+      title: parentId == null
+          ? context.l10n.uiAddCategory
+          : context.l10n.uiAddSubcategory,
+      hint: context.l10n.uiEnterACategoryName,
     );
     if (!mounted) return;
     if (name == null || name.isEmpty) return;
@@ -1273,8 +1306,10 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
     if (category == null) return;
 
     final bool confirmed = await _showConfirmDialog(
-      title: "刪除分類",
-      message: "確定要刪除「${category.name}」及其子分類嗎？",
+      title: context.l10n.uiDeleteCategory,
+      message: context.l10n.uiDeleteAndItsSubcategories(
+        (category.name).toString(),
+      ),
     );
     if (!mounted) return;
     if (!confirmed) return;
@@ -1322,9 +1357,11 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
     final List<GlossaryCategory> categoryTree = _readCategoryTree();
 
     final bool confirmed = await _showConfirmDialog(
-      title: "移除詞條",
-      message:
-          "確定要從「${_categoryName(entryRef.sourceCategoryId, categoryTree)}」移除「${entry.term}」嗎？",
+      title: context.l10n.uiRemoveEntry,
+      message: context.l10n.uiRemoveFrom(
+        (_categoryName(entryRef.sourceCategoryId, categoryTree)).toString(),
+        (entry.term).toString(),
+      ),
     );
     if (!mounted) return;
     if (!confirmed) return;
@@ -1408,14 +1445,14 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
                 Row(
                   children: [
                     Text(
-                      "第 ${index + 1} 組",
+                      context.l10n.uiGroup((index + 1).toString()),
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                     const Spacer(),
                     ItemActionBar(
                       actions: [
                         ItemAction.delete(
-                          tooltip: "刪除此組",
+                          tooltip: context.l10n.uiDeleteThisGroup,
                           onPressed: selectedEntry.pairs.length <= 1
                               ? null
                               : () => _removePair(index),
@@ -1430,7 +1467,9 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
                   initialValue: pair.meaning,
                   minLines: 2,
                   maxLines: 4,
-                  decoration: const InputDecoration(labelText: "意義"),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.uiMeaning,
+                  ),
                   onChanged: (value) => _scheduleDraftCommit(
                     "meaning:${selectedEntry.id}:$index",
                     () => _updatePairMeaning(selectedEntry.id, index, value),
@@ -1442,7 +1481,9 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
                   initialValue: pair.example,
                   minLines: 2,
                   maxLines: 4,
-                  decoration: const InputDecoration(labelText: "例句"),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.uiExample,
+                  ),
                   onChanged: (value) => _scheduleDraftCommit(
                     "example:${selectedEntry.id}:$index",
                     () => _updatePairExample(selectedEntry.id, index, value),
@@ -1533,8 +1574,8 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
   }
 
   Widget _buildWarningCard() {
-    return const AppNoticeBanner(
-      message: "本功能正在開發中，使用時可能出現錯誤。",
+    return AppNoticeBanner(
+      message: context.l10n.uiThisFeatureIsInDevelopmentAndMayContain,
       tone: AppFeedbackTone.warning,
     );
   }
@@ -1558,23 +1599,26 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
           children: [
             Row(
               children: [
-                const Expanded(
-                  child: MediumTitle(icon: Icons.folder, text: "詞語類別"),
+                Expanded(
+                  child: MediumTitle(
+                    icon: Icons.folder,
+                    text: context.l10n.uiWordCategories,
+                  ),
                 ),
                 IconButton(
-                  tooltip: "新增根分類",
+                  tooltip: context.l10n.uiAddRootCategory,
                   onPressed: () => _addCategory(),
                   icon: const Icon(Icons.create_new_folder_outlined),
                 ),
                 IconButton(
-                  tooltip: "新增子分類",
+                  tooltip: context.l10n.uiAddSubcategory,
                   onPressed: _selectedCategoryId == null
                       ? null
                       : () => _addCategory(parentId: _selectedCategoryId),
                   icon: const Icon(Icons.create_new_folder),
                 ),
                 PopupMenuButton<String>(
-                  tooltip: "匯入匯出",
+                  tooltip: context.l10n.uiImportExport,
                   iconColor: scheme.onSurface,
                   onSelected: (value) {
                     switch (value) {
@@ -1593,21 +1637,33 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
                     return [
                       PopupMenuItem<String>(
                         value: "import",
-                        child: Text("匯入…", style: menuTextStyle),
+                        child: Text(
+                          context.l10n.uiImport2,
+                          style: menuTextStyle,
+                        ),
                       ),
                       const PopupMenuDivider(),
                       PopupMenuItem<String>(
                         enabled: false,
-                        child: Text("匯出……（已禁用）", style: menuTextStyle),
+                        child: Text(
+                          context.l10n.uiExportDisabled,
+                          style: menuTextStyle,
+                        ),
                       ),
                       PopupMenuItem<String>(
                         value: "export_selected",
                         enabled: _selectedCategoryId != null,
-                        child: Text("匯出選取類別", style: menuTextStyle),
+                        child: Text(
+                          context.l10n.uiExportSelectedCategory,
+                          style: menuTextStyle,
+                        ),
                       ),
                       PopupMenuItem<String>(
                         value: "export_all",
-                        child: Text("匯出全部", style: menuTextStyle),
+                        child: Text(
+                          context.l10n.uiExportAll,
+                          style: menuTextStyle,
+                        ),
                       ),
                     ];
                   },
@@ -1620,20 +1676,20 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
             ),
             const SizedBox(height: 4),
             Text(
-              "長按卡片可拖曳，支援排序與改為子目錄。",
+              context.l10n.uiLongPressCardsToDragReorderOrMove,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 12),
             CollectionPanel.builder(
-              title: "詞語類別",
+              title: context.l10n.uiWordCategories,
               showSectionCard: false,
               minHeight: 180,
               maxHeight: 420,
               controller: _categoryTreeScrollController,
               showScrollbar: true,
               itemCount: rows.length,
-              emptyTitle: "尚無詞語類別",
-              emptyDescription: "請新增第一個分類",
+              emptyTitle: context.l10n.uiNoWordCategories,
+              emptyDescription: context.l10n.uiAddYourFirstCategory,
               emptyIcon: Icons.create_new_folder_outlined,
               itemBuilder: (BuildContext context, int index) {
                 return _buildCategoryRow(rows[index], categoryTree);
@@ -1676,7 +1732,7 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
         onEdit: () => _startEditingCategory(category.id),
         onSubmitted: (_) => _submitEditingCategory(),
         onTapOutside: (_) => _submitEditingCategory(),
-        emptyText: "（未命名分類）",
+        emptyText: context.l10n.uiUnnamedCategory2,
         style: TextStyle(
           fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
           color: isSelected
@@ -1685,11 +1741,11 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
         ),
       ),
       subtitle: Text(
-        "共 $totalEntries 條",
+        context.l10n.uiEntries((totalEntries).toString()),
         style: Theme.of(context).textTheme.bodySmall,
       ),
       trailing: PopupMenuButton<String>(
-        tooltip: "分類操作",
+        tooltip: context.l10n.uiCategoryActions,
         onSelected: (value) {
           if (value == "rename") {
             _startEditingCategory(category.id);
@@ -1715,17 +1771,19 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
               PopupMenuItem<String>(
                 value: "toggle",
                 child: Text(
-                  isExpanded ? "收合子分類" : "展開子分類",
+                  isExpanded
+                      ? context.l10n.uiCollapseSubcategories
+                      : context.l10n.uiExpandSubcategories,
                   style: menuTextStyle,
                 ),
               ),
             PopupMenuItem<String>(
               value: "rename",
-              child: Text("重命名", style: menuTextStyle),
+              child: Text(context.l10n.uiRename, style: menuTextStyle),
             ),
             PopupMenuItem<String>(
               value: "delete",
-              child: Text("刪除分類", style: menuTextStyle),
+              child: Text(context.l10n.uiDeleteCategory, style: menuTextStyle),
             ),
           ];
         },
@@ -1782,13 +1840,16 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
         if (data is _GlossaryCategoryDragData) {
           _moveCategoryTo(data.categoryId, category.id, position);
           final String actionText = switch (position) {
-            DropPosition.before => "移動到前方",
-            DropPosition.child => "移動到子目錄",
-            DropPosition.after => "移動到後方",
+            DropPosition.before => context.l10n.uiMoveBefore,
+            DropPosition.child => context.l10n.uiMoveToSubcategory,
+            DropPosition.after => context.l10n.uiMoveAfter,
           };
           AppFeedback.success(
             context,
-            "「${data.categoryName}」已$actionText",
+            context.l10n.uiLiteral2(
+              (data.categoryName).toString(),
+              (actionText).toString(),
+            ),
             duration: const Duration(seconds: 1),
           );
           return;
@@ -1803,7 +1864,10 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
           if (moved) {
             AppFeedback.success(
               context,
-              "「${data.entryTerm}」已移到「${category.name}」",
+              context.l10n.uiMovedInto(
+                (data.entryTerm).toString(),
+                (category.name).toString(),
+              ),
               duration: const Duration(seconds: 1),
             );
           }
@@ -1833,11 +1897,11 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
     final ColorScheme scheme = Theme.of(context).colorScheme;
 
     if (_selectedCategoryId == null) {
-      return const AppSectionCard(
-        title: "詞語條目",
+      return AppSectionCard(
+        title: context.l10n.uiWordEntries,
         icon: Icons.format_list_bulleted,
         child: AppEmptyState(
-          title: "請先選擇詞語類別",
+          title: context.l10n.uiSelectAWordCategoryFirst,
           icon: Icons.touch_app_outlined,
           compact: true,
         ),
@@ -1862,26 +1926,29 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            MediumTitle(icon: Icons.format_list_bulleted, text: "詞語條目"),
+            MediumTitle(
+              icon: Icons.format_list_bulleted,
+              text: context.l10n.uiWordEntries,
+            ),
             const SizedBox(height: 8),
             Text(
-              "詞條可長按拖曳，支援排序與移動到其他分類。",
+              context.l10n.uiLongPressEntriesToDragReorderOrMove,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 12),
             CollectionPanel.builder(
-              title: "詞語條目",
+              title: context.l10n.uiWordEntries,
               showSectionCard: false,
               minHeight: 180,
               maxHeight: 320,
               controller: _entryListScrollController,
               showScrollbar: true,
               itemCount: visibleRefs.length,
-              emptyTitle: "此類別目前沒有詞條",
-              emptyDescription: "請新增第一個詞條",
+              emptyTitle: context.l10n.uiThisCategoryHasNoEntries,
+              emptyDescription: context.l10n.uiAddYourFirstEntry,
               emptyIcon: Icons.menu_book_outlined,
               footer: AddItemInput(
-                title: "詞條名稱",
+                title: context.l10n.uiEntryName,
                 onAdd: _addEntryByTermToSelectedCategory,
               ),
               itemBuilder: (BuildContext context, int index) {
@@ -1911,9 +1978,9 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
 
     final bool isSelected = _selectedEntryId == entry.id;
     final String summary = entry.pairs.isEmpty
-        ? "尚未填寫意義"
+        ? context.l10n.uiNoMeaningEnteredYet
         : (entry.pairs.first.meaning.trim().isEmpty
-              ? "尚未填寫意義"
+              ? context.l10n.uiNoMeaningEnteredYet
               : entry.pairs.first.meaning);
 
     return DraggableCardNode<Object>(
@@ -1936,20 +2003,27 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
           Text(summary, maxLines: 1, overflow: TextOverflow.ellipsis),
           const SizedBox(height: 4),
           Text(
-            "詞性：${_resolvePartOfSpeechLabel(entry)}",
+            context.l10n.uiPartOfSpeech(
+              (_resolvePartOfSpeechLabel(entry)).toString(),
+            ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 2),
           Text(
             ref.isLocal
-                ? "來源：本目錄"
-                : "來源：子目錄 ${_categoryName(ref.sourceCategoryId, categoryTree)}",
+                ? context.l10n.uiSourceThisCategory
+                : context.l10n.uiSourceSubcategory(
+                    (_categoryName(
+                      ref.sourceCategoryId,
+                      categoryTree,
+                    )).toString(),
+                  ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
       ),
       trailing: IconButton(
-        tooltip: "從此分類移除",
+        tooltip: context.l10n.uiRemoveFromThisCategory,
         icon: const Icon(Icons.remove_circle_outline),
         onPressed: () => _removeEntryFromCategory(ref),
       ),
@@ -2022,7 +2096,10 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
           );
           AppFeedback.success(
             context,
-            "「${data.entryTerm}」已移動到「$destination」",
+            context.l10n.uiMovedTo(
+              (data.entryTerm).toString(),
+              (destination).toString(),
+            ),
             duration: const Duration(seconds: 1),
           );
         }
@@ -2050,15 +2127,23 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const MediumTitle(icon: Icons.library_books, text: "詞語解釋、例句"),
+            MediumTitle(
+              icon: Icons.library_books,
+              text: context.l10n.uiMeaningsAndExamples,
+            ),
             const SizedBox(height: 12),
             if (selectedEntry == null)
-              Text("請從上方選擇一個詞條。", style: Theme.of(context).textTheme.bodyMedium)
+              Text(
+                context.l10n.uiSelectAnEntryAbove,
+                style: Theme.of(context).textTheme.bodyMedium,
+              )
             else ...[
               AppTextField(
                 key: ValueKey("term_${selectedEntry.id}"),
                 initialValue: selectedEntry.term,
-                decoration: const InputDecoration(labelText: "詞條名稱"),
+                decoration: InputDecoration(
+                  labelText: context.l10n.uiEntryName,
+                ),
                 onChanged: (value) => _scheduleDraftCommit(
                   "term:${selectedEntry.id}",
                   () => _updateTerm(selectedEntry.id, value),
@@ -2068,12 +2153,12 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
               AppDropdownField<GlossaryPartOfSpeech>(
                 key: ValueKey("part_of_speech_${selectedEntry.id}"),
                 value: selectedEntry.partOfSpeech,
-                labelText: "詞性",
+                labelText: context.l10n.uiPartOfSpeech2,
                 textStyle: Theme.of(context).textTheme.bodySmall,
                 options: GlossaryPartOfSpeech.values.map((partOfSpeech) {
                   return DropdownOption<GlossaryPartOfSpeech>(
                     value: partOfSpeech,
-                    label: partOfSpeech.label,
+                    label: context.l10n.legacyLabel(partOfSpeech.label),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -2088,7 +2173,9 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
                 AppTextField(
                   key: ValueKey("custom_pos_${selectedEntry.id}"),
                   initialValue: selectedEntry.customPartOfSpeech,
-                  decoration: const InputDecoration(labelText: "自訂詞性"),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.uiCustomPartOfSpeech,
+                  ),
                   onChanged: (value) => _scheduleDraftCommit(
                     "partOfSpeech:${selectedEntry.id}",
                     () => _updateCustomPartOfSpeech(selectedEntry.id, value),
@@ -2099,12 +2186,12 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
               AppDropdownField<GlossaryPolarity>(
                 key: ValueKey("polarity_${selectedEntry.id}"),
                 value: selectedEntry.polarity,
-                labelText: "情感傾向",
+                labelText: context.l10n.uiSentiment,
                 textStyle: Theme.of(context).textTheme.bodySmall,
                 options: GlossaryPolarity.values.map((polarity) {
                   return DropdownOption<GlossaryPolarity>(
                     value: polarity,
-                    label: polarity.label,
+                    label: context.l10n.legacyLabel(polarity.label),
                     child: Row(
                       children: [
                         Icon(
@@ -2114,7 +2201,7 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          polarity.label,
+                          context.l10n.legacyLabel(polarity.label),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
@@ -2131,7 +2218,7 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
               Row(
                 children: [
                   Text(
-                    "意義 + 例句組",
+                    context.l10n.uiMeaningAndExampleGroups,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -2140,7 +2227,7 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
                   TextButton.icon(
                     onPressed: _addPair,
                     icon: const Icon(Icons.add),
-                    label: const Text("新增一組"),
+                    label: Text(context.l10n.uiAddGroup),
                   ),
                 ],
               ),
@@ -2182,7 +2269,7 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
               children: [
                 const Icon(Icons.error_outline, size: 36),
                 const SizedBox(height: 12),
-                const Text("讀取詞語資料失敗"),
+                Text(context.l10n.uiCouldNotLoadWordData),
                 const SizedBox(height: 8),
                 Text(
                   _loadError!,
@@ -2192,7 +2279,7 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: _loadGlossary,
-                  child: const Text("重試"),
+                  child: Text(context.l10n.commonRetry),
                 ),
               ],
             ),
@@ -2206,11 +2293,11 @@ class _GlossaryViewState extends ConsumerState<GlossaryView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: LargeTitle(
                 icon: Icons.library_books_outlined,
-                text: "詞語參考",
+                text: context.l10n.uiWordReference,
               ),
             ),
             const SizedBox(height: 32),

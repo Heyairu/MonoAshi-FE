@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import 'package:monogatari_assistant/application/project_export/export_models.dart';
 import 'package:monogatari_assistant/application/project_export/export_service.dart';
 import 'package:monogatari_assistant/models/chapter_selection_data.dart';
@@ -269,7 +270,19 @@ void main() {
       expect(result, isNull);
       await tester.tap(find.byKey(const Key('export-save')));
       await tester.pumpAndSettle();
-      expect(find.textContaining('無法寫入'), findsOneWidget);
+      expect(
+        find.textContaining(
+          lookupAppLocalizations(defaultAppLocale).projectErrorUnknown,
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Bad state:'), findsNothing);
+      expect(
+        tester
+            .widget<FilledButton>(find.byKey(const Key('export-save')))
+            .onPressed,
+        isNotNull,
+      );
       await tester.tap(find.byKey(const Key('export-save')));
       await tester.pumpAndSettle();
       expect(result!.status, ExportSaveStatus.saved);

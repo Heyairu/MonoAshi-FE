@@ -1,3 +1,5 @@
+import '../../l10n/app_localization.dart';
+import '../../l10n/localized_ui_text.dart';
 import "dart:async";
 import "dart:convert";
 
@@ -50,25 +52,42 @@ class P2pSyncState {
   final Set<String> localDraftHeadIds;
   final P2pRevisionDelta? localRevisionDelta;
   final bool isRevisionMetadataLoading;
-  final String? revisionMetadataError;
+  final Object? _revisionMetadataError;
+  String? get revisionMetadataError => _revisionMetadataError?.toString();
+  String? revisionMetadataErrorFor(AppLocalizations l10n) =>
+      localizeUiText(_revisionMetadataError, l10n);
   final P2pSecureTransportStatus secureTransportStatus;
   final P2pRevisionSummary? remoteRevisionSummary;
   final P2pRevisionSummaryRelation? revisionSummaryRelation;
   final P2pRevisionGraph? remoteRevisionGraph;
   final Set<String> commonAncestorRevisionIds;
   final bool isRevisionGraphLoading;
-  final String? revisionGraphError;
+  final Object? _revisionGraphError;
+  String? get revisionGraphError => _revisionGraphError?.toString();
+  String? revisionGraphErrorFor(AppLocalizations l10n) =>
+      localizeUiText(_revisionGraphError, l10n);
   final P2pResolutionAck? localResolutionAck;
   final P2pResolutionAck? remoteResolutionAck;
   final P2pSnapshotManifest? remoteSnapshotManifest;
   final P2pSnapshotManifestStatus snapshotManifestStatus;
-  final String? snapshotManifestError;
+  final Object? _snapshotManifestError;
+  String? get snapshotManifestError => _snapshotManifestError?.toString();
+  String? snapshotManifestErrorFor(AppLocalizations l10n) =>
+      localizeUiText(_snapshotManifestError, l10n);
   final P2pSnapshotSyncRequest? incomingSnapshotSyncRequest;
   final int incomingSnapshotSyncRequestGeneration;
-  final String? secureTransportError;
+  final Object? _secureTransportError;
+  String? get secureTransportError => _secureTransportError?.toString();
+  String? secureTransportErrorFor(AppLocalizations l10n) =>
+      localizeUiText(_secureTransportError, l10n);
   final int negotiationGeneration;
-  final String? message;
-  final String? errorMessage;
+  final Object? _message;
+  String? get message => _message?.toString();
+  String? messageFor(AppLocalizations l10n) => localizeUiText(_message, l10n);
+  final Object? _errorMessage;
+  String? get errorMessage => _errorMessage?.toString();
+  String? errorMessageFor(AppLocalizations l10n) =>
+      localizeUiText(_errorMessage, l10n);
 
   const P2pSyncState({
     this.serviceStatus = P2pServiceStatus.stopped,
@@ -96,26 +115,31 @@ class P2pSyncState {
     this.localDraftHeadIds = const <String>{},
     this.localRevisionDelta,
     this.isRevisionMetadataLoading = false,
-    this.revisionMetadataError,
+    Object? revisionMetadataError,
     this.secureTransportStatus = P2pSecureTransportStatus.inactive,
     this.remoteRevisionSummary,
     this.revisionSummaryRelation,
     this.remoteRevisionGraph,
     this.commonAncestorRevisionIds = const <String>{},
     this.isRevisionGraphLoading = false,
-    this.revisionGraphError,
+    Object? revisionGraphError,
     this.localResolutionAck,
     this.remoteResolutionAck,
     this.remoteSnapshotManifest,
     this.snapshotManifestStatus = P2pSnapshotManifestStatus.inactive,
-    this.snapshotManifestError,
+    Object? snapshotManifestError,
     this.incomingSnapshotSyncRequest,
     this.incomingSnapshotSyncRequestGeneration = 0,
-    this.secureTransportError,
+    Object? secureTransportError,
     this.negotiationGeneration = 0,
-    this.message,
-    this.errorMessage,
-  });
+    Object? message,
+    Object? errorMessage,
+  }) : _revisionMetadataError = revisionMetadataError,
+       _revisionGraphError = revisionGraphError,
+       _snapshotManifestError = snapshotManifestError,
+       _secureTransportError = secureTransportError,
+       _message = message,
+       _errorMessage = errorMessage;
 
   bool get isServiceBusy {
     return serviceStatus == P2pServiceStatus.starting ||
@@ -293,8 +317,8 @@ class P2pSyncState {
       isRevisionMetadataLoading:
           isRevisionMetadataLoading ?? this.isRevisionMetadataLoading,
       revisionMetadataError: identical(revisionMetadataError, _p2pUnset)
-          ? this.revisionMetadataError
-          : revisionMetadataError as String?,
+          ? _revisionMetadataError
+          : revisionMetadataError,
       secureTransportStatus:
           secureTransportStatus ?? this.secureTransportStatus,
       remoteRevisionSummary: identical(remoteRevisionSummary, _p2pUnset)
@@ -312,8 +336,8 @@ class P2pSyncState {
       isRevisionGraphLoading:
           isRevisionGraphLoading ?? this.isRevisionGraphLoading,
       revisionGraphError: identical(revisionGraphError, _p2pUnset)
-          ? this.revisionGraphError
-          : revisionGraphError as String?,
+          ? _revisionGraphError
+          : revisionGraphError,
       localResolutionAck: identical(localResolutionAck, _p2pUnset)
           ? this.localResolutionAck
           : localResolutionAck as P2pResolutionAck?,
@@ -326,8 +350,8 @@ class P2pSyncState {
       snapshotManifestStatus:
           snapshotManifestStatus ?? this.snapshotManifestStatus,
       snapshotManifestError: identical(snapshotManifestError, _p2pUnset)
-          ? this.snapshotManifestError
-          : snapshotManifestError as String?,
+          ? _snapshotManifestError
+          : snapshotManifestError,
       incomingSnapshotSyncRequest:
           identical(incomingSnapshotSyncRequest, _p2pUnset)
           ? this.incomingSnapshotSyncRequest
@@ -336,16 +360,14 @@ class P2pSyncState {
           incomingSnapshotSyncRequestGeneration ??
           this.incomingSnapshotSyncRequestGeneration,
       secureTransportError: identical(secureTransportError, _p2pUnset)
-          ? this.secureTransportError
-          : secureTransportError as String?,
+          ? _secureTransportError
+          : secureTransportError,
       negotiationGeneration:
           negotiationGeneration ?? this.negotiationGeneration,
-      message: identical(message, _p2pUnset)
-          ? this.message
-          : message as String?,
+      message: identical(message, _p2pUnset) ? _message : message,
       errorMessage: identical(errorMessage, _p2pUnset)
-          ? this.errorMessage
-          : errorMessage as String?,
+          ? _errorMessage
+          : errorMessage,
     );
   }
 }
@@ -512,7 +534,11 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
           ? state.reachablePeer
           : null,
       inboundPeerAddress: probe.remoteAddress,
-      message: "${probe.remoteAddress} 已連入並驗證本機端點；TCP 可雙向通訊，不需要再從本機反向連線。",
+      message: LocalizedUiText(
+        (l10n, args) =>
+            l10n.p2pConnectedAndVerifiedThisEndpointTCPWorks(args[0]),
+        [(probe.remoteAddress).toString()],
+      ),
       errorMessage: null,
     );
   }
@@ -564,7 +590,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     state = state.copyWith(
       connectionStatus: P2pConnectionStatus.reachableUnpaired,
       inboundPeerAddress: inbound.remoteAddress,
-      message: "${inbound.remoteAddress} 已送達安全配對要求；本機正在自動回應。",
+      message: LocalizedUiText(
+        (l10n, args) => l10n.p2pSentASecurePairingRequestThisDevice(args[0]),
+        [(inbound.remoteAddress).toString()],
+      ),
       errorMessage: null,
     );
     await _acceptRemotePairingChallenge(inbound.challenge);
@@ -590,7 +619,11 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       if (!_disposed) {
         state = state.copyWith(
           pairingStatus: P2pPairingStatus.error,
-          errorMessage: "處理遠端安全配對事件失敗：${_describeError(error)}",
+          errorMessage: LocalizedUiText(
+            (l10n, args) =>
+                l10n.p2pCouldNotProcessTheRemotePairingEvent(args[0]),
+            [(_describeError(error)).toString()],
+          ),
         );
       }
     });
@@ -659,7 +692,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       _revalidatePendingRemoteResolutionAck(inbound.graph);
     } on FormatException catch (error) {
       state = state.copyWith(
-        revisionGraphError: "已拒絕無效的遠端 revision graph：${error.message}",
+        revisionGraphError: LocalizedUiText(
+          (l10n, args) => l10n.p2pRejectedAnInvalidRemoteRevisionGraph(args[0]),
+          [(error.message).toString()],
+        ),
       );
     }
   }
@@ -689,7 +725,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         remotePairingChallenge: null,
         remotePairingConfirmation: null,
         pairingCode: null,
-        message: "已忽略對方上一輪過期的配對 challenge，等待自動更新。",
+        message: LocalizedUiText(
+          (l10n, args) => l10n.p2pIgnoredAnExpiredPairingChallengeFromThe,
+        ),
         errorMessage: null,
       );
       return;
@@ -699,7 +737,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         pairingStatus: P2pPairingStatus.error,
         remotePairingChallenge: null,
         pairingCode: null,
-        errorMessage: "對方的配對 challenge 無效、遭竄改或已過期。",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pThePeerSPairingChallengeIsInvalid,
+        ),
       );
       return;
     }
@@ -711,7 +751,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         pairingStatus: P2pPairingStatus.error,
         remotePairingChallenge: null,
         pairingCode: null,
-        errorMessage: "已信任裝置的公開金鑰發生變更；已拒絕配對。",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pTheTrustedDeviceSPublicKeyChanged,
+        ),
       );
       return;
     }
@@ -723,7 +765,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         pairingStatus: P2pPairingStatus.waitingForPeer,
         remotePairingChallenge: challenge,
         pairingCode: null,
-        message: "對方要求安全配對，但本機暫時無法建立 challenge；正在等待重試。",
+        message: LocalizedUiText(
+          (l10n, args) => l10n.p2pThePeerRequestedSecurePairingButThis,
+        ),
         errorMessage: null,
       );
       return;
@@ -748,7 +792,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       remotePairingConfirmation: null,
       pairingCode: code,
       trustedPeer: existing,
-      message: "請在兩台裝置上比較六位數配對碼；完全相同才可確認。",
+      message: LocalizedUiText(
+        (l10n, args) => l10n.p2pCompareTheSixDigitPairingCodeOn,
+      ),
       errorMessage: null,
     );
     if (_persistentVerificationNegotiated(localChallenge, challenge) &&
@@ -763,14 +809,20 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
           pairingStatus: P2pPairingStatus.waitingForPeerConfirmation,
           localPairingConfirmation: confirmation,
           pairingCode: null,
-          message: "雙端 14 天持久驗證仍有效；已自動回簽本次短期 session。",
+          message: LocalizedUiText(
+            (l10n, args) => l10n.p2pBothDevicesDayAuthenticationIsValidThis,
+          ),
         );
         final endpoint = state.reachablePeer;
         if (endpoint != null) await _refreshPairingConfirmation(endpoint);
       } catch (error) {
         state = state.copyWith(
           pairingStatus: P2pPairingStatus.error,
-          errorMessage: "持久驗證自動回簽失敗：${_describeError(error)}",
+          errorMessage: LocalizedUiText(
+            (l10n, args) => l10n
+                .p2pPersistentAuthenticationCouldNotSignAutomatically(args[0]),
+            [(_describeError(error)).toString()],
+          ),
         );
       }
     }
@@ -796,7 +848,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     );
     if (confirmation.transcriptHashBase64 != expectedTranscriptHash) {
       state = state.copyWith(
-        message: "已忽略上一輪的 pairing confirmation，等待目前 challenge 的回簽。",
+        message: LocalizedUiText(
+          (l10n, args) => l10n.p2pIgnoredAPreviousPairingConfirmationWaitingFor,
+        ),
         errorMessage: null,
       );
       return;
@@ -810,7 +864,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       state = state.copyWith(
         pairingStatus: P2pPairingStatus.error,
         remotePairingConfirmation: null,
-        errorMessage: "對方的 pairing confirmation 簽章或 transcript 不一致。",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pThePeerSPairingConfirmationSignatureOr,
+        ),
       );
       return;
     }
@@ -836,7 +892,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
           remotePairingConfirmation: confirmation,
           pairingCode: null,
           trustedPeer: trustedPeers[remoteChallenge.deviceId],
-          message: "對方已確認配對碼；雙方皆允許單端確認，本機驗證簽章後已自動回簽。",
+          message: LocalizedUiText(
+            (l10n, args) => l10n.p2pThePeerConfirmedTheCodeBothDevices,
+          ),
           errorMessage: null,
         );
         await _establishAuthenticatedTransport();
@@ -845,7 +903,11 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       } catch (error) {
         state = state.copyWith(
           pairingStatus: P2pPairingStatus.error,
-          errorMessage: "無法自動完成安全配對：${_describeError(error)}",
+          errorMessage: LocalizedUiText(
+            (l10n, args) =>
+                l10n.p2pCouldNotCompleteSecurePairingAutomatically(args[0]),
+            [(_describeError(error)).toString()],
+          ),
         );
       }
       return;
@@ -861,8 +923,12 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
           : state.pairingStatus,
       remotePairingConfirmation: confirmation,
       message: mutuallyConfirmed
-          ? "雙方已簽署確認同一份配對 transcript；正在建立 authenticated encrypted transport。"
-          : "對方已確認配對碼；目前設定要求本機也必須確認。",
+          ? LocalizedUiText(
+              (l10n, args) => l10n.p2pBothDevicesSignedTheSamePairingTranscript,
+            )
+          : LocalizedUiText(
+              (l10n, args) => l10n.p2pThePeerConfirmedTheCodeYourSettings,
+            ),
       errorMessage: null,
     );
     if (mutuallyConfirmed) await _establishAuthenticatedTransport();
@@ -930,8 +996,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       );
       state = state.copyWith(
         secureTransportStatus: P2pSecureTransportStatus.authenticated,
-        message:
-            "authenticated encrypted transport 已建立；revision summary 與 snapshot chunks 僅透過此通道交換。",
+        message: LocalizedUiText(
+          (l10n, args) =>
+              l10n.p2pAuthenticatedEncryptedTransportIsReadyRevisionSummaries,
+        ),
         secureTransportError: null,
       );
       if (_persistentVerificationNegotiated(localChallenge, remoteChallenge)) {
@@ -950,14 +1018,20 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       _endpointService.installAuthenticatedSession(null);
       state = state.copyWith(
         secureTransportStatus: P2pSecureTransportStatus.error,
-        secureTransportError: "無法驗證加密通道的裝置身分或 transcript：${error.message}",
+        secureTransportError: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotVerifyTheEncryptedChannelS(args[0]),
+          [(error.message).toString()],
+        ),
       );
     } on StateError catch (error) {
       if (_disposed || secureGeneration != _secureTransportGeneration) return;
       _endpointService.installAuthenticatedSession(null);
       state = state.copyWith(
         secureTransportStatus: P2pSecureTransportStatus.error,
-        secureTransportError: "無法建立加密通道：${error.message}",
+        secureTransportError: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotEstablishAnEncryptedChannel(args[0]),
+          [(error.message).toString()],
+        ),
       );
     }
   }
@@ -1034,19 +1108,31 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     } on P2pProbeException catch (error) {
       if (_disposed || secureGeneration != _secureTransportGeneration) return;
       state = state.copyWith(
-        secureTransportError: "加密 revision summary 暫時無法交換：$error",
+        secureTransportError: LocalizedUiText(
+          (l10n, args) => l10n
+              .p2pEncryptedRevisionSummariesAreTemporarilyUnavailable(args[0]),
+          [(error).toString()],
+        ),
       );
     } on FormatException catch (error) {
       if (_disposed || secureGeneration != _secureTransportGeneration) return;
       _snapshotTransferSession.revoke();
       state = state.copyWith(
-        secureTransportError: "已拒絕無效的加密 revision summary：${error.message}",
+        secureTransportError: LocalizedUiText(
+          (l10n, args) =>
+              l10n.p2pRejectedAnInvalidEncryptedRevisionSummary(args[0]),
+          [(error.message).toString()],
+        ),
       );
     } on StateError catch (error) {
       if (_disposed || secureGeneration != _secureTransportGeneration) return;
       _snapshotTransferSession.revoke();
       state = state.copyWith(
-        secureTransportError: "加密通道目前不可用：${error.message}",
+        secureTransportError: LocalizedUiText(
+          (l10n, args) =>
+              l10n.p2pTheEncryptedChannelIsCurrentlyUnavailable(args[0]),
+          [(error.message).toString()],
+        ),
       );
     }
   }
@@ -1113,21 +1199,33 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       if (!_disposed && secureGeneration == _secureTransportGeneration) {
         state = state.copyWith(
           isRevisionGraphLoading: false,
-          revisionGraphError: "已拒絕無效的加密 revision graph：${error.message}",
+          revisionGraphError: LocalizedUiText(
+            (l10n, args) =>
+                l10n.p2pRejectedAnInvalidEncryptedRevisionGraph(args[0]),
+            [(error.message).toString()],
+          ),
         );
       }
     } on P2pProbeException catch (error) {
       if (!_disposed && secureGeneration == _secureTransportGeneration) {
         state = state.copyWith(
           isRevisionGraphLoading: false,
-          revisionGraphError: "revision graph 傳輸暫時中斷，可重新連線續傳：$error",
+          revisionGraphError: LocalizedUiText(
+            (l10n, args) =>
+                l10n.p2pRevisionGraphTransferWasInterruptedReconnectTo(args[0]),
+            [(error).toString()],
+          ),
         );
       }
     } on StateError catch (error) {
       if (!_disposed && secureGeneration == _secureTransportGeneration) {
         state = state.copyWith(
           isRevisionGraphLoading: false,
-          revisionGraphError: "revision graph 目前不可用：${error.message}",
+          revisionGraphError: LocalizedUiText(
+            (l10n, args) =>
+                l10n.p2pTheRevisionGraphIsCurrentlyUnavailable(args[0]),
+            [(error.message).toString()],
+          ),
         );
       }
     } finally {
@@ -1141,8 +1239,12 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     if (!canRequest || manifest == null) {
       state = state.copyWith(
         errorMessage: state.reachablePeer == null
-            ? "尚未取得已驗證的對方服務端點；請等待加密 revision summary 交換完成。"
-            : "目前沒有可透過已驗證連線提供給對方的 snapshot。",
+            ? LocalizedUiText(
+                (l10n, args) => l10n.p2pNoVerifiedPeerEndpointYetWaitFor,
+              )
+            : LocalizedUiText(
+                (l10n, args) => l10n.p2pNoSnapshotIsCurrentlyAvailableToSend,
+              ),
       );
       return false;
     }
@@ -1156,7 +1258,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     try {
       _endpointService.updateLocalSnapshotSyncRequest(request);
       state = state.copyWith(
-        message: "已透過加密通道送出同步要求；等待接收端下載並選擇儲存位置。",
+        message: LocalizedUiText(
+          (l10n, args) =>
+              l10n.p2pSyncRequestedThroughTheEncryptedChannelWaiting,
+        ),
         errorMessage: null,
       );
       if (state.reachablePeer != null) {
@@ -1164,7 +1269,12 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       }
       return true;
     } catch (error) {
-      state = state.copyWith(errorMessage: "無法送出同步要求：${_describeError(error)}");
+      state = state.copyWith(
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotSendASyncRequest(args[0]),
+          [(_describeError(error)).toString()],
+        ),
+      );
       return false;
     }
   }
@@ -1192,7 +1302,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       incomingSnapshotSyncRequest: request,
       incomingSnapshotSyncRequestGeneration:
           state.incomingSnapshotSyncRequestGeneration + 1,
-      message: "對方已透過加密通道要求同步；正在準備下載 snapshot。",
+      message: LocalizedUiText(
+        (l10n, args) => l10n.p2pThePeerRequestedSyncThroughTheEncrypted,
+      ),
       errorMessage: null,
     );
   }
@@ -1206,7 +1318,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         ack.projectUuid != state.sessionProjectUuid) {
       _pendingRemoteResolutionAck = null;
       state = state.copyWith(
-        revisionGraphError: "已拒絕身分或 project session 不一致的遠端 ACK。",
+        revisionGraphError: LocalizedUiText(
+          (l10n, args) => l10n.p2pRejectedARemoteAcknowledgementWithAMismatched,
+        ),
       );
       return;
     }
@@ -1222,7 +1336,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       _pendingRemoteResolutionAck = ack;
       state = state.copyWith(
         revisionGraphError: null,
-        message: "已收到對方 resolve ACK；等待已驗證 revision graph 完成後確認。",
+        message: LocalizedUiText(
+          (l10n, args) =>
+              l10n.p2pReceivedThePeerSResolutionAcknowledgementWaiting,
+        ),
       );
       if (!_revisionGraphRefreshInProgress) {
         unawaited(refreshRevisionGraph());
@@ -1232,7 +1349,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     if (!ack.matchesRevision(revision)) {
       _pendingRemoteResolutionAck = null;
       state = state.copyWith(
-        revisionGraphError: "已拒絕內容或 parent 與本機 resolve revision 不一致的遠端 ACK。",
+        revisionGraphError: LocalizedUiText(
+          (l10n, args) => l10n.p2pRejectedAnAcknowledgementWhoseContentOrParent,
+        ),
       );
       return;
     }
@@ -1241,7 +1360,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     state = state.copyWith(
       remoteResolutionAck: ack,
       revisionGraphError: null,
-      message: "對方已 ACK resolve revision；雙方 revision DAG 已收斂。",
+      message: LocalizedUiText(
+        (l10n, args) => l10n.p2pThePeerAcknowledgedTheResolutionRevisionBoth,
+      ),
     );
     _endpointService.updateLocalSnapshotSyncRequest(null);
   }
@@ -1261,14 +1382,18 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     if (remoteRevision == null || !ack.matchesRevision(remoteRevision)) {
       _pendingRemoteResolutionAck = null;
       state = state.copyWith(
-        revisionGraphError: "已拒絕未包含於對方已驗證 revision graph 的遠端 ACK。",
+        revisionGraphError: LocalizedUiText(
+          (l10n, args) => l10n.p2pRejectedAnAcknowledgementAbsentFromThePeer,
+        ),
       );
       return;
     }
 
     state = state.copyWith(
       revisionGraphError: null,
-      message: "對方已 ACK 遠端 resolve revision；等待下載並安裝該 revision。",
+      message: LocalizedUiText(
+        (l10n, args) => l10n.p2pThePeerAcknowledgedTheRemoteResolutionRevision,
+      ),
     );
   }
 
@@ -1292,7 +1417,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         remotePairingConfirmation: null,
         pairingCode: null,
         trustedPeer: null,
-        message: "已建立十分鐘有效的配對 challenge，等待對方開始配對。",
+        message: LocalizedUiText(
+          (l10n, args) => l10n.p2pCreatedAPairingChallengeValidForTen,
+        ),
         errorMessage: null,
       );
       _startPairingChallengeRefresh();
@@ -1304,7 +1431,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     } catch (error) {
       state = state.copyWith(
         pairingStatus: P2pPairingStatus.error,
-        errorMessage: "無法開始安全配對：${_describeError(error)}",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotStartSecurePairing(args[0]),
+          [(_describeError(error)).toString()],
+        ),
       );
       return false;
     }
@@ -1339,8 +1469,13 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         localPairingConfirmation: confirmation,
         trustedPeer: trusted,
         message: state.isSingleDeviceConfirmationNegotiated
-            ? "本機已簽署確認；等待對方驗證後自動回簽。"
-            : "本機已簽署確認並加入信任清單；等待對方手動確認同一配對 transcript。",
+            ? LocalizedUiText(
+                (l10n, args) =>
+                    l10n.p2pThisDeviceSignedItsConfirmationWaitingFor,
+              )
+            : LocalizedUiText(
+                (l10n, args) => l10n.p2pThisDeviceSignedAndTrustedThePeer,
+              ),
         errorMessage: null,
       );
       final remoteConfirmation = state.remotePairingConfirmation;
@@ -1353,7 +1488,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     } catch (error) {
       state = state.copyWith(
         pairingStatus: P2pPairingStatus.error,
-        errorMessage: "儲存信任裝置失敗：${_describeError(error)}",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotSaveTheTrustedDevice(args[0]),
+          [(_describeError(error)).toString()],
+        ),
       );
       return false;
     }
@@ -1373,7 +1511,7 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       remotePairingConfirmation: null,
       pairingCode: null,
       trustedPeer: null,
-      message: "已取消本次配對。",
+      message: LocalizedUiText((l10n, args) => l10n.p2pPairingCancelled),
       errorMessage: null,
     );
   }
@@ -1381,7 +1519,13 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
   void handlePairingPreferenceChanged() {
     if (state.pairingStatus == P2pPairingStatus.idle) return;
     cancelPairing();
-    state = state.copyWith(message: "配對確認設定已變更；請重新開始配對。", errorMessage: null);
+    state = state.copyWith(
+      message: LocalizedUiText(
+        (l10n, args) =>
+            l10n.p2pPairingConfirmationSettingsChangedStartPairingAgain,
+      ),
+      errorMessage: null,
+    );
   }
 
   void _clearAuthenticatedTransport() {
@@ -1641,8 +1785,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         localDraftHeadIds: const <String>{},
         localRevisionDelta: null,
         isRevisionMetadataLoading: false,
-        revisionMetadataError:
-            "無法載入 revision metadata：${_describeError(error)}",
+        revisionMetadataError: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotLoadRevisionMetadata(args[0]),
+          [(_describeError(error)).toString()],
+        ),
       );
       _localSnapshotManifests = const <String, P2pSnapshotManifest>{};
       _endpointService.updateLocalRevisionGraph(null);
@@ -1662,7 +1808,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     final normalizedProjectUuid = projectUuid.trim().toLowerCase();
     if (!P2pProjectStatus.isValidProjectUuid(normalizedProjectUuid)) {
       state = state.copyWith(
-        revisionMetadataError: "無法建立 revision：project UUID 無效。",
+        revisionMetadataError: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotCreateARevisionInvalidProject,
+        ),
       );
       return false;
     }
@@ -1736,7 +1884,11 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
               contentSha256: manifest.contentSha256,
             ),
           );
-          state = state.copyWith(message: "已儲存新 revision；正在透過加密通道即時通知對方同步。");
+          state = state.copyWith(
+            message: LocalizedUiText(
+              (l10n, args) => l10n.p2pNewRevisionSavedNotifyingThePeerThrough,
+            ),
+          );
         }
         unawaited(refreshRevisionSummary());
       }
@@ -1745,8 +1897,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       if (!_disposed && _currentLocalProjectUuid == normalizedProjectUuid) {
         state = state.copyWith(
           isRevisionMetadataLoading: false,
-          revisionMetadataError:
-              "無法建立 revision metadata：${_describeError(error)}",
+          revisionMetadataError: LocalizedUiText(
+            (l10n, args) => l10n.p2pCouldNotCreateRevisionMetadata(args[0]),
+            [(_describeError(error)).toString()],
+          ),
         );
       }
       return false;
@@ -1816,8 +1970,14 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         );
         state = state.copyWith(
           message: record.draftState.delta == null
-              ? "draft revision 已建立；正在透過加密通道傳送 summary。"
-              : "draft revision 已建立；正在透過加密通道傳送 summary/delta。",
+              ? LocalizedUiText(
+                  (l10n, args) =>
+                      l10n.p2pDraftRevisionCreatedSendingItsSummaryThrough,
+                )
+              : LocalizedUiText(
+                  (l10n, args) =>
+                      l10n.p2pDraftRevisionCreatedSendingItsSummaryAnd,
+                ),
         );
         unawaited(refreshRevisionSummary());
       }
@@ -1825,7 +1985,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     } catch (error) {
       if (!_disposed && _currentLocalProjectUuid == normalizedProjectUuid) {
         state = state.copyWith(
-          revisionMetadataError: "無法建立 draft revision：${_describeError(error)}",
+          revisionMetadataError: LocalizedUiText(
+            (l10n, args) => l10n.p2pCouldNotCreateADraftRevision(args[0]),
+            [(_describeError(error)).toString()],
+          ),
         );
       }
       return false;
@@ -1866,8 +2029,11 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     } catch (error) {
       if (!_disposed) {
         state = state.copyWith(
-          revisionMetadataError:
-              "已拒絕無效的 revision delta，將改用完整 snapshot：${_describeError(error)}",
+          revisionMetadataError: LocalizedUiText(
+            (l10n, args) =>
+                l10n.p2pRejectedAnInvalidRevisionDeltaFallingBack(args[0]),
+            [(_describeError(error)).toString()],
+          ),
         );
       }
       return null;
@@ -1901,7 +2067,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     ];
     if (invalidReasons.isNotEmpty) {
       state = state.copyWith(
-        revisionMetadataError: "無法保存遠端歷史：${invalidReasons.join("、")}。",
+        revisionMetadataError: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotSaveRemoteHistory(args[0]),
+          [(invalidReasons.join("、")).toString()],
+        ),
       );
       return false;
     }
@@ -1977,8 +2146,11 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     } catch (error) {
       if (!_disposed) {
         state = state.copyWith(
-          revisionMetadataError:
-              "遠端 snapshot 已開啟，但保存 revision DAG 失敗：${_describeError(error)}",
+          revisionMetadataError: LocalizedUiText(
+            (l10n, args) =>
+                l10n.p2pRemoteSnapshotOpenedButItsRevisionGraph(args[0]),
+            [(_describeError(error)).toString()],
+          ),
         );
       }
       return false;
@@ -1997,7 +2169,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         remoteGraph.projectUuid != state.sessionProjectUuid ||
         remoteGraph.revisions[manifest.revisionId] == null) {
       state = state.copyWith(
-        revisionMetadataError: "無法暫存遠端 conflict snapshot：session 或 DAG 已失效。",
+        revisionMetadataError: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotStageTheRemoteConflictSnapshot,
+        ),
       );
       return false;
     }
@@ -2035,8 +2209,11 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     } catch (error) {
       if (!_disposed) {
         state = state.copyWith(
-          revisionMetadataError:
-              "無法暫存遠端 conflict snapshot：${_describeError(error)}",
+          revisionMetadataError: LocalizedUiText(
+            (l10n, args) =>
+                l10n.p2pCouldNotStageTheRemoteConflictSnapshot2(args[0]),
+            [(_describeError(error)).toString()],
+          ),
         );
       }
       return false;
@@ -2066,8 +2243,14 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         commonAncestors.length > 1) {
       state = state.copyWith(
         revisionMetadataError: commonAncestors.length > 1
-            ? "偵測到多個 maximal common ancestors；必須先取得 recursive merge base，未進行猜測式合併。"
-            : "無法建立欄位合併：authenticated session 或 concurrent heads 已失效。",
+            ? LocalizedUiText(
+                (l10n, args) =>
+                    l10n.p2pMultipleMaximalCommonAncestorsFoundARecursive,
+              )
+            : LocalizedUiText(
+                (l10n, args) =>
+                    l10n.p2pCouldNotPrepareFieldMergingTheAuthenticated,
+              ),
       );
       return null;
     }
@@ -2123,8 +2306,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     } catch (error) {
       if (!_disposed) {
         state = state.copyWith(
-          revisionMetadataError:
-              "無法建立 ProjectData 欄位合併：${_describeError(error)}",
+          revisionMetadataError: LocalizedUiText(
+            (l10n, args) => l10n.p2pCouldNotPrepareProjectFieldMerging(args[0]),
+            [(_describeError(error)).toString()],
+          ),
         );
       }
       return null;
@@ -2166,7 +2351,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         localResolutionAck: null,
         remoteResolutionAck: null,
         revisionMetadataError: null,
-        message: "已建立雙 parent resolve revision；等待透過加密通道傳播。",
+        message: LocalizedUiText(
+          (l10n, args) => l10n.p2pCreatedAResolutionRevisionWithTwoParents,
+        ),
       );
       _endpointService.updateLocalRevisionGraph(graph);
       _endpointService.updateLocalResolutionAck(null);
@@ -2188,8 +2375,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     } catch (error) {
       if (!_disposed) {
         state = state.copyWith(
-          revisionMetadataError:
-              "無法建立 resolve revision：${_describeError(error)}",
+          revisionMetadataError: LocalizedUiText(
+            (l10n, args) => l10n.p2pCouldNotCreateAResolutionRevision(args[0]),
+            [(_describeError(error)).toString()],
+          ),
         );
       }
       return null;
@@ -2327,7 +2516,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       sessionProjectUuid: sessionProjectUuid,
       negotiationGeneration: state.negotiationGeneration + 1,
       message: preservePendingResolutionMessage
-          ? "對方已 ACK 遠端 resolve revision；等待下載並安裝該 revision。"
+          ? LocalizedUiText(
+              (l10n, args) =>
+                  l10n.p2pThePeerAcknowledgedTheRemoteResolutionRevision,
+            )
           : _negotiationMessage(negotiation),
       errorMessage: null,
     );
@@ -2403,7 +2595,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         localPairingChallenge: challenge,
         localPairingConfirmation: null,
         pairingCode: null,
-        message: "已自動回應對方的安全配對要求，正在建立比較碼。",
+        message: LocalizedUiText(
+          (l10n, args) => l10n.p2pRespondedAutomaticallyToThePeerSSecure,
+        ),
         errorMessage: null,
       );
       _startPairingChallengeRefresh();
@@ -2412,7 +2606,11 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       if (!_disposed) {
         state = state.copyWith(
           pairingStatus: P2pPairingStatus.error,
-          errorMessage: "無法自動建立本機 pairing challenge：${_describeError(error)}",
+          errorMessage: LocalizedUiText(
+            (l10n, args) =>
+                l10n.p2pCouldNotAutomaticallyCreateALocalPairing(args[0]),
+            [(_describeError(error)).toString()],
+          ),
         );
       }
       return null;
@@ -2444,14 +2642,20 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         remotePairingConfirmation: null,
         pairingCode: null,
         trustedPeer: null,
-        message: "配對 challenge 已自動更新；等待對方取得新比較碼。",
+        message: LocalizedUiText(
+          (l10n, args) =>
+              l10n.p2pPairingChallengeRefreshedAutomaticallyWaitingForThe,
+        ),
         errorMessage: null,
       );
       return renewed;
     } catch (error) {
       state = state.copyWith(
         pairingStatus: P2pPairingStatus.error,
-        errorMessage: "無法更新配對 challenge：${_describeError(error)}",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotRefreshThePairingChallenge(args[0]),
+          [(_describeError(error)).toString()],
+        ),
       );
       return null;
     }
@@ -2583,7 +2787,14 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       pairingCode: null,
       trustedPeer: null,
       negotiationGeneration: state.negotiationGeneration + 1,
-      message: remoteChanged ? "對方已更換同步文件，連線已中斷。" : "本機已更換同步文件，連線已中斷。",
+      message: remoteChanged
+          ? LocalizedUiText(
+              (l10n, args) => l10n.p2pThePeerChangedItsSyncDocumentDisconnected,
+            )
+          : LocalizedUiText(
+              (l10n, args) =>
+                  l10n.p2pThisDeviceChangedItsSyncDocumentDisconnected,
+            ),
       errorMessage: null,
     );
   }
@@ -2612,7 +2823,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       _initialized = false;
       state = state.copyWith(
         pairingStatus: P2pPairingStatus.error,
-        errorMessage: "無法初始化裝置安全身分：${_describeError(error)}",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotInitializeTheDeviceSSecure(args[0]),
+          [(_describeError(error)).toString()],
+        ),
       );
     }
   }
@@ -2636,7 +2850,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     } catch (error) {
       state = state.copyWith(
         localAddresses: const <String>[],
-        errorMessage: "無法取得本機 LAN IP：${_describeError(error)}",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotObtainALocalLANIP(args[0]),
+          [(_describeError(error)).toString()],
+        ),
       );
     }
   }
@@ -2650,7 +2867,7 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       serviceStatus: P2pServiceStatus.starting,
       configuredPort: port,
       listeningPort: null,
-      message: "正在開啟本機服務…",
+      message: LocalizedUiText((l10n, args) => l10n.p2pStartingLocalService),
       errorMessage: null,
     );
     try {
@@ -2664,7 +2881,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       state = state.copyWith(
         serviceStatus: P2pServiceStatus.listening,
         listeningPort: endpoint.port,
-        message: "本機端點已開啟；完成安全配對後可交換加密 revision 與 snapshot chunks。",
+        message: LocalizedUiText(
+          (l10n, args) =>
+              l10n.p2pLocalEndpointReadySecurePairingEnablesEncrypted,
+        ),
         errorMessage: null,
       );
       await refreshLocalAddresses();
@@ -2675,7 +2895,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         serviceStatus: P2pServiceStatus.error,
         listeningPort: null,
         message: null,
-        errorMessage: "無法開啟 Port $port：${_describeError(error)}",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotOpenPort(args[0], args[1]),
+          [(port).toString(), (_describeError(error)).toString()],
+        ),
       );
       return false;
     }
@@ -2696,7 +2919,7 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     _clearAuthenticatedTransport();
     state = state.copyWith(
       serviceStatus: P2pServiceStatus.stopping,
-      message: "正在停止本機服務…",
+      message: LocalizedUiText((l10n, args) => l10n.p2pStoppingLocalService),
       errorMessage: null,
     );
     try {
@@ -2719,7 +2942,7 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         pairingCode: null,
         trustedPeer: null,
         negotiationGeneration: state.negotiationGeneration + 1,
-        message: "本機服務已停止。",
+        message: LocalizedUiText((l10n, args) => l10n.p2pLocalServiceStopped),
         errorMessage: null,
       );
     } catch (error) {
@@ -2727,7 +2950,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         serviceStatus: P2pServiceStatus.error,
         listeningPort: null,
         message: null,
-        errorMessage: "停止本機服務失敗：${_describeError(error)}",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotStopLocalService(args[0]),
+          [(_describeError(error)).toString()],
+        ),
       );
     }
   }
@@ -2739,7 +2965,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       connectionStatus: P2pConnectionStatus.connecting,
       reachablePeer: null,
       inboundPeerAddress: null,
-      message: "正在測試 ${endpoint.host}:${endpoint.port}…",
+      message: LocalizedUiText(
+        (l10n, args) => l10n.p2pTesting(args[0], args[1]),
+        [(endpoint.host).toString(), (endpoint.port).toString()],
+      ),
       errorMessage: null,
     );
     try {
@@ -2753,7 +2982,9 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         connectionStatus: P2pConnectionStatus.reachableUnpaired,
         reachablePeer: endpoint,
         inboundPeerAddress: null,
-        message: "端點可達；完成安全配對後才會啟用加密內容通道。",
+        message: LocalizedUiText(
+          (l10n, args) => l10n.p2pEndpointReachableSecurePairingIsRequiredTo,
+        ),
         errorMessage: null,
       );
       return true;
@@ -2763,7 +2994,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         connectionStatus: P2pConnectionStatus.error,
         reachablePeer: null,
         message: null,
-        errorMessage: "無法連線至 $endpoint：${_describeError(error)}",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotConnectTo(args[0], args[1]),
+          [(endpoint).toString(), (_describeError(error)).toString()],
+        ),
       );
       return false;
     }
@@ -2796,7 +3030,11 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       remotePairingConfirmation: null,
       pairingCode: null,
       trustedPeer: null,
-      message: "正在連線並協商同步文件 ${endpoint.host}:${endpoint.port}…",
+      message: LocalizedUiText(
+        (l10n, args) =>
+            l10n.p2pConnectingAndNegotiatingTheSyncDocumentAt(args[0], args[1]),
+        [(endpoint.host).toString(), (endpoint.port).toString()],
+      ),
       errorMessage: null,
     );
     try {
@@ -2836,7 +3074,10 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
         selectedProjectSource: null,
         sessionProjectUuid: null,
         message: null,
-        errorMessage: "無法連線至 $endpoint：${_describeError(error)}",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pCouldNotConnectTo(args[0], args[1]),
+          [(endpoint).toString(), (_describeError(error)).toString()],
+        ),
       );
       return false;
     }
@@ -2858,8 +3099,12 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       selectedProjectSource: source,
       sessionProjectUuid: sessionProjectUuid,
       message: source == P2pProjectSource.local
-          ? "已選擇由本機提供同步文件。"
-          : "已選擇由對方提供同步文件。",
+          ? LocalizedUiText(
+              (l10n, args) => l10n.p2pThisDeviceWillProvideTheSyncDocument,
+            )
+          : LocalizedUiText(
+              (l10n, args) => l10n.p2pThePeerWillProvideTheSyncDocument,
+            ),
       errorMessage: null,
     );
     if (state.hasAuthenticatedTransport) {
@@ -2911,7 +3156,11 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
       pairingCode: null,
       trustedPeer: null,
       negotiationGeneration: state.negotiationGeneration + 1,
-      message: state.isListening ? "已中斷目前 peer；本機服務仍在監聽。" : "已中斷目前 peer。",
+      message: state.isListening
+          ? LocalizedUiText(
+              (l10n, args) => l10n.p2pPeerDisconnectedTheLocalServiceIsStill,
+            )
+          : LocalizedUiText((l10n, args) => l10n.p2pPeerDisconnected),
       errorMessage: null,
     );
   }
@@ -2927,15 +3176,26 @@ class P2pSyncNotifier extends Notifier<P2pSyncState> {
     }
   }
 
-  String _negotiationMessage(P2pProjectNegotiationResult negotiation) {
+  LocalizedUiText _negotiationMessage(P2pProjectNegotiationResult negotiation) {
     return switch (negotiation.kind) {
-      P2pProjectNegotiationKind.sameProject => "雙方 UUID 相同，已選定同一份同步文件。",
-      P2pProjectNegotiationKind.localProvides => "對方沒有目標文件，將由本機提供文件。",
-      P2pProjectNegotiationKind.remoteProvides => "本機沒有目標文件，將由對方提供文件。",
+      P2pProjectNegotiationKind.sameProject => LocalizedUiText(
+        (l10n, args) => l10n.p2pBothUUIDsMatchTheSameSyncDocument,
+      ),
+      P2pProjectNegotiationKind.localProvides => LocalizedUiText(
+        (l10n, args) => l10n.p2pThePeerHasNoTargetDocumentThis,
+      ),
+      P2pProjectNegotiationKind.remoteProvides => LocalizedUiText(
+        (l10n, args) => l10n.p2pThisDeviceHasNoTargetDocumentThe,
+      ),
       P2pProjectNegotiationKind.selectionRequired =>
         negotiation.selectionReason == P2pProjectSelectionReason.bothMissing
-            ? "雙方都沒有可同步文件，需要先決定文件。"
-            : "雙方文件 UUID 不同，需要選擇同步文件。",
+            ? LocalizedUiText(
+                (l10n, args) => l10n.p2pNeitherDeviceHasASyncDocumentChoose,
+              )
+            : LocalizedUiText(
+                (l10n, args) =>
+                    l10n.p2pTheDocumentUUIDsDifferChooseWhichDocument,
+              ),
     };
   }
 
@@ -2963,16 +3223,22 @@ class P2pSnapshotTransferState {
   final P2pSnapshotTransferStatus status;
   final P2pSnapshotManifest? manifest;
   final P2pVerifiedSnapshot? verifiedSnapshot;
-  final String? message;
-  final String? errorMessage;
+  final Object? _message;
+  String? get message => _message?.toString();
+  String? messageFor(AppLocalizations l10n) => localizeUiText(_message, l10n);
+  final Object? _errorMessage;
+  String? get errorMessage => _errorMessage?.toString();
+  String? errorMessageFor(AppLocalizations l10n) =>
+      localizeUiText(_errorMessage, l10n);
 
   const P2pSnapshotTransferState({
     this.status = P2pSnapshotTransferStatus.idle,
     this.manifest,
     this.verifiedSnapshot,
-    this.message,
-    this.errorMessage,
-  });
+    Object? message,
+    Object? errorMessage,
+  }) : _message = message,
+       _errorMessage = errorMessage;
 
   bool get isBusy =>
       status == P2pSnapshotTransferStatus.downloading ||
@@ -3043,9 +3309,11 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
       syncState,
     );
     if (authorization == null) {
-      state = const P2pSnapshotTransferState(
+      state = P2pSnapshotTransferState(
         status: P2pSnapshotTransferStatus.failed,
-        errorMessage: "目前沒有可在已驗證連線中下載的遠端 snapshot。",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pNoRemoteSnapshotIsAvailableForDownload,
+        ),
       );
       return false;
     }
@@ -3055,7 +3323,10 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
     state = P2pSnapshotTransferState(
       status: P2pSnapshotTransferStatus.downloading,
       manifest: authorization.manifest,
-      message: "正在透過 authenticated encrypted transport 重建或下載並驗證 snapshot…",
+      message: LocalizedUiText(
+        (l10n, args) =>
+            l10n.p2pReconstructingOrDownloadingAndVerifyingTheSnapshot,
+      ),
     );
     try {
       final deltaVerified = await ref
@@ -3074,8 +3345,13 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
         manifest: authorization.manifest,
         verifiedSnapshot: verified,
         message: deltaVerified == null
-            ? "snapshot 已完成 chunk、SHA-256、XML、UUID 與版本驗證；尚未寫入專案。"
-            : "snapshot 已由加密 delta 重建，並完成 SHA-256、XML、UUID 與版本驗證；尚未寫入專案。",
+            ? LocalizedUiText(
+                (l10n, args) => l10n.p2pSnapshotChunksSHAXMLUUIDAndVersion,
+              )
+            : LocalizedUiText(
+                (l10n, args) =>
+                    l10n.p2pSnapshotReconstructedFromAnEncryptedDeltaSHA,
+              ),
       );
       return true;
     } on P2pSnapshotDownloadCancelledException {
@@ -3083,7 +3359,9 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
         state = P2pSnapshotTransferState(
           status: P2pSnapshotTransferStatus.cancelled,
           manifest: authorization.manifest,
-          message: "snapshot 下載已取消。",
+          message: LocalizedUiText(
+            (l10n, args) => l10n.p2pSnapshotDownloadCancelled,
+          ),
         );
       }
       return false;
@@ -3092,7 +3370,11 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
         state = P2pSnapshotTransferState(
           status: P2pSnapshotTransferStatus.failed,
           manifest: authorization.manifest,
-          errorMessage: "snapshot 下載或驗證失敗：${_describeError(error)}",
+          errorMessage: LocalizedUiText(
+            (l10n, args) =>
+                l10n.p2pSnapshotDownloadOrVerificationFailed(args[0]),
+            [(_describeError(error)).toString()],
+          ),
         );
       }
       return false;
@@ -3111,8 +3393,9 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
         status: P2pSnapshotTransferStatus.verified,
         manifest: verified?.manifest,
         verifiedSnapshot: verified,
-        errorMessage:
-            "雙方 revisions concurrent；必須完成逐欄 conflict resolution，不能直接覆寫本機文件。",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pRevisionsDivergedResolveConflictsFieldByField,
+        ),
       );
       return false;
     }
@@ -3120,9 +3403,11 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
         authorization == null ||
         verified.manifest != authorization.manifest ||
         !authorization.matches(ref.read(p2pSyncProvider))) {
-      state = const P2pSnapshotTransferState(
+      state = P2pSnapshotTransferState(
         status: P2pSnapshotTransferStatus.failed,
-        errorMessage: "已驗證 snapshot 已失效；請重新建立安全連線後下載。",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pTheVerifiedSnapshotIsNoLongerValid,
+        ),
       );
       return false;
     }
@@ -3145,7 +3430,9 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
         status: P2pSnapshotTransferStatus.failed,
         manifest: verified.manifest,
         verifiedSnapshot: verified,
-        errorMessage: "尚未取得包含此 snapshot 的已驗證 revision graph；未寫入專案。",
+        errorMessage: LocalizedUiText(
+          (l10n, args) => l10n.p2pNoVerifiedRevisionGraphContainingThisSnapshot,
+        ),
       );
       return false;
     }
@@ -3162,7 +3449,10 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
         status: P2pSnapshotTransferStatus.failed,
         manifest: verified.manifest,
         verifiedSnapshot: verified,
-        errorMessage: "authenticated snapshot session capability 不存在；未寫入專案。",
+        errorMessage: LocalizedUiText(
+          (l10n, args) =>
+              l10n.p2pAuthenticatedSnapshotSessionCapabilityIsMissingThe,
+        ),
       );
       return false;
     }
@@ -3172,7 +3462,9 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
       status: P2pSnapshotTransferStatus.applying,
       manifest: verified.manifest,
       verifiedSnapshot: verified,
-      message: "等待確認儲存位置並安全開啟 snapshot…",
+      message: LocalizedUiText(
+        (l10n, args) => l10n.p2pWaitingToConfirmTheSaveLocationAnd,
+      ),
     );
     try {
       final applied = await apply(verified);
@@ -3181,7 +3473,9 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
         state = P2pSnapshotTransferState(
           status: P2pSnapshotTransferStatus.cancelled,
           manifest: verified.manifest,
-          message: "同步 session 已變更；已停止將 snapshot 套用至編輯器。",
+          message: LocalizedUiText(
+            (l10n, args) => l10n.p2pTheSyncSessionChangedSnapshotApplicationTo,
+          ),
         );
         return false;
       }
@@ -3200,7 +3494,9 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
             status: P2pSnapshotTransferStatus.failed,
             manifest: verified.manifest,
             verifiedSnapshot: verified,
-            errorMessage: "snapshot 已另存並開啟，但遠端 revision 歷史尚未保存；請勿繼續編輯並重試同步。",
+            errorMessage: LocalizedUiText(
+              (l10n, args) => l10n.p2pSnapshotSavedAndOpenedButRemoteRevision,
+            ),
           );
           return false;
         }
@@ -3212,7 +3508,14 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
             : P2pSnapshotTransferStatus.verified,
         manifest: verified.manifest,
         verifiedSnapshot: applied ? null : verified,
-        message: applied ? "遠端 snapshot 已另存並開啟。" : "已取消套用；驗證結果仍保留在記憶體中。",
+        message: applied
+            ? LocalizedUiText(
+                (l10n, args) => l10n.p2pRemoteSnapshotSavedAndOpened,
+              )
+            : LocalizedUiText(
+                (l10n, args) => l10n
+                    .p2pApplicationCancelledVerificationResultsRemainInMemory,
+              ),
       );
       return applied;
     } catch (error) {
@@ -3221,7 +3524,10 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
           status: P2pSnapshotTransferStatus.failed,
           manifest: verified.manifest,
           verifiedSnapshot: verified,
-          errorMessage: "無法儲存或開啟 snapshot：${_describeError(error)}",
+          errorMessage: LocalizedUiText(
+            (l10n, args) => l10n.p2pCouldNotSaveOrOpenTheSnapshot(args[0]),
+            [(_describeError(error)).toString()],
+          ),
         );
       }
       return false;
@@ -3235,7 +3541,9 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
     state = P2pSnapshotTransferState(
       status: P2pSnapshotTransferStatus.applied,
       manifest: snapshot.manifest,
-      message: "concurrent snapshot 已完成逐欄合併並建立 resolve revision。",
+      message: LocalizedUiText(
+        (l10n, args) => l10n.p2pConcurrentSnapshotsMergedFieldByFieldAnd,
+      ),
     );
   }
 
@@ -3244,9 +3552,11 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
     _authorization = null;
     await _coordinator.cancel();
     if (_disposed) return;
-    state = const P2pSnapshotTransferState(
+    state = P2pSnapshotTransferState(
       status: P2pSnapshotTransferStatus.cancelled,
-      message: "snapshot 傳輸已取消。",
+      message: LocalizedUiText(
+        (l10n, args) => l10n.p2pSnapshotTransferCancelled,
+      ),
     );
   }
 
@@ -3256,9 +3566,11 @@ class P2pSnapshotTransferNotifier extends Notifier<P2pSnapshotTransferState> {
     _authorization = null;
     await _coordinator.cancel();
     if (_disposed) return;
-    state = const P2pSnapshotTransferState(
+    state = P2pSnapshotTransferState(
       status: P2pSnapshotTransferStatus.cancelled,
-      message: "連線、文件或 revision 已變更；舊 snapshot 已失效。",
+      message: LocalizedUiText(
+        (l10n, args) => l10n.p2pConnectionDocumentOrRevisionChangedThePrevious,
+      ),
     );
   }
 

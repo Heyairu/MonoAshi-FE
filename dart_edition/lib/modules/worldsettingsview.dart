@@ -16,6 +16,7 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "package:file_picker/file_picker.dart";
 import "dart:io";
@@ -719,7 +720,10 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
   }) async {
     final scenes = _placedScenes();
     if (scenes.isEmpty) {
-      AppFeedback.error(context, "請先將 Scene 放入時間軸，再新增地點快照。");
+      AppFeedback.error(
+        context,
+        context.l10n.uiAddTheSceneToTheTimelineBeforeAdding3,
+      );
       return;
     }
     final currentTick = ref.read(timelineViewProvider).currentTick;
@@ -764,13 +768,13 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
         (scene) => scene.placementId == placementId,
       );
       String controllerLabel(String? id) {
-        if (id == null || id.isEmpty) return "未設定";
+        if (id == null || id.isEmpty) return context.l10n.uiNotSet;
         return characters
                 .where((entry) => entry.key == id)
                 .firstOrNull
                 ?.value
                 .displayName ??
-            "找不到：$id";
+            context.l10n.uiNotFound((id).toString());
       }
 
       return subtreeLocations
@@ -784,27 +788,50 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
             final differences = <String>[];
             if (before?.exists != exists) {
               differences.add(
-                "存在 ${(before?.exists ?? true) ? '是' : '否'} → ${exists ? '是' : '否'}",
+                context.l10n.uiExistence(
+                  ((before?.exists ?? true)
+                          ? context.l10n.uiYes
+                          : context.l10n.uiNo)
+                      .toString(),
+                  (exists ? context.l10n.uiYes : context.l10n.uiNo).toString(),
+                ),
               );
             }
             if (before?.accessible != accessible) {
               differences.add(
-                "可進入 ${(before?.accessible ?? true) ? '是' : '否'} → ${accessible ? '是' : '否'}",
+                context.l10n.uiAccess(
+                  ((before?.accessible ?? true)
+                          ? context.l10n.uiYes
+                          : context.l10n.uiNo)
+                      .toString(),
+                  (accessible ? context.l10n.uiYes : context.l10n.uiNo)
+                      .toString(),
+                ),
               );
             }
             if ((before?.status ?? "") != snapshotStatus.trim()) {
               differences.add(
-                "狀態「${before?.status.isNotEmpty == true ? before!.status : '未設定'}」"
-                " → 「${snapshotStatus.trim().isEmpty ? '未設定' : snapshotStatus.trim()}」",
+                context.l10n.uiState(
+                  (before?.status.isNotEmpty == true
+                          ? before!.status
+                          : context.l10n.uiNotSet)
+                      .toString(),
+                  (snapshotStatus.trim().isEmpty
+                          ? context.l10n.uiNotSet
+                          : snapshotStatus.trim())
+                      .toString(),
+                ),
               );
             }
             if (before?.controllerCharacterId != controllerCharacterId) {
               differences.add(
-                "控制者 ${controllerLabel(before?.controllerCharacterId)}"
-                " → ${controllerLabel(controllerCharacterId)}",
+                context.l10n.uiController(
+                  (controllerLabel(before?.controllerCharacterId)).toString(),
+                  (controllerLabel(controllerCharacterId)).toString(),
+                ),
               );
             }
-            return "${target.localName}：${differences.isEmpty ? '無變更' : differences.join('；')}";
+            return "${target.localName}：${differences.isEmpty ? context.l10n.uiNoChanges : differences.join('；')}";
           })
           .toList(growable: false);
     }
@@ -814,7 +841,13 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           title: Text(
-            "${sourceState == null ? '新增' : '複製'}「${location.localName}」場景快照",
+            context.l10n.uiSceneSnapshot(
+              (sourceState == null
+                      ? context.l10n.commonAdd
+                      : context.l10n.commonCopy)
+                  .toString(),
+              (location.localName).toString(),
+            ),
           ),
           content: SingleChildScrollView(
             child: Column(
@@ -831,7 +864,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                 ),
                 AppDropdownField<String>(
                   value: placementId,
-                  labelText: "綁定 Scene",
+                  labelText: context.l10n.uiLinkToScene,
                   options: scenes
                       .map(
                         (scene) => DropdownOption(
@@ -850,11 +883,15 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                   SwitchListTile(
                     key: const Key("location-snapshot-include-descendants"),
                     contentPadding: EdgeInsets.zero,
-                    title: const Text("套用至所有子地點"),
+                    title: Text(context.l10n.uiApplyToAllChildLocations),
                     subtitle: Text(
                       includeDescendants
-                          ? "將建立 ${subtreeLocations.length} 筆獨立快照"
-                          : "目前只會修改「${location.localName}」",
+                          ? context.l10n.uiCreatesIndependentSnapshots(
+                              context.formats.integer(subtreeLocations.length),
+                            )
+                          : context.l10n.uiOnlyWillBeModified(
+                              (location.localName).toString(),
+                            ),
                       style: Theme.of(context).textTheme.labelTiny,
                     ),
                     value: includeDescendants,
@@ -868,7 +905,9 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                     onChanged: (value) => snapshotName = value,
                     decoration: appFieldDecoration(
                       context,
-                      decoration: const InputDecoration(labelText: "當時名稱"),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.uiNameAtThisPoint,
+                      ),
                     ),
                   ),
                   TextFormField(
@@ -877,15 +916,17 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                     onChanged: (value) => snapshotDescription = value,
                     decoration: appFieldDecoration(
                       context,
-                      decoration: const InputDecoration(labelText: "當時描述"),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.uiDescriptionAtThisPoint,
+                      ),
                     ),
                     minLines: 2,
                     maxLines: 4,
                   ),
                   const SizedBox(height: 8),
-                  const Align(
+                  Align(
                     alignment: Alignment.centerLeft,
-                    child: Text("當時自訂屬性"),
+                    child: Text(context.l10n.uiCustomPropertiesAtThisPoint),
                   ),
                   for (final entry in snapshotProperties.indexed)
                     Row(
@@ -898,8 +939,8 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                             initialValue: entry.$2.key,
                             decoration: appFieldDecoration(
                               context,
-                              decoration: const InputDecoration(
-                                labelText: "設定",
+                              decoration: InputDecoration(
+                                labelText: context.l10n.uiSettings,
                               ),
                             ),
                             onChanged: (value) {
@@ -919,8 +960,8 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                             initialValue: entry.$2.value,
                             decoration: appFieldDecoration(
                               context,
-                              decoration: const InputDecoration(
-                                labelText: "鍵值",
+                              decoration: InputDecoration(
+                                labelText: context.l10n.uiValue,
                               ),
                             ),
                             onChanged: (value) {
@@ -935,7 +976,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                           key: ValueKey(
                             "location-snapshot-property-remove-${entry.$1}",
                           ),
-                          label: "移除屬性",
+                          label: context.l10n.uiRemoveProperty,
                           onPressed: () => setDialogState(
                             () => snapshotProperties.removeAt(entry.$1),
                           ),
@@ -955,7 +996,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                         ],
                       ),
                       icon: const Icon(Icons.add),
-                      label: const Text("新增屬性"),
+                      label: Text(context.l10n.uiAddProperty),
                     ),
                   ),
                   if (propertyValidationError != null)
@@ -970,19 +1011,23 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                       ),
                     ),
                 ] else
-                  const Align(
+                  Align(
                     alignment: Alignment.centerLeft,
-                    child: Text("批次套用會保留各子地點原有的名稱、描述與自訂屬性。"),
+                    child: Text(
+                      context
+                          .l10n
+                          .uiBatchApplicationPreservesEachChildLocationSExisting,
+                    ),
                   ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text("此時已存在"),
+                  title: Text(context.l10n.uiExistsAtThisPoint),
                   value: exists,
                   onChanged: (value) => setDialogState(() => exists = value),
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text("此時可進入"),
+                  title: Text(context.l10n.uiAccessibleAtThisPoint),
                   value: accessible,
                   onChanged: (value) =>
                       setDialogState(() => accessible = value),
@@ -994,7 +1039,9 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                       setDialogState(() => snapshotStatus = value),
                   decoration: appFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "狀態"),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiStatus,
+                    ),
                   ),
                 ),
                 DropdownButtonFormField<String>(
@@ -1008,17 +1055,26 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                   initialValue: controllerCharacterId ?? "",
                   decoration: appDropdownFieldDecoration(
                     context,
-                    decoration: const InputDecoration(labelText: "控制者"),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiController2,
+                    ),
                   ),
                   items: [
-                    const DropdownMenuItem(value: "", child: Text("未設定")),
+                    DropdownMenuItem(
+                      value: "",
+                      child: Text(context.l10n.uiNotSet),
+                    ),
                     if (controllerCharacterId != null &&
                         !characters.any(
                           (entry) => entry.key == controllerCharacterId,
                         ))
                       DropdownMenuItem(
                         value: controllerCharacterId,
-                        child: Text("找不到：$controllerCharacterId"),
+                        child: Text(
+                          context.l10n.uiNotFound(
+                            (controllerCharacterId).toString(),
+                          ),
+                        ),
                       ),
                     for (final entry in characters)
                       DropdownMenuItem(
@@ -1048,7 +1104,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "批次差異預覽",
+                          context.l10n.uiBatchChangesPreview,
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                         const SizedBox(height: 6),
@@ -1063,7 +1119,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               key: const Key("location-snapshot-confirm"),
@@ -1082,15 +1138,19 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                       keys.toSet().length != keys.length) {
                     setDialogState(
                       () => propertyValidationError = hasValueWithoutKey
-                          ? "屬性有鍵值時必須填寫設定名稱。"
-                          : "自訂屬性的設定名稱不可重複。",
+                          ? context.l10n.uiPropertiesWithAValueMustHaveAName
+                          : context.l10n.uiCustomPropertyNamesMustBeUnique,
                     );
                     return;
                   }
                 }
                 Navigator.pop(context, true);
               },
-              child: Text(sourceState == null ? "新增快照" : "複製快照"),
+              child: Text(
+                sourceState == null
+                    ? context.l10n.uiAddSnapshot
+                    : context.l10n.uiDuplicateSnapshot,
+              ),
             ),
           ],
         ),
@@ -1158,7 +1218,11 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
         .setCurrentTick(selectedScene.startTick);
     AppFeedback.success(
       context,
-      targets.length == 1 ? "已新增地點快照" : "已新增 ${targets.length} 筆地點快照",
+      targets.length == 1
+          ? context.l10n.uiLocationSnapshotAdded
+          : context.l10n.uiAddedLocationSnapshots(
+              context.formats.integer(targets.length),
+            ),
     );
   }
 
@@ -1177,17 +1241,21 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text("刪除整批地點快照？"),
-          content: Text("這筆快照與其他子地點屬於同一次批次操作，將一併刪除 ${removedIds.length} 筆快照。"),
+          title: Text(context.l10n.uiDeleteAllSnapshotsInThisBatch),
+          content: Text(
+            context.l10n.uiThisSnapshotBelongsToTheSameBatchAs(
+              context.formats.integer(removedIds.length),
+            ),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               key: const Key("location-snapshot-delete-batch-confirm"),
               onPressed: () => Navigator.pop(context, true),
-              child: const Text("整批刪除"),
+              child: Text(context.l10n.uiDeleteBatch),
             ),
           ],
         ),
@@ -1202,7 +1270,11 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
     }
     AppFeedback.success(
       context,
-      removedIds.length > 1 ? "已刪除 ${removedIds.length} 筆地點快照" : "已刪除地點快照",
+      removedIds.length > 1
+          ? context.l10n.uiDeletedLocationSnapshots(
+              context.formats.integer(removedIds.length),
+            )
+          : context.l10n.uiLocationSnapshotDeleted,
     );
   }
 
@@ -1270,7 +1342,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
               itemKind: ItemReferenceKind.itemClass,
               name: state.name.isEmpty ? itemClass.name : state.name,
               quantity: allocation.quantity == null
-                  ? "未知"
+                  ? context.l10n.uiUnknown
                   : "${allocation.quantity}${unit.isEmpty ? "" : " $unit"}",
               description: allocation.note.isNotEmpty
                   ? allocation.note
@@ -1321,8 +1393,11 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
       children: [
         Row(
           children: [
-            const Expanded(
-              child: SmallTitle(icon: Icons.link_outlined, text: "一般關聯物品"),
+            Expanded(
+              child: SmallTitle(
+                icon: Icons.link_outlined,
+                text: context.l10n.uiRelatedItems,
+              ),
             ),
             FilledButton.tonalIcon(
               key: const Key("location-link-item"),
@@ -1330,13 +1405,13 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                   ? () => _linkItemToLocation(locationId)
                   : null,
               icon: const Icon(Icons.add_link),
-              label: const Text("連結物品"),
+              label: Text(context.l10n.uiLinkItem),
             ),
           ],
         ),
         const SizedBox(height: 8),
         if (relatedEntries.isEmpty)
-          const Text("尚未設定一般物品關聯。")
+          Text(context.l10n.uiNoRelatedItemsAreConfigured)
         else
           ...relatedEntries.map(
             (entry) => ListTile(
@@ -1351,7 +1426,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                 [
                   if (entry.relation.role.isNotEmpty) entry.relation.role,
                   if (entry.relation.note.isNotEmpty) entry.relation.note,
-                ].join("・"),
+                ].join(context.l10n.uiLiteral),
               ),
               trailing: Wrap(
                 children: [
@@ -1360,7 +1435,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                       key: ValueKey(
                         "location-open-related-item-${entry.relation.relationId}",
                       ),
-                      label: "開啟物品頁",
+                      label: context.l10n.uiOpenItems,
                       onPressed: () => widget.onOpenItem!(entry.classId!),
                       icon: Icons.open_in_new,
                     ),
@@ -1368,7 +1443,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                     key: ValueKey(
                       "location-unlink-item-${entry.relation.relationId}",
                     ),
-                    label: "解除關聯",
+                    label: context.l10n.uiUnlink,
                     onPressed: !baseline
                         ? null
                         : () => ref
@@ -1384,10 +1459,10 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
         const SizedBox(height: 16),
         Row(
           children: [
-            const Expanded(
+            Expanded(
               child: SmallTitle(
                 icon: Icons.inventory_2_outlined,
-                text: "目前位於本地點的物品",
+                text: context.l10n.uiItemsCurrentlyAtThisLocation,
               ),
             ),
             FilledButton.tonalIcon(
@@ -1396,15 +1471,16 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                   ? () => _assignItemToLocation(locationId)
                   : null,
               icon: const Icon(Icons.inventory_2_outlined),
-              label: const Text("分配物品"),
+              label: Text(context.l10n.uiAssignItem),
             ),
           ],
         ),
         const SizedBox(height: 8),
         if (entries.isEmpty)
-          const AppEmptyState(
-            title: "目前沒有物品",
-            description: "按「分配物品」即可在此頁設定所在地或聚合數量",
+          AppEmptyState(
+            title: context.l10n.uiNoItemsHere,
+            description:
+                context.l10n.uiUseAllocateItemsToSetLocationsOrAggregate,
             icon: Icons.inventory_2_outlined,
             compact: true,
           )
@@ -1413,11 +1489,11 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
             scrollDirection: Axis.horizontal,
             child: DataTable(
               key: const ValueKey("location-items-table"),
-              columns: const [
-                DataColumn(label: Text("物品")),
-                DataColumn(label: Text("數量"), numeric: true),
-                DataColumn(label: Text("狀態／備註")),
-                DataColumn(label: Text("操作")),
+              columns: [
+                DataColumn(label: Text(context.l10n.uiItem)),
+                DataColumn(label: Text(context.l10n.uiQuantity), numeric: true),
+                DataColumn(label: Text(context.l10n.uiStatusNotes)),
+                DataColumn(label: Text(context.l10n.uiActions)),
               ],
               rows: entries
                   .map(
@@ -1439,7 +1515,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                         DataCell(
                           NeonIconButton(
                             key: ValueKey("location-unassign-item-${entry.id}"),
-                            label: "清除預設分配",
+                            label: context.l10n.uiClearDefaultAssignment,
                             onPressed: !baseline
                                 ? null
                                 : () => _clearLocationItemAssignment(
@@ -1475,7 +1551,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
         .toSet();
     final selected = await showProjectObjectSelector(
       context: context,
-      title: "選擇要連結的地點物品",
+      title: context.l10n.uiChooseALocationItemToLink,
       allowedKinds: const {
         ProjectObjectKind.itemClass,
         ProjectObjectKind.itemInstance,
@@ -1493,7 +1569,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
             itemKind: itemKind,
             targetId: locationId,
             targetKind: ItemRelationTargetKind.location,
-            role: "相關",
+            role: context.l10n.uiRelated,
           ),
         );
   }
@@ -1501,7 +1577,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
   Future<void> _assignItemToLocation(String locationId) async {
     final selected = await showProjectObjectSelector(
       context: context,
-      title: "選擇要放在本地點的物品",
+      title: context.l10n.uiChooseAnItemToPlaceHere,
       allowedKinds: const {
         ProjectObjectKind.itemClass,
         ProjectObjectKind.itemInstance,
@@ -1519,7 +1595,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text("分配「${selected.label}」"),
+          title: Text(context.l10n.uiAssign((selected.label).toString())),
           content: TextFormField(
             key: const Key("location-assignment-quantity"),
             autofocus: true,
@@ -1527,9 +1603,9 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
             initialValue: quantityText,
             decoration: appFieldDecoration(
               context,
-              decoration: const InputDecoration(
-                labelText: "數量",
-                helperText: "留空代表數量未知",
+              decoration: InputDecoration(
+                labelText: context.l10n.uiQuantity,
+                helperText: context.l10n.uiLeaveBlankIfTheQuantityIsUnknown,
               ),
             ),
             onChanged: (value) => quantityText = value,
@@ -1537,12 +1613,12 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
             FilledButton(
               key: const Key("location-assignment-confirm"),
               onPressed: () => Navigator.pop(context, true),
-              child: const Text("分配"),
+              child: Text(context.l10n.uiAssign2),
             ),
           ],
         ),
@@ -1553,9 +1629,11 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
           : int.tryParse(quantityText.trim());
       if (quantityText.trim().isNotEmpty &&
           (quantity == null || quantity < 0)) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("數量必須是零或正整數。")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.uiQuantityMustBeZeroOrAPositiveInteger),
+          ),
+        );
         return;
       }
     }
@@ -1581,9 +1659,13 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
           );
     } on Object catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("無法分配物品：$error")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.uiCouldNotAssignTheItem((error).toString()),
+            ),
+          ),
+        );
       }
     }
   }
@@ -1618,17 +1700,19 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("搬移舊版世界物品"),
-        content: Text("將 $count 筆物品子節點搬到新版物品管理；原 ID、內容與來源路徑會保留。"),
+        title: Text(context.l10n.uiMoveLegacyWorldbuildingItems),
+        content: Text(
+          context.l10n.uiMoveItemNodesToTheNewItemManager((count).toString()),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("取消"),
+            child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
             key: const Key("world-migrate-items-confirm"),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text("搬移"),
+            child: Text(context.l10n.uiMove),
           ),
         ],
       ),
@@ -1660,7 +1744,13 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
     });
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("已搬移 ${result.migratedCount} 筆物品到新版物品管理。")),
+        SnackBar(
+          content: Text(
+            context.l10n.uiMovedItemsToTheNewItemManager(
+              (result.migratedCount).toString(),
+            ),
+          ),
+        ),
       );
     }
   }
@@ -1692,7 +1782,10 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                     // Title
                     Row(
                       children: [
-                        const LargeTitle(icon: Icons.public, text: "世界設定"),
+                        LargeTitle(
+                          icon: Icons.public,
+                          text: context.l10n.uiWorldbuilding2,
+                        ),
                         const Spacer(),
                         PopupMenuButton<String>(
                           icon: Row(
@@ -1700,7 +1793,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                             children: [
                               Icon(Icons.grid_view, color: menuIconColor),
                               const SizedBox(width: 4),
-                              const Text("模板管理"),
+                              Text(context.l10n.uiManageTemplates),
                             ],
                           ),
                           onSelected: (value) {
@@ -1726,36 +1819,38 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                             }
                           },
                           itemBuilder: (context) => [
-                            const PopupMenuItem(
+                            PopupMenuItem(
                               value: "import",
-                              child: Text("匯入模板檔案…"),
+                              child: Text(context.l10n.uiImportTemplateFile),
                             ),
                             PopupMenuItem(
                               value: "exportSelected",
                               enabled: _selectedPreset != null,
-                              child: const Text("匯出選取模板…"),
+                              child: Text(
+                                context.l10n.uiExportSelectedTemplate,
+                              ),
                             ),
                             PopupMenuItem(
                               value: "exportAll",
                               enabled: templatePresets.isNotEmpty,
-                              child: const Text("匯出全部模板…"),
+                              child: Text(context.l10n.uiExportAllTemplates),
                             ),
                             const PopupMenuDivider(),
-                            const PopupMenuItem(
+                            PopupMenuItem(
                               value: "save",
-                              child: Text("儲存預設模板…"),
+                              child: Text(context.l10n.uiSaveTemplatePreset),
                             ),
                             PopupMenuItem(
                               value: "rename",
                               enabled: _selectedPreset != null,
-                              child: const Text("更改預設名稱…"),
+                              child: Text(context.l10n.uiRenamePreset),
                             ),
                             PopupMenuItem(
                               value: "delete",
                               enabled:
                                   _selectedPreset != null &&
                                   _selectedPreset!.name != "空白",
-                              child: const Text("刪除選取預設"),
+                              child: Text(context.l10n.uiDeleteSelectedPreset),
                             ),
                           ],
                         ),
@@ -1768,7 +1863,10 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          MediumTitle(icon: Icons.map, text: "世界結構"),
+                          MediumTitle(
+                            icon: Icons.map,
+                            text: context.l10n.uiWorldStructure,
+                          ),
                           const SizedBox(height: 8),
                           GestureDetector(
                             onTap: () {
@@ -1777,15 +1875,16 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                               });
                             },
                             child: CollectionPanel.builder(
-                              title: "世界結構",
+                              title: context.l10n.uiWorldStructure,
                               showSectionCard: false,
                               minHeight: listHeight,
                               maxHeight: listHeight,
                               controller: _treeScrollController,
                               showScrollbar: true,
                               itemCount: flatList.length,
-                              emptyTitle: "尚無地點",
-                              emptyDescription: "請新增第一個地點",
+                              emptyTitle: context.l10n.uiNoLocationsYet,
+                              emptyDescription:
+                                  context.l10n.uiAddYourFirstLocation,
                               emptyIcon: Icons.public_off_outlined,
                               itemBuilder: (context, index) {
                                 final item = flatList[index];
@@ -1799,7 +1898,9 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                             ),
                             child: AddItemInput(
                               useNeonStyle: true,
-                              title: selectedNodeId != null ? "子地點" : "頂層地點",
+                              title: selectedNodeId != null
+                                  ? context.l10n.uiChildLocation
+                                  : context.l10n.uiTopLevelLocation,
                               onAdd: _addLocation,
                             ),
                           ),
@@ -1810,7 +1911,10 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          MediumTitle(icon: Icons.info_outline, text: "節點詳情"),
+                          MediumTitle(
+                            icon: Icons.info_outline,
+                            text: context.l10n.uiNodeDetails,
+                          ),
                           const SizedBox(height: 8),
                           Container(
                             constraints: const BoxConstraints(minHeight: 320),
@@ -1869,7 +1973,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
           editingNodeId = null;
         });
       },
-      emptyText: "（未命名）",
+      emptyText: context.l10n.uiUntitled,
       style: TextStyle(
         fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
         color: isSelected
@@ -1911,15 +2015,19 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
       ),
       subtitle: Text(
         [
-          "${location.nodeType.label} • ${location.child.length} 個子節點",
-          if (isUnavailable) "此 Tick 尚未存在",
-          if (item.retainedShell) "保留樹殼：仍有存在的子地點",
+          context.l10n.worldChildNodeCount(
+            context.l10n.legacyLabel(location.nodeType.label),
+            context.formats.integer(location.child.length),
+          ),
+          if (isUnavailable) context.l10n.uiDoesNotExistAtThisTick,
+          if (item.retainedShell)
+            context.l10n.uiTreeShellRetainedExistingChildLocationsRemain,
           if (item.unavailableAncestor && !isUnavailable)
-            "父層在此 Tick 不存在；此節點仍獨立存在",
+            context.l10n.uiParentDoesNotExistAtThisTickThis,
           if (snapshot != null &&
               snapshot.name.isNotEmpty &&
               snapshot.name != location.localName)
-            "當時名稱：${snapshot.name}",
+            context.l10n.uiNameAtThisPoint2((snapshot.name).toString()),
         ].join("\n"),
         key: ValueKey("location-timeline-status-${location.id}"),
         style: Theme.of(context).textTheme.bodySmall,
@@ -1933,7 +2041,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
           });
         },
         onDelete: () => _deleteNode(location.id),
-        deleteTooltip: "刪除地點",
+        deleteTooltip: context.l10n.uiDeleteLocation,
       ),
 
       // 狀態與回調
@@ -1992,21 +2100,29 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
         switch (pos) {
           case DropPosition.before:
             positionStr = "before";
-            messageKey = "之前";
+            messageKey = context.l10n.uiBefore;
             break;
           case DropPosition.child:
             positionStr = "child";
-            messageKey = "的子地點";
+            messageKey = context.l10n.uiAsAChildLocation;
             break;
           case DropPosition.after:
             positionStr = "after";
-            messageKey = "之後";
+            messageKey = context.l10n.uiAfter;
             break;
         }
 
         final message = pos == DropPosition.child
-            ? "「${data.locationName}」已成為「${location.localName}」$messageKey"
-            : "「${data.locationName}」已移動到「${location.localName}」$messageKey";
+            ? context.l10n.uiIsNowPlaced(
+                (data.locationName).toString(),
+                (location.localName).toString(),
+                (messageKey).toString(),
+              )
+            : context.l10n.uiMoved(
+                (data.locationName).toString(),
+                (location.localName).toString(),
+                (messageKey).toString(),
+              );
 
         _moveLocationTo(data.locationId, location.id, positionStr);
         AppFeedback.success(
@@ -2026,11 +2142,11 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
         ? null
         : _getLocation(displayNodeId, _locations);
     if (location == null || location.nodeType != WorldNodeType.location) {
-      return const SnapshotPanelCard(
+      return SnapshotPanelCard(
         key: ValueKey("location-snapshot-card"),
         child: AppEmptyState(
-          title: "請先選取地點",
-          description: "選取地點後即可預覽時間軸與管理快照",
+          title: context.l10n.uiSelectALocationFirst,
+          description: context.l10n.uiSelectALocationToPreviewItsTimelineAnd,
           icon: Icons.location_on_outlined,
           compact: true,
         ),
@@ -2086,14 +2202,14 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
             snapshotActionsBuilder: (event) => [
               NeonIconButton(
                 key: ValueKey("location-add-snapshot-${location.id}"),
-                label: "新增 Scene 快照",
+                label: context.l10n.uiAddSceneSnapshot,
                 onPressed: () => _addLocationSnapshot(location),
                 icon: Icons.add_photo_alternate_outlined,
                 accent: NeonAccent.green,
               ),
               NeonIconButton(
                 key: ValueKey("location-copy-snapshot-${location.id}"),
-                label: "複製快照",
+                label: context.l10n.uiDuplicateSnapshot,
                 icon: Icons.copy_all_outlined,
                 onPressed: () => _addLocationSnapshot(
                   location,
@@ -2122,13 +2238,15 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                 key: ValueKey(
                   "location-delete-selected-snapshot-${location.id}",
                 ),
-                label: "刪除目前快照",
+                label: context.l10n.uiDeleteCurrentSnapshot,
                 onPressed: selectedSnapshotChange == null
                     ? null
                     : () => _removeLocationSnapshot(selectedSnapshotChange),
                 icon: Icons.delete_outline,
                 destructive: true,
-                statusLabel: selectedSnapshotChange == null ? "尚未選取快照" : null,
+                statusLabel: selectedSnapshotChange == null
+                    ? context.l10n.uiNoSnapshotSelected
+                    : null,
               ),
             ],
           ),
@@ -2136,22 +2254,40 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
           Card(
             child: ListTile(
               leading: const Icon(Icons.movie_outlined),
-              title: const Text("目前故事狀態"),
+              title: Text(context.l10n.uiCurrentStoryState),
               subtitle: Text(
                 snapshot == null
-                    ? "無快照"
+                    ? context.l10n.uiNoSnapshots
                     : [
-                        if (snapshot.name.isNotEmpty) "名稱：${snapshot.name}",
+                        if (snapshot.name.isNotEmpty)
+                          context.l10n.uiName((snapshot.name).toString()),
                         if (snapshot.description.isNotEmpty)
-                          "描述：${snapshot.description}",
+                          context.l10n.uiDescription2(
+                            (snapshot.description).toString(),
+                          ),
                         if (snapshot.properties.isNotEmpty)
-                          "屬性：${snapshot.properties.entries.map((entry) => "${entry.key}=${entry.value}").join("、")}",
-                        snapshot.exists ? "存在" : "尚未存在",
-                        snapshot.accessible ? "可進入" : "不可進入",
+                          context.l10n.uiProperties(
+                            (snapshot.properties.entries
+                                    .map(
+                                      (entry) => "${entry.key}=${entry.value}",
+                                    )
+                                    .join("、"))
+                                .toString(),
+                          ),
+                        snapshot.exists
+                            ? context.l10n.uiExists
+                            : context.l10n.uiDoesNotExistYet,
+                        snapshot.accessible
+                            ? context.l10n.uiAccessible
+                            : context.l10n.uiInaccessible,
                         if (snapshot.status.isNotEmpty) snapshot.status,
                         if (snapshot.controllerCharacterId != null)
-                          "控制者：${characterLabels[snapshot.controllerCharacterId] ?? snapshot.controllerCharacterId}",
-                      ].join("・"),
+                          context.l10n.uiController3(
+                            (characterLabels[snapshot.controllerCharacterId] ??
+                                    snapshot.controllerCharacterId)
+                                .toString(),
+                          ),
+                      ].join(context.l10n.uiLiteral),
               ),
             ),
           ),
@@ -2161,7 +2297,11 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
               child: ExpansionTile(
                 key: ValueKey("location-snapshot-history-${location.id}"),
                 leading: const Icon(Icons.history),
-                title: Text("快照歷程（${locationChanges.length}）"),
+                title: Text(
+                  context.l10n.uiSnapshotHistory(
+                    context.formats.integer(locationChanges.length),
+                  ),
+                ),
                 children: locationChanges
                     .map(
                       (change) => ListTile(
@@ -2174,10 +2314,10 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                         subtitle: Text(
                           change.patch.status?.value?.isNotEmpty == true
                               ? change.patch.status!.value!
-                              : "連結此 Scene",
+                              : context.l10n.uiLinkThisScene,
                         ),
                         trailing: NeonIconButton(
-                          label: "移除地點快照",
+                          label: context.l10n.uiRemoveLocationSnapshot,
                           onPressed: () => _removeLocationSnapshot(change),
                           icon: Icons.delete_outline,
                           destructive: true,
@@ -2197,9 +2337,9 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
     final displayNodeId = selectedNodeId ?? lastSelectedNodeId;
 
     if (displayNodeId == null) {
-      return const AppEmptyState(
-        title: "請選擇一個地點",
-        description: "選取地點後即可編輯詳細資料",
+      return AppEmptyState(
+        title: context.l10n.uiChooseALocation,
+        description: context.l10n.uiSelectALocationToEditItsDetails,
         icon: Icons.touch_app_outlined,
         compact: true,
       );
@@ -2207,8 +2347,8 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
 
     final location = _getLocation(displayNodeId, _locations);
     if (location == null) {
-      return const AppEmptyState(
-        title: "找不到該地點",
+      return AppEmptyState(
+        title: context.l10n.uiLocationNotFound,
         icon: Icons.location_off_outlined,
         compact: true,
       );
@@ -2255,7 +2395,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (change != null) ...[
-              Text("編輯中：${event!.label}"),
+              Text(context.l10n.uiEditing((event!.label).toString())),
               const SizedBox(height: AppSpacing.md),
             ],
             LocationSnapshotStateEditor(
@@ -2293,7 +2433,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
           // 應用模板
           Row(
             children: [
-              const Text("應用模板: "),
+              Text(context.l10n.uiApplyTemplate),
               Expanded(
                 child: AppDropdownField<String>(
                   value: selectedPresetName,
@@ -2305,10 +2445,10 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                         ),
                       )
                       .toList(),
-                  hintText: "選擇模板",
+                  hintText: context.l10n.uiChooseTemplate,
                   onChanged: (value) {
                     setState(() {
-                      selectedPresetName = value ?? "空白";
+                      selectedPresetName = value ?? context.l10n.uiBlank;
                     });
                   },
                 ),
@@ -2322,7 +2462,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                   );
                   _applyTemplateTo(location.id, preset);
                 },
-                child: const Text("確定"),
+                child: Text(context.l10n.commonConfirm),
               ),
             ],
           ),
@@ -2349,8 +2489,8 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                   child: AppTextField(
                     controller: locationNameController,
                     focusNode: _locationNameFocusNode,
-                    decoration: const InputDecoration(
-                      labelText: "名稱",
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiName2,
                       isDense: true,
                     ),
                   ),
@@ -2388,8 +2528,8 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
                   child: AppTextField(
                     controller: locationTypeController,
                     focusNode: _locationTypeFocusNode,
-                    decoration: const InputDecoration(
-                      labelText: "類型",
+                    decoration: InputDecoration(
+                      labelText: context.l10n.uiType,
                       isDense: true,
                     ),
                   ),
@@ -2408,26 +2548,26 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
 
           if (location.nodeType == WorldNodeType.item)
             AppNoticeBanner(
-              message: "這是舊版物品子節點。新版物品不再存放於世界設定樹，請搬移後在本頁地點區直接管理分配。",
+              message: context.l10n.uiThisIsALegacyItemNodeItemsAre,
               icon: Icons.move_down_outlined,
               tone: AppFeedbackTone.warning,
               action: TextButton.icon(
                 key: const Key("world-migrate-items"),
                 onPressed: _migrateLegacyWorldItems,
                 icon: const Icon(Icons.move_down_outlined),
-                label: const Text("搬移全部物品"),
+                label: Text(context.l10n.uiMoveAllItems),
               ),
             )
           else
             AppDropdownField<WorldNodeType>(
               value: location.nodeType,
-              labelText: "節點類別",
+              labelText: context.l10n.uiNodeType,
               options: WorldNodeType.values
                   .where((type) => type != WorldNodeType.item)
                   .map(
                     (type) => DropdownOption<WorldNodeType>(
                       value: type,
-                      label: type.label,
+                      label: context.l10n.legacyLabel(type.label),
                     ),
                   )
                   .toList(),
@@ -2451,16 +2591,19 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
           ],
 
           // 自訂值表
-          Text("自訂值表:", style: Theme.of(context).textTheme.labelSmall),
+          Text(
+            context.l10n.uiCustomProperties,
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
           const SizedBox(height: 8),
           AppTwoColumnTable(
-            firstHeader: "設定",
-            secondHeader: "鍵值",
+            firstHeader: context.l10n.uiSettings,
+            secondHeader: context.l10n.uiValue,
             bodyHeight: 200,
             onSelectionCleared: _clearCustomValueSelection,
-            emptyState: const AppEmptyState(
-              title: "尚無自訂值",
-              description: "在下方輸入設定與鍵值後新增",
+            emptyState: AppEmptyState(
+              title: context.l10n.uiNoCustomProperties,
+              description: context.l10n.uiEnterAPropertyNameAndValueBelowTo,
               icon: Icons.tune_outlined,
               compact: true,
             ),
@@ -2511,8 +2654,8 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
           AppTwoColumnTableEditor(
             firstController: tempKeyController,
             secondController: tempValController,
-            firstLabel: "設定",
-            secondLabel: "鍵值",
+            firstLabel: context.l10n.uiSettings,
+            secondLabel: context.l10n.uiValue,
             isEditing: selectedCustomValueId != null,
             canSubmit: (key, _) => key.trim().isNotEmpty,
             onSubmit: (_, _) => _saveCustomValue(location.id),
@@ -2521,7 +2664,10 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
           const SizedBox(height: 16),
 
           // 備註
-          const Text("備註:", style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            context.l10n.uiNotes4,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -2614,9 +2760,9 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
   Future<void> _showOverwritePresetDialog(TemplatePreset preset) async {
     final confirmed = await AppDialog.confirm(
       context: context,
-      title: "儲存預設模板",
-      message: "同名模板已存在，是否要覆蓋？",
-      confirmLabel: "覆蓋",
+      title: context.l10n.uiSaveTemplatePreset2,
+      message: context.l10n.uiATemplateWithThisNameExistsOverwriteIt,
+      confirmLabel: context.l10n.uiOverwrite,
     );
     if (!mounted || !confirmed) return;
 
@@ -2631,8 +2777,8 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
   Future<void> _showRenamePresetDialog() async {
     final newName = await AppDialog.prompt(
       context: context,
-      title: "更改預設名稱",
-      labelText: "新模板名稱",
+      title: context.l10n.uiRenamePreset2,
+      labelText: context.l10n.uiNewTemplateName,
       initialValue: selectedPresetName,
     );
     if (!mounted || newName == null) {
@@ -2683,7 +2829,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
         final presets = _parseAllTemplatesXML(xml);
 
         if (presets.isEmpty) {
-          _showErrorDialog("匯入失敗：檔案中沒有找到任何 <Type> 節點。");
+          _showErrorDialog(context.l10n.uiImportFailedNoTypeNodesFoundInThe);
         } else {
           setState(() {
             // 合併：同名覆蓋
@@ -2705,7 +2851,9 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
           _saveTemplatesToDisk();
         }
       } catch (e) {
-        _showErrorDialog("讀取檔案失敗：${e.toString()}");
+        _showErrorDialog(
+          context.l10n.uiCouldNotReadFile((e.toString()).toString()),
+        );
       }
     }
   }
@@ -2725,7 +2873,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
 
   Future<void> _exportToFile(String content, String fileName) async {
     final result = await FilePicker.platform.saveFile(
-      dialogTitle: "匯出檔案",
+      dialogTitle: context.l10n.uiExportFile,
       fileName: fileName,
       // 不在 saveFile 上傳遞 bytes，因為 macOS 不支援
       // 內容將由應用程式寫入檔案
@@ -2738,9 +2886,11 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
           final file = File(result);
           await file.writeAsString(content);
         }
-        _showSuccessDialog("檔案已匯出至：$result");
+        _showSuccessDialog(context.l10n.uiFileExportedTo((result).toString()));
       } catch (e) {
-        _showErrorDialog("匯出失敗：${e.toString()}");
+        _showErrorDialog(
+          context.l10n.uiExportFailed((e.toString()).toString()),
+        );
       }
     }
   }
@@ -2839,7 +2989,7 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
         _ensureBlankPresetExists();
         selectedPresetName = templatePresets.isNotEmpty
             ? templatePresets.first.name
-            : "空白";
+            : context.l10n.uiBlank;
       });
     } catch (e) {
       _log.warning("讀取模板失敗：${e.toString()}");
@@ -2851,7 +3001,10 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
 
   void _ensureBlankPresetExists() {
     if (!templatePresets.any((p) => p.name == "空白")) {
-      templatePresets.insert(0, TemplatePreset(name: "空白", type: "", keys: []));
+      templatePresets.insert(
+        0,
+        TemplatePreset(name: context.l10n.uiBlank, type: "", keys: []),
+      );
     }
   }
 
@@ -2946,28 +3099,44 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("永久刪除「${location.localName}」？"),
+        title: Text(
+          context.l10n.uiPermanentlyDelete((location.localName).toString()),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("若只是讓地點在故事中消失，請新增 Scene 快照並關閉「此時已存在」。"),
+            Text(context.l10n.uiToMakeALocationDisappearOnlyWithinThe),
             const SizedBox(height: 12),
-            Text("將永久刪除 ${impact.locationCount} 個地點節點"),
-            Text("移除 ${impact.snapshotCount} 筆地點快照"),
-            Text("移除 ${impact.relationCount} 筆物品關聯"),
-            Text("清除 ${impact.itemPlacementCount} 筆物品地點記錄"),
+            Text(
+              context.l10n.uiPermanentlyDeleteLocationNodes(
+                (impact.locationCount).toString(),
+              ),
+            ),
+            Text(
+              context.l10n.uiRemoveLocationSnapshots(
+                (impact.snapshotCount).toString(),
+              ),
+            ),
+            Text(
+              context.l10n.uiRemoveItemLinks((impact.relationCount).toString()),
+            ),
+            Text(
+              context.l10n.uiClearItemLocationRecords(
+                (impact.itemPlacementCount).toString(),
+              ),
+            ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("取消"),
+            child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
             key: const Key("location-permanent-delete-confirm"),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text("永久刪除"),
+            child: Text(context.l10n.uiDeletePermanently),
           ),
         ],
       ),
@@ -3079,9 +3248,9 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
   void _showErrorDialog(String message) {
     AppDialog.message(
       context: context,
-      title: "錯誤",
+      title: context.l10n.uiError,
       message: message,
-      closeLabel: "確定",
+      closeLabel: context.l10n.commonConfirm,
       tone: AppFeedbackTone.error,
     );
   }
@@ -3089,9 +3258,9 @@ class _WorldSettingsViewState extends ConsumerState<WorldSettingsView> {
   void _showSuccessDialog(String message) {
     AppDialog.message(
       context: context,
-      title: "成功",
+      title: context.l10n.uiSuccess,
       message: message,
-      closeLabel: "確定",
+      closeLabel: context.l10n.commonConfirm,
       tone: AppFeedbackTone.success,
     );
   }

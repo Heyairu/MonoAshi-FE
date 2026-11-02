@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -75,11 +76,11 @@ class _OobeGateState extends ConsumerState<OobeGate> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('無法讀取初次設定，請重試。'),
+              Text(context.l10n.uiCouldNotReadInitialSetupPleaseTryAgain),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () => ref.invalidate(oobeCompletedProvider),
-                child: const Text('重試'),
+                child: Text(context.l10n.commonRetry),
               ),
             ],
           ),
@@ -99,7 +100,7 @@ class _OobeGateState extends ConsumerState<OobeGate> {
         body: Center(
           child: FilledButton(
             onPressed: () => ref.invalidate(storageDirectoriesProvider),
-            child: const Text('無法讀取備份位置，按此重試'),
+            child: Text(context.l10n.uiCouldNotReadTheBackupLocationSelectTo),
           ),
         ),
       );

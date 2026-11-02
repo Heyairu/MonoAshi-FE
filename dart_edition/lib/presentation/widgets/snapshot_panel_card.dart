@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "../../bin/ui_library.dart";
@@ -35,7 +36,10 @@ class _SnapshotPanelCardState extends State<SnapshotPanelCard> {
         expanded: widget.collapsible ? expanded : null,
         child: InkWell(
           onTap: widget.collapsible ? _toggleExpanded : null,
-          child: MediumTitle(icon: Icons.view_timeline_rounded, text: "時間軸與快照"),
+          child: MediumTitle(
+            icon: Icons.view_timeline_rounded,
+            text: context.l10n.uiTimelineAndSnapshots,
+          ),
         ),
       ),
       actions: [
@@ -43,7 +47,7 @@ class _SnapshotPanelCardState extends State<SnapshotPanelCard> {
         if (widget.collapsible)
           IconButton(
             key: const ValueKey("snapshot-panel-expand-toggle"),
-            tooltip: expanded ? "收合" : "展開",
+            tooltip: expanded ? context.l10n.uiCollapse : context.l10n.uiExpand,
             icon: expanded
                 ? Icon(Icons.expand_less_rounded)
                 : Icon(Icons.expand_more_rounded),

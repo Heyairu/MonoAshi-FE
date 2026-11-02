@@ -940,7 +940,7 @@ abstract final class ProjectRecordCodec {
             },
           )
           .toList(),
-      "characterType": value.characterType,
+      "characterType": normalizeCharacterType(value.characterType),
       "organizations": value.organizations.map(_profileEntryToJson).toList(),
       "possessions": value.possessions.map(_possessionToJson).toList(),
       "statusEntries": value.statusEntries.map(_profileEntryToJson).toList(),
@@ -1039,7 +1039,7 @@ abstract final class ProjectRecordCodec {
           ),
         )
         .toList(),
-    characterType: _string(value, "characterType"),
+    characterType: normalizeCharacterType(_string(value, "characterType")),
     organizations: _objectList(
       value,
       "organizations",

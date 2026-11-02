@@ -3,7 +3,11 @@ import "../../domain/repositories/file_repository.dart";
 
 export "../../domain/repositories/file_repository.dart";
 
+import '../../l10n/app_localization.dart';
+
 class DefaultFileRepository implements FileRepository {
+  DefaultFileRepository({this.localizations});
+  final AppLocalizations Function()? localizations;
   @override
   Future<ProjectFile> createNewProject() {
     return FileService.createNewProject();
@@ -29,7 +33,10 @@ class DefaultFileRepository implements FileRepository {
 
   @override
   Future<ProjectFile> saveProject(ProjectFile projectFile) {
-    return FileService.saveProject(projectFile);
+    return FileService.saveProject(
+      projectFile,
+      dialogTitle: localizations?.call().uiSaveProjectFile,
+    );
   }
 
   @override
@@ -39,7 +46,10 @@ class DefaultFileRepository implements FileRepository {
 
   @override
   Future<ProjectFile> saveProjectAs(ProjectFile projectFile) {
-    return FileService.saveProjectAs(projectFile);
+    return FileService.saveProjectAs(
+      projectFile,
+      dialogTitle: localizations?.call().uiSaveProjectFile,
+    );
   }
 
   @override
@@ -67,7 +77,9 @@ class DefaultFileRepository implements FileRepository {
 
   @override
   Future<String> selectAutoBackupDirectory() {
-    return FileService.selectAutoBackupDirectory();
+    return FileService.selectAutoBackupDirectory(
+      dialogTitle: localizations?.call().uiChooseAutoBackupFolder,
+    );
   }
 
   @override
@@ -87,6 +99,7 @@ class DefaultFileRepository implements FileRepository {
     required String extension,
   }) {
     return FileService.exportTextWithResult(
+      dialogTitle: localizations?.call().uiExportTextFile,
       content: content,
       fileName: fileName,
       extension: extension,

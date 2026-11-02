@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_svg/flutter_svg.dart";
@@ -176,9 +177,9 @@ class _SplashContent extends StatelessWidget {
       children: [
         const _AppIcon(),
         SizedBox(height: compact ? 22 : 12),
-        Text("物語 Assistant", style: titleStyle),
+        Text(context.l10n.uiMonogatariAssistant, style: titleStyle),
         const SizedBox(height: 2),
-        Text("Codename Hana", style: codeNameStyle),
+        Text(context.l10n.uiCodenameHana, style: codeNameStyle),
         const SizedBox(height: 7),
         Text("Version 0.9.31    Build 931", style: detailStyle),
         const Spacer(),

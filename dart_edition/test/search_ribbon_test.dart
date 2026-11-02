@@ -163,7 +163,10 @@ void main() {
         await tester.binding.setSurfaceSize(const Size(2400, 1200));
         addTearDown(() => tester.binding.setSurfaceSize(null));
         final container = ProviderContainer();
-        addTearDown(container.dispose);
+        var disposed = false;
+        addTearDown(() {
+          if (!disposed) container.dispose();
+        });
         await tester.pumpWidget(
           UncontrolledProviderScope(
             container: container,
@@ -236,7 +239,10 @@ void main() {
           "search",
         );
         expect(find.byType(FilterChip), findsNothing);
+        await tester.pump(const Duration(milliseconds: 300));
         await tester.pumpWidget(const SizedBox.shrink());
+        container.dispose();
+        disposed = true;
         await tester.pump();
       },
     );

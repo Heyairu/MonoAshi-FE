@@ -1,3 +1,5 @@
+import '../../l10n/app_localization.dart';
+import 'locale_providers.dart';
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "../../data/repositories/file_repository.dart";
@@ -9,7 +11,10 @@ import "repository_providers.dart";
 export "repository_providers.dart";
 
 final fileRepositoryProvider = Provider<FileRepository>((ref) {
-  return DefaultFileRepository();
+  return DefaultFileRepository(
+    localizations: () =>
+        lookupAppLocalizations(ref.read(resolvedAppLocaleProvider)),
+  );
 });
 
 final glossaryRepositoryProvider = Provider<GlossaryRepository>((ref) {

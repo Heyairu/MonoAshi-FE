@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "../features/help/help_scope.dart";
 import "../features/help/help_topic.dart";
 import "package:flutter/material.dart";
@@ -141,8 +142,8 @@ class AppDialog extends StatelessWidget {
     required BuildContext context,
     required String title,
     required String message,
-    String cancelLabel = "取消",
-    String confirmLabel = "確定",
+    String? cancelLabel,
+    String? confirmLabel,
     bool destructive = false,
     bool barrierDismissible = true,
     IconData? icon,
@@ -159,7 +160,7 @@ class AppDialog extends StatelessWidget {
         return [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(cancelLabel),
+            child: Text(cancelLabel ?? context.l10n.commonCancel),
           ),
           FilledButton(
             style: destructive
@@ -169,7 +170,7 @@ class AppDialog extends StatelessWidget {
                   )
                 : null,
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(confirmLabel),
+            child: Text(confirmLabel ?? context.l10n.commonConfirm),
           ),
         ];
       },
@@ -184,8 +185,8 @@ class AppDialog extends StatelessWidget {
     String initialValue = "",
     String? labelText,
     String? hintText,
-    String cancelLabel = "取消",
-    String confirmLabel = "確定",
+    String? cancelLabel,
+    String? confirmLabel,
     bool allowEmpty = false,
     bool trimInput = true,
     bool barrierDismissible = true,
@@ -200,8 +201,8 @@ class AppDialog extends StatelessWidget {
         initialValue: initialValue,
         labelText: labelText,
         hintText: hintText,
-        cancelLabel: cancelLabel,
-        confirmLabel: confirmLabel,
+        cancelLabel: cancelLabel ?? dialogContext.l10n.commonCancel,
+        confirmLabel: confirmLabel ?? dialogContext.l10n.commonConfirm,
         allowEmpty: allowEmpty,
         trimInput: trimInput,
         icon: icon,
@@ -213,7 +214,7 @@ class AppDialog extends StatelessWidget {
     required BuildContext context,
     required String title,
     required String message,
-    String closeLabel = "關閉",
+    String? closeLabel,
     AppFeedbackTone tone = AppFeedbackTone.info,
     IconData? icon,
     bool barrierDismissible = true,
@@ -228,7 +229,7 @@ class AppDialog extends StatelessWidget {
       actionsBuilder: (dialogContext) => [
         FilledButton(
           onPressed: () => Navigator.of(dialogContext).pop(),
-          child: Text(closeLabel),
+          child: Text(closeLabel ?? context.l10n.commonClose),
         ),
       ],
     );

@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,9 +34,13 @@ Future<void> showWritingGoalDialog(
     );
   } catch (error) {
     if (!context.mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('無法載入寫作目標：$error')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          context.l10n.uiCouldNotLoadWritingGoals((error).toString()),
+        ),
+      ),
+    );
     ref.invalidate(writingGoalDefaultsProvider);
   }
 }
@@ -134,7 +139,7 @@ class _WritingGoalDialogState extends ConsumerState<_WritingGoalDialog> {
     return PopScope(
       canPop: !_saving,
       child: AlertDialog(
-        title: Text(writingGoalTitle(widget.kind)),
+        title: Text(context.l10n.legacyLabel(writingGoalTitle(widget.kind))),
         content: SingleChildScrollView(
           child: SizedBox(
             width: 380,
@@ -146,10 +151,13 @@ class _WritingGoalDialogState extends ConsumerState<_WritingGoalDialog> {
                     widget.kind != WritingGoalKind.daily) ...[
                   SegmentedButton<bool>(
                     segments: [
-                      const ButtonSegment(value: false, label: Text('預設')),
+                      ButtonSegment(
+                        value: false,
+                        label: Text(context.l10n.uiDefault),
+                      ),
                       ButtonSegment(
                         value: true,
-                        label: const Text('僅限本檔案'),
+                        label: Text(context.l10n.uiThisFileOnly),
                         enabled: _canUseFile,
                       ),
                     ],
@@ -163,13 +171,17 @@ class _WritingGoalDialogState extends ConsumerState<_WritingGoalDialog> {
                 ],
                 Text(
                   widget.kind == WritingGoalKind.daily
-                      ? '本機所有作品合計的每日淨增字數'
+                      ? context.l10n.uiDailyNetWordGainAcrossAllLocalWorks
                       : _fileScope
-                      ? '隨目前作品保存，套用至本檔案。'
-                      : '套用至所有未設定檔案專屬目標的作品。',
+                      ? context.l10n.uiSavedWithTheCurrentWorkAndAppliedTo
+                      : context.l10n.uiApplyToWorksWithoutAFileSpecificGoal,
                 ),
                 if (!_fileScope && override != null)
-                  Text('本檔案仍使用專屬目標 $override 字。'),
+                  Text(
+                    context.l10n.uiThisFileStillUsesItsOwnGoalOf(
+                      context.formats.integer(override),
+                    ),
+                  ),
                 const SizedBox(height: 16),
                 Form(
                   key: _form,
@@ -177,10 +189,12 @@ class _WritingGoalDialogState extends ConsumerState<_WritingGoalDialog> {
                     key: ValueKey(_fileScope),
                     controller: _fileScope ? _file : _default,
                     autofocus: true,
-                    labelText: '目標字數',
+                    labelText: context.l10n.uiWordCountGoal,
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    validator: validateWritingGoal,
+                    validator: (value) => validateWritingGoal(value) == null
+                        ? null
+                        : context.l10n.writingGoalInvalid,
                     onSubmitted: (_) {
                       if (!_saving) _apply();
                     },
@@ -201,15 +215,15 @@ class _WritingGoalDialogState extends ConsumerState<_WritingGoalDialog> {
           if (_fileScope && override != null)
             TextButton(
               onPressed: _saving ? null : () => _apply(inherit: true),
-              child: const Text('恢復使用預設'),
+              child: Text(context.l10n.uiRestoreDefault),
             ),
           TextButton(
             onPressed: _saving ? null : () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+            child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
             onPressed: _saving ? null : _apply,
-            child: Text(_saving ? '保存中…' : '套用'),
+            child: Text(_saving ? context.l10n.uiSaving : context.l10n.uiApply),
           ),
         ],
       ),
@@ -226,18 +240,24 @@ class WritingGoalSettings extends ConsumerWidget {
       loading: () => const LinearProgressIndicator(),
       error: (error, stack) => TextButton(
         onPressed: () => ref.invalidate(writingGoalDefaultsProvider),
-        child: const Text('無法讀取寫作目標，點此重試'),
+        child: Text(context.l10n.uiCouldNotReadWritingGoalsClickToRetry),
       ),
       data: (defaults) => Column(
         children: [
           for (final kind in WritingGoalKind.values)
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(writingGoalTitle(kind)),
+              title: Text(context.l10n.legacyLabel(writingGoalTitle(kind))),
               subtitle: Text(
-                kind == WritingGoalKind.daily ? '本機所有作品合計' : '預設；檔案專屬值可從對應儀表設定',
+                kind == WritingGoalKind.daily
+                    ? context.l10n.uiAllLocalWorksCombined
+                    : context.l10n.uiDefaultFileSpecificValuesCanBeSetFrom,
               ),
-              trailing: Text('${defaults.valueFor(kind)} 字'),
+              trailing: Text(
+                context.l10n.uiCharacters2(
+                  context.formats.integer(defaults.valueFor(kind)),
+                ),
+              ),
               onTap: () =>
                   showWritingGoalDialog(context, ref, kind, defaultsOnly: true),
             ),

@@ -102,14 +102,23 @@ class _SettingViewState extends ConsumerState<SettingView>
     try {
       await AndroidBackgroundExecution.requestBatteryOptimizationExemption();
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("請在系統提示中允許不受電池最佳化限制。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.uiAllowUnrestrictedBatteryUsageInTheSystemPrompt,
+          ),
+        ),
+      );
     } on PlatformException catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message ?? "無法開啟背景執行權限。")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error.message ??
+                context.l10n.uiCouldNotOpenBackgroundExecutionPermissions,
+          ),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoadingBackgroundPermission = false);
@@ -125,7 +134,11 @@ class _SettingViewState extends ConsumerState<SettingView>
       await Clipboard.setData(ClipboardData(text: configuration));
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("已複製 MCP Host 設定。請貼到 Host 的 MCP 設定中。")),
+        SnackBar(
+          content: Text(
+            context.l10n.uiMCPHostConfigurationCopiedPasteItIntoYour,
+          ),
+        ),
       );
     } on StateError catch (error) {
       if (!mounted) return;
@@ -214,8 +227,8 @@ class _SettingViewState extends ConsumerState<SettingView>
             const SizedBox(height: 24),
             SettingsSectionCard(
               id: "appearance",
-              title: "外觀與介面",
-              subtitle: "主題、導覽、工具列與字體",
+              title: context.l10n.uiAppearanceAndInterface,
+              subtitle: context.l10n.uiThemeNavigationToolbarAndFonts,
               icon: Icons.palette_outlined,
               initiallyExpanded: true,
               children: [
@@ -228,27 +241,33 @@ class _SettingViewState extends ConsumerState<SettingView>
                 _buildFontSizeSetting(),
                 _buildColorSetting(),
                 _buildThemePreview(),
-                _buildPlaceholderSetting("工具列項目編輯", Icons.bento_outlined),
+                _buildPlaceholderSetting(
+                  context.l10n.uiCustomizeToolbarItems,
+                  Icons.bento_outlined,
+                ),
               ],
             ),
             SettingsSectionCard(
               id: "editing",
-              title: "編輯與輸入",
-              subtitle: "智慧候選、覆寫、縮排與字數統計",
+              title: context.l10n.uiEditingAndInput,
+              subtitle: context
+                  .l10n
+                  .uiSmartSuggestionsOverwriteIndentationAndWordCount,
               icon: Icons.edit_note_outlined,
               children: [_buildEditingSettings()],
             ),
-            const SettingsSectionCard(
+            SettingsSectionCard(
               id: 'writing-goals',
-              title: '寫作目標',
-              subtitle: '每日進度與每章、全文預設目標',
+              title: context.l10n.uiWritingGoals,
+              subtitle:
+                  context.l10n.uiDailyProgressAndDefaultChapterAndProjectGoals,
               icon: Icons.flag_outlined,
               children: [WritingGoalSettings()],
             ),
             SettingsSectionCard(
               id: "storage",
-              title: "儲存與備份",
-              subtitle: "自動儲存、備份排程與容量",
+              title: context.l10n.uiSavingAndBackups,
+              subtitle: context.l10n.uiAutosaveBackupScheduleAndStorageLimits,
               icon: Icons.save_outlined,
               children: [
                 HelpTarget(
@@ -263,8 +282,10 @@ class _SettingViewState extends ConsumerState<SettingView>
             ),
             SettingsSectionCard(
               id: "sync",
-              title: "同步與連線",
-              subtitle: "裝置配對、持久驗證與背景執行",
+              title: context.l10n.uiSyncAndConnections,
+              subtitle: context
+                  .l10n
+                  .uiDevicePairingPersistentAuthenticationAndBackgroundExecution,
               icon: Icons.sync_outlined,
               children: [
                 _buildP2pSyncSetting(),
@@ -294,8 +315,8 @@ class _SettingViewState extends ConsumerState<SettingView>
             ),
             SettingsSectionCard(
               id: "integrations",
-              title: "外部整合",
-              subtitle: "MCP 專案唯讀存取與授權",
+              title: context.l10n.uiExternalIntegrations,
+              subtitle: context.l10n.uiReadOnlyMCPProjectAccessAndAuthorization,
               icon: Icons.hub_outlined,
               children: [_buildMcpSetting()],
             ),
@@ -310,9 +331,9 @@ class _SettingViewState extends ConsumerState<SettingView>
     children: [
       SwitchWithIconTitle(
         key: const Key("poppin-enabled-setting"),
-        title: "啟用 Poppin IntelliSense",
+        title: context.l10n.uiEnablePoppinIntelliSense,
         icon: Icons.auto_awesome_outlined,
-        subtitle: "輸入標記類型、/ 或 \\ 時顯示游標旁候選清單",
+        subtitle: context.l10n.uiShowSuggestionsNearTheCursorWhenEnteringA,
         value: _settingsViewState.poppinEnabled,
         onChanged: (value) async {
           await ref
@@ -323,9 +344,9 @@ class _SettingViewState extends ConsumerState<SettingView>
       const SizedBox(height: 16),
       SwitchWithIconTitle(
         key: const Key("overwrite-mode-enabled-setting"),
-        title: "啟用覆寫模式",
+        title: context.l10n.uiEnableOverwriteMode,
         icon: Icons.edit_outlined,
-        subtitle: "允許使用 Ins 或狀態列切換覆寫模式；關閉時使用插入模式",
+        subtitle: context.l10n.uiUseInsOrTheStatusBarToToggle,
         value:
             ref
                 .watch(settingsStateProvider)
@@ -337,11 +358,14 @@ class _SettingViewState extends ConsumerState<SettingView>
             .setOverwriteModeEnabled(value),
       ),
       const SizedBox(height: 16),
-      Text("空格與縮排", style: Theme.of(context).textTheme.titleMedium),
+      Text(
+        context.l10n.uiSpacesAndIndentation,
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
       const SizedBox(height: 8),
       ListTile(
-        title: const Text("Tab 空格數量"),
-        subtitle: const Text("按 Tab 或自動留空時插入的空格數"),
+        title: Text(context.l10n.uiSpacesPerTab),
+        subtitle: Text(context.l10n.uiNumberOfSpacesInsertedByTabOrAutomatic),
         trailing: DropdownButton<int>(
           key: const Key("tab-space-count-setting"),
           value:
@@ -359,9 +383,9 @@ class _SettingViewState extends ConsumerState<SettingView>
       ),
       SwitchWithIconTitle(
         key: const Key("tab-full-width-setting"),
-        title: "使用全形空格",
+        title: context.l10n.uiUseFullWidthSpaces,
         icon: Icons.space_bar,
-        subtitle: "關閉時使用半形空格",
+        subtitle: context.l10n.uiUseHalfWidthSpacesWhenDisabled,
         value:
             ref.watch(settingsStateProvider).valueOrNull?.tabFullWidth ?? true,
         onChanged: (value) =>
@@ -370,9 +394,10 @@ class _SettingViewState extends ConsumerState<SettingView>
       const SizedBox(height: 8),
       SwitchWithIconTitle(
         key: const Key("auto-indent-line-start-setting"),
-        title: "行首自動留空",
+        title: context.l10n.uiAutomaticallyIndentNewLines,
         icon: Icons.keyboard_return,
-        subtitle: "Enter 換行後插入設定的空格；Shift+Enter 僅換行",
+        subtitle:
+            context.l10n.uiInsertConfiguredSpacesAfterEnterShiftEnterInserts,
         value:
             ref.watch(settingsStateProvider).valueOrNull?.autoIndentLineStart ??
             false,
@@ -385,9 +410,9 @@ class _SettingViewState extends ConsumerState<SettingView>
       const SizedBox(height: 16),
       SwitchWithIconTitle(
         key: const Key("alias-mention-updates-setting"),
-        title: "修改別名時更新正文 Mention",
+        title: context.l10n.uiUpdateManuscriptMentionsWhenAliasesChange,
         icon: Icons.sync,
-        subtitle: "更新同角色且顯示文字等於原別名的標記",
+        subtitle: context.l10n.uiUpdateMarkersForTheSameCharacterWhoseDisplay,
         value:
             ref.watch(aliasMentionUpdatesEnabledProvider).valueOrNull ?? true,
         onChanged: (value) => ref
@@ -404,23 +429,28 @@ class _SettingViewState extends ConsumerState<SettingView>
     final active = bridge.status == McpBridgeStatus.active;
     final busy = bridge.status == McpBridgeStatus.starting;
     final status = switch (bridge.status) {
-      McpBridgeStatus.stopped => "未啟用",
-      McpBridgeStatus.starting => "正在建立本機授權…",
-      McpBridgeStatus.active => "已授權：${bridge.projectTitle ?? '目前專案'}（僅本機、唯讀）",
-      McpBridgeStatus.expired => "授權已到期",
-      McpBridgeStatus.failed => bridge.failure ?? "啟用失敗",
+      McpBridgeStatus.stopped => context.l10n.uiDisabled2,
+      McpBridgeStatus.starting => context.l10n.uiCreatingLocalAuthorization,
+      McpBridgeStatus.active => context.l10n.uiAuthorizedLocalReadOnly(
+        (bridge.projectTitle ?? context.l10n.uiCurrentProject).toString(),
+      ),
+      McpBridgeStatus.expired => context.l10n.uiAuthorizationExpired,
+      McpBridgeStatus.failed => bridge.failure ?? context.l10n.uiCouldNotEnable,
     };
     return Semantics(
       container: true,
-      label: "MCP 唯讀整合",
+      label: context.l10n.uiReadOnlyMCPIntegration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SwitchWithIconTitle(
             key: const Key("mcp-readonly-setting"),
-            title: "MCP 唯讀整合",
+            title: context.l10n.uiReadOnlyMCPIntegration,
             icon: Icons.hub_outlined,
-            subtitle: "只公開目前授權專案的摘要、章節、角色、世界觀、大綱與詞語；不提供修改工具。$status",
+            subtitle: context.l10n
+                .uiExposeOnlyTheAuthorizedProjectSSummaryChapters(
+                  (status).toString(),
+                ),
             value: active,
             onChanged: (value) async {
               if (busy || !notifier.isDesktopSupported) return;
@@ -428,9 +458,11 @@ class _SettingViewState extends ConsumerState<SettingView>
             },
           ),
           if (!notifier.isDesktopSupported)
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(left: 56, top: AppSpacing.xs),
-              child: Text("MCP sidecar 僅支援 Windows、macOS 與 Linux。"),
+              child: Text(
+                context.l10n.uiTheMCPSidecarSupportsWindowsMacOSAndLinux,
+              ),
             ),
           if (active)
             Padding(
@@ -441,7 +473,9 @@ class _SettingViewState extends ConsumerState<SettingView>
                   if (bridge.descriptorAvailable &&
                       bridge.descriptorPath != null) ...[
                     SelectableText(
-                      "連線設定檔：${bridge.descriptorPath}",
+                      context.l10n.uiConnectionConfiguration(
+                        (bridge.descriptorPath).toString(),
+                      ),
                       key: const Key("mcp-descriptor-path"),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
@@ -450,7 +484,7 @@ class _SettingViewState extends ConsumerState<SettingView>
                     Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                       child: Text(
-                        "MCP Host 已取得一次性授權；如要改連其他 Host，請停止後重新啟用。",
+                        context.l10n.uiAnMCPHostHasClaimedTheOneTime,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
@@ -463,13 +497,13 @@ class _SettingViewState extends ConsumerState<SettingView>
                           key: const Key("mcp-copy-host-configuration"),
                           onPressed: _copyMcpHostConfiguration,
                           icon: const Icon(Icons.copy_outlined),
-                          label: const Text("複製 MCP Host 設定"),
+                          label: Text(context.l10n.uiCopyMCPHostConfiguration),
                         ),
                       FilledButton.tonalIcon(
                         key: const Key("mcp-stop-session"),
                         onPressed: notifier.stop,
                         icon: const Icon(Icons.stop_circle_outlined),
-                        label: const Text("停止目前授權"),
+                        label: Text(context.l10n.uiStopCurrentAuthorization),
                       ),
                     ],
                   ),
@@ -486,9 +520,9 @@ class _SettingViewState extends ConsumerState<SettingView>
       children: [
         SwitchWithIconTitle(
           key: const Key("p2p-single-device-confirmation-setting"),
-          title: "允許單端確認配對碼",
+          title: context.l10n.uiAllowOneSidedPairingConfirmation,
           icon: Icons.phonelink_lock_outlined,
-          subtitle: "僅在兩台裝置都開啟時生效；任一台確認後，另一台會驗證簽章並自動回簽",
+          subtitle: context.l10n.uiRequiresBothDevicesToEnableThisOptionAfter,
           value: _settingsViewState.allowSingleDevicePairingConfirmation,
           onChanged: (value) async {
             await ref
@@ -499,9 +533,10 @@ class _SettingViewState extends ConsumerState<SettingView>
         ),
         SwitchWithIconTitle(
           key: const Key("p2p-persistent-verification-setting"),
-          title: "持久驗證（14 天）",
+          title: context.l10n.uiPersistentAuthenticationDays,
           icon: Icons.verified_user_outlined,
-          subtitle: "僅在兩台裝置都開啟時生效；期限內可自動驗證，每次成功連線會重新續簽 14 天",
+          subtitle:
+              context.l10n.uiRequiresBothDevicesToEnableThisOptionAuthenticate,
           value: _settingsViewState.allowPersistentP2pVerification,
           onChanged: (value) async {
             await ref
@@ -528,9 +563,11 @@ class _SettingViewState extends ConsumerState<SettingView>
               ? Icons.battery_full_outlined
               : Icons.battery_saver_outlined,
         ),
-        title: const Text("允許背景常駐"),
+        title: Text(context.l10n.uiAllowBackgroundExecution),
         subtitle: Text(
-          _isBatteryOptimizationExempt ? "已允許不受電池最佳化限制" : "讓已啟用的背景工作較不易被系統暫停",
+          _isBatteryOptimizationExempt
+              ? context.l10n.uiUnrestrictedBatteryUsageIsAllowed
+              : context.l10n.uiReduceTheChanceOfTheSystemSuspendingActive,
         ),
         trailing: FilledButton(
           onPressed:
@@ -543,7 +580,11 @@ class _SettingViewState extends ConsumerState<SettingView>
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Text(_isBatteryOptimizationExempt ? "已允許" : "允許"),
+              : Text(
+                  _isBatteryOptimizationExempt
+                      ? context.l10n.uiAllowed
+                      : context.l10n.uiAllow,
+                ),
         ),
       ),
     );
@@ -552,7 +593,7 @@ class _SettingViewState extends ConsumerState<SettingView>
   // MARK: - 字體大小設定
   Widget _buildFontSizeSetting() {
     return LabeledSlider(
-      title: "字體大小調整",
+      title: context.l10n.uiFontSize,
       icon: Icons.text_fields,
       value: _settingsViewState.fontSize,
       min: 12,
@@ -570,7 +611,10 @@ class _SettingViewState extends ConsumerState<SettingView>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("主題顏色", style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          context.l10n.uiThemeColor2,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 12),
         SettingsColorPicker(
           selectedColor: _themeViewState.themeColor,
@@ -591,16 +635,19 @@ class _SettingViewState extends ConsumerState<SettingView>
       ),
     );
     final labels = {
-      NavigationStyle.railTooltip: "僅圖示",
-      NavigationStyle.railLabel: "圖示與名稱",
-      NavigationStyle.railButtonDrawer: "點擊展開",
-      NavigationStyle.railHoverDrawer: "懸停展開",
+      NavigationStyle.railTooltip: context.l10n.uiIconsOnly,
+      NavigationStyle.railLabel: context.l10n.uiIconsAndLabels,
+      NavigationStyle.railButtonDrawer: context.l10n.uiExpandOnClick,
+      NavigationStyle.railHoverDrawer: context.l10n.uiExpandOnHover,
     };
     return Column(
       key: const Key("navigation-style-setting"),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("導覽模式", style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          context.l10n.uiNavigationStyle,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 12),
         SettingsModePicker(
           compactRow: true,
@@ -609,7 +656,7 @@ class _SettingViewState extends ConsumerState<SettingView>
               SettingsModeOption(
                 id: "navigation-${option.name}",
                 label: labels[option]!,
-                description: option.description,
+                description: context.l10n.legacyLabel(option.description),
                 preview: SettingsModePreview(
                   accent: _themeViewState.themePreset.accent(
                     _themeViewState.themeColor,
@@ -624,10 +671,13 @@ class _SettingViewState extends ConsumerState<SettingView>
           ],
         ),
         const SizedBox(height: 8),
-        Text(style.description, style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          context.l10n.legacyLabel(style.description),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
         const SizedBox(height: 4),
         Text(
-          "首頁固定頂端；設定、關於固定底端。窄視窗使用按鈕開啟導覽。",
+          context.l10n.uiHomeStaysAtTheTopSettingsAndAbout,
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
@@ -644,7 +694,10 @@ class _SettingViewState extends ConsumerState<SettingView>
       key: const Key("toolbar-mode-setting"),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("工具列模式", style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          context.l10n.uiToolbarMode,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 12),
         SettingsModePicker(
           compactRow: true,
@@ -652,8 +705,12 @@ class _SettingViewState extends ConsumerState<SettingView>
             for (final mode in [...ToolbarMode.values, null])
               SettingsModeOption(
                 id: "toolbar-${mode?.name ?? 'automatic'}",
-                label: mode?.label ?? "自動",
-                description: mode?.description ?? "依裝置選擇：桌面 Full，手機 Moderate。",
+                label: mode?.label ?? context.l10n.uiAutomatic3,
+                description:
+                    (mode == null
+                        ? null
+                        : context.l10n.legacyLabel(mode.description)) ??
+                    context.l10n.uiChooseByDeviceFullOnDesktopModerateOn,
                 preview: SettingsModePreview(
                   accent: _themeViewState.themePreset.accent(
                     _themeViewState.themeColor,
@@ -669,8 +726,11 @@ class _SettingViewState extends ConsumerState<SettingView>
         const SizedBox(height: 8),
         Text(
           preference == null
-              ? "自動使用 ${resolved.label}：${resolved.description}"
-              : resolved.description,
+              ? context.l10n.uiAutomaticallyUsing(
+                  (resolved.label).toString(),
+                  (context.l10n.legacyLabel(resolved.description)).toString(),
+                )
+              : context.l10n.legacyLabel(resolved.description),
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
@@ -679,14 +739,17 @@ class _SettingViewState extends ConsumerState<SettingView>
 
   Widget _buildThemeModeSetting() {
     final labels = {
-      AppThemeMode.light: "淺色",
-      AppThemeMode.dark: "深色",
-      AppThemeMode.system: "自動",
+      AppThemeMode.light: context.l10n.uiLight,
+      AppThemeMode.dark: context.l10n.uiDark,
+      AppThemeMode.system: context.l10n.uiAutomatic3,
     };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("主題模式", style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          context.l10n.uiThemeMode,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 12),
         SettingsModePicker(
           options: [
@@ -695,8 +758,8 @@ class _SettingViewState extends ConsumerState<SettingView>
                 id: "theme-${mode.name}",
                 label: labels[mode]!,
                 description: mode == AppThemeMode.system
-                    ? "跟隨系統的淺色或深色外觀。"
-                    : "使用${labels[mode]}外觀。",
+                    ? context.l10n.uiFollowTheSystemSLightOrDarkAppearance
+                    : context.l10n.uiUseAppearance((labels[mode]).toString()),
                 preview: SettingsModePreview(
                   accent: _themeViewState.themePreset.accent(
                     _themeViewState.themeColor,
@@ -741,7 +804,10 @@ class _SettingViewState extends ConsumerState<SettingView>
               ),
               const SizedBox(width: 8),
               Text(
-                "目前使用：${isDark ? "深色" : "淺色"}模式",
+                context.l10n.uiCurrentlyUsingMode(
+                  (isDark ? context.l10n.uiDark : context.l10n.uiLight)
+                      .toString(),
+                ),
                 style: TextStyle(
                   color: colorScheme.onPrimaryContainer,
                   fontWeight: FontWeight.w600,
@@ -768,11 +834,14 @@ class _SettingViewState extends ConsumerState<SettingView>
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("字數統計模式", style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    context.l10n.uiWordCountMode,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                   Text(
                     _settingsViewState.wordCountMode == WordCountMode.characters
-                        ? "純字元數 (不建議)"
-                        : "全形字元 + 半形單字",
+                        ? context.l10n.uiCharacterCountNotRecommended
+                        : context.l10n.uiFullWidthCharactersHalfWidthWords,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -783,15 +852,15 @@ class _SettingViewState extends ConsumerState<SettingView>
         const SizedBox(height: 8),
         AppDropdownField<WordCountMode>(
           value: _settingsViewState.wordCountMode,
-          labelText: "字數統計模式",
-          options: const [
+          labelText: context.l10n.uiWordCountMode,
+          options: [
             DropdownOption<WordCountMode>(
               value: WordCountMode.characters,
-              label: "字元數 (不建議)",
+              label: context.l10n.uiCharactersNotRecommended,
             ),
             DropdownOption<WordCountMode>(
               value: WordCountMode.wordsAndCharacters,
-              label: "混合模式",
+              label: context.l10n.uiMixedMode,
             ),
           ],
           onChanged: (value) async {
@@ -814,9 +883,9 @@ class _SettingViewState extends ConsumerState<SettingView>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SwitchWithIconTitle(
-          title: "自動儲存",
+          title: context.l10n.uiAutoSave,
           icon: Icons.save,
-          subtitle: "依排程儲存檔案（需要檔案存在）",
+          subtitle: context.l10n.uiSaveOnAScheduleRequiresAnExistingFile,
           value: enabled,
           onChanged: (value) async {
             await ref
@@ -829,14 +898,16 @@ class _SettingViewState extends ConsumerState<SettingView>
           child: IgnorePointer(
             ignoring: !enabled,
             child: LabeledSlider(
-              title: "儲存間隔",
+              title: context.l10n.uiSaveInterval,
               icon: Icons.timer,
               value: interval.toDouble(),
               min: 0,
               max: 120,
               divisions: 24,
               layout: LabeledSliderLayout.stacked,
-              valueLabelBuilder: (value) => "${value.round()} 分鐘",
+              valueLabelBuilder: (value) => context.l10n.uiMinutes(
+                context.formats.integer(value.round()),
+              ),
               onChanged: (value) async {
                 await ref
                     .read(settingsStateProvider.notifier)
@@ -860,9 +931,11 @@ class _SettingViewState extends ConsumerState<SettingView>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SwitchWithIconTitle(
-          title: "自動備份",
+          title: context.l10n.uiAutomaticBackup,
           icon: Icons.backup,
-          subtitle: "依排程建立專案備份，不覆蓋原檔案",
+          subtitle: context
+              .l10n
+              .uiCreateScheduledProjectBackupsWithoutOverwritingTheOriginal,
           value: enabled,
           onChanged: (value) async {
             await ref
@@ -875,14 +948,16 @@ class _SettingViewState extends ConsumerState<SettingView>
           child: IgnorePointer(
             ignoring: !enabled,
             child: LabeledSlider(
-              title: "備份間隔",
+              title: context.l10n.uiBackupInterval,
               icon: Icons.timer,
               value: interval.toDouble(),
               min: 0,
               max: 120,
               divisions: 24,
               layout: LabeledSliderLayout.stacked,
-              valueLabelBuilder: (value) => "${value.round()} 分鐘",
+              valueLabelBuilder: (value) => context.l10n.uiMinutes(
+                context.formats.integer(value.round()),
+              ),
               onChanged: (value) async {
                 await ref
                     .read(settingsStateProvider.notifier)
@@ -898,7 +973,7 @@ class _SettingViewState extends ConsumerState<SettingView>
             child: HelpTarget(
               topicId: HelpTopicId.backupCapacity,
               child: LabeledSlider(
-                title: "備份最高上限",
+                title: context.l10n.uiMaximumBackupStorage,
                 icon: Icons.storage_outlined,
                 value: maxSizeMb.clamp(16, 4096).toDouble(),
                 min: 16,
@@ -941,7 +1016,7 @@ class _SettingViewState extends ConsumerState<SettingView>
                 return TextButton.icon(
                   onPressed: _selectAutoBackupDirectory,
                   icon: const Icon(Icons.folder_open),
-                  label: const Text("選擇自動備份資料夾"),
+                  label: Text(context.l10n.uiChooseAutomaticBackupFolder),
                 );
               }
 
@@ -953,23 +1028,23 @@ class _SettingViewState extends ConsumerState<SettingView>
                   TextButton.icon(
                     onPressed: _openAutoBackupDirectory,
                     icon: const Icon(Icons.folder_open),
-                    label: const Text("開啟"),
+                    label: Text(context.l10n.uiOpen),
                   ),
                   if (info.isAndroid)
                     TextButton.icon(
                       onPressed: _selectAutoBackupDirectory,
                       icon: const Icon(Icons.drive_folder_upload_outlined),
-                      label: const Text("重新選擇"),
+                      label: Text(context.l10n.uiChooseAgain),
                     )
                   else if (info.isDefault)
                     TextButton.icon(
                       onPressed: _selectAutoBackupDirectory,
                       icon: const Icon(Icons.drive_folder_upload_outlined),
-                      label: const Text("選擇"),
+                      label: Text(context.l10n.uiChoose),
                     )
                   else
                     PopupMenuButton<String>(
-                      tooltip: "AutoBackup 目錄選項",
+                      tooltip: context.l10n.uiAutoBackupFolderOptions,
                       icon: const Icon(Icons.more_horiz),
                       onSelected: (value) async {
                         if (value == "select") {
@@ -978,9 +1053,15 @@ class _SettingViewState extends ConsumerState<SettingView>
                           await _resetAutoBackupDirectory();
                         }
                       },
-                      itemBuilder: (context) => const [
-                        PopupMenuItem(value: "select", child: Text("選擇")),
-                        PopupMenuItem(value: "reset", child: Text("重設")),
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: "select",
+                          child: Text(context.l10n.uiChoose),
+                        ),
+                        PopupMenuItem(
+                          value: "reset",
+                          child: Text(context.l10n.uiReset),
+                        ),
                       ],
                     ),
                   if (info.path.trim().isNotEmpty)
@@ -991,7 +1072,11 @@ class _SettingViewState extends ConsumerState<SettingView>
                       ),
                     ),
                   Text(
-                    "${_formatBytes(info.totalBytes)} / $maxSizeMb MB ・ ${info.fileCount} 份",
+                    context.l10n.uiMBBackups(
+                      (_formatBytes(info.totalBytes)).toString(),
+                      context.formats.integer(maxSizeMb),
+                      context.formats.integer(info.fileCount),
+                    ),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -999,7 +1084,7 @@ class _SettingViewState extends ConsumerState<SettingView>
                   TextButton.icon(
                     onPressed: info.fileCount == 0 ? null : _clearAutoBackups,
                     icon: const Icon(Icons.cleaning_services_outlined),
-                    label: const Text("清理全部備份"),
+                    label: Text(context.l10n.uiDeleteAllBackups),
                   ),
                 ],
               );
@@ -1010,12 +1095,7 @@ class _SettingViewState extends ConsumerState<SettingView>
     );
   }
 
-  String _formatBytes(int bytes) {
-    if (bytes < 1024 * 1024) {
-      return "${(bytes / 1024).toStringAsFixed(1)} KB";
-    }
-    return "${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB";
-  }
+  String _formatBytes(int bytes) => context.formats.bytes(bytes);
 
   Future<void> _clearAutoBackups() async {
     try {
@@ -1026,7 +1106,10 @@ class _SettingViewState extends ConsumerState<SettingView>
       _refreshAutoBackupDirectoryInfo();
       AppFeedback.success(
         context,
-        "已清理 ${result.deletedFiles} 份備份，釋放 ${_formatBytes(result.freedBytes)}。",
+        context.l10n.uiDeletedBackupsFreeing(
+          context.formats.integer(result.deletedFiles),
+          (_formatBytes(result.freedBytes)).toString(),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
@@ -1042,7 +1125,10 @@ class _SettingViewState extends ConsumerState<SettingView>
       if (!mounted) {
         return;
       }
-      AppFeedback.success(context, "已開啟 AutoBackup 目錄：$directoryPath");
+      AppFeedback.success(
+        context,
+        context.l10n.uiOpenedAutoBackupFolder((directoryPath).toString()),
+      );
     } catch (e) {
       if (!mounted) {
         return;
@@ -1060,7 +1146,10 @@ class _SettingViewState extends ConsumerState<SettingView>
         return;
       }
       _refreshAutoBackupDirectoryInfo();
-      AppFeedback.success(context, "AutoBackup 目錄已設定：$directoryPath");
+      AppFeedback.success(
+        context,
+        context.l10n.uiAutoBackupFolderSet((directoryPath).toString()),
+      );
     } catch (e) {
       if (!mounted) {
         return;
@@ -1078,7 +1167,10 @@ class _SettingViewState extends ConsumerState<SettingView>
         return;
       }
       _refreshAutoBackupDirectoryInfo();
-      AppFeedback.success(context, "AutoBackup 目錄已重設：$directoryPath");
+      AppFeedback.success(
+        context,
+        context.l10n.uiAutoBackupFolderReset((directoryPath).toString()),
+      );
     } catch (e) {
       if (!mounted) {
         return;
@@ -1098,7 +1190,7 @@ class _SettingViewState extends ConsumerState<SettingView>
           Text(title, style: Theme.of(context).textTheme.labelMedium),
           const Spacer(),
           Text(
-            "即將推出",
+            context.l10n.uiComingSoon,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontStyle: FontStyle.italic,

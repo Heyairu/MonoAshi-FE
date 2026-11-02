@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "dart:convert";
 
 import "package:flutter/material.dart";
@@ -126,7 +127,7 @@ class _P2pConflictResolutionDialogState
               .length,
     );
     return AlertDialog(
-      title: const Text("同步衝突：選擇各欄位使用版本"),
+      title: Text(context.l10n.uiSyncConflictsChooseAVersionForEachField),
       content: SizedBox(
         width: 760,
         height: 560,
@@ -135,8 +136,12 @@ class _P2pConflictResolutionDialogState
           children: [
             Text(
               unresolvedCount == 0
-                  ? "所有 ${widget.conflicts.length} 個衝突欄位皆已決定"
-                  : "尚有 $unresolvedCount 個衝突欄位未決定",
+                  ? context.l10n.uiAllConflictingFieldsResolved(
+                      context.formats.integer(widget.conflicts.length),
+                    )
+                  : context.l10n.uiUnresolvedFields(
+                      (unresolvedCount).toString(),
+                    ),
               key: const Key("p2p-conflict-progress"),
             ),
             const SizedBox(height: 8),
@@ -145,11 +150,11 @@ class _P2pConflictResolutionDialogState
               children: [
                 OutlinedButton(
                   onPressed: () => _setAllDefaults(P2pConflictSide.local),
-                  child: const Text("全部欄位預設本機"),
+                  child: Text(context.l10n.uiDefaultAllFieldsToLocal),
                 ),
                 OutlinedButton(
                   onPressed: () => _setAllDefaults(P2pConflictSide.remote),
-                  child: const Text("全部欄位預設對方"),
+                  child: Text(context.l10n.uiDefaultAllFieldsToRemote),
                 ),
               ],
             ),
@@ -166,12 +171,16 @@ class _P2pConflictResolutionDialogState
         TextButton(
           key: const Key("p2p-conflict-cancel"),
           onPressed: widget.onCancel,
-          child: const Text("取消並保留兩個版本"),
+          child: Text(context.l10n.uiCancelAndKeepBothVersions),
         ),
         FilledButton(
           key: const Key("p2p-conflict-apply"),
           onPressed: _isComplete ? _apply : null,
-          child: Text("套用 ${widget.conflicts.length} 個欄位選擇並完成同步"),
+          child: Text(
+            context.l10n.uiApplyFieldChoicesAndFinishSync(
+              context.formats.integer(widget.conflicts.length),
+            ),
+          ),
         ),
       ],
     );
@@ -187,7 +196,10 @@ class _P2pConflictResolutionDialogState
         initiallyExpanded: false,
         title: Text("${_displayGroupType(group.type)}：${group.label}"),
         subtitle: Text(
-          "${group.conflicts.length} 個衝突欄位 · ${_shortId(group.id)}",
+          context.l10n.uiConflictingFields(
+            context.formats.integer(group.conflicts.length),
+            (_shortId(group.id)).toString(),
+          ),
         ),
         childrenPadding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,
@@ -202,10 +214,10 @@ class _P2pConflictResolutionDialogState
               crossAxisAlignment: WrapCrossAlignment.center,
               spacing: 8,
               children: [
-                const Text("預設使用："),
+                Text(context.l10n.uiDefaultVersion),
                 ChoiceChip(
                   key: Key("p2p-group-local-${group.key}"),
-                  label: const Text("本機版本"),
+                  label: Text(context.l10n.uiLocalVersion),
                   selected: defaultSide == P2pConflictSide.local,
                   onSelected: (_) => setState(() {
                     _groupDefaults[group.key] = P2pConflictSide.local;
@@ -213,7 +225,7 @@ class _P2pConflictResolutionDialogState
                 ),
                 ChoiceChip(
                   key: Key("p2p-group-remote-${group.key}"),
-                  label: const Text("對方版本"),
+                  label: Text(context.l10n.uiRemoteVersion),
                   selected: defaultSide == P2pConflictSide.remote,
                   onSelected: (_) => setState(() {
                     _groupDefaults[group.key] = P2pConflictSide.remote;
@@ -240,9 +252,9 @@ class _P2pConflictResolutionDialogState
         P2pFieldConflictChoice.inheritGroup;
     final inherited = _groupDefaults[group.key];
     final inheritedLabel = switch (inherited) {
-      P2pConflictSide.local => "同上（本機版本）",
-      P2pConflictSide.remote => "同上（對方版本）",
-      null => "同上（尚未設定）",
+      P2pConflictSide.local => context.l10n.uiInheritLocalVersion,
+      P2pConflictSide.remote => context.l10n.uiInheritRemoteVersion,
+      null => context.l10n.uiInheritNotSet,
     };
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
@@ -255,9 +267,15 @@ class _P2pConflictResolutionDialogState
         ),
         child: ExpansionTile(
           key: Key("p2p-field-${conflict.conflictId}"),
-          title: Text("衝突欄位：${conflict.fieldPath}"),
+          title: Text(
+            context.l10n.uiConflictingField(
+              context.l10n.conflictFieldPathLabel(conflict.fieldPathSegments),
+            ),
+          ),
           subtitle: Text(
-            _effectiveSide(group, conflict) == null ? "尚未決定" : "已決定",
+            _effectiveSide(group, conflict) == null
+                ? context.l10n.uiUnresolved
+                : context.l10n.uiResolved,
           ),
           childrenPadding: const EdgeInsets.fromLTRB(
             AppSpacing.lg,
@@ -266,9 +284,27 @@ class _P2pConflictResolutionDialogState
             AppSpacing.lg,
           ),
           children: [
-            _buildVersionPreview("共同祖先", conflict.base),
-            _buildVersionPreview("本機", conflict.local),
-            _buildVersionPreview("對方", conflict.remote),
+            _buildVersionPreview(
+              context.l10n.uiCommonAncestor,
+              conflict.base,
+              characterType:
+                  conflict.fieldPathSegments.length == 1 &&
+                  conflict.fieldPathSegments.first == "角色類型",
+            ),
+            _buildVersionPreview(
+              context.l10n.uiThisDevice,
+              conflict.local,
+              characterType:
+                  conflict.fieldPathSegments.length == 1 &&
+                  conflict.fieldPathSegments.first == "角色類型",
+            ),
+            _buildVersionPreview(
+              context.l10n.uiPeer,
+              conflict.remote,
+              characterType:
+                  conflict.fieldPathSegments.length == 1 &&
+                  conflict.fieldPathSegments.first == "角色類型",
+            ),
             const SizedBox(height: 8),
             Align(
               alignment: Alignment.centerLeft,
@@ -287,14 +323,14 @@ class _P2pConflictResolutionDialogState
                   ),
                   ChoiceChip(
                     key: Key("p2p-field-local-${conflict.conflictId}"),
-                    label: const Text("本機版本"),
+                    label: Text(context.l10n.uiLocalVersion),
                     selected: choice == P2pFieldConflictChoice.local,
                     onSelected: (_) =>
                         _setFieldChoice(conflict, P2pFieldConflictChoice.local),
                   ),
                   ChoiceChip(
                     key: Key("p2p-field-remote-${conflict.conflictId}"),
-                    label: const Text("對方版本"),
+                    label: Text(context.l10n.uiRemoteVersion),
                     selected: choice == P2pFieldConflictChoice.remote,
                     onSelected: (_) => _setFieldChoice(
                       conflict,
@@ -319,7 +355,11 @@ class _P2pConflictResolutionDialogState
     });
   }
 
-  Widget _buildVersionPreview(String label, P2pFieldValue value) {
+  Widget _buildVersionPreview(
+    String label,
+    P2pFieldValue value, {
+    bool characterType = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
       child: Row(
@@ -336,7 +376,11 @@ class _P2pConflictResolutionDialogState
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: AppSurfaceShape.borderRadius,
               ),
-              child: SelectableText(_displayValue(value)),
+              child: SelectableText(
+                characterType && value.exists && value.value is String
+                    ? context.l10n.characterTypeLabel(value.value! as String)
+                    : _displayValue(value),
+              ),
             ),
           ),
         ],
@@ -345,7 +389,7 @@ class _P2pConflictResolutionDialogState
   }
 
   String _displayValue(P2pFieldValue value) {
-    if (!value.exists) return "（不存在／已刪除）";
+    if (!value.exists) return context.l10n.uiMissingDeleted;
     final raw = value.value;
     if (raw is Map || raw is List) {
       try {
@@ -360,12 +404,12 @@ class _P2pConflictResolutionDialogState
   String _shortId(String id) => id.length <= 8 ? id : id.substring(0, 8);
 
   String _displayGroupType(String type) => switch (type) {
-    "project" => "作品",
-    "character" => "角色",
-    "projectRemainder" => "專案區段",
-    "itemWorkspace" => "物品",
-    "phrase" => "短語",
-    "phraseLibrary" => "短語庫",
+    "project" => context.l10n.uiWork,
+    "character" => context.l10n.uiCharacters3,
+    "projectRemainder" => context.l10n.uiProjectSections,
+    "itemWorkspace" => context.l10n.uiItem,
+    "phrase" => context.l10n.uiPhrases,
+    "phraseLibrary" => context.l10n.uiPhraseLibrary,
     _ => type,
   };
 }

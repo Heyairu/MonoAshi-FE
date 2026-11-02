@@ -21,9 +21,10 @@ void main() {
           arb.keys.where((key) => !key.startsWith('@')).toSet();
       final source = catalog('zh');
       for (final locale in ['en', 'ja']) {
-        expect(keys(catalog(locale)), keys(source));
+        final translated = catalog(locale);
+        expect(keys(translated), keys(source));
         for (final key in keys(source)) {
-          expect(catalog(locale)[key], isNotEmpty, reason: '$locale:$key');
+          expect(translated[key], isNotEmpty, reason: '$locale:$key');
         }
       }
     },

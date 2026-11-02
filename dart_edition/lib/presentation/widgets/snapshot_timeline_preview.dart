@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "dart:math" as math;
 
 import "package:flutter/foundation.dart" show listEquals;
@@ -158,7 +159,11 @@ class _SnapshotTimelinePreviewState
       selected = await showDialog<SnapshotTimelineEvent>(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text("Tick ${events.first.tick} 的事件"),
+          title: Text(
+            context.l10n.uiEventsAtTick(
+              context.formats.integer(events.first.tick),
+            ),
+          ),
           content: SizedBox(
             width: 440,
             child: ListView(
@@ -182,7 +187,7 @@ class _SnapshotTimelinePreviewState
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("取消"),
+              child: Text(context.l10n.commonCancel),
             ),
           ],
         ),
@@ -281,19 +286,21 @@ class _SnapshotTimelinePreviewState
         widget.hint ??
         (widget.autoSelectAtTick
             ? widget.mode == SnapshotPreviewMode.baseline
-                  ? "目前編輯預設資料；開啟「跟隨時間軸」可預覽指定 Tick。"
+                  ? context
+                        .l10n
+                        .uiEditingDefaultDataEnableFollowTimelineToPreview
                   : selected == null
-                  ? "此 Tick 無快照，僅供預覽；新增快照後即可編輯。若要編輯預設資料，請關閉「跟隨時間軸」。"
+                  ? context.l10n.uiNoSnapshotAtThisTickPreviewOnlyAdd
                   : selected.inherited
-                  ? "此 Tick 僅有 Class 繼承狀態，僅供預覽；新增單件快照後即可編輯。"
-                  : "目前編輯此 Tick 的快照，變更只會儲存至此事件。"
+                  ? context.l10n.uiOnlyAnInheritedClassStateExistsAtThis
+                  : context.l10n.uiEditingThisTickSSnapshotChangesAreSaved
             : null);
     final actions =
         widget.snapshotActionsBuilder?.call(selected) ??
         [
           if (widget.onCopy != null)
             NeonIconButton(
-              label: "複製快照",
+              label: context.l10n.uiDuplicateSnapshot,
               icon: Icons.copy_outlined,
               onPressed: selected == null || selected.inherited
                   ? null
@@ -301,7 +308,7 @@ class _SnapshotTimelinePreviewState
             ),
           if (widget.onDelete != null)
             NeonIconButton(
-              label: "刪除快照",
+              label: context.l10n.uiDeleteSnapshot,
               icon: Icons.delete_outline,
               destructive: true,
               onPressed: selected == null || selected.inherited
@@ -370,7 +377,7 @@ class _SnapshotTimelinePreviewState
                           if (widget.allowLocalMode)
                             NeonIconButton(
                               key: const ValueKey("snapshot-preview-local"),
-                              label: "獨立預覽",
+                              label: context.l10n.uiIndependentPreview,
                               icon: Icons.history_toggle_off_outlined,
                               selected:
                                   widget.mode == SnapshotPreviewMode.localTick,
@@ -380,7 +387,7 @@ class _SnapshotTimelinePreviewState
                                   : NeonStatus.idle,
                               statusLabel:
                                   widget.mode == SnapshotPreviewMode.localTick
-                                  ? "歷史預覽"
+                                  ? context.l10n.uiHistoricalPreview
                                   : null,
                               onPressed:
                                   widget.onModeChanged == null ||
@@ -396,7 +403,7 @@ class _SnapshotTimelinePreviewState
                           if (widget.allowLocalMode || widget.allowBaseline)
                             NeonIconButton(
                               key: const ValueKey("snapshot-preview-follow"),
-                              label: "跟隨時間軸",
+                              label: context.l10n.uiFollowTimeline,
                               icon: Icons.playlist_add_check_rounded,
                               selected:
                                   widget.mode ==
@@ -418,7 +425,7 @@ class _SnapshotTimelinePreviewState
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         NeonIconButton(
-                          label: "上一事件",
+                          label: context.l10n.uiPreviousEvent,
                           onPressed: previous == null || !_canNavigate
                               ? null
                               : () => _pickEvents(
@@ -452,7 +459,7 @@ class _SnapshotTimelinePreviewState
                           ),
                         ),
                         NeonIconButton(
-                          label: "下一事件",
+                          label: context.l10n.uiNextEvent,
                           onPressed: next == null || !_canNavigate
                               ? null
                               : () => _pickEvents(
@@ -466,7 +473,7 @@ class _SnapshotTimelinePreviewState
                     ),
                     if (widget.allowLocateMainTimeline)
                       NeonIconButton(
-                        label: "定位主時間軸",
+                        label: context.l10n.uiLocateOnMainTimeline,
                         onPressed: widget.mode == SnapshotPreviewMode.baseline
                             ? null
                             : () {
@@ -481,14 +488,14 @@ class _SnapshotTimelinePreviewState
                         icon: Icons.my_location_outlined,
                       ),
                     NeonIconButton(
-                      label: "縮小",
+                      label: context.l10n.uiZoomOut,
                       onPressed: _scale <= 12
                           ? null
                           : () => setState(() => _scale /= 2),
                       icon: Icons.zoom_out,
                     ),
                     NeonIconButton(
-                      label: "放大",
+                      label: context.l10n.uiZoomIn,
                       onPressed: _scale >= 96
                           ? null
                           : () => setState(() => _scale *= 2),
@@ -497,11 +504,17 @@ class _SnapshotTimelinePreviewState
                     if (widget.placementsOverride == null)
                       AppMenuButton<bool>(
                         key: const ValueKey("snapshot-preview-context"),
-                        labelText: "Scene 顯示範圍",
+                        labelText: context.l10n.uiSceneDisplayRange,
                         value: _completeContext,
-                        options: const [
-                          DropdownOption(value: false, label: "相關 Scene"),
-                          DropdownOption(value: true, label: "完整 Scene"),
+                        options: [
+                          DropdownOption(
+                            value: false,
+                            label: context.l10n.uiRelatedScenes,
+                          ),
+                          DropdownOption(
+                            value: true,
+                            label: context.l10n.uiAllScenes,
+                          ),
                         ],
                         onChanged: (value) =>
                             setState(() => _completeContext = value!),
@@ -542,7 +555,9 @@ class _SnapshotTimelinePreviewState
                 ]),
           emptyMessage:
               widget.emptyMessage ??
-              (events.isEmpty ? "尚無快照事件，可在任意 Tick 預覽" : "Scene 尚未排定，使用回退時間"),
+              (events.isEmpty
+                  ? context.l10n.uiNoSnapshotEventsPreviewAnyTick
+                  : context.l10n.uiSceneNotScheduledUsingFallbackTime),
         ),
         if (selected != null) ...[
           Padding(

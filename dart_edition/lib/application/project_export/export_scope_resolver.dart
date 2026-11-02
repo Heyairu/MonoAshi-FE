@@ -1,3 +1,4 @@
+import "../../models/project_operation_error.dart";
 import "../../models/project_data.dart";
 import "../../models/chapter_selection_data.dart";
 import "../../models/outline_data.dart";
@@ -41,9 +42,16 @@ ResolvedExportScope resolveExportScope(
         ...root.selectableKeys,
     };
     if (!all.containsAll(selected)) {
-      throw FormatException("${module.label}含已移除或無效的選取項目。");
+      throw ProjectValidationException(
+        ProjectErrorCode.exportSelection,
+        "${module.label}含已移除或無效的選取項目。",
+      );
     }
-    if (selected.isEmpty) throw FormatException("請至少選取一個${module.label}項目。");
+    if (selected.isEmpty)
+      throw ProjectValidationException(
+        ProjectErrorCode.exportSelection,
+        "請至少選取一個${module.label}項目。",
+      );
     if (selected.length != all.length) partial[module] = selected;
   }
   bool keep(SelectiveProjectModule module, String key) =>
@@ -215,7 +223,10 @@ ResolvedExportScope resolveExportScope(
     };
     for (final instance in instances.values) {
       if (!data.itemClasses.containsKey(instance.classId)) {
-        throw FormatException("物品「${instance.name}」缺少定義，無法匯出。");
+        throw ProjectValidationException(
+          ProjectErrorCode.missingItemDefinition,
+          "物品「${instance.name}」缺少定義，無法匯出。",
+        );
       }
       if (classIds.add(instance.classId)) {
         dependencies

@@ -1,6 +1,7 @@
 // Copyright 2025-2026 Heyairu（部屋伊琉）
 // Licensed under the Apache License, Version 2.0.
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -18,8 +19,10 @@ class HelpViewer extends StatefulWidget {
     required this.retryCatalog,
     required this.onTopic,
     this.embedded = false,
+    this.catalogKey,
   });
   final bool embedded;
+  final String? catalogKey;
   final ValueListenable<String> topic;
   final FocusNode focusNode;
   final Future<HelpCatalog> Function() loadCatalog;
@@ -36,10 +39,32 @@ class _HelpViewerState extends State<HelpViewer> {
   int _historyIndex = -1;
   bool _narrowDirectory = false;
   late Future<HelpCatalog> _catalog;
+  String? _loadedKey;
+
+  void _loadForCurrentLocale() {
+    final key =
+        widget.catalogKey ?? HelpAssets.cacheKey(context.l10n.localeName);
+    if (_loadedKey == key) return;
+    if (_loadedKey != null) widget.retryCatalog();
+    _loadedKey = key;
+    _catalog = widget.loadCatalog();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadForCurrentLocale();
+  }
+
+  @override
+  void didUpdateWidget(covariant HelpViewer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _loadForCurrentLocale();
+  }
+
   @override
   void initState() {
     super.initState();
-    _catalog = widget.loadCatalog();
     widget.topic.addListener(_topicChanged);
     _record(widget.topic.value);
   }
@@ -102,12 +127,15 @@ class _HelpViewerState extends State<HelpViewer> {
             children: [
               Row(
                 children: [
-                  const Expanded(
-                    child: Text('說明中心', style: TextStyle(fontSize: 22)),
+                  Expanded(
+                    child: Text(
+                      context.l10n.uiHelpCenter,
+                      style: TextStyle(fontSize: 22),
+                    ),
                   ),
                   if (!widget.embedded)
                     IconButton(
-                      tooltip: '關閉說明（Esc）',
+                      tooltip: context.l10n.uiCloseHelpEsc,
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.close),
                     ),
@@ -118,17 +146,17 @@ class _HelpViewerState extends State<HelpViewer> {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   IconButton(
-                    tooltip: '說明首頁',
+                    tooltip: context.l10n.uiHelpHome,
                     onPressed: () => widget.onTopic(HelpTopicId.home),
                     icon: const Icon(Icons.home_outlined),
                   ),
                   IconButton(
-                    tooltip: '上一頁',
+                    tooltip: context.l10n.uiPreviousPage,
                     onPressed: _historyIndex > 0 ? () => _move(-1) : null,
                     icon: const Icon(Icons.arrow_back),
                   ),
                   IconButton(
-                    tooltip: '下一頁',
+                    tooltip: context.l10n.uiNextPage,
                     onPressed: _historyIndex + 1 < _history.length
                         ? () => _move(1)
                         : null,
@@ -141,13 +169,17 @@ class _HelpViewerState extends State<HelpViewer> {
                       icon: Icon(
                         _narrowDirectory ? Icons.article_outlined : Icons.list,
                       ),
-                      label: Text(_narrowDirectory ? '閱讀文章' : '目錄與搜尋'),
+                      label: Text(
+                        _narrowDirectory
+                            ? context.l10n.uiReadArticle
+                            : context.l10n.uiContentsAndSearch,
+                      ),
                     ),
                 ],
               ),
               AppTextField(
                 controller: _query,
-                labelText: '搜尋說明',
+                labelText: context.l10n.uiSearchHelp,
                 prefixIcon: const Icon(Icons.search),
                 onChanged: (_) => setState(() => _narrowDirectory = true),
               ),
@@ -156,19 +188,28 @@ class _HelpViewerState extends State<HelpViewer> {
                 child: FutureBuilder<HelpCatalog>(
                   future: _catalog,
                   builder: (context, snapshot) {
+                    // FutureBuilder can retain the previous future's data while
+                    // waiting. Do not flash an article in the old language.
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
                     if (snapshot.hasError) {
                       return Center(
                         child: SingleChildScrollView(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Text('無法載入內建說明，請重試。'),
+                              Text(
+                                context
+                                    .l10n
+                                    .uiCouldNotLoadOfflineHelpPleaseTryAgain,
+                              ),
                               TextButton(
                                 onPressed: () => setState(() {
                                   widget.retryCatalog();
                                   _catalog = widget.loadCatalog();
                                 }),
-                                child: const Text('重試'),
+                                child: Text(context.l10n.commonRetry),
                               ),
                             ],
                           ),
@@ -219,13 +260,13 @@ class _HelpViewerState extends State<HelpViewer> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('找不到符合的說明'),
+            Text(context.l10n.uiNoMatchingHelpTopics),
             TextButton(
               onPressed: () => setState(() {
                 _query.clear();
                 _narrowDirectory = true;
               }),
-              child: const Text('返回目錄'),
+              child: Text(context.l10n.uiBackToContents),
             ),
           ],
         ),
@@ -288,7 +329,10 @@ class _HelpViewerState extends State<HelpViewer> {
             ],
             if (topic.relatedIds.isNotEmpty) ...[
               const Divider(),
-              Text('相關說明', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                context.l10n.uiRelatedTopics,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               Wrap(
                 spacing: 8,
                 children: [

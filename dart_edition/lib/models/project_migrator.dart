@@ -21,7 +21,7 @@ class ProjectMigrationResult {
 /// Owns all project-format upgrades. Module codecs only decode their XML shape;
 /// they never guess which historical project version they received.
 class ProjectMigrator {
-  static const currentVersion = "1.20";
+  static const currentVersion = "1.22";
   static const _legacyMigrationCutoff = "1.08";
   static const _timelineProjectionCutoff = "1.10";
   static const _characterSnapshotCutoff = "1.11";
@@ -49,6 +49,8 @@ class ProjectMigrator {
     required String? sourceVersion,
     required ProjectData parsedData,
   }) {
+    final roles = _upgradeCharacterTypes(parsedData);
+    parsedData = roles.data;
     if (requiresMigration(sourceVersion)) {
       final legacy = _migrateLegacyTo108(parsedData);
       final timelineUpgrade = _upgradeTimelineProjection(
@@ -86,11 +88,60 @@ class ProjectMigrator {
       data: tableUpgrade.data,
       warnings: _validateReferences(tableUpgrade.data),
       wasMigrated:
+          roles.changed ||
           timelineUpgrade.changed ||
           snapshotUpgrade.changed ||
           tableUpgrade.changed ||
           _requiresProjectUuidUpgrade(sourceVersion) ||
           _requiresCurrentFormatUpgrade(sourceVersion),
+    );
+  }
+
+  static ({ProjectData data, bool changed}) _upgradeCharacterTypes(
+    ProjectData source,
+  ) {
+    final characters = <String, CharacterEntryData>{};
+    var changed = false;
+    for (final entry in source.characterData.entries) {
+      final type = normalizeCharacterType(entry.value.characterType);
+      if (type == entry.value.characterType) {
+        characters[entry.key] = entry.value;
+      } else {
+        changed = true;
+        characters[entry.key] = entry.value.copyWith(characterType: type);
+      }
+    }
+    if (!changed) return (data: source, changed: false);
+    return (
+      data: ProjectData(
+        projectUUID: source.projectUUID,
+        writingGoals: source.writingGoals,
+        baseInfoData: source.baseInfoData,
+        segmentsData: source.segmentsData,
+        outlineData: source.outlineData,
+        foreshadowData: source.foreshadowData,
+        updatePlanData: source.updatePlanData,
+        worldSettingsData: source.worldSettingsData,
+        itemClasses: source.itemClasses,
+        itemInstances: source.itemInstances,
+        itemRelations: source.itemRelations,
+        itemClassStateChanges: source.itemClassStateChanges,
+        itemInstanceStateChanges: source.itemInstanceStateChanges,
+        locationStateChanges: source.locationStateChanges,
+        characterData: characters,
+        characterStates: source.characterStates,
+        characterStateBaselines: source.characterStateBaselines,
+        characterStateChanges: source.characterStateChanges,
+        timelineDocument: source.timelineDocument,
+        outlineChapterLinks: source.outlineChapterLinks,
+        totalWords: source.totalWords,
+        contentText: source.contentText,
+        isDirty: source.isDirty,
+        revisionTrackingJson: source.revisionTrackingJson,
+        phrases: source.phrases,
+        phrasesRecoveryPayload: source.phrasesRecoveryPayload,
+      ),
+      changed: true,
     );
   }
 

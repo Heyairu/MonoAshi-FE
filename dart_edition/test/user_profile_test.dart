@@ -75,15 +75,15 @@ void main() {
         child: const MaterialApp(home: Scaffold(body: WelcomeGreeting())),
       ),
     );
-    expect(find.text("Good Morning, \nAlice!"), findsOneWidget);
+    expect(find.text("早安，\nAlice！"), findsOneWidget);
     now = DateTime(2026, 10, 31, 12);
     await tester.pump(const Duration(minutes: 1));
-    expect(find.text("Good Afternoon, \nAlice!"), findsOneWidget);
+    expect(find.text("午安，\nAlice！"), findsOneWidget);
     await container
         .read(userProfileProvider.notifier)
         .save(const UserProfile(displayName: "Bob"));
     await tester.pump();
-    expect(find.text("Good Afternoon, \nBob!"), findsOneWidget);
+    expect(find.text("午安，\nBob！"), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 }

@@ -1,3 +1,4 @@
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 
 import "../../ui_library/spacing.dart";
@@ -92,9 +93,9 @@ final class _PoppinPanelState<T> extends State<PoppinPanel<T>> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxHeight: 260),
         child: widget.items.isEmpty
-            ? const Padding(
+            ? Padding(
                 padding: EdgeInsets.all(AppSpacing.md),
-                child: Text("找不到符合的候選項目"),
+                child: Text(context.l10n.uiNoMatchingSuggestions),
               )
             : Column(
                 mainAxisSize: MainAxisSize.min,
@@ -120,7 +121,7 @@ final class _PoppinPanelState<T> extends State<PoppinPanel<T>> {
     return Semantics(
       key: ValueKey("${widget.keyPrefix}-back"),
       button: true,
-      label: "返回 ${widget.parentLabel}",
+      label: context.l10n.uiBackTo((widget.parentLabel).toString()),
       onTap: widget.onBack,
       child: ExcludeSemantics(
         child: InkWell(
@@ -167,7 +168,9 @@ final class _PoppinPanelState<T> extends State<PoppinPanel<T>> {
               button: true,
               selected: selected,
               label: semanticLabel,
-              hint: expandable ? "按 Enter 選取，按向右鍵展開下一層" : "按 Enter 或 Tab 選取",
+              hint: expandable
+                  ? context.l10n.uiEnterSelectsRightArrowOpensTheNextLevel
+                  : context.l10n.uiEnterOrTabSelects,
               onTap: () => widget.onSelected(index),
               child: ExcludeSemantics(
                 child: InkWell(
@@ -202,7 +205,7 @@ final class _PoppinPanelState<T> extends State<PoppinPanel<T>> {
           if (expandable)
             IconButton(
               key: ValueKey("${widget.keyPrefix}-expand-$id"),
-              tooltip: "展開 $label 的下一層",
+              tooltip: context.l10n.uiExpandTheNextLevelOf((label).toString()),
               onPressed: () => widget.onExpanded(index),
               icon: const Icon(Icons.chevron_right, size: 18),
               visualDensity: VisualDensity.compact,

@@ -16,9 +16,9 @@
  * 
  ************************************************************/
 
+import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:intl/intl.dart";
 import "package:xml/xml.dart" as xml;
 import "../bin/ui_library.dart";
 import "package:logging/logging.dart";
@@ -244,7 +244,6 @@ class BaseInfoView extends ConsumerStatefulWidget {
 
 class _BaseInfoViewState extends ConsumerState<BaseInfoView> {
   bool _isSyncingControllers = false;
-  final DateFormat _dateFormatter = DateFormat("yyyy.MM.dd HH:mm:ss");
 
   final List<ProviderSubscription> _subscriptions = [];
 
@@ -497,9 +496,12 @@ class _BaseInfoViewState extends ConsumerState<BaseInfoView> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // 標題
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
-              child: LargeTitle(icon: Icons.info_outline, text: "基本資訊"),
+              child: LargeTitle(
+                icon: Icons.info_outline,
+                text: context.l10n.uiBasicInformation,
+              ),
             ),
             const SizedBox(height: 32),
             // 表單卡片
@@ -515,8 +517,8 @@ class _BaseInfoViewState extends ConsumerState<BaseInfoView> {
                   children: [
                     // 書名
                     _buildTextFieldSection(
-                      label: "書名",
-                      hint: "輸入書名",
+                      label: context.l10n.uiBookTitle,
+                      hint: context.l10n.uiEnterTheBookTitle,
                       controller: _bookNameController,
                       focusNode: _bookNameFocusNode,
                       fieldId: ProjectCollaborationFields.baseInfoBookName,
@@ -527,8 +529,8 @@ class _BaseInfoViewState extends ConsumerState<BaseInfoView> {
 
                     // 作者
                     _buildTextFieldSection(
-                      label: "作者",
-                      hint: "輸入作者名",
+                      label: context.l10n.uiAuthor,
+                      hint: context.l10n.uiEnterTheAuthorSName,
                       controller: _authorController,
                       focusNode: _authorFocusNode,
                       fieldId: ProjectCollaborationFields.baseInfoAuthor,
@@ -539,8 +541,8 @@ class _BaseInfoViewState extends ConsumerState<BaseInfoView> {
 
                     // 故事主旨
                     _buildTextFieldSection(
-                      label: "主旨",
-                      hint: "輸入故事主旨",
+                      label: context.l10n.uiTheme2,
+                      hint: context.l10n.uiEnterTheStorySTheme,
                       controller: _purposeController,
                       focusNode: _purposeFocusNode,
                       fieldId: ProjectCollaborationFields.baseInfoPurpose,
@@ -551,8 +553,8 @@ class _BaseInfoViewState extends ConsumerState<BaseInfoView> {
 
                     // 一句話簡介
                     _buildTextFieldSection(
-                      label: "一句話簡介",
-                      hint: "輸入一句話簡介",
+                      label: context.l10n.uiOneLineSummary,
+                      hint: context.l10n.uiEnterAOneLineSummary,
                       controller: _toRecapController,
                       focusNode: _toRecapFocusNode,
                       fieldId: ProjectCollaborationFields.baseInfoToRecap,
@@ -563,8 +565,8 @@ class _BaseInfoViewState extends ConsumerState<BaseInfoView> {
 
                     // 類型
                     _buildTextFieldSection(
-                      label: "類型",
-                      hint: "輸入作品類型",
+                      label: context.l10n.uiType,
+                      hint: context.l10n.uiEnterTheGenre,
                       controller: _storyTypeController,
                       focusNode: _storyTypeFocusNode,
                       fieldId: ProjectCollaborationFields.baseInfoStoryType,
@@ -639,7 +641,7 @@ class _BaseInfoViewState extends ConsumerState<BaseInfoView> {
 
   Widget _buildTagsSection(List<String> tags) {
     return CardList(
-      title: "標籤",
+      title: context.l10n.uiTags,
       icon: Icons.local_offer,
       items: tags,
       onAdd: _addTag,
@@ -653,7 +655,7 @@ class _BaseInfoViewState extends ConsumerState<BaseInfoView> {
       children: [
         Row(
           children: [
-            const SmallTitle(icon: Icons.description, text: "簡介"),
+            SmallTitle(icon: Icons.description, text: context.l10n.uiSynopsis),
             const RevisionFieldMarker(
               recordKey: ProjectRecordKey(
                 kind: ProjectRecordKind.baseInfo,
@@ -672,7 +674,7 @@ class _BaseInfoViewState extends ConsumerState<BaseInfoView> {
             controller: _introController,
             focusNode: _introFocusNode,
             selectAllOnFocus: false,
-            hintText: "輸入作品簡介",
+            hintText: context.l10n.uiEnterASynopsis,
             maxLines: 6,
           ),
         ),
@@ -706,15 +708,18 @@ class _BaseInfoViewState extends ConsumerState<BaseInfoView> {
                   ),
                 ),
               ),
-              child: const SmallTitle(icon: Icons.analytics, text: "統計資訊"),
+              child: SmallTitle(
+                icon: Icons.analytics,
+                text: context.l10n.uiStatistics,
+              ),
             ),
             const SizedBox(height: 16),
 
             // 最後儲存時間
             _buildStatRow(
-              "最後儲存時間",
+              context.l10n.uiLastSaved,
               latestSave != null
-                  ? _dateFormatter.format(latestSave)
+                  ? context.formats.dateTime(latestSave)
                   : "--:--:--",
               Icons.access_time,
             ),
@@ -722,11 +727,19 @@ class _BaseInfoViewState extends ConsumerState<BaseInfoView> {
             const Divider(height: 16),
 
             // 總字數
-            _buildStatRow("總字數", "$totalWords 字", Icons.format_list_numbered),
+            _buildStatRow(
+              context.l10n.uiTotalCount,
+              context.l10n.uiCharacters2(context.formats.integer(totalWords)),
+              Icons.format_list_numbered,
+            ),
             const Divider(height: 16),
 
             // 本章字數
-            _buildStatRow("本章字數", "$nowWords 字", Icons.article),
+            _buildStatRow(
+              context.l10n.uiChapterCount,
+              context.l10n.uiCharacters2(context.formats.integer(nowWords)),
+              Icons.article,
+            ),
           ],
         ),
       ),
