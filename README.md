@@ -10,6 +10,8 @@
 
 ## 文件
 
+[宣傳網站原始檔](docs/index.html) · [GitHub Pages 發佈與維護](docs/WEBSITE.md)
+
 | 文件 | 內容 |
 | --- | --- |
 | [統一說明文件](docs/GUIDE.md) | 功能、使用流程、保存與備份、開發環境、架構及發布 |

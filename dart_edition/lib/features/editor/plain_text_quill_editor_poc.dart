@@ -3,8 +3,11 @@
 // content cannot enter the plain-text boundary.
 // ignore_for_file: experimental_member_use
 
+import 'dart:async';
+
 import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "package:flutter/foundation.dart";
+import "package:flutter/gestures.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_quill/flutter_quill.dart";
@@ -597,6 +600,86 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
   TextEditingValue? _compositionBefore;
   List<TextRange> _compositionProtectedRanges = const [];
   int _compositionGeneration = 0;
+  Timer? _consecutiveTapTimer;
+  Timer? _interactionTimer;
+  int _consecutiveTapCount = 0;
+  Offset? _lastTapPosition;
+  PointerDeviceKind? _lastTapKind;
+  Offset? _pointerDownPosition;
+
+  void _resetTapSequence() {
+    _consecutiveTapTimer?.cancel();
+    _consecutiveTapTimer = null;
+    _consecutiveTapCount = 0;
+    _lastTapPosition = null;
+    _lastTapKind = null;
+  }
+
+  bool _handleTapDown(
+    TapDownDetails details,
+    TextPosition Function(Offset) positionForOffset,
+  ) {
+    _interactionTimer?.cancel();
+    final keyboard = HardwareKeyboard.instance;
+    if (keyboard.isShiftPressed ||
+        keyboard.isControlPressed ||
+        keyboard.isAltPressed ||
+        keyboard.isMetaPressed) {
+      _resetTapSequence();
+      return false;
+    }
+    final nearby =
+        _lastTapPosition != null &&
+        (details.globalPosition - _lastTapPosition!).distance <= kDoubleTapSlop;
+    _consecutiveTapCount =
+        _consecutiveTapTimer?.isActive == true &&
+            nearby &&
+            details.kind == _lastTapKind &&
+            _consecutiveTapCount < 3
+        ? _consecutiveTapCount + 1
+        : 1;
+    _lastTapPosition = details.globalPosition;
+    _lastTapKind = details.kind;
+    _consecutiveTapTimer?.cancel();
+    _consecutiveTapTimer = Timer(kDoubleTapTimeout, _resetTapSequence);
+    if (_consecutiveTapCount == 1) return false;
+
+    final editor = _editorKey.currentState?.renderEditor;
+    if (editor == null || !editor.hasSize) return false;
+    final position = positionForOffset(details.globalPosition);
+    final selection = _consecutiveTapCount == 2
+        ? editor.selectWordAtPosition(position)
+        : editor.childAtPosition(position).container.length == 1
+        ? TextSelection.fromPosition(position)
+        : editor.selectLineAtPosition(position);
+    _requestFocus();
+    _controller.updateSelection(
+      TextSelection(
+        baseOffset: selection.baseOffset.clamp(0, _editableContentLength),
+        extentOffset: selection.extentOffset.clamp(0, _editableContentLength),
+      ),
+      ChangeSource.local,
+    );
+    // Quill must still update its own pointer bookkeeping and touch toolbar.
+    return false;
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    _interactionTimer?.cancel();
+    _pointerDownPosition = event.buttons == kPrimaryButton
+        ? event.position
+        : null;
+    if (_pointerDownPosition == null) _resetTapSequence();
+  }
+
+  void _handlePointerMove(PointerMoveEvent event) {
+    final origin = _pointerDownPosition;
+    if (origin != null && (event.position - origin).distance > kTouchSlop) {
+      _pointerDownPosition = null;
+      _resetTapSequence();
+      _interactionTimer?.cancel();
+    }
+  }
 
   void _attachCompositionListener() {
     final state = _editorKey.currentState;
@@ -797,6 +880,8 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
 
   @override
   void dispose() {
+    _consecutiveTapTimer?.cancel();
+    _interactionTimer?.cancel();
     widget.commands?._detach(this);
     widget.searchController
       ?..removeListener(_handleSearchStateChanged)
@@ -834,6 +919,8 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
   }
 
   void _applyExternalContent(String rawText, TextSelection rawSelection) {
+    _resetTapSequence();
+    _interactionTimer?.cancel();
     final nextDocument = PlainTextQuillAdapter.fromPlainText(rawText);
     final previousDocument = _controller.document;
     _compositionGeneration++;
@@ -893,6 +980,8 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
     if (_isApplyingExternalContent) return;
     final nextText = PlainTextQuillAdapter.toPlainText(_controller.document);
     if (_lastEmittedText != nextText) {
+      _resetTapSequence();
+      _interactionTimer?.cancel();
       _lastEmittedText = nextText;
       final nextMapping = PlainTextQuillAdapter.fromPlainText(nextText);
       nextMapping.document.close();
@@ -930,7 +1019,12 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
   }
 
   void _handleFocusChanged() {
-    if (_focusNode.hasFocus) _reportLocalSelectionIfNeeded(force: true);
+    if (_focusNode.hasFocus) {
+      _reportLocalSelectionIfNeeded(force: true);
+    } else {
+      _resetTapSequence();
+      _interactionTimer?.cancel();
+    }
   }
 
   void _reportLocalSelectionIfNeeded({bool force = false}) {
@@ -953,9 +1047,32 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
     if (editor == null || !editor.hasSize) return;
     final hitOffset = editor.getPositionForOffset(globalPosition).offset;
     final hostOffset = _plainTextDocument.documentOffsetToRawOffset(hitOffset);
+    final revision = _textRevision;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || widget.onInteraction == null) return;
-      widget.onInteraction!(offset: hostOffset, globalPosition: globalPosition);
+      if (!mounted ||
+          revision != _textRevision ||
+          widget.onInteraction == null ||
+          _consecutiveTapCount > 1 ||
+          !_editableSelection.isCollapsed) {
+        return;
+      }
+      // A single annotation click opens details only after the multi-click
+      // window, allowing the next click to select its visible word or line.
+      _interactionTimer?.cancel();
+      final selection = _editableSelection;
+      _interactionTimer = Timer(kDoubleTapTimeout, () {
+        if (!mounted ||
+            revision != _textRevision ||
+            !_focusNode.hasFocus ||
+            _pointerDownPosition != null ||
+            _editableSelection != selection) {
+          return;
+        }
+        widget.onInteraction?.call(
+          offset: hostOffset,
+          globalPosition: globalPosition,
+        );
+      });
     });
   }
 
@@ -1183,7 +1300,19 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
           ),
         Listener(
           key: const ValueKey<String>("plain-text-quill-interaction-listener"),
-          onPointerUp: (event) => _reportInteraction(event.position),
+          onPointerDown: _handlePointerDown,
+          onPointerMove: _handlePointerMove,
+          onPointerCancel: (_) {
+            _pointerDownPosition = null;
+            _resetTapSequence();
+            _interactionTimer?.cancel();
+          },
+          onPointerUp: (event) {
+            if (_pointerDownPosition != null) {
+              _reportInteraction(event.position);
+            }
+            _pointerDownPosition = null;
+          },
           child: QuillEditor.basic(
             key: const ValueKey<String>("plain-text-quill-editor"),
             controller: _controller,
@@ -1191,6 +1320,10 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
             scrollController: _scrollController,
             config: QuillEditorConfig(
               editorKey: _editorKey,
+              onTapDown: _handleTapDown,
+              // Preserve word/line selections instead of letting the third
+              // click fall through to Quill's single-click caret placement.
+              onTapUp: (_, _) => _consecutiveTapCount > 1,
               onKeyPressed: (event, node) {
                 final keyboard = HardwareKeyboard.instance;
                 if (keyboard.isControlPressed ||

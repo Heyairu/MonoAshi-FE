@@ -10,6 +10,7 @@
 | [統一 API 文件](API.md) | 開發者、整合者 | MCP、檔案 API、Rhodanthe、Copilot adapter、P2P 與協作契約 |
 | [參考文件索引](SOURCES.md) | 維護者 | 保留的專題規格、使用指南、設計與發布驗收文件 |
 | [專案首頁](../README.md) | 所有讀者 | 專案介紹、畫面預覽與快速啟動 |
+| [宣傳網站原始檔](index.html) | 所有讀者 | M3 Teal 產品介紹頁；[GitHub Pages 發佈與維護](WEBSITE.md) |
 
 ## 文件使用原則
 

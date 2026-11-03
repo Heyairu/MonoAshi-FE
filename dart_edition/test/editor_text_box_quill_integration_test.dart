@@ -1,6 +1,7 @@
 import "package:flutter_localizations/flutter_localizations.dart";
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
+import "package:flutter/gestures.dart";
 import "package:flutter_quill/flutter_quill.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_test/flutter_test.dart";
@@ -310,6 +311,8 @@ void main() {
     );
     await tester.pump();
 
+    expect(interaction, isNull);
+    await tester.pump(kDoubleTapTimeout);
     expect(interaction, isNotNull);
     expect(interaction!.displayOffset, 3);
     expect(
