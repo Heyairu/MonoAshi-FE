@@ -2,6 +2,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "../../bin/file.dart" as file_module;
 import "../../features/revision_tracking/application/revision_session_codec.dart";
+import "../../features/navigation/app_module.dart";
 import "project_snapshot_utils.dart";
 
 /// A deterministic, fixed-size fingerprint of serialized project content.
@@ -88,6 +89,9 @@ class ProjectHistoryEntry {
   final ProjectHistoryContentDigest contentDigest;
   final int approximateByteSize;
   final int pageIndex;
+
+  /// The sidebar page visible while editing the always-mounted desktop editor.
+  final int? desktopPageIndex;
   final String? selectedSegID;
   final String? selectedChapID;
   final int cursorOffset;
@@ -99,6 +103,7 @@ class ProjectHistoryEntry {
     required this.contentDigest,
     required this.approximateByteSize,
     required this.pageIndex,
+    this.desktopPageIndex,
     required this.selectedSegID,
     required this.selectedChapID,
     required this.cursorOffset,
@@ -112,6 +117,7 @@ class ProjectHistoryEntry {
         contentDigest: contentDigest,
         approximateByteSize: approximateByteSize,
         pageIndex: pageIndex,
+        desktopPageIndex: desktopPageIndex,
         selectedSegID: selectedSegID,
         selectedChapID: selectedChapID,
         cursorOffset: cursorOffset,
@@ -119,9 +125,26 @@ class ProjectHistoryEntry {
         writingProgressPosition: position,
       );
 
+  /// Uses the previous content as the destination's baseline without creating
+  /// another deep project snapshot. Only a subsequent edit commits this jump.
+  ProjectHistoryEntry _transitionTo(ProjectHistoryEntry destination) =>
+      ProjectHistoryEntry._(
+        data: data,
+        contentDigest: contentDigest,
+        approximateByteSize: approximateByteSize,
+        pageIndex: destination.pageIndex,
+        desktopPageIndex: destination.desktopPageIndex,
+        selectedSegID: destination.selectedSegID,
+        selectedChapID: destination.selectedChapID,
+        cursorOffset: destination.cursorOffset,
+        isPageTransition: true,
+        writingProgressPosition: writingProgressPosition,
+      );
+
   factory ProjectHistoryEntry({
     required file_module.ProjectData data,
     required int pageIndex,
+    int? desktopPageIndex,
     required String? selectedSegID,
     required String? selectedChapID,
     required int cursorOffset,
@@ -177,6 +200,7 @@ class ProjectHistoryEntry {
           (snapshot.revisionTrackingJson?.length ?? 0) * 2 +
           _estimatedObjectOverheadBytes,
       pageIndex: pageIndex,
+      desktopPageIndex: desktopPageIndex,
       selectedSegID: selectedSegID,
       selectedChapID: selectedChapID,
       cursorOffset: cursorOffset,
@@ -232,23 +256,6 @@ class ProjectHistoryNotifier extends Notifier<ProjectHistoryState> {
 
   void reset(ProjectHistoryEntry entry) {
     state = ProjectHistoryState(undoStack: [entry], redoStack: const []);
-  }
-
-  List<ProjectHistoryEntry> _withoutTrailingUnchangedPageTransition(
-    List<ProjectHistoryEntry> stack,
-  ) {
-    if (stack.length < 2) {
-      return stack;
-    }
-
-    final last = stack.last;
-    final previous = stack[stack.length - 2];
-    if (!last.isPageTransition ||
-        last.contentDigest != previous.contentDigest) {
-      return stack;
-    }
-
-    return stack.sublist(0, stack.length - 1);
   }
 
   ProjectHistoryState _trimToLimits({
@@ -309,11 +316,11 @@ class ProjectHistoryNotifier extends Notifier<ProjectHistoryState> {
   }
 
   bool record(ProjectHistoryEntry entry) {
-    final currentStack = _withoutTrailingUnchangedPageTransition(
-      state.undoStack,
-    );
-    if (!entry.isPageTransition &&
-        currentStack.isNotEmpty &&
+    // Browsing alone never commits a command or invalidates redo. The next
+    // changed snapshot supplies the page that actually owns the modification.
+    if (entry.isPageTransition) return false;
+    final currentStack = state.undoStack;
+    if (currentStack.isNotEmpty &&
         currentStack.last.contentDigest == entry.contentDigest) {
       final updatedStack = entry.writingProgressPosition == null
           ? currentStack
@@ -333,41 +340,72 @@ class ProjectHistoryNotifier extends Notifier<ProjectHistoryState> {
     }
 
     state = _trimToLimits(
-      undoStack: [...currentStack, entry],
+      undoStack: [
+        ...currentStack,
+        if (currentStack.isNotEmpty &&
+            currentStack.last.pageIndex != entry.pageIndex)
+          currentStack.last._transitionTo(entry),
+        entry,
+      ],
       redoStack: const [],
     );
     return true;
   }
 
-  ProjectHistoryEntry? undo(ProjectHistoryEntry currentEntry) {
+  bool _skipTransition(ProjectHistoryEntry entry, bool skipEditorTransitions) =>
+      skipEditorTransitions &&
+      entry.isPageTransition &&
+      entry.pageIndex == AppModule.editorPageIndex;
+
+  ProjectHistoryEntry? undo(
+    ProjectHistoryEntry currentEntry, {
+    bool skipEditorTransitions = false,
+  }) {
     if (state.undoStack.isEmpty) {
       reset(currentEntry);
       return null;
     }
 
+    // Capture an edit that has not reached the debounce timer, including its
+    // destination baseline, and discard the obsolete redo branch.
+    record(currentEntry);
     final undoStack = [...state.undoStack];
-    if (undoStack.last.contentDigest != currentEntry.contentDigest) {
-      undoStack.add(currentEntry);
-    } else if (currentEntry.writingProgressPosition case final position?) {
+    if (currentEntry.writingProgressPosition case final position?) {
       undoStack[undoStack.length - 1] = undoStack.last
           .withWritingProgressPosition(position);
     }
+    final redoStack = [...state.redoStack];
+    // A resize may leave the cursor on a jump previously replayed in a narrow
+    // layout. Skip that command too instead of consuming an empty Undo step.
+    while (undoStack.length > 1 &&
+        _skipTransition(undoStack.last, skipEditorTransitions)) {
+      redoStack.insert(0, undoStack.removeLast());
+    }
 
     if (undoStack.length <= 1) {
-      state = _trimToLimits(undoStack: undoStack, redoStack: state.redoStack);
+      state = _trimToLimits(undoStack: undoStack, redoStack: redoStack);
       return null;
     }
 
-    final current = undoStack.removeLast();
+    redoStack.insert(0, undoStack.removeLast());
+    while (undoStack.length > 1 &&
+        _skipTransition(undoStack.last, skipEditorTransitions)) {
+      redoStack.insert(0, undoStack.removeLast());
+    }
     final target = undoStack.last;
-    state = _trimToLimits(
-      undoStack: undoStack,
-      redoStack: [current, ...state.redoStack],
-    );
+    state = _trimToLimits(undoStack: undoStack, redoStack: redoStack);
     return target;
   }
 
-  ProjectHistoryEntry? redo(ProjectHistoryEntry currentEntry) {
+  ProjectHistoryEntry? redo(
+    ProjectHistoryEntry currentEntry, {
+    bool skipEditorTransitions = false,
+  }) {
+    if (state.undoStack.isNotEmpty &&
+        state.undoStack.last.contentDigest != currentEntry.contentDigest) {
+      record(currentEntry);
+      return null;
+    }
     if (state.redoStack.isEmpty) {
       if (state.undoStack.isEmpty) {
         reset(currentEntry);
@@ -376,7 +414,7 @@ class ProjectHistoryNotifier extends Notifier<ProjectHistoryState> {
     }
 
     final redoStack = [...state.redoStack];
-    final target = redoStack.removeAt(0);
+    var target = redoStack.removeAt(0);
     final undoStack = [...state.undoStack];
     if (undoStack.isEmpty ||
         undoStack.last.contentDigest != currentEntry.contentDigest) {
@@ -386,9 +424,14 @@ class ProjectHistoryNotifier extends Notifier<ProjectHistoryState> {
           .withWritingProgressPosition(position);
     }
     undoStack.add(target);
+    while (_skipTransition(target, skipEditorTransitions) &&
+        redoStack.isNotEmpty) {
+      target = redoStack.removeAt(0);
+      undoStack.add(target);
+    }
 
     state = _trimToLimits(undoStack: undoStack, redoStack: redoStack);
-    return target;
+    return _skipTransition(target, skipEditorTransitions) ? null : target;
   }
 }
 

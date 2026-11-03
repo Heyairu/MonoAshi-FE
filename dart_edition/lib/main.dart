@@ -821,6 +821,7 @@ class _ContentViewState extends ConsumerState<ContentView>
   bool _suppressRevisionDirty = false;
   int? _lastRecordedProjectDataRevision;
   int? _pendingProjectHistoryRevision;
+  int? _pendingProjectHistoryPageIndex;
   Timer? _autoSaveTimer;
   Timer? _autoBackupTimer;
   bool _isWritingAutoSave = false;
@@ -837,14 +838,6 @@ class _ContentViewState extends ConsumerState<ContentView>
   static const Duration _projectHistoryRecordDelay = Duration(
     milliseconds: 500,
   );
-  static const Set<int> _ignoredPageTransitionIndexes = {
-    0, // Welcome
-    16, // Help
-    9, // Glossary
-    10, // Palettes
-    11, // Proofreading
-    14, // About
-  };
   static const Set<int> _projectBackedPageIndexes = {
     1, // Base info
     2, // Chapters
@@ -1069,6 +1062,9 @@ class _ContentViewState extends ConsumerState<ContentView>
       );
 
       _refreshActiveChapterWordCount();
+      if (ref.read(projectHistoryProvider).undoStack.isEmpty) {
+        _resetProjectHistory();
+      }
     });
   }
 
@@ -1641,6 +1637,10 @@ class _ContentViewState extends ConsumerState<ContentView>
 
       // 將輸入事件轉交 coordinator，UI listener 僅保留畫面刷新職責。
       if (textChanged) {
+        if (!_isApplyingProjectHistory &&
+            !ref.read(editorCoordinatorProvider).isApplyingProjectData) {
+          _pendingProjectHistoryPageIndex = AppModule.editorPageIndex;
+        }
         _rhodantheDiagnostics = const <RhodantheExternalAnnotation>[];
         final delta = CollaborativeTextDelta.between(
           _lastObservedEditorText,
@@ -2277,6 +2277,7 @@ class _ContentViewState extends ConsumerState<ContentView>
     }
 
     _pendingProjectHistoryRevision = revision;
+    _pendingProjectHistoryPageIndex ??= slidePageIndexNow;
     _projectHistoryRecordTimer?.cancel();
     _projectHistoryRecordTimer = Timer(_projectHistoryRecordDelay, () {
       _projectHistoryRecordTimer = null;
@@ -2292,7 +2293,7 @@ class _ContentViewState extends ConsumerState<ContentView>
 
   ProjectHistoryEntry _createProjectHistoryEntry(
     ProjectData data, {
-    bool isPageTransition = false,
+    int? pageIndex,
   }) {
     final selection = ref.read(editorSelectionProvider);
     final rawSelection = textController.selection.isValid
@@ -2306,21 +2307,20 @@ class _ContentViewState extends ConsumerState<ContentView>
 
     return ProjectHistoryEntry(
       data: data,
-      pageIndex: slidePageIndexNow,
+      pageIndex: pageIndex ?? slidePageIndexNow,
+      desktopPageIndex: slidePageIndexNow == AppModule.editorPageIndex
+          ? _lastFunctionModule.pageIndex
+          : slidePageIndexNow,
       selectedSegID: selection.selectedSegID,
       selectedChapID: selection.selectedChapID,
       cursorOffset: cursorOffset,
-      isPageTransition: isPageTransition,
       writingProgressPosition: ref
           .read(dailyWritingProgressProvider)
           .checkpoint(),
     );
   }
 
-  void _recordProjectHistorySnapshot({
-    bool reset = false,
-    bool isPageTransition = false,
-  }) {
+  void _recordProjectHistorySnapshot({bool reset = false}) {
     if (!mounted || _isApplyingProjectHistory) {
       return;
     }
@@ -2329,6 +2329,7 @@ class _ContentViewState extends ConsumerState<ContentView>
     _projectHistoryRecordTimer = null;
     _pendingProjectHistoryRevision = null;
     _syncEditorToSelectedChapter();
+    final data = _collectProjectData();
 
     // Syncing editor text may publish a new aggregate provider state and
     // schedule another timer synchronously. Consume that revision here so the
@@ -2337,15 +2338,14 @@ class _ContentViewState extends ConsumerState<ContentView>
     _projectHistoryRecordTimer = null;
     _pendingProjectHistoryRevision = null;
     final int currentRevision = _projectDataRevision;
-    if (!reset &&
-        !isPageTransition &&
-        currentRevision == _lastRecordedProjectDataRevision) {
+    if (!reset && currentRevision == _lastRecordedProjectDataRevision) {
+      _pendingProjectHistoryPageIndex = null;
       return;
     }
 
     final entry = _createProjectHistoryEntry(
-      _collectProjectData(),
-      isPageTransition: isPageTransition,
+      data,
+      pageIndex: reset ? null : _pendingProjectHistoryPageIndex,
     );
     final historyNotifier = ref.read(projectHistoryProvider.notifier);
     if (reset) {
@@ -2354,23 +2354,18 @@ class _ContentViewState extends ConsumerState<ContentView>
       historyNotifier.record(entry);
     }
     _lastRecordedProjectDataRevision = currentRevision;
+    _pendingProjectHistoryPageIndex = null;
   }
 
   void _resetProjectHistory() {
     _recordProjectHistorySnapshot(reset: true);
   }
 
-  bool _shouldRecordPageTransition(int fromIndex, int toIndex) {
-    return !_ignoredPageTransitionIndexes.contains(fromIndex) &&
-        !_ignoredPageTransitionIndexes.contains(toIndex);
-  }
-
   void _recordPageTransitionIfNeeded(int nextPageIndex) {
-    if (!_shouldRecordPageTransition(slidePageIndexNow, nextPageIndex)) {
-      return;
-    }
-
-    _recordProjectHistorySnapshot(isPageTransition: true);
+    if (slidePageIndexNow == nextPageIndex) return;
+    // Flush edits on their original page. Browsing is kept only in UI state;
+    // the next changed snapshot commits its destination's navigation command.
+    _recordProjectHistorySnapshot();
   }
 
   EditorProjectInitialState _initialStateForHistoryEntry(
@@ -2408,13 +2403,18 @@ class _ContentViewState extends ConsumerState<ContentView>
     );
   }
 
-  void _applyProjectHistoryEntry(ProjectHistoryEntry entry) {
+  bool get _usesDesktopHistory =>
+      (_stableResizeBodySize?.width ?? MediaQuery.sizeOf(context).width) >= 800;
+
+  void _applyProjectHistoryEntry(ProjectHistoryEntry entry, {int? pageIndex}) {
     if (!mounted) {
       return;
     }
 
     _projectHistoryRecordTimer?.cancel();
     _projectHistoryRecordTimer = null;
+    _pendingProjectHistoryRevision = null;
+    _pendingProjectHistoryPageIndex = null;
     _isApplyingProjectHistory = true;
     if (entry.writingProgressPosition case final position?) {
       ref.read(dailyWritingProgressProvider).restoreCheckpoint(position);
@@ -2425,7 +2425,20 @@ class _ContentViewState extends ConsumerState<ContentView>
       ..revisionTrackingJson = ref.read(revisionTrackingJsonProvider);
 
     setState(() {
-      slidePageIndexNow = entry.pageIndex < 0 ? 0 : entry.pageIndex;
+      final destination =
+          pageIndex ??
+          (_usesDesktopHistory && entry.pageIndex == AppModule.editorPageIndex
+              ? entry.desktopPageIndex ?? slidePageIndexNow
+              : entry.pageIndex);
+      if (!_usesDesktopHistory || destination != AppModule.editorPageIndex) {
+        slidePageIndexNow = destination < 0 ? 0 : destination;
+      }
+      final sidebarPage = slidePageIndexNow == AppModule.editorPageIndex
+          ? entry.desktopPageIndex
+          : slidePageIndexNow;
+      if (sidebarPage != null && sidebarPage != AppModule.editorPageIndex) {
+        _lastFunctionModule = AppModule.forPage(sidebarPage);
+      }
       _applyProjectData(historyData, initialState);
     });
     ref
@@ -2449,14 +2462,44 @@ class _ContentViewState extends ConsumerState<ContentView>
       return;
     }
 
-    _syncEditorToSelectedChapter();
+    _recordProjectHistorySnapshot();
+    final undoEntries = ref
+        .read(projectHistoryProvider)
+        .undoStack
+        .where(
+          (entry) =>
+              !_usesDesktopHistory ||
+              !entry.isPageTransition ||
+              entry.pageIndex != AppModule.editorPageIndex,
+        );
+    final outgoing = undoEntries.lastOrNull;
+    if (outgoing != null &&
+        undoEntries.length > 1 &&
+        slidePageIndexNow != outgoing.pageIndex &&
+        !(_usesDesktopHistory &&
+            outgoing.pageIndex == AppModule.editorPageIndex)) {
+      // Browsing does not move the history cursor. Return to the current
+      // history page first so the next Undo visibly reverts its modification.
+      _selectModule(AppModule.forPage(outgoing.pageIndex));
+      return;
+    }
     final currentEntry = _createProjectHistoryEntry(_collectProjectData());
-    final target = ref.read(projectHistoryProvider.notifier).undo(currentEntry);
+    final target = ref
+        .read(projectHistoryProvider.notifier)
+        .undo(currentEntry, skipEditorTransitions: _usesDesktopHistory);
     if (target == null) {
       return;
     }
 
-    _applyProjectHistoryEntry(target);
+    _applyProjectHistoryEntry(
+      target,
+      pageIndex:
+          _usesDesktopHistory &&
+              outgoing?.isPageTransition == false &&
+              outgoing?.pageIndex == AppModule.editorPageIndex
+          ? slidePageIndexNow
+          : null,
+    );
   }
 
   void _redoProjectHistory() {
@@ -2464,14 +2507,22 @@ class _ContentViewState extends ConsumerState<ContentView>
       return;
     }
 
-    _syncEditorToSelectedChapter();
+    _recordProjectHistorySnapshot();
     final currentEntry = _createProjectHistoryEntry(_collectProjectData());
-    final target = ref.read(projectHistoryProvider.notifier).redo(currentEntry);
+    final target = ref
+        .read(projectHistoryProvider.notifier)
+        .redo(currentEntry, skipEditorTransitions: _usesDesktopHistory);
     if (target == null) {
       return;
     }
 
-    _applyProjectHistoryEntry(target);
+    _applyProjectHistoryEntry(
+      target,
+      pageIndex:
+          _usesDesktopHistory && target.pageIndex == AppModule.editorPageIndex
+          ? slidePageIndexNow
+          : null,
+    );
   }
 
   void _updateAllWordCounts() {
@@ -2649,12 +2700,6 @@ class _ContentViewState extends ConsumerState<ContentView>
       projectIoControllerProvider.select((state) => state.isProjectIoBusy),
     );
 
-    // 根據平台判斷快捷鍵修飾符 (Apple 設備使用 Command，其他使用 Control)
-    final bool isApple =
-        !kIsWeb &&
-        (defaultTargetPlatform == TargetPlatform.macOS ||
-            defaultTargetPlatform == TargetPlatform.iOS);
-
     HelpController.maybeOf(context)?.pageTopic = HelpTopicId.forPage(
       slidePageIndexNow,
     );
@@ -2668,7 +2713,13 @@ class _ContentViewState extends ConsumerState<ContentView>
           _selectModule(AppModule.step(_currentModule, delta)),
       onOpenSwitcher: _openModuleSwitcher,
       onOpenModule: _selectModule,
+      onNew: () => _handleFileAction("new"),
+      onOpen: () => _handleFileAction("open"),
+      onSave: () => _handleFileAction("save"),
       onSaveAs: () => _handleFileAction("saveAs"),
+      onUndo: _undoProjectHistory,
+      onRedo: _redoProjectHistory,
+      onCloseSearch: showFindReplaceWindow ? _closeFindReplace : null,
       onFind: _openFindReplace,
       onReplace: () => _openFindReplace(replace: true),
       onSearchResult: (forward) {
@@ -2678,218 +2729,142 @@ class _ContentViewState extends ConsumerState<ContentView>
           );
         }
       },
-      child: Shortcuts(
-        shortcuts: <ShortcutActivator, Intent>{
-          SingleActivator(
-            LogicalKeyboardKey.keyS,
-            control: !isApple,
-            meta: isApple,
-            shift: true,
-            includeRepeats: false,
-          ): const SaveAsFileIntent(),
-          SingleActivator(
-            isApple ? LogicalKeyboardKey.keyF : LogicalKeyboardKey.keyH,
-            control: !isApple,
-            meta: isApple,
-            alt: isApple,
-            includeRepeats: false,
-          ): const ReplaceIntent(),
-          SingleActivator(
-            isApple ? LogicalKeyboardKey.keyG : LogicalKeyboardKey.f3,
-            meta: isApple,
-            includeRepeats: false,
-          ): const SearchResultIntent(
-            true,
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          SaveAsFileIntent: CallbackAction<SaveAsFileIntent>(
+            onInvoke: (_) => _handleFileAction("saveAs"),
           ),
-          SingleActivator(
-            isApple ? LogicalKeyboardKey.keyG : LogicalKeyboardKey.f3,
-            meta: isApple,
-            shift: true,
-            includeRepeats: false,
-          ): const SearchResultIntent(
-            false,
-          ),
-          if (!isApple)
-            const SingleActivator(LogicalKeyboardKey.keyY, control: true):
-                const RedoProjectIntent(),
-          if (showFindReplaceWindow)
-            const SingleActivator(
-              LogicalKeyboardKey.escape,
-              includeRepeats: false,
-            ): const CloseSearchIntent(),
-
-          SingleActivator(
-            LogicalKeyboardKey.keyN,
-            control: !isApple,
-            meta: isApple,
-            includeRepeats: false,
-          ): const NewFileIntent(),
-          SingleActivator(
-            LogicalKeyboardKey.keyO,
-            control: !isApple,
-            meta: isApple,
-            includeRepeats: false,
-          ): const OpenFileIntent(),
-          SingleActivator(
-            LogicalKeyboardKey.keyS,
-            control: !isApple,
-            meta: isApple,
-            includeRepeats: false,
-          ): const SaveFileIntent(),
-          SingleActivator(
-            LogicalKeyboardKey.keyF,
-            control: !isApple,
-            meta: isApple,
-            includeRepeats: false,
-          ): const FindIntent(),
-          SingleActivator(
-            LogicalKeyboardKey.keyZ,
-            control: !isApple,
-            meta: isApple,
-          ): const UndoProjectIntent(),
-          SingleActivator(
-            LogicalKeyboardKey.keyZ,
-            control: !isApple,
-            meta: isApple,
-            shift: true,
-          ): const RedoProjectIntent(),
-        },
-        child: Actions(
-          actions: <Type, Action<Intent>>{
-            SaveAsFileIntent: CallbackAction<SaveAsFileIntent>(
-              onInvoke: (_) => _handleFileAction("saveAs"),
-            ),
-            ReplaceIntent: CallbackAction<ReplaceIntent>(
-              onInvoke: (_) {
-                _openFindReplace(replace: true);
-                return null;
-              },
-            ),
-            SearchResultIntent: CallbackAction<SearchResultIntent>(
-              onInvoke: (intent) {
-                if (!_navigationBlocked && showFindReplaceWindow) {
-                  unawaited(
-                    _findBarKey.currentState?.navigate(intent.forward) ??
-                        Future<void>.value(),
-                  );
-                }
-                return null;
-              },
-            ),
-            CloseSearchIntent: CallbackAction<CloseSearchIntent>(
-              onInvoke: (_) {
-                if (!_navigationBlocked) _closeFindReplace();
-                return null;
-              },
-            ),
-            NewFileIntent: CallbackAction<NewFileIntent>(
-              onInvoke: (intent) => _handleFileAction("new"),
-            ),
-            OpenFileIntent: CallbackAction<OpenFileIntent>(
-              onInvoke: (intent) => _handleFileAction("open"),
-            ),
-            SaveFileIntent: CallbackAction<SaveFileIntent>(
-              onInvoke: (intent) => _handleFileAction("save"),
-            ),
-            FindIntent: CallbackAction<FindIntent>(
-              onInvoke: (intent) {
-                _openFindReplace();
-                return null;
-              },
-            ),
-            UndoProjectIntent: CallbackAction<UndoProjectIntent>(
-              onInvoke: (intent) {
-                _undoProjectHistory();
-                return null;
-              },
-            ),
-            RedoProjectIntent: CallbackAction<RedoProjectIntent>(
-              onInvoke: (intent) {
-                _redoProjectHistory();
-                return null;
-              },
-            ),
-          },
-          child: PopScope(
-            canPop: false,
-            onPopInvokedWithResult: (bool didPop, dynamic result) async {
-              if (didPop) return;
-
-              final shouldPop = await _requestExit();
-              if (!shouldPop || !context.mounted) return;
-
-              if (_isAndroidPlatform) {
-                // Popping the Flutter route leaves the Android Activity in its
-                // task. Ask the platform to finish it so Back exits directly.
-                await SystemNavigator.pop();
-              } else {
-                Navigator.of(context).maybePop();
-              }
+          ReplaceIntent: CallbackAction<ReplaceIntent>(
+            onInvoke: (_) {
+              _openFindReplace(replace: true);
+              return null;
             },
-            child: Scaffold(
-              appBar: MonogatariTopAppBar(
-                key: _topAppBarKey,
-                iconSize: fontSize + 8,
-                mode: toolbarMode,
-                controller: _ribbonController,
-                searchOptions: findReplaceOptions.copy(),
-                searchQuery: _ribbonSearchQuery,
-                onSearchOptionChanged: _changeFindOption,
-                modePreference: toolbarPreference,
-                onModeChanged: (value) =>
-                    ref.read(toolbarModeProvider.notifier).setMode(value),
-                isProjectIoBusy: projectIoBusy || _fileCommandRunning,
-                statusIndicator: const _ProjectIoBusyIndicator(),
-                showPunctuationPanel: showPunctuationPanel,
-                showFindReplaceWindow: showFindReplaceWindow,
-                showNavigation: _showNavigation,
-                showSidebar: _showSidebar,
-                showDashboard: _showGaugeDashboard,
-                onToggleNavigation: MediaQuery.sizeOf(context).width < 800
-                    ? null
-                    : () => setState(() => _showNavigation = !_showNavigation),
-                onToggleSidebar: MediaQuery.sizeOf(context).width < 800
-                    ? null
-                    : () => setState(() => _showSidebar = !_showSidebar),
-                onToggleDashboard: MediaQuery.sizeOf(context).width < 800
-                    ? null
-                    : () => setState(
-                        () => _showGaugeDashboard = !_showGaugeDashboard,
-                      ),
-                onFileAction: _handleFileAction,
-                onEditorAction: _performEditorAction,
-                onOpenPhraseLibrary: () async {
-                  final editor = _bodyEditorKey.currentState;
-                  if (editor != null) {
-                    await editor.openPhraseLibrary();
-                  } else {
-                    await PhraseLibraryDialog.show(context: context);
-                  }
-                },
-                onInsertPhrase: () async {
-                  if (MediaQuery.sizeOf(context).width < 800) {
-                    setState(() => slidePageIndexNow = 114514);
-                  }
-                  await _bodyEditorKey.currentState?.insertPhrase();
-                },
-                onSaveSelectionAsPhrase: () =>
-                    _bodyEditorKey.currentState?.saveSelectionAsPhrase(),
-                onEditorActionPointerDown: _prepareEditorToolbarAction,
-                onEditorActionInteractionEnd: _finishEditorToolbarAction,
-                onTogglePunctuationPanel: _togglePunctuationPanel,
-                onToggleFindReplaceWindow: _toggleFindReplaceWindow,
-              ),
-              body: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: _clearEditableFocus,
-                child: LayoutBuilder(
-                  builder: (context, constraints) => _buildResizeStabilizedBody(
-                    constraints: constraints,
-                    fontSize: fontSize,
-                    wordCountMode: wordCountMode,
-                    hasUnsavedChanges: hasUnsavedChanges,
-                    lastSavedTime: lastSavedTime,
-                  ),
+          ),
+          SearchResultIntent: CallbackAction<SearchResultIntent>(
+            onInvoke: (intent) {
+              if (!_navigationBlocked && showFindReplaceWindow) {
+                unawaited(
+                  _findBarKey.currentState?.navigate(intent.forward) ??
+                      Future<void>.value(),
+                );
+              }
+              return null;
+            },
+          ),
+          CloseSearchIntent: CallbackAction<CloseSearchIntent>(
+            onInvoke: (_) {
+              if (!_navigationBlocked) _closeFindReplace();
+              return null;
+            },
+          ),
+          NewFileIntent: CallbackAction<NewFileIntent>(
+            onInvoke: (intent) => _handleFileAction("new"),
+          ),
+          OpenFileIntent: CallbackAction<OpenFileIntent>(
+            onInvoke: (intent) => _handleFileAction("open"),
+          ),
+          SaveFileIntent: CallbackAction<SaveFileIntent>(
+            onInvoke: (intent) => _handleFileAction("save"),
+          ),
+          FindIntent: CallbackAction<FindIntent>(
+            onInvoke: (intent) {
+              _openFindReplace();
+              return null;
+            },
+          ),
+          UndoProjectIntent: CallbackAction<UndoProjectIntent>(
+            onInvoke: (intent) {
+              _undoProjectHistory();
+              return null;
+            },
+          ),
+          RedoProjectIntent: CallbackAction<RedoProjectIntent>(
+            onInvoke: (intent) {
+              _redoProjectHistory();
+              return null;
+            },
+          ),
+        },
+        child: PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (bool didPop, dynamic result) async {
+            if (didPop) return;
+
+            final shouldPop = await _requestExit();
+            if (!shouldPop || !context.mounted) return;
+
+            if (_isAndroidPlatform) {
+              // Popping the Flutter route leaves the Android Activity in its
+              // task. Ask the platform to finish it so Back exits directly.
+              await SystemNavigator.pop();
+            } else {
+              Navigator.of(context).maybePop();
+            }
+          },
+          child: Scaffold(
+            appBar: MonogatariTopAppBar(
+              key: _topAppBarKey,
+              iconSize: fontSize + 8,
+              mode: toolbarMode,
+              controller: _ribbonController,
+              searchOptions: findReplaceOptions.copy(),
+              searchQuery: _ribbonSearchQuery,
+              onSearchOptionChanged: _changeFindOption,
+              modePreference: toolbarPreference,
+              onModeChanged: (value) =>
+                  ref.read(toolbarModeProvider.notifier).setMode(value),
+              isProjectIoBusy: projectIoBusy || _fileCommandRunning,
+              statusIndicator: const _ProjectIoBusyIndicator(),
+              showPunctuationPanel: showPunctuationPanel,
+              showFindReplaceWindow: showFindReplaceWindow,
+              showNavigation: _showNavigation,
+              showSidebar: _showSidebar,
+              showDashboard: _showGaugeDashboard,
+              onToggleNavigation: MediaQuery.sizeOf(context).width < 800
+                  ? null
+                  : () => setState(() => _showNavigation = !_showNavigation),
+              onToggleSidebar: MediaQuery.sizeOf(context).width < 800
+                  ? null
+                  : () => setState(() => _showSidebar = !_showSidebar),
+              onToggleDashboard: MediaQuery.sizeOf(context).width < 800
+                  ? null
+                  : () => setState(
+                      () => _showGaugeDashboard = !_showGaugeDashboard,
+                    ),
+              onFileAction: _handleFileAction,
+              onEditorAction: _performEditorAction,
+              onOpenPhraseLibrary: () async {
+                final editor = _bodyEditorKey.currentState;
+                if (editor != null) {
+                  await editor.openPhraseLibrary();
+                } else {
+                  await PhraseLibraryDialog.show(context: context);
+                }
+              },
+              onInsertPhrase: () async {
+                if (MediaQuery.sizeOf(context).width < 800) {
+                  _recordPageTransitionIfNeeded(AppModule.editorPageIndex);
+                  setState(() => slidePageIndexNow = 114514);
+                }
+                await _bodyEditorKey.currentState?.insertPhrase();
+              },
+              onSaveSelectionAsPhrase: () =>
+                  _bodyEditorKey.currentState?.saveSelectionAsPhrase(),
+              onEditorActionPointerDown: _prepareEditorToolbarAction,
+              onEditorActionInteractionEnd: _finishEditorToolbarAction,
+              onTogglePunctuationPanel: _togglePunctuationPanel,
+              onToggleFindReplaceWindow: _toggleFindReplaceWindow,
+            ),
+            body: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: _clearEditableFocus,
+              child: LayoutBuilder(
+                builder: (context, constraints) => _buildResizeStabilizedBody(
+                  constraints: constraints,
+                  fontSize: fontSize,
+                  wordCountMode: wordCountMode,
+                  hasUnsavedChanges: hasUnsavedChanges,
+                  lastSavedTime: lastSavedTime,
                 ),
               ),
             ),
@@ -3824,7 +3799,7 @@ class _ContentViewState extends ConsumerState<ContentView>
       });
     },
     onNavigateRecord: (record, field) {
-      _syncEditorToSelectedChapter();
+      _recordProjectHistorySnapshot();
       setState(() => _showSidebar = true);
       onNavigate?.call();
       switch (record.key.kind) {
@@ -4823,6 +4798,7 @@ class _ContentViewState extends ConsumerState<ContentView>
   void _focusEditorForProofreading() {
     final bool isMobileLayout = MediaQuery.of(context).size.width < 800;
     if (isMobileLayout && slidePageIndexNow < slidePageCounts) {
+      _recordPageTransitionIfNeeded(AppModule.editorPageIndex);
       setState(() {
         slidePageIndexNow = 114514;
       });
@@ -4841,6 +4817,7 @@ class _ContentViewState extends ConsumerState<ContentView>
       onOpenChapter: (chapterUUID) {
         _flushPendingEditorContent();
         _syncEditorToSelectedChapter();
+        _recordProjectHistorySnapshot();
         final opened = ref
             .read(editorCoordinatorProvider.notifier)
             .navigateToChapter(chapterUUID);

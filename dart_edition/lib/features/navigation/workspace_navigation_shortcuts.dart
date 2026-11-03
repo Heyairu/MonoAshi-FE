@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app_module.dart';
 
-/// Routes exact workspace gestures before editor-local search and movement.
-/// The focus subtree and current route gate prevent background navigation.
+/// Routes application commands before editor-local shortcuts, even when the
+/// workspace has lost focus. Modal routes, menus and IME retain their own keys.
 class WorkspaceNavigationShortcuts extends StatefulWidget {
   const WorkspaceNavigationShortcuts({
     super.key,
@@ -21,6 +21,12 @@ class WorkspaceNavigationShortcuts extends StatefulWidget {
     this.onReplace,
     this.onSearchResult,
     this.onSaveAs,
+    this.onNew,
+    this.onOpen,
+    this.onSave,
+    this.onUndo,
+    this.onRedo,
+    this.onCloseSearch,
   });
 
   final FocusNode? focusNode;
@@ -34,6 +40,12 @@ class WorkspaceNavigationShortcuts extends StatefulWidget {
   final VoidCallback? onReplace;
   final ValueChanged<bool>? onSearchResult;
   final VoidCallback? onSaveAs;
+  final VoidCallback? onNew;
+  final VoidCallback? onOpen;
+  final VoidCallback? onSave;
+  final VoidCallback? onUndo;
+  final VoidCallback? onRedo;
+  final VoidCallback? onCloseSearch;
 
   @override
   State<WorkspaceNavigationShortcuts> createState() =>
@@ -49,14 +61,13 @@ class _WorkspaceNavigationShortcutsState
   void initState() {
     super.initState();
     FocusManager.instance.addEarlyKeyEventHandler(_onKey);
+    FocusManager.instance.addLateKeyEventHandler(_onLateKey);
   }
 
   KeyEventResult _onKey(KeyEvent event) {
-    if (!_focus.hasFocus || ModalRoute.of(context)?.isCurrent == false) {
-      return KeyEventResult.ignored;
-    }
     final keyboard = HardwareKeyboard.instance;
     VoidCallback? invoke;
+    var includeRepeats = false;
     if (keyboard.isAltPressed &&
         !keyboard.isControlPressed &&
         !keyboard.isMetaPressed &&
@@ -77,6 +88,16 @@ class _WorkspaceNavigationShortcutsState
           : keyboard.isControlPressed && !keyboard.isMetaPressed;
       if (primary) {
         if (!keyboard.isAltPressed &&
+            event.logicalKey == LogicalKeyboardKey.keyZ) {
+          invoke = keyboard.isShiftPressed ? widget.onRedo : widget.onUndo;
+          includeRepeats = true;
+        } else if (!apple &&
+            !keyboard.isAltPressed &&
+            !keyboard.isShiftPressed &&
+            event.logicalKey == LogicalKeyboardKey.keyY) {
+          invoke = widget.onRedo;
+          includeRepeats = true;
+        } else if (!keyboard.isAltPressed &&
             keyboard.isShiftPressed &&
             event.logicalKey == LogicalKeyboardKey.keyS) {
           invoke = widget.onSaveAs;
@@ -102,6 +123,12 @@ class _WorkspaceNavigationShortcutsState
             event.logicalKey == LogicalKeyboardKey.keyM) {
           invoke = widget.onOpenSwitcher;
         } else if (!keyboard.isAltPressed && !keyboard.isShiftPressed) {
+          invoke = switch (event.logicalKey) {
+            LogicalKeyboardKey.keyN => widget.onNew,
+            LogicalKeyboardKey.keyO => widget.onOpen,
+            LogicalKeyboardKey.keyS => widget.onSave,
+            _ => null,
+          };
           const digits = [
             LogicalKeyboardKey.digit0,
             LogicalKeyboardKey.digit1,
@@ -134,7 +161,30 @@ class _WorkspaceNavigationShortcutsState
         invoke = () => widget.onSearchResult!(!keyboard.isShiftPressed);
       }
     }
-    if (invoke == null) return KeyEventResult.ignored;
+    return _invoke(event, invoke, includeRepeats: includeRepeats);
+  }
+
+  KeyEventResult _onLateKey(KeyEvent event) {
+    final keyboard = HardwareKeyboard.instance;
+    if (event.logicalKey != LogicalKeyboardKey.escape ||
+        keyboard.isAltPressed ||
+        keyboard.isMetaPressed ||
+        keyboard.isControlPressed ||
+        keyboard.isShiftPressed) {
+      return KeyEventResult.ignored;
+    }
+    // Let focused controls cancel their own operation before closing search.
+    return _invoke(event, widget.onCloseSearch);
+  }
+
+  KeyEventResult _invoke(
+    KeyEvent event,
+    VoidCallback? invoke, {
+    bool includeRepeats = false,
+  }) {
+    if (invoke == null || ModalRoute.of(context)?.isCurrent == false) {
+      return KeyEventResult.ignored;
+    }
     final node = FocusManager.instance.primaryFocus;
     final focusContext = node?.context;
     if (focusContext != null &&
@@ -149,14 +199,17 @@ class _WorkspaceNavigationShortcutsState
     }
     // A disabled workspace command must not fall through to editor formatting.
     if (widget.isBlocked()) return KeyEventResult.handled;
-    if (event is KeyDownEvent) invoke();
-    // Consume repeats without repeating navigation or passing to the editor.
+    if (event is KeyDownEvent || (includeRepeats && event is KeyRepeatEvent)) {
+      invoke();
+    }
+    // Consume key-up and non-repeatable commands so editors cannot handle them.
     return KeyEventResult.handled;
   }
 
   @override
   void dispose() {
     FocusManager.instance.removeEarlyKeyEventHandler(_onKey);
+    FocusManager.instance.removeLateKeyEventHandler(_onLateKey);
     if (widget.focusNode == null) _focus.dispose();
     super.dispose();
   }

@@ -253,7 +253,7 @@ void main() {
     expect(container.read(projectHistoryProvider).redoStack, isEmpty);
   });
 
-  test("unchanged trailing page transition is removed on normal record", () {
+  test("unchanged browsing never adds a history entry", () {
     final seed = ProjectData.empty();
     final a = _entry(_copyProject(seed, chapterContent: "A"));
     final transition = _entry(
@@ -265,8 +265,8 @@ void main() {
     final notifier = container.read(projectHistoryProvider.notifier);
 
     notifier.reset(a);
-    expect(notifier.record(transition), isTrue);
-    expect(container.read(projectHistoryProvider).undoStack, hasLength(2));
+    expect(notifier.record(transition), isFalse);
+    expect(container.read(projectHistoryProvider).undoStack, hasLength(1));
 
     expect(
       notifier.record(_entry(_copyProject(seed, chapterContent: "A"))),
