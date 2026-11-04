@@ -12,7 +12,7 @@
 
 ## 文件
 
-[宣傳網站原始檔](docs/index.html) · [GitHub Pages 發佈與維護](docs/WEBSITE.md)
+[宣傳網站](https://heyairu.github.io/MonoAshi-FE/) · [宣傳網站原始檔](docs/index.html) · [GitHub Pages 發佈與維護](docs/WEBSITE.md)
 
 | 文件 | 內容 |
 | --- | --- |

@@ -12,7 +12,7 @@
 
 ## Documentation
 
-[Promotional website source](docs/index.html) · [Publishing and maintaining the GitHub Pages site](docs/WEBSITE.md)
+[Website](https://heyairu.github.io/MonoAshi-FE/) · [Promotional website source](docs/index.html) · [Publishing and maintaining the GitHub Pages site](docs/WEBSITE.md)
 
 | Document | Contents |
 | --- | --- |

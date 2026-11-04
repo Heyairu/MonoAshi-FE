@@ -94,7 +94,7 @@ button { color: inherit; }
 .main-nav a:hover::after, .main-nav a[aria-current]::after { transform: scaleX(1); }
 .header-actions { display: flex; align-items: center; gap: 12px; }
 .language-menu { position: relative; flex-shrink: 0; font-size: 13px; }
-.language-menu summary { display: flex; align-items: center; gap: 6px; min-height: 40px; cursor: pointer; padding: 6px 9px; white-space: nowrap; border: 1px solid var(--outline-variant); border-radius: var(--control-radius); }
+.language-menu summary { display: flex; align-items: center; gap: 6px; min-height: 40px; cursor: pointer; padding: 6px 9px; white-space: nowrap; list-style: none; border: 1px solid var(--outline-variant); border-radius: var(--control-radius); }
 .language-menu summary::-webkit-details-marker { display: none; }
 .language-menu summary .icon { width: 16px; height: 16px; }
 .language-menu summary .icon:last-child { width: 12px; height: 12px; }

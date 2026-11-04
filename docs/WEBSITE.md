@@ -22,7 +22,7 @@ python3 -m http.server 4173 --bind 127.0.0.1 --directory docs
 4. 分支選擇 **main**，資料夾選擇 **/docs**，按 **Save**。
 5. 等待 GitHub Pages 的部署完成，再使用設定頁顯示的網址。
 
-本儲存庫的預期網址為 `https://heyairu.github.io/Monogatari-Assistant-FE/`；此網址須在實際部署成功後才會提供新頁面。詳細設定依 [GitHub 官方發佈指引](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)。
+本儲存庫的預期網址為 `https://heyairu.github.io/MonoAshi-FE/`；此網址須在實際部署成功後才會提供新頁面。詳細設定依 [GitHub 官方發佈指引](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)。
 
 `docs/.nojekyll` 讓 GitHub 直接提供靜態檔案。資源使用相對路徑，適用於專案子路徑及自訂網域。現有 Markdown 說明文件仍留在原路徑；網站連結至 GitHub 上的文件閱讀介面。
 
