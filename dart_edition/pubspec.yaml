@@ -52,6 +52,7 @@ dependencies:
   # Pinned while MCP support is experimental; upgrade only after protocol
   # compatibility tests pass against the supported hosts.
   mcp_dart: 2.4.2
+  super_clipboard: ^0.9.1
 
 
 dev_dependencies:
@@ -70,6 +71,9 @@ dependency_overrides:
   flutter_keyboard_visibility: ^6.0.0
 
 flutter:
+  config:
+    # The native clipboard plugin currently uses CocoaPods on Apple platforms.
+    enable-swift-package-manager: false
   generate: true
   uses-material-design: true
   

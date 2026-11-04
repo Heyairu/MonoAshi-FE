@@ -11,10 +11,14 @@ final class PlainTextQuillMentionMarker {
   const PlainTextQuillMentionMarker({
     required this.offset,
     required this.annotation,
+    this.displayText,
   });
 
   final int offset;
   final InlineAnnotation annotation;
+  final String? displayText;
+
+  String get label => displayText ?? annotation.editorLabel;
 }
 
 /// Paints Mosaic mention-kind symbols over their reserved Quill character.
@@ -172,7 +176,7 @@ class _MentionBadge extends StatelessWidget {
       key: ValueKey<String>("plain-text-quill-mention-${marker.offset}"),
       label: context.l10n.uiAnnotation(
         (_kindLabel(context.l10n, annotation.kind)).toString(),
-        (annotation.displayText).toString(),
+        marker.label,
       ),
       child: ExcludeSemantics(
         child: DecoratedBox(

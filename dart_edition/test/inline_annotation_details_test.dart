@@ -14,7 +14,7 @@ void main() {
   const uuid = "4e251fc2-1e2b-4f78-93da-91f8c76d9a92";
 
   testWidgets(
-    "quick note edits are escaped and preserve an empty display fallback",
+    "quick note edits preserve empty display fields as implicit mentions",
     (tester) async {
       late BuildContext context;
       await tester.pumpWidget(
@@ -51,7 +51,8 @@ void main() {
       final parsed = const InlineAnnotationParser()
           .parse(result!.rawSyntax!)
           .single;
-      expect(parsed.displayText, "小艾");
+      expect(parsed.displayText, isEmpty);
+      expect(parsed.isImplicit, isTrue);
       expect(parsed.targetId, uuid);
       expect(parsed.note, "新{備註}/");
     },
@@ -142,13 +143,14 @@ void main() {
     expect(controller.selection, const TextSelection.collapsed(offset: 5));
   });
 
-  test("empty display update keeps the existing display text", () {
+  test("empty display update makes the mention implicit", () {
     final controller = MosaicEditingController(rawText: "//@<$uuid|小艾>//");
     addTearDown(controller.dispose);
 
-    expect(controller.updateAnnotationDisplayText(0, "   "), isTrue);
-    expect(controller.rawText, "//@<$uuid|小艾>//");
-    expect(controller.displayText, "$inlineAnnotationPlaceholder小艾");
+    expect(controller.updateAnnotationDisplayText(0, ""), isTrue);
+    expect(controller.rawText, "//@<$uuid|>//");
+    expect(controller.annotations.single.isImplicit, isTrue);
+    expect(controller.displayText, "$inlineAnnotationPlaceholder（隱式提及）");
   });
 
   testWidgets("click popup only edits display text and stays by its anchor", (
@@ -222,7 +224,7 @@ void main() {
 
     final result = await resultFuture;
     expect(result?.action, InlineAnnotationDetailsAction.applyDisplayText);
-    expect(result?.displayText, "小艾");
+    expect(result?.displayText, "   ");
   });
 
   testWidgets("first-level popup validates and applies edited raw syntax", (
@@ -423,25 +425,29 @@ void main() {
     expect(controller.rawText, "//@<$uuid|小艾>//");
   });
 
-  test("full syntax replacement restores an emptied display label", () {
-    final controller = MosaicEditingController(
-      rawText: "//@+^CE<$uuid|小艾>{原備註}//",
-    );
-    addTearDown(controller.dispose);
+  test(
+    "full syntax replacement preserves empty fields as implicit mentions",
+    () {
+      final controller = MosaicEditingController(
+        rawText: "//@+^CE<$uuid|小艾>{原備註}//",
+      );
+      addTearDown(controller.dispose);
 
-    expect(
-      controller.replaceAnnotationSyntax(0, "//!-^AF<$uuid|   >{新備註}//"),
-      isTrue,
-    );
+      expect(
+        controller.replaceAnnotationSyntax(0, "//!-^AF<$uuid|>{新備註}//"),
+        isTrue,
+      );
 
-    expect(controller.rawText, "//!-^AF<$uuid|小艾>{新備註}//");
-    final annotation = controller.annotations.single;
-    expect(annotation.displayText, "小艾");
-    expect(annotation.kind, InlineAnnotationKind.location);
-    expect(annotation.state, InlineAnnotationState.end);
-    expect(annotation.colors.value, "AF");
-    expect(annotation.note, "新備註");
-  });
+      expect(controller.rawText, "//!-^AF<$uuid|>{新備註}//");
+      final annotation = controller.annotations.single;
+      expect(annotation.displayText, isEmpty);
+      expect(annotation.isImplicit, isTrue);
+      expect(annotation.kind, InlineAnnotationKind.location);
+      expect(annotation.state, InlineAnnotationState.end);
+      expect(annotation.colors.value, "AF");
+      expect(annotation.note, "新備註");
+    },
+  );
 
   test("missing target resolves to null", () {
     final annotation = const InlineAnnotationParser()

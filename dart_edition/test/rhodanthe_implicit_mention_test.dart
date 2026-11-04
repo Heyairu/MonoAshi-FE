@@ -45,13 +45,13 @@ void main() {
   test('implicit mention uses italic and dims the inherited foreground', () {
     const base = Color(0xff123456);
     final result = render(
-      '前//@~<$id|（😀艾莉絲）>//後',
+      '前//@<$id|>//後',
       RhodantheTheme.light(),
       baseColor: base,
     );
     expect(result.applied, isTrue);
     final span = result.span.children!.cast<TextSpan>().singleWhere(
-      (s) => s.text == '（😀艾莉絲）',
+      (s) => s.text == '（隱式提及）',
     );
     expect(span.style!.fontStyle, FontStyle.italic);
     expect(span.style!.color, base.withValues(alpha: .6));
@@ -66,9 +66,9 @@ void main() {
         RhodantheTheme.highContrast(),
         RhodantheTheme.highContrast(brightness: Brightness.dark),
       ]) {
-        final result = render('//@~^CE<$id|（艾莉絲）>//', theme);
+        final result = render('//@^CE<$id|>//', theme);
         final span = result.span.children!.cast<TextSpan>().singleWhere(
-          (s) => s.text == '（艾莉絲）',
+          (s) => s.text == '（隱式提及）',
         );
         expect(result.applied, isTrue);
         expect(
@@ -95,7 +95,7 @@ void main() {
     expect(style.foreground, isNull);
   });
   test('search foreground keeps implicit opacity after arbitration', () {
-    final projection = InlineAnnotationProjection.build('//@~<$id|（艾莉絲）>//');
+    final projection = InlineAnnotationProjection.build('//@<$id|>//');
     final annotation = const InlineAnnotationRhodantheAdapter()
         .build(projection: projection, documentRevision: 1)
         .single;
@@ -127,7 +127,7 @@ void main() {
       ),
     );
     final span = result.span.children!.cast<TextSpan>().singleWhere(
-      (s) => s.text == '（艾莉絲）',
+      (s) => s.text == '（隱式提及）',
     );
     expect(
       span.style!.color,

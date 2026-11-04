@@ -75,6 +75,7 @@ import "features/inline_annotations/inline_annotation_target_resolver.dart";
 import "features/inline_annotations/inline_annotation_projection.dart";
 import "features/inline_annotations/mosaic_editing_controller.dart";
 import "features/inline_annotations/alias_mention_updates.dart";
+import "features/inline_annotations/mosaic_clipboard.dart";
 import "features/editor/plain_text_quill_editor_poc.dart";
 import "features/navigation/app_module.dart";
 import "features/navigation/workspace_navigation_shortcuts.dart";
@@ -5430,7 +5431,16 @@ class _ContentViewState extends ConsumerState<ContentView>
         ? controller.plainTextForSelection(selection)
         : controller.text.substring(selection.start, selection.end);
     debugPrint("[DEBUG] Copy: copying ${selectedText.length} UTF-16 units");
-    Clipboard.setData(ClipboardData(text: selectedText));
+    if (controller is MosaicEditingController) {
+      unawaited(
+        MosaicClipboard.write(
+          text: selectedText,
+          rawText: controller.rawTextForSelection(selection),
+        ),
+      );
+    } else {
+      Clipboard.setData(ClipboardData(text: selectedText));
+    }
   }
 
   /// 剪切選定的文本到剪貼簿
@@ -5452,6 +5462,24 @@ class _ContentViewState extends ConsumerState<ContentView>
         ? controller.plainTextForSelection(selection)
         : controller.text.substring(selection.start, selection.end);
     debugPrint("[DEBUG] Cut: cutting ${selectedText.length} UTF-16 units");
+    if (controller is MosaicEditingController) {
+      final before = controller.value;
+      final revision = controller.rawRevision;
+      await MosaicClipboard.write(
+        text: selectedText,
+        rawText: controller.rawTextForSelection(selection),
+      );
+      if (controller.value != before || controller.rawRevision != revision) {
+        return;
+      }
+      controller.replaceRawRange(
+        controller.projection.displayRangeToRaw(
+          TextRange(start: selection.start, end: selection.end),
+        ),
+        '',
+      );
+      return;
+    }
     await Clipboard.setData(ClipboardData(text: selectedText));
 
     // 刪除選定的文本
@@ -5479,6 +5507,25 @@ class _ContentViewState extends ConsumerState<ContentView>
   ) async {
     debugPrint("[DEBUG] Paste Starting paste operation");
     try {
+      if (controller is MosaicEditingController) {
+        final before = controller.value;
+        final revision = controller.rawRevision;
+        final data = await MosaicClipboard.read();
+        if (controller.value != before || controller.rawRevision != revision) {
+          return;
+        }
+        final selection = controller.selection;
+        if (!selection.isValid) return;
+        final text = data.rawText ?? data.text;
+        if (text.isEmpty) return;
+        controller.replaceRawRange(
+          controller.projection.displayRangeToRaw(
+            TextRange(start: selection.start, end: selection.end),
+          ),
+          text,
+        );
+        return;
+      }
       final clipboardData = await Clipboard.getData("text/plain");
       final pastedText = clipboardData?.text ?? "";
 

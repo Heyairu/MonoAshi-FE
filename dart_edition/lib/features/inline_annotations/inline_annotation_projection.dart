@@ -20,6 +20,7 @@ final class ProjectedInlineAnnotation {
   final TextRange badgeRange;
   final TextRange labelRange;
   final bool isExpanded;
+  final String label;
 
   const ProjectedInlineAnnotation({
     required this.annotation,
@@ -27,6 +28,7 @@ final class ProjectedInlineAnnotation {
     required this.badgeRange,
     required this.labelRange,
     required this.isExpanded,
+    required this.label,
   });
 }
 
@@ -58,6 +60,7 @@ final class InlineAnnotationProjection {
     InlineAnnotationParser parser = const InlineAnnotationParser(),
     int? activeAnnotationStart,
     TextRange composingRawRange = TextRange.empty,
+    String Function(InlineAnnotation)? implicitLabel,
   }) {
     final parsed = annotations ?? parser.parse(rawText);
     final output = StringBuffer();
@@ -100,6 +103,9 @@ final class InlineAnnotationProjection {
     }
 
     for (final annotation in parsed) {
+      final label = annotation.isImplicit
+          ? implicitLabel?.call(annotation) ?? annotation.editorLabel
+          : annotation.displayText;
       if (annotation.sourceRange.start < rawCursor ||
           annotation.sourceRange.end > rawText.length) {
         continue;
@@ -174,6 +180,15 @@ final class InlineAnnotationProjection {
           downstream.add(raw);
         }
 
+        if (annotation.isImplicit) {
+          output.write(label);
+          for (var unit = 0; unit < label.length; unit++) {
+            displayCursor++;
+            upstream.add(rawDisplay.start);
+            downstream.add(rawDisplay.start);
+          }
+        }
+
         for (
           var hidden = rawDisplay.end;
           hidden <= annotation.sourceRange.end;
@@ -193,6 +208,7 @@ final class InlineAnnotationProjection {
           badgeRange: badgeRange,
           labelRange: labelRange,
           isExpanded: isExpanded,
+          label: label,
         ),
       );
       rawCursor = annotation.sourceRange.end;
@@ -241,6 +257,12 @@ final class InlineAnnotationProjection {
       var rawOffset = displayOffsetToRaw(displayOffset);
       for (final entry in projectedAnnotations) {
         if (entry.isExpanded) continue;
+        if (entry.annotation.isImplicit &&
+            displayOffset > entry.displayRange.start &&
+            displayOffset <= entry.displayRange.end) {
+          rawOffset = entry.annotation.sourceRange.end;
+          break;
+        }
         if (displayOffset == entry.displayRange.start) {
           rawOffset = entry.annotation.sourceRange.start;
           break;
@@ -268,15 +290,37 @@ final class InlineAnnotationProjection {
     final extentAffinity = isForward
         ? MosaicOffsetAffinity.upstream
         : MosaicOffsetAffinity.downstream;
+    var base = displayOffsetToRaw(selection.baseOffset, affinity: baseAffinity);
+    var extent = displayOffsetToRaw(
+      selection.extentOffset,
+      affinity: extentAffinity,
+    );
+    for (final entry in projectedAnnotations) {
+      if (entry.isExpanded ||
+          !entry.annotation.isImplicit ||
+          selection.start >= entry.displayRange.end ||
+          selection.end <= entry.displayRange.start) {
+        continue;
+      }
+      if (isForward) {
+        if (base > entry.annotation.sourceRange.start) {
+          base = entry.annotation.sourceRange.start;
+        }
+        if (extent < entry.annotation.sourceRange.end) {
+          extent = entry.annotation.sourceRange.end;
+        }
+      } else {
+        if (extent > entry.annotation.sourceRange.start) {
+          extent = entry.annotation.sourceRange.start;
+        }
+        if (base < entry.annotation.sourceRange.end) {
+          base = entry.annotation.sourceRange.end;
+        }
+      }
+    }
     return TextSelection(
-      baseOffset: displayOffsetToRaw(
-        selection.baseOffset,
-        affinity: baseAffinity,
-      ),
-      extentOffset: displayOffsetToRaw(
-        selection.extentOffset,
-        affinity: extentAffinity,
-      ),
+      baseOffset: base,
+      extentOffset: extent,
       affinity: selection.affinity,
       isDirectional: selection.isDirectional,
     );
@@ -299,7 +343,10 @@ final class InlineAnnotationProjection {
     );
     for (final entry in projectedAnnotations) {
       if (!entry.isExpanded &&
-          ((range.start <= entry.displayRange.start &&
+          ((entry.annotation.isImplicit &&
+                  range.start < entry.displayRange.end &&
+                  range.end > entry.displayRange.start) ||
+              (range.start <= entry.displayRange.start &&
                   range.end >= entry.displayRange.end) ||
               (range.start <= entry.badgeRange.start &&
                   range.end >= entry.badgeRange.end) ||
@@ -331,13 +378,14 @@ final class InlineAnnotationProjection {
     final output = StringBuffer();
     var cursor = start;
     for (final entry in projectedAnnotations) {
-      if (entry.isExpanded ||
-          entry.badgeRange.end <= start ||
-          entry.badgeRange.start >= end) {
+      final excluded = entry.annotation.isImplicit
+          ? entry.displayRange
+          : entry.badgeRange;
+      if (entry.isExpanded || excluded.end <= start || excluded.start >= end) {
         continue;
       }
-      final badgeStart = entry.badgeRange.start.clamp(start, end);
-      final badgeEnd = entry.badgeRange.end.clamp(start, end);
+      final badgeStart = excluded.start.clamp(start, end);
+      final badgeEnd = excluded.end.clamp(start, end);
       if (cursor < badgeStart) {
         output.write(displayText.substring(cursor, badgeStart));
       }

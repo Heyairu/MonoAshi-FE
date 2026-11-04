@@ -81,7 +81,6 @@ class _InlineAnnotationEditFormState extends State<_InlineAnnotationEditForm> {
         widget.rawSyntax ??
         InlineAnnotationSyntax.format(
           kind: annotation.kind,
-          isImplicit: annotation.isImplicit,
           state: annotation.state,
           colors: annotation.colors,
           targetId: annotation.targetId,
@@ -116,9 +115,6 @@ class _InlineAnnotationEditFormState extends State<_InlineAnnotationEditForm> {
       final enteredDisplayText = _displayController.text;
       final source = InlineAnnotationSyntax.format(
         kind: _kind,
-        isImplicit:
-            _kind != InlineAnnotationKind.emphasis &&
-            widget.annotation.isImplicit,
         state: _kind == InlineAnnotationKind.emphasis
             ? InlineAnnotationState.none
             : _annotationState,
@@ -129,7 +125,9 @@ class _InlineAnnotationEditFormState extends State<_InlineAnnotationEditForm> {
         targetId: _kind == InlineAnnotationKind.emphasis
             ? null
             : _targetController.text.trim(),
-        displayText: enteredDisplayText.trim().isEmpty
+        displayText:
+            _kind == InlineAnnotationKind.emphasis &&
+                enteredDisplayText.trim().isEmpty
             ? widget.annotation.displayText
             : enteredDisplayText,
         note: _noteController.text,

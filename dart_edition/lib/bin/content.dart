@@ -42,6 +42,7 @@ import "../features/inline_annotations/inline_annotation.dart";
 import "../features/inline_annotations/inline_annotation_syntax.dart";
 import "../features/inline_annotations/inline_annotation_symbol_overlay.dart";
 import "../features/inline_annotations/mosaic_editing_controller.dart";
+import "../features/inline_annotations/mosaic_clipboard.dart";
 import "../features/poppin/poppin.dart";
 import "../features/phrases/phrase_entry.dart";
 import "../features/phrases/phrase_search_index.dart";
@@ -307,6 +308,10 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
   }
 
   Future<void> _pastePlainText() async {
+    if (widget.controller is MosaicEditingController) {
+      await _pasteMosaicSelection(widget.controller.selection);
+      return;
+    }
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     if (!mounted ||
         data?.text == null ||
@@ -337,7 +342,15 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _refreshCompletion();
+      if (!mounted) return;
+      if (widget.controller case final MosaicEditingController controller) {
+        controller.configureImplicitLabels(
+          implicit: context.l10n.uiImplicitMention,
+          start: context.l10n.uiStart,
+          end: context.l10n.uiEnd,
+        );
+      }
+      _refreshCompletion();
     });
   }
 
@@ -1282,14 +1295,69 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
         ? controller.plainTextForSelection(selection)
         : controller.text.substring(selection.start, selection.end);
     final originalText = controller.text;
-    await Clipboard.setData(ClipboardData(text: selectedText));
-    if (!cut || !mounted || controller.text != originalText) return;
+    if (controller is MosaicEditingController) {
+      await MosaicClipboard.write(
+        text: selectedText,
+        rawText: controller.rawTextForSelection(selection),
+      );
+    } else {
+      await Clipboard.setData(ClipboardData(text: selectedText));
+    }
+    if (!cut ||
+        !mounted ||
+        !identical(controller, widget.controller) ||
+        controller.text != originalText ||
+        controller.selection != selection) {
+      return;
+    }
 
     controller.value = controller.value.copyWith(
       text: originalText.replaceRange(selection.start, selection.end, ""),
       selection: TextSelection.collapsed(offset: selection.start),
       composing: TextRange.empty,
     );
+  }
+
+  Future<void> _copyMosaicSelection(TextSelection selection) async {
+    final controller = widget.controller as MosaicEditingController;
+    await MosaicClipboard.write(
+      text: controller.projection.readerTextFor(
+        TextRange(start: selection.start, end: selection.end),
+      ),
+      rawText: controller.rawTextForSelection(selection),
+    );
+  }
+
+  Future<bool> _pasteMosaicSelection(TextSelection selection) async {
+    final controller = widget.controller as MosaicEditingController;
+    final before = controller.value;
+    final revision = controller.rawRevision;
+    final data = await MosaicClipboard.read();
+    if (!mounted ||
+        !identical(controller, widget.controller) ||
+        controller.value != before ||
+        controller.rawRevision != revision ||
+        _hasActiveComposition(controller.value)) {
+      return true;
+    }
+    final raw = data.rawText;
+    if (raw != null) {
+      controller.replaceRawRange(
+        controller.projection.displayRangeToRaw(
+          TextRange(start: selection.start, end: selection.end),
+        ),
+        raw,
+      );
+    } else if (data.text.isNotEmpty) {
+      if (_usesPlainTextQuillEditor) {
+        _quillCommands.replaceSelectionWith(data.text);
+      } else {
+        _replaceSelectionWithoutOverwrite(
+          data.text.replaceAll('\r\n', '\n').replaceAll('\r', '\n'),
+        );
+      }
+    }
+    return true;
   }
 
   void _handleQuillChanged(String content) {
@@ -1516,6 +1584,12 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
                       clipboardTextTransform: mosaicController == null
                           ? null
                           : _quillMosaicClipboardText,
+                      onCopySelection: mosaicController == null
+                          ? null
+                          : _copyMosaicSelection,
+                      onPasteSelection: mosaicController == null
+                          ? null
+                          : _pasteMosaicSelection,
                       focusNode: widget.focusNode,
                       commands: _quillCommands,
                       searchController: widget.quillSearchController,
@@ -1538,6 +1612,7 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
                                   PlainTextQuillMentionMarker(
                                     offset: entry.badgeRange.start,
                                     annotation: entry.annotation,
+                                    displayText: entry.label,
                                   ),
                             ],
                       remoteCursors: remoteCursors,

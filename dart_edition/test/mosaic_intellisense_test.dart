@@ -679,7 +679,7 @@ void main() {
         displayName: "艾莉絲",
         displayNameIsAlias: false,
       );
-      const labels = {'': '（艾莉絲）', '+': '（艾莉絲：開始）', '-': '（艾莉絲：結束）'};
+      const labels = {'': '（隱式提及）', '+': '（開始）', '-': '（結束）'};
       for (final symbol in ['@', '!', '#', '?', '&', '*']) {
         for (final entry in labels.entries) {
           for (final raw in ['$symbol${entry.key}', '//$symbol${entry.key}<']) {
@@ -696,7 +696,8 @@ void main() {
                 .parse(candidate.insertText)
                 .single;
             expect(candidate.detail, entry.value, reason: raw);
-            expect(annotation.displayText, entry.value, reason: raw);
+            expect(annotation.displayText, isEmpty, reason: raw);
+            expect(candidate.insertText, isNot(contains('~')), reason: raw);
             expect(annotation.isImplicit, isTrue, reason: raw);
             expect(annotation.targetId, uuid, reason: raw);
             expect(annotation.state, switch (entry.key) {
@@ -708,7 +709,7 @@ void main() {
               InlineAnnotationProjection.readerTextFromRaw(
                 candidate.insertText,
               ),
-              entry.value,
+              '',
               reason: raw,
             );
           }
@@ -739,13 +740,13 @@ void main() {
           .firstWhere((item) => item.id == uuid)
           .children
           .firstWhere((item) => item.id == '$uuid:implicit');
-      expect(implicit.detail, '（Alice：${state.value}）');
+      expect(implicit.detail, '（${state.value}）');
       expect(
         const InlineAnnotationParser()
             .parse(implicit.insertText)
             .single
             .displayText,
-        implicit.detail,
+        isEmpty,
       );
     }
   });

@@ -65,11 +65,13 @@ final class InlineAnnotationParser {
       return null;
     }
 
-    final isImplicit =
+    // Read the former flag for compatibility, but infer implicitness only from
+    // the text field. Writers never emit this legacy marker.
+    final hasLegacyImplicitFlag =
         parsedKind != InlineAnnotationKind.emphasis &&
         cursor < source.length &&
         source.codeUnitAt(cursor) == 0x7e;
-    if (isImplicit) cursor++;
+    if (hasLegacyImplicitFlag) cursor++;
 
     var state = InlineAnnotationState.none;
     if (parsedKind != InlineAnnotationKind.emphasis && cursor < source.length) {
@@ -176,7 +178,6 @@ final class InlineAnnotationParser {
     return InlineAnnotation(
       kind: parsedKind,
       state: state,
-      isImplicit: isImplicit,
       colors: colors,
       targetId: targetId,
       targetStatus: targetStatus,

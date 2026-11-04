@@ -50,7 +50,6 @@ final class InlineAnnotationColorCode {
 final class InlineAnnotation {
   final InlineAnnotationKind kind;
   final InlineAnnotationState state;
-  final bool isImplicit;
   final InlineAnnotationColorCode colors;
   final String? targetId;
   final InlineAnnotationTargetStatus targetStatus;
@@ -69,7 +68,6 @@ final class InlineAnnotation {
   const InlineAnnotation({
     required this.kind,
     required this.state,
-    this.isImplicit = false,
     required this.colors,
     required this.targetId,
     required this.targetStatus,
@@ -81,4 +79,17 @@ final class InlineAnnotation {
   });
 
   bool get hasTarget => targetId != null;
+
+  /// An empty text field denotes an implicit mention; no syntax flag is needed.
+  bool get isImplicit =>
+      kind != InlineAnnotationKind.emphasis && displayText.isEmpty;
+
+  /// Editor-only hint. The empty source field remains empty when saved.
+  String get editorLabel => !isImplicit
+      ? displayText
+      : switch (state) {
+          InlineAnnotationState.none => '（隱式提及）',
+          InlineAnnotationState.start => '（開始）',
+          InlineAnnotationState.end => '（結束）',
+        };
 }

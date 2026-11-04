@@ -506,6 +506,8 @@ class PlainTextQuillEditorPoc extends StatefulWidget {
     this.selectionOffset = 0,
     this.selection,
     this.clipboardTextTransform,
+    this.onCopySelection,
+    this.onPasteSelection,
     this.mentionMarkers = const <PlainTextQuillMentionMarker>[],
     this.highContrast = false,
     this.placeholder,
@@ -566,6 +568,8 @@ class PlainTextQuillEditorPoc extends StatefulWidget {
 
   /// Optional display-to-reader-text transform used only for clipboard data.
   final String Function(String text)? clipboardTextTransform;
+  final Future<void> Function(TextSelection selection)? onCopySelection;
+  final Future<bool> Function(TextSelection selection)? onPasteSelection;
   final List<PlainTextQuillMentionMarker> mentionMarkers;
   final bool highContrast;
   final String? placeholder;
@@ -926,7 +930,7 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
               marker.offset + 1,
             ),
             end: _plainTextDocument.rawOffsetToDocumentOffset(
-              marker.offset + 1 + marker.annotation.displayText.length,
+              marker.offset + 1 + marker.label.length,
             ),
           ),
     ];
@@ -1122,7 +1126,7 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
         ? null
         : (Delta()..insert(source)).diff(Delta()..insert(current));
     for (final marker in widget.mentionMarkers) {
-      final hostEnd = marker.offset + 1 + marker.annotation.displayText.length;
+      final hostEnd = marker.offset + 1 + marker.label.length;
       if (marker.offset < 0 || hostEnd > widget.content.length) continue;
       final start = _canonicalizeLineEndings(
         widget.content.substring(0, marker.offset),
@@ -1307,6 +1311,11 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
       _requestFocus();
       return;
     }
+    if (widget.onCopySelection case final copy?) {
+      await copy(_hostSelectionForClipboard);
+      if (mounted) _requestFocus();
+      return;
+    }
     final plainText = PlainTextQuillAdapter.toPlainText(_controller.document);
     final selectedText = plainText.substring(selection.start, selection.end);
     await Clipboard.setData(
@@ -1323,16 +1332,35 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
       _requestFocus();
       return;
     }
+    final before = _plainText;
     await _copy();
+    if (!mounted || _plainText != before || _editableSelection != selection) {
+      return;
+    }
     _replaceSelectionWith("");
   }
 
   Future<void> _paste() async {
+    if (widget.onPasteSelection case final paste?) {
+      if (await paste(_hostSelectionForClipboard)) {
+        if (mounted) _requestFocus();
+        return;
+      }
+    }
     final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
     final text = clipboardData?.text;
     if (text != null && text.isNotEmpty) _replaceSelectionWith(text);
     _requestFocus();
   }
+
+  TextSelection get _hostSelectionForClipboard => TextSelection(
+    baseOffset: _plainTextDocument.documentOffsetToRawOffset(
+      _editableSelection.baseOffset,
+    ),
+    extentOffset: _plainTextDocument.documentOffsetToRawOffset(
+      _editableSelection.extentOffset,
+    ),
+  );
 
   void _replaceSelectionWith(String text) {
     final selection = _editableSelection;
@@ -1455,6 +1483,12 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
       _PlainTextPasteIntent: CallbackAction<_PlainTextPasteIntent>(
         onInvoke: (_) => _paste(),
       ),
+      CopySelectionTextIntent: CallbackAction<CopySelectionTextIntent>(
+        onInvoke: (intent) => intent.collapseSelection ? _cut() : _copy(),
+      ),
+      PasteTextIntent: CallbackAction<PasteTextIntent>(
+        onInvoke: (_) => _paste(),
+      ),
     };
   }
 
@@ -1502,6 +1536,43 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
             focusNode: _focusNode,
             scrollController: _scrollController,
             config: QuillEditorConfig(
+              contextMenuBuilder: (context, state) =>
+                  AdaptiveTextSelectionToolbar.buttonItems(
+                    anchors: state.contextMenuAnchors,
+                    buttonItems: [
+                      if (widget.onPasteSelection != null &&
+                          !state.contextMenuButtonItems.any(
+                            (item) => item.type == ContextMenuButtonType.paste,
+                          ))
+                        ContextMenuButtonItem(
+                          type: ContextMenuButtonType.paste,
+                          onPressed: () {
+                            state.hideToolbar();
+                            unawaited(_paste());
+                          },
+                        ),
+                      for (final item in state.contextMenuButtonItems)
+                        ContextMenuButtonItem(
+                          type: item.type,
+                          label: item.label,
+                          onPressed: switch (item.type) {
+                            ContextMenuButtonType.copy => () {
+                              state.hideToolbar();
+                              unawaited(_copy());
+                            },
+                            ContextMenuButtonType.cut => () {
+                              state.hideToolbar();
+                              unawaited(_cut());
+                            },
+                            ContextMenuButtonType.paste => () {
+                              state.hideToolbar();
+                              unawaited(_paste());
+                            },
+                            _ => item.onPressed,
+                          },
+                        ),
+                    ],
+                  ),
               editorKey: _editorKey,
               onTapDown: _handleTapDown,
               // Preserve word/line selections instead of letting the third
@@ -1577,6 +1648,7 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
                       marker.offset,
                     ),
                     annotation: marker.annotation,
+                    displayText: marker.label,
                   ),
               ],
             ),

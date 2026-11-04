@@ -113,11 +113,12 @@ class _InlineAnnotationQuickEditorState
       final annotation = parsed.single;
       _rawSyntaxController.text = InlineAnnotationSyntax.format(
         kind: annotation.kind,
-        isImplicit: annotation.isImplicit,
         state: annotation.state,
         colors: annotation.colors,
         targetId: annotation.targetId,
-        displayText: _displayController.text.trim().isEmpty
+        displayText:
+            annotation.kind == InlineAnnotationKind.emphasis &&
+                _displayController.text.trim().isEmpty
             ? widget.annotation.displayText
             : _displayController.text,
         note: _noteController.text,
@@ -147,7 +148,9 @@ class _InlineAnnotationQuickEditorState
     Navigator.of(context).pop(
       InlineAnnotationDetailsResult(
         InlineAnnotationDetailsAction.applyDisplayText,
-        displayText: entered.trim().isEmpty
+        displayText:
+            widget.annotation.kind == InlineAnnotationKind.emphasis &&
+                entered.trim().isEmpty
             ? widget.annotation.displayText
             : entered,
       ),

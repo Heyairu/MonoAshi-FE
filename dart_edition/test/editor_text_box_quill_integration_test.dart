@@ -123,7 +123,7 @@ void main() {
         "Mention trailing input stays outside, implicit=$implicit, suffix=$suffix",
         (tester) async {
           final mention =
-              "//@${implicit ? '~' : ''}<4e251fc2-1e2b-4f78-93da-91f8c76d9a92|Chino>{主角}//";
+              "//@<4e251fc2-1e2b-4f78-93da-91f8c76d9a92|${implicit ? '' : 'Chino'}>{主角}//";
           final controller = HighlightTextEditingController(
             text: '$mention$suffix',
           );
@@ -156,7 +156,10 @@ void main() {
           );
           await tester.pump();
           expect(controller.rawText, '$mention　$suffix');
-          expect(controller.annotations.single.displayText, 'Chino');
+          expect(
+            controller.annotations.single.displayText,
+            implicit ? '' : 'Chino',
+          );
           expect(controller.projection.annotationAtDisplayOffset(end), isNull);
 
           final withSpace = PlainTextQuillAdapter.toPlainText(quill.document);
@@ -168,7 +171,10 @@ void main() {
           );
           await tester.pump();
           expect(controller.rawText, '$mention　文字$suffix');
-          expect(controller.annotations.single.displayText, 'Chino');
+          expect(
+            controller.annotations.single.displayText,
+            implicit ? '' : 'Chino',
+          );
           expect(
             controller.projection.projectedAnnotations.single.displayRange.end,
             end,
@@ -249,7 +255,7 @@ void main() {
         "deleting mention character $offset removes all raw syntax, implicit=$implicit",
         (tester) async {
           final source =
-              "前//@${implicit ? '~' : ''}<4e251fc2-1e2b-4f78-93da-91f8c76d9a92|艾莉絲>{登場}//後";
+              "前//@<4e251fc2-1e2b-4f78-93da-91f8c76d9a92|${implicit ? '' : '艾莉絲'}>{登場}//後";
           final controller = HighlightTextEditingController(text: source);
           final focusNode = FocusNode();
           addTearDown(controller.dispose);

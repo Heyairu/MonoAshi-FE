@@ -694,9 +694,9 @@ final class MosaicIntelliSenseEngine {
     int depth = 0,
   }) {
     final implicitDisplayText = switch (state) {
-      InlineAnnotationState.none => "（${target.primaryName}）",
-      InlineAnnotationState.start => "（${target.primaryName}：${l10n.uiStart}）",
-      InlineAnnotationState.end => "（${target.primaryName}：${l10n.uiEnd}）",
+      InlineAnnotationState.none => "（${l10n.uiImplicitMention}）",
+      InlineAnnotationState.start => "（${l10n.uiStart}）",
+      InlineAnnotationState.end => "（${l10n.uiEnd}）",
     };
     final hasCreateAction =
         includeHierarchy &&
@@ -769,8 +769,7 @@ final class MosaicIntelliSenseEngine {
           state: state,
           colors: colors,
           targetId: target.id,
-          isImplicit: true,
-          displayText: implicitDisplayText,
+          displayText: '',
         ),
       ),
       MosaicCompletionCandidate(

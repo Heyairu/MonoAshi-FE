@@ -48,6 +48,28 @@ class MosaicEditingController extends CodeController {
   InlineAnnotationProjection? _compositionBaseProjection;
   String? _compositionBaseRawText;
   int _rawRevision = 0;
+  String _implicitLabel = '隱式提及';
+  String _startLabel = '開始';
+  String _endLabel = '結束';
+
+  void configureImplicitLabels({
+    required String implicit,
+    required String start,
+    required String end,
+  }) {
+    if (_implicitLabel == implicit &&
+        _startLabel == start &&
+        _endLabel == end) {
+      return;
+    }
+    final rawSelection = _projection.displaySelectionToRaw(selection);
+    _implicitLabel = implicit;
+    _startLabel = start;
+    _endLabel = end;
+    _rebuildProjection();
+    _publishProjection(_projection.rawSelectionToDisplay(rawSelection));
+  }
+
   final int _presentationRevision = 0;
 
   /// Lets the editor consume Tab for IntelliSense before CodeController
@@ -186,6 +208,13 @@ class MosaicEditingController extends CodeController {
     final start = visibleSelection.start;
     final end = visibleSelection.end;
     return collapsed.readerTextFor(TextRange(start: start, end: end));
+  }
+
+  String rawTextForSelection(TextSelection selection) {
+    final range = _projection.displayRangeToRaw(
+      TextRange(start: selection.start, end: selection.end),
+    );
+    return _rawText.substring(range.start, range.end);
   }
 
   @override
@@ -357,6 +386,7 @@ class MosaicEditingController extends CodeController {
     );
     for (final entry in _projection.projectedAnnotations) {
       if (!entry.isExpanded &&
+          !entry.annotation.isImplicit &&
           start >= entry.displayRange.start &&
           end <= entry.displayRange.end) {
         rawRange = TextRange(
@@ -400,7 +430,9 @@ class MosaicEditingController extends CodeController {
   bool updateAnnotationDisplayText(int sourceStart, String displayText) {
     for (final annotation in annotations) {
       if (annotation.sourceRange.start != sourceStart) continue;
-      final effectiveDisplayText = displayText.trim().isEmpty
+      final effectiveDisplayText =
+          annotation.kind == InlineAnnotationKind.emphasis &&
+              displayText.trim().isEmpty
           ? annotation.displayText
           : displayText;
       final encoded = InlineAnnotationSyntax.escape(effectiveDisplayText);
@@ -431,12 +463,12 @@ class MosaicEditingController extends CodeController {
       if (annotation.sourceRange.start != sourceStart) continue;
       var replacementSyntax = rawSyntax;
       var replacement = parsed.single;
-      if (replacement.displayText.trim().isEmpty &&
+      if (replacement.kind == InlineAnnotationKind.emphasis &&
+          replacement.displayText.trim().isEmpty &&
           annotation.displayText.isNotEmpty) {
         try {
           replacementSyntax = InlineAnnotationSyntax.format(
             kind: replacement.kind,
-            isImplicit: replacement.isImplicit,
             state: replacement.state,
             colors: replacement.colors,
             targetId: replacement.targetId,
@@ -477,11 +509,10 @@ class MosaicEditingController extends CodeController {
       try {
         final source = InlineAnnotationSyntax.format(
           kind: annotation.kind,
-          isImplicit: annotation.isImplicit,
           state: annotation.state,
           colors: annotation.colors,
           targetId: targetId,
-          displayText: displayText,
+          displayText: annotation.isImplicit ? '' : displayText,
           note: annotation.note,
         );
         return replaceAnnotationSyntax(sourceStart, source);
@@ -761,6 +792,12 @@ class MosaicEditingController extends CodeController {
       _rawText,
       parser: _parser,
       composingRawRange: composingRawRange,
+      implicitLabel: (annotation) =>
+          '（${switch (annotation.state) {
+            InlineAnnotationState.none => _implicitLabel,
+            InlineAnnotationState.start => _startLabel,
+            InlineAnnotationState.end => _endLabel,
+          }}）',
     );
   }
 
