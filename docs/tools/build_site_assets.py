@@ -92,8 +92,8 @@ def write_social_card(parser):
 
 def main():
     parser = SiteText()
-    parser.feed((ROOT / 'docs/index.html').read_text())
-    text = ''.join(parser.parts) + (ASSETS / 'site.js').read_text() + (ASSETS / 'site.css').read_text()
+    parser.feed((ROOT / 'docs/index.zh-Hant.html').read_text(encoding='utf-8'))
+    text = ''.join(parser.parts) + (ASSETS / 'site.js').read_text(encoding='utf-8') + (ASSETS / 'site.css').read_text(encoding='utf-8')
     (ASSETS / 'fonts').mkdir(exist_ok=True)
     latin = set(range(0x0000, 0x0250)) | set(range(0x2000, 0x2070))
     chinese = {ord(c) for c in text if ord(c) >= 0x0250}

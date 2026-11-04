@@ -2,6 +2,21 @@
   'use strict';
 
   const root = document.documentElement;
+  const labels = {
+    en: ['Switch to light theme', 'Switch to dark theme', 'Close navigation menu', 'Open navigation menu'],
+    ja: ['ライトテーマに切り替え', 'ダークテーマに切り替え', 'ナビゲーションメニューを閉じる', 'ナビゲーションメニューを開く'],
+    'zh-Hant': ['切換為淺色主題', '切換為深色主題', '關閉導覽選單', '開啟導覽選單'],
+  };
+  const [lightLabel, darkLabel, closeMenuLabel, openMenuLabel] = labels[root.lang] || labels.en;
+
+  document.querySelectorAll('.language-options a').forEach((link) => {
+    link.hash = window.location.hash;
+    link.addEventListener('click', (event) => {
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      link.hash = window.location.hash;
+      try { localStorage.setItem('monoashi-site-language', link.hreflang); } catch { /* The link still works. */ }
+    });
+  });
   const themeToggle = document.querySelector('.theme-toggle');
   const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
   let savedTheme = null;
@@ -10,7 +25,7 @@
   const applyTheme = (theme) => {
     root.dataset.theme = theme;
     const dark = theme === 'dark';
-    themeToggle.setAttribute('aria-label', `切換為${dark ? '淺' : '深'}色主題`);
+    themeToggle.setAttribute('aria-label', dark ? lightLabel : darkLabel);
     themeToggle.querySelector('use').setAttribute('href', dark ? '#i-sun' : '#i-moon');
     document.querySelector('meta[name="theme-color"]').content = dark ? '#0e1513' : '#006a60';
   };
@@ -28,7 +43,7 @@
   const nav = document.querySelector('.main-nav');
   const setMenu = (open) => {
     menuToggle.setAttribute('aria-expanded', String(open));
-    menuToggle.setAttribute('aria-label', open ? '關閉導覽選單' : '開啟導覽選單');
+    menuToggle.setAttribute('aria-label', open ? closeMenuLabel : openMenuLabel);
     menuToggle.querySelector('use').setAttribute('href', open ? '#i-close' : '#i-menu');
     nav.classList.toggle('is-open', open);
   };

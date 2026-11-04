@@ -1,6 +1,8 @@
 # 宣傳網站與 GitHub Pages
 
-網站入口為 `docs/index.html`，採原生 HTML、CSS 與 JavaScript，沒有套件安裝或建置步驟。以繁體中文介紹 Monogatari Assistant，使用 M3 Teal 語意色彩、固定圓角矩形控制項，並提供響應式版面、深淺主題、鍵盤分頁切換、常見問題與圖片預覽。
+網站入口為 `docs/index.html`，採原生 HTML、CSS 與 JavaScript，沒有套件安裝或建置步驟。網站以英文、日文與繁體中文介紹 Monogatari Assistant，使用 M3 Teal 語意色彩、固定圓角矩形控制項，並提供響應式版面、深淺主題、鍵盤分頁切換、常見問題與圖片預覽。
+
+首次造訪時依瀏覽器的語言偏好順序選擇。日文對應日文版，繁體中文及台灣、香港、澳門的中文語系對應繁中版，沒有相符的偏好時預設顯示英文。頁首選單可手動切換，選擇會記在瀏覽器。可直接分享各語言的頁面連結，固定開啟英文版請使用 `index.html?lang=en`。停用 JavaScript 時，入口顯示英文，語言連結仍可使用。
 
 ## 本機預覽
 
@@ -28,9 +30,10 @@ python3 -m http.server 4173 --bind 127.0.0.1 --directory docs
 
 | 檔案 | 用途 |
 | --- | --- |
-| `index.html` | 頁面結構、功能文案、導覽與分享 metadata |
+| `index.html`、`index.ja.html`、`index.zh-Hant.html` | 英文、日文、繁中的頁面結構、文案與分享 metadata |
+| `assets/site-locale.js` | 入口頁的瀏覽器語系偵測與語言偏好 |
 | `assets/site.css` | M3 Teal light／dark tokens、元件、響應式及列印樣式 |
-| `assets/site.js` | 主題偏好、手機導覽、可存取的分頁切換與原生 dialog |
+| `assets/site.js` | 語言和主題偏好、手機導覽、可存取的分頁切換與原生 dialog |
 | `assets/app-icon.png` | 由專案既有圖示縮小的網站圖示 |
 | `assets/screenshots/*.webp` | 從專案實際 Flutter 介面擷取的五張功能畫面 |
 | `assets/fonts/*.woff2` | 自架 Noto Sans 與 Noto Sans TC 可變字型，保留 100–900 字重 |
@@ -40,7 +43,7 @@ python3 -m http.server 4173 --bind 127.0.0.1 --directory docs
 
 修改品牌色時，先調整 CSS 的語意 tokens；深色模式同時保留系統偏好規則及明確的 `data-theme="dark"` 覆寫。主題選擇儲存在本機 `localStorage` 的 `monoashi-site-theme`，儲存不可用時仍可切換。全站統一使用 Noto Sans，繁中文字形由 Noto Sans TC 提供。字型隨網站保存及載入，不依賴訪客電腦安裝的字型，也沒有追蹤碼、外部字型請求或 CDN。網頁目前無需額外的等寬字型。
 
-如移轉儲存庫、改用自訂網域或變更預設分支，請同步更新 `index.html` 的 GitHub 文件連結及 `og:image` 絕對網址。可下載版本一律導向 Releases，不預設每個平台都有發佈檔。功能能力與限制以 `GUIDE.md` 及 `API.md` 為準，更新時避免將開發規劃寫成已提供功能。
+更新網站文案或結構時，請同步維護三份 HTML 的導覽、功能和 metadata。日文頁面使用系統日文字型。三個版本共用原有的應用程式截圖和分享圖。移轉儲存庫、改用自訂網域或變更預設分支時，請同步更新各頁的 GitHub 文件連結及 `og:image` 絕對網址。可下載版本一律導向 Releases，不預設每個平台都有發佈檔。功能能力與限制以 `GUIDE.md` 及 `API.md` 為準，更新時避免將開發規劃寫成已提供功能。
 
 頁首、功能分頁與畫廊使用實際 Flutter `ContentView`、正文編輯器及各功能模組的介面擷取，展示內容是獨立建立的虛構故事《星海之間》。擷取使用 Flutter 測試渲染器及 `RenderRepaintBoundary.toImage`，不是以 HTML 重畫 App，也不是作業系統視窗截圖；原生外掛與偏好儲存經隔離，不讀取個人稿件。截圖可點擊放大，沒有 JavaScript 時仍可直接開啟圖片。圖片與產品名稱的權利依專案既有商標及授權說明。
 

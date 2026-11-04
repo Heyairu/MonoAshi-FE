@@ -1,4 +1,4 @@
-# Monogatari Assistant FE
+# MonoAshi
 
 **繁體中文** · [English](README.md) · [日本語](README.ja.md)
 

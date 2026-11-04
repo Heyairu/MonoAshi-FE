@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#006a60">
+  <meta name="description" content="MonoAshi 是整合正文編輯、章節、大綱、角色、世界設定與時間軸的開源寫作工具。支援本機專案儲存、文本校正與修訂追蹤。">
+  <meta property="og:title" content="MonoAshi - 寫作與設定管理工具">
+  <meta property="og:description" content="整合正文編輯、章節與故事設定管理，支援本機儲存、文本校正與修訂追蹤。">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="zh_TW">
+  <meta property="og:image" content="https://heyairu.github.io/Monogatari-Assistant-FE/assets/social-card.png">
+  <meta name="color-scheme" content="light dark">
+  <title>MonoAshi - 寫作與設定管理工具</title>
+  <link rel="icon" href="assets/app-icon.png" type="image/png">
+  <link rel="preload" href="assets/fonts/NotoSans-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/NotoSansTC-site.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="alternate" hreflang="en" href="index.html">
+  <link rel="alternate" hreflang="ja" href="index.ja.html">
+  <link rel="alternate" hreflang="zh-Hant" href="index.zh-Hant.html">
+  <link rel="alternate" hreflang="x-default" href="./">
+  <script src="assets/site.js" defer></script>
+  <noscript><style>.feature-panel[hidden]{display:grid!important;margin-top:24px}.feature-tabs,.theme-toggle,.menu-toggle{display:none!important}@media(max-width:860px){.main-nav{display:flex;position:static;flex-wrap:wrap;padding:0;border:0;box-shadow:none;gap:8px;background:transparent}.header-inner{height:auto;min-height:80px;flex-wrap:wrap;padding-block:12px}.main-nav a{padding:5px;font-size:12px}}</style></noscript>
+</head>
+<body>
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 16v4h14v-4"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6c-3-2-6-2-10-1v14c4-1 7-1 10 1 3-2 6-2 10-1V5c-4-1-7-1-10 1Zm0 0v14"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="m15 4 5 5M4 20l5-1L21 7a2 2 0 0 0-5-5L4 14l-1 7 6-2M14 21h7"/></symbol>
+    <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><path d="M2 21v-3a7 7 0 0 1 14 0v3M17 4a3 3 0 0 1 0 6m2 4a6 6 0 0 1 3 5v2"/></symbol>
+    <symbol id="i-world" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><ellipse cx="12" cy="12" rx="4" ry="10"/><path d="M2 12h20"/></symbol>
+    <symbol id="i-time" viewBox="0 0 24 24"><path d="M5 3v18M5 6h6m-6 6h13M5 18h6"/><circle cx="14" cy="6" r="2"/><circle cx="20" cy="12" r="2"/><circle cx="14" cy="18" r="2"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6V4h6l3 3h9v13H3V6Z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 2 9 4v6c0 5-9 10-9 10S3 17 3 12V6l9-4Z"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Zm7-2v4m-2-2h4"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path d="M9 19c-4 1-4-2-6-2m12 5v-4a3 3 0 0 0-.8-2.3c3-.4 6-1.5 6-6.4a5 5 0 0 0-1.4-3.5A5 5 0 0 0 18.7 2S17.5 1.6 15 3a13 13 0 0 0-6 0C6.5 1.6 5.3 2 5.3 2a5 5 0 0 0-.1 3.8 5 5 0 0 0-1.4 3.5c0 4.9 3 6 6 6.4A3 3 0 0 0 9 18v4"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 1v2m0 18v2M1 12h2m18 0h2M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 13A9 9 0 0 1 11 3a9 9 0 1 0 10 10Z"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="m10 13 4-4m-6 6-2 2a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0m2 3 2-2a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0" transform="translate(1 1)"/></symbol>
+  </defs></svg>
+  <a class="skip-link" href="#main">跳至主要內容</a>
+
+  <header class="site-header">
+    <div class="header-inner wrap">
+      <a class="brand" href="#" aria-label="MonoAshi 首頁"><img src="assets/app-icon.png" alt="" width="40" height="40"><span></span></a>
+      <nav class="main-nav" id="main-nav" aria-label="主要導覽">
+        <a href="#features">探索功能</a><a href="#workflow">使用流程</a><a href="#resources">資源中心</a><a href="#faq">常見問題</a>
+      </nav>
+      <div class="header-actions">
+        <details class="language-menu"><summary aria-label="語言">繁體中文</summary><div class="language-options"><a href="index.html?lang=en" lang="en" hreflang="en">English</a><a href="index.ja.html" lang="ja" hreflang="ja">日本語</a><a href="index.zh-Hant.html" lang="zh-Hant" hreflang="zh-Hant" aria-current="page">繁體中文</a></div></details>
+        <button class="icon-button theme-toggle" type="button" aria-label="切換為深色主題"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-moon"/></svg></button>
+        <a class="button button-small header-cta" href="https://github.com/Heyairu/Monogatari-Assistant-FE/releases">下載<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a>
+        <button class="icon-button menu-toggle" type="button" aria-label="開啟導覽選單" aria-controls="main-nav" aria-expanded="false"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-menu"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy wrap">
+        <a class="release-link" href="https://github.com/Heyairu/Monogatari-Assistant-FE/releases"><span class="status-dot"></span>查看下載版本<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a>
+        <h1 id="hero-title">專為故事創作設計的<br><span>寫作與設定管理工具</span></h1>
+        <p class="hero-description">使用 MonoAshi 撰寫正文、編排章節，管理角色、世界設定與時間軸。<br>從大綱到校稿，在同一專案中完成。</p>
+        <div class="hero-actions"><a class="button" href="https://github.com/Heyairu/Monogatari-Assistant-FE/releases">下載 MonoAshi<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a><a class="button button-outline" href="#features"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-book"/></svg>了解功能</a></div>
+        <p class="hero-note">開放原始碼<span>·</span>本機專案保存<span>·</span>以 Flutter 打造</p>
+      </div>
+
+      <figure class="hero-visual wrap" aria-label="MonoAshi 實際創作工作區">
+        <div class="visual-orbit" aria-hidden="true"></div><div class="visual-grid" aria-hidden="true"></div>
+        <a class="screenshot-link hero-screenshot" href="assets/screenshots/writing.webp" data-preview data-caption="章節與正文工作區 · 展示專案《星海之間》">
+          <img src="assets/screenshots/writing.webp" alt="MonoAshi 實際介面：左側章節目錄與右側正文編輯器，展示作品《星海之間》" width="2400" height="1500" fetchpriority="high">
+          <span class="screenshot-expand">放大查看實際介面<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></span>
+        </a>
+        <figcaption>實際應用程式畫面 · 展示專案《星海之間》</figcaption>
+      </figure>
+    </section>
+
+    <div class="principles wrap" aria-label="適用用途"><span>適用於小說與長篇創作</span><div><span><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-pen"/></svg>小說創作</span><span><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-world"/></svg>世界觀設定</span><span><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-people"/></svg>角色管理</span><span><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-time"/></svg>長篇企劃</span></div></div>
+
+    <section class="section features-section" id="features" aria-labelledby="features-title">
+      <div class="wrap">
+        <div class="section-heading"><h2 id="features-title">寫作所需的功能，集中於一個專案。</h2><p>編輯正文、整理設定、檢視事件順序，<br>再以校稿與修訂工具調整內容。</p></div>
+        <div class="feature-explorer">
+          <div class="feature-tabs" role="tablist" aria-label="探索創作功能">
+            <button type="button" role="tab" id="tab-writing" aria-controls="panel-writing" aria-selected="true" tabindex="0"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-pen"/></svg>正文與章節</button>
+            <button type="button" role="tab" id="tab-world" aria-controls="panel-world" aria-selected="false" tabindex="-1"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-world"/></svg>角色與設定</button>
+            <button type="button" role="tab" id="tab-timeline" aria-controls="panel-timeline" aria-selected="false" tabindex="-1"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-time"/></svg>時間軸</button>
+            <button type="button" role="tab" id="tab-revision" aria-controls="panel-revision" aria-selected="false" tabindex="-1"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>校稿與修訂</button>
+          </div>
+          <div class="feature-panel" id="panel-writing" role="tabpanel" aria-labelledby="tab-writing" tabindex="0">
+            <div class="feature-copy"><h3>整理章節，<br>編輯長篇正文。</h3><p>使用資料夾與章節樹編排稿件，搭配正文標記、註記及專案短語庫，管理撰寫過程中的內容。</p><ul class="check-list"><li>章節與資料夾分層管理</li><li>正文標記、註記與專案短語庫</li><li>文字搜尋與取代</li></ul><a class="text-link" href="https://github.com/Heyairu/Monogatari-Assistant-FE/blob/main/docs/GUIDE.md#3-建立開啟與保存作品">了解寫作工作區<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a></div>
+            <figure class="feature-art screenshot-art"><a class="screenshot-link" href="assets/screenshots/writing.webp" data-preview data-caption="章節與正文工作區 · 展示專案《星海之間》"><img src="assets/screenshots/writing.webp" alt="MonoAshi 實際介面：章節與正文編輯工作區" width="2400" height="1500" loading="lazy"><span class="screenshot-expand">放大查看<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></span></a><figcaption>章節與正文工作區 · 實際介面擷取</figcaption></figure>
+          </div>
+          <div class="feature-panel" id="panel-world" role="tabpanel" aria-labelledby="tab-world" tabindex="0" hidden>
+            <div class="feature-copy"><h3>集中管理角色<br>與世界設定。</h3><p>保存角色檔案、關係、地點與物品資料，透過關係圖與階層式地點整理故事設定。</p><ul class="check-list"><li>角色檔案與關係圖</li><li>階層式地點管理</li><li>物品資料與歸屬記錄</li></ul><a class="text-link" href="https://github.com/Heyairu/Monogatari-Assistant-FE/blob/main/docs/GUIDE.md#5-角色地點物品與-scene-快照">探索世界設定<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a></div>
+            <figure class="feature-art screenshot-art"><a class="screenshot-link" href="assets/screenshots/characters.webp" data-preview data-caption="角色檔案與設定 · 展示專案《星海之間》"><img src="assets/screenshots/characters.webp" alt="MonoAshi 實際介面：角色設定工作區" width="2400" height="1500" loading="lazy"><span class="screenshot-expand">放大查看<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></span></a><figcaption>角色檔案與設定 · 實際介面擷取</figcaption></figure>
+          </div>
+          <div class="feature-panel" id="panel-timeline" role="tabpanel" aria-labelledby="tab-timeline" tabindex="0" hidden>
+            <div class="feature-copy"><h3>檢視事件順序<br>與故事狀態。</h3><p>以主時間軸編排事件與多條故事線，透過 Scene 狀態快照查看特定時點的角色、地點與物品資料。</p><ul class="check-list"><li>主時間軸與微型時間軸</li><li>依 Scene 查看角色、地點與物品狀態</li><li>多條故事線與事件排序</li></ul><a class="text-link" href="https://github.com/Heyairu/Monogatari-Assistant-FE/blob/main/docs/GUIDE.md#5-角色地點物品與-scene-快照">了解時間軸與快照<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a></div>
+            <figure class="feature-art screenshot-art"><a class="screenshot-link" href="assets/screenshots/timeline.webp" data-preview data-caption="主時間軸與故事事件 · 展示專案《星海之間》"><img src="assets/screenshots/timeline.webp" alt="MonoAshi 實際介面：故事時間軸工作區" width="2400" height="1500" loading="lazy"><span class="screenshot-expand">放大查看<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></span></a><figcaption>主時間軸與故事事件 · 實際介面擷取</figcaption></figure>
+          </div>
+          <div class="feature-panel" id="panel-revision" role="tabpanel" aria-labelledby="tab-revision" tabindex="0" hidden>
+            <div class="feature-copy"><h3>檢查文本，<br>追蹤修訂內容。</h3><p>使用冗字檢查與文本校正檢視稿件，並透過本機 checkpoint 比較支援的內容差異。</p><ul class="check-list"><li>文本校正與冗字檢查</li><li>修訂追蹤與比較基準</li><li>TXT、Markdown 與局部 XML 匯出</li></ul><a class="text-link" href="https://github.com/Heyairu/Monogatari-Assistant-FE/blob/main/docs/GUIDE.md">查看校稿與匯出說明<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a></div>
+            <figure class="feature-art screenshot-art"><a class="screenshot-link" href="assets/screenshots/proofreading.webp" data-preview data-caption="文本校正與冗字檢查 · 展示專案《星海之間》"><img src="assets/screenshots/proofreading.webp" alt="MonoAshi 實際介面：文本校正工作區" width="2400" height="1500" loading="lazy"><span class="screenshot-expand">放大查看<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></span></a><figcaption>文本校正與冗字檢查 · 實際介面擷取</figcaption></figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section workflow-section" id="workflow" aria-labelledby="workflow-title"><div class="wrap">
+      <div class="section-heading heading-row"><div><h2 id="workflow-title">從建立專案到匯出稿件</h2></div><p>整理設定、撰寫正文，<br>完成校稿與匯出。</p></div>
+      <div class="journey-grid">
+        <article class="journey-card"><div class="journey-top"><span>01</span><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-spark"/></svg></div><h3>建立專案</h3><p>填寫作品簡介，建立章節與大綱，加入角色、地點等設定資料。</p><div class="journey-art idea-art" aria-hidden="true"><span class="idea-note note-back">作品簡介與故事設定</span><span class="idea-note note-front"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-spark"/></svg>章節、大綱與角色資料</span></div></article>
+        <article class="journey-card"><div class="journey-top"><span>02</span><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-pen"/></svg></div><h3>撰寫與編輯</h3><p>以章節組織稿件，在正文編輯與設定管理之間切換，使用註記和標記補充說明。</p><div class="journey-art words-art" aria-hidden="true"><span>第一章　風的名字</span><i></i><i></i><i></i><div><span class="status-dot"></span>正文編輯與章節管理</div></div></article>
+        <article class="journey-card"><div class="journey-top"><span>03</span><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-book"/></svg></div><h3>校稿與匯出</h3><p>檢查文本與修訂內容，儲存專案後，將選定的正文或設定資料匯出。</p><div class="journey-art export-art" aria-hidden="true"><div><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-book"/></svg><span>星海之間</span></div><span class="file-tag">.txt</span><span class="file-tag">.md</span><span class="file-tag">.xml</span></div></article>
+      </div>
+    </div></section>
+
+    <section class="section ownership-section" aria-labelledby="ownership-title"><div class="wrap ownership-grid"><div><h2 id="ownership-title">本機儲存，<br>彈性整合。</h2><p>將稿件保存為本機專案檔，依需要設定備份，<br>或啟用 Copilot 與 MCP 整合。</p><a class="button button-outline" href="https://github.com/Heyairu/Monogatari-Assistant-FE"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-github"/></svg>檢視 GitHub 專案<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a></div><div class="ownership-list"><article><span class="tonal-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-shield"/></svg></span><div><h3>本機儲存與備份</h3><p>以 .mnproj 檔案保存作品，並在設定中調整自動儲存與備份。</p></div></article><article><span class="tonal-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-github"/></svg></span><div><h3>開放原始碼</h3><p>原始碼採 Apache 2.0 授權，可查看實作、回報問題或參與開發。</p></div></article><article><span class="tonal-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-link"/></svg></span><div><h3>Copilot 與 MCP 整合</h3><p>可自備 API Key 使用 Copilot，或授權 MCP 唯讀查看作品。</p></div></article></div></div></section>
+
+    <section class="section resources-section" id="resources" aria-labelledby="resources-title"><div class="wrap">
+      <div class="section-heading heading-row"><div><h2 id="resources-title">使用說明與開發資源</h2></div><a class="text-link" href="https://github.com/Heyairu/Monogatari-Assistant-FE/tree/main/docs">前往文件中心<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a></div>
+      <div class="resource-grid"><a class="resource-card" href="https://github.com/Heyairu/Monogatari-Assistant-FE/blob/main/docs/GUIDE.md"><span class="resource-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-book"/></svg></span><span class="resource-label">使用指南</span><h3>了解基本操作</h3><p>認識工作區、建立章節，了解如何儲存與備份。</p><span class="text-link">閱讀使用指南<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></span></a><a class="resource-card" href="https://github.com/Heyairu/Monogatari-Assistant-FE/blob/main/docs/API.md"><span class="resource-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-link"/></svg></span><span class="resource-label">API 文件</span><h3>外部工具整合</h3><p>提供 MCP、專案格式與外部整合的介面說明。</p><span class="text-link">查閱 API 文件<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></span></a><a class="resource-card" href="https://github.com/Heyairu/Monogatari-Assistant-FE/issues"><span class="resource-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-people"/></svg></span><span class="resource-label">問題與建議</span><h3>回報使用問題</h3><p>透過 GitHub Issues 回報錯誤或提出功能建議。</p><span class="text-link">前往 GitHub Issues<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></span></a></div>
+      <details class="preview-details"><summary>檢視更多介面<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron"/></svg></summary><div class="preview-gallery"><a class="screenshot-link gallery-screenshot" href="assets/screenshots/writing.webp" data-preview data-caption="章節與正文 · 展示專案《星海之間》"><img src="assets/screenshots/writing.webp" alt="MonoAshi 實際介面：章節與正文" width="2400" height="1500" loading="lazy"><span>章節與正文<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></span></a><a class="screenshot-link gallery-screenshot" href="assets/screenshots/characters.webp" data-preview data-caption="角色設定 · 展示專案《星海之間》"><img src="assets/screenshots/characters.webp" alt="MonoAshi 實際介面：角色設定" width="2400" height="1500" loading="lazy"><span>角色設定<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></span></a><a class="screenshot-link gallery-screenshot" href="assets/screenshots/world.webp" data-preview data-caption="世界設定 · 展示專案《星海之間》"><img src="assets/screenshots/world.webp" alt="MonoAshi 實際介面：世界設定" width="2400" height="1500" loading="lazy"><span>世界設定<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></span></a><a class="screenshot-link gallery-screenshot" href="assets/screenshots/timeline.webp" data-preview data-caption="故事時間軸 · 展示專案《星海之間》"><img src="assets/screenshots/timeline.webp" alt="MonoAshi 實際介面：故事時間軸" width="2400" height="1500" loading="lazy"><span>故事時間軸<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></span></a><a class="screenshot-link gallery-screenshot" href="assets/screenshots/proofreading.webp" data-preview data-caption="文本校正 · 展示專案《星海之間》"><img src="assets/screenshots/proofreading.webp" alt="MonoAshi 實際介面：文本校正" width="2400" height="1500" loading="lazy"><span>文本校正<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></span></a></div><p class="preview-note">畫面使用展示專案《星海之間》。實際介面依版本與平台而異。</p></details>
+    </div></section>
+
+    <section class="section faq-section" id="faq" aria-labelledby="faq-title"><div class="wrap faq-grid"><div><h2 id="faq-title">常見問題集</h2><p>其他問題與建議<br><a class="text-link" href="https://github.com/Heyairu/Monogatari-Assistant-FE/issues">前往 GitHub Issues<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a></p></div><div class="faq-list">
+      <details><summary>MonoAshi 是什麼？<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron"/></svg></summary><div><p>MonoAshi 是為故事創作者設計的開源寫作工具，以 Flutter 開發，將正文、章節、大綱、角色、世界觀、物品與時間軸集中在同一個工作區。</p></div></details>
+      <details><summary>稿件儲存在哪裡？<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron"/></svg></summary><div><p>作品主要以 .mnproj 專案檔保存在指定的本機位置。自動儲存會寫回已知位置，自動備份則另存於設定的備份資料夾；兩者可在 App 設定中調整。啟用外部 AI 或協作前，請先閱讀相關連線與資料範圍說明。</p></div></details>
+      <details><summary>支援哪些匯出格式？<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron"/></svg></summary><div><p>目前支援正文 TXT／Markdown、設定資料的 Markdown 閱讀稿，以及局部 XML 專案交換。可選單一文件或分散文件 ZIP。完整資料請保留 .mnproj；DOCX／PDF 選項目前停用。</p></div></details>
+      <details><summary>是否必須使用 AI？<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron"/></svg></summary><div><p>不需要。正文編輯與設定管理可獨立使用。Copilot 使用自備 API Key 連接服務商；Ask／Plan 須在建置時啟用，Plan 只提供提案與驗證，Agent 尚未開放。MCP 則供授權的本機 Host 唯讀查看作品。</p></div></details>
+      <details><summary>支援哪些裝置？<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron"/></svg></summary><div><p>專案以 Flutter 開發，包含 Windows、macOS、Linux、Android、iOS 與 Web 的平台工程。各平台能力、驗收與可下載版本有所不同，請以 GitHub Releases 與使用指南為準。</p></div></details>
+      <details><summary>如何下載或參與開發？<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron"/></svg></summary><div><p>先到 <a href="https://github.com/Heyairu/Monogatari-Assistant-FE/releases">GitHub Releases</a> 查看可下載版本與平台資訊。開發者也可以依儲存庫 README 的步驟從原始碼執行，或透過 Issues 回報問題與提出建議。</p></div></details>
+    </div></div></section>
+
+  </main>
+
+  <footer class="site-footer"><div class="wrap"><div class="footer-top"><a class="brand" href="#"><img src="assets/app-icon.png" alt="" width="40" height="40"><span>MonoAshi</span></a><p>Enable your stories "flutter".<span>讓你的物語更加流暢。</span></p><a class="text-link" href="https://github.com/Heyairu/Monogatari-Assistant-FE"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-github"/></svg>GitHub<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow"/></svg></a></div><div class="footer-bottom"><span>MonoAshi™ · Heyairu（部屋伊琉）</span><nav aria-label="頁尾導覽"><a href="https://github.com/Heyairu/Monogatari-Assistant-FE/blob/main/LICENSE.md">Apache 2.0</a><a href="https://github.com/Heyairu/Monogatari-Assistant-FE/blob/main/NOTICE.md">第三方聲明</a><a href="https://github.com/Heyairu/Monogatari-Assistant-FE/blob/main/TRADEMARKS.md">商標說明</a></nav><span>以 Flutter 開發。</span></div></div></footer>
+
+  <dialog class="preview-dialog" aria-label="應用程式實際介面"><button class="icon-button dialog-close" type="button" aria-label="關閉預覽"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-close"/></svg></button><img src="assets/screenshots/writing.webp" alt="MonoAshi 實際章節與正文工作區" width="2400" height="1500"><p>章節與正文工作區 · 展示專案《星海之間》</p></dialog>
+</body>
+</html>
