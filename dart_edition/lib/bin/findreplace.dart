@@ -3147,6 +3147,19 @@ class FindReplaceBarState extends State<FindReplaceBar> {
                       ),
                     ),
                   ),
+                  if (widget.onClose != null)
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 16),
+                      onPressed: widget.onClose,
+                      tooltip: MaterialLocalizations.of(
+                        context,
+                      ).closeButtonTooltip,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
+                    ),
                 ],
               ),
 

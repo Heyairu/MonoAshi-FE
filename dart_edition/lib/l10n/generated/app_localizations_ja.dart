@@ -1896,6 +1896,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get uiLanguage => '言語';
 
   @override
+  String get uiEnglish => '英語';
+
+  @override
+  String get uiNameUnitedKingdom => 'イギリス';
+
+  @override
+  String get uiNameUnitedStates => 'アメリカ';
+
+  @override
+  String get uiNameCanada => 'カナダ';
+
+  @override
+  String get uiNameAustralia => 'オーストラリア';
+
+  @override
   String get uiJapanese => '日本風';
 
   @override
@@ -1908,13 +1923,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get uiGender => '性別';
 
   @override
-  String get uiAllUnavailable => 'すべて（利用不可）';
-
-  @override
   String get uiMale => '男性';
 
   @override
-  String get uiNeutralUnavailable => '中性（利用不可）';
+  String get uiNeutral => '中性';
 
   @override
   String get uiFemale => '女性';
@@ -8295,4 +8307,28 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get copilotErrorValidation =>
       '現在の章節、選択した資料、API URL の設定を確認してから再試行してください。';
+
+  @override
+  String get uiImplicitMention => '暗黙の言及';
+
+  @override
+  String get paletteSearchRange => '検索範囲';
+
+  @override
+  String get paletteRangePrecise => '狭い';
+
+  @override
+  String get paletteRangeDefault => '標準';
+
+  @override
+  String get paletteRangeBroad => '広い';
+
+  @override
+  String get paletteNoNearbyEntries => '範囲内に近い項目はありません';
+
+  @override
+  String get paletteOutsideRange => '最も近い項目（範囲外）';
+
+  @override
+  String get paletteInvalidHex => '6桁のHEXカラーを入力してください';
 }

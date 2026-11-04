@@ -42,7 +42,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text("文字色票"), findsOneWidget);
-    expect(find.byType(AppTextField), findsOneWidget);
+    expect(find.byType(AppTextField), findsNWidgets(2));
     expect(
       find.byKey(const ValueKey<String>("palette-import-export-menu")),
       findsOneWidget,
@@ -57,30 +57,17 @@ void main() {
     expect(searchBounds.top, greaterThan(titleBounds.bottom));
     expect(importExportBounds.left, greaterThan(searchBounds.left));
     expect(importExportBounds.center.dy, closeTo(searchBounds.center.dy, 1));
-    expect(
-      find.byKey(const ValueKey<String>("palette-hue-342")),
-      findsOneWidget,
-    );
-    final IconButton hueButton = tester.widget<IconButton>(
-      find.byKey(const ValueKey<String>("palette-hue-342")),
-    );
-    final Color expectedHueColor = HSVColor.fromAHSV(1, 342, 0.8, 1).toColor();
-    expect(
-      hueButton.style?.backgroundColor?.resolve(const <WidgetState>{}),
-      expectedHueColor,
-    );
-
-    await tester.tap(find.text("S 100% · V 20%").first);
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.byKey(const ValueKey<String>("palette-add-h000-s100-v020")),
-    );
-    await tester.pump();
+    expect(find.byKey(const ValueKey('palette-color-wheel')), findsOneWidget);
+    expect(find.byKey(const ValueKey('palette-radius-0.1')), findsOneWidget);
+    expect(find.text('適中'), findsOneWidget);
+    expect(find.textContaining('0.10'), findsNothing);
+    expect(find.textContaining('Δ'), findsNothing);
+    expect(find.textContaining('預設'), findsNothing);
     await tester.enterText(
-      find.byKey(const ValueKey<String>("palette-editor-add-h000-s100-v020")),
-      "焦灼",
+      find.byKey(const ValueKey('palette-new-entry')),
+      '焦灼',
     );
-    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.tap(find.byKey(const ValueKey('palette-add-selected')));
     await tester.pumpAndSettle();
 
     expect(find.text("焦灼"), findsOneWidget);
@@ -90,7 +77,97 @@ void main() {
     );
     await tester.pump();
     expect(find.text("焦灼"), findsOneWidget);
-    expect(find.text("色相 0 度，飽和度 100%，明度 20%"), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is Text && widget.data == '#FF0000',
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Δ'), findsNothing);
+    expect(repository.userData, contains('rgb-FF0000'));
+    // Moving the picker changes the query, but never the saved association.
+    final before = repository.userData;
+    final wheel = tester.getRect(
+      find.byKey(const ValueKey('palette-color-wheel')),
+    );
+    await tester.tapAt(Offset(wheel.center.dx, wheel.top + wheel.height * .93));
+    await tester.pumpAndSettle();
+    expect(repository.userData, before);
+    expect(find.text('最近的詞條（超出範圍）'), findsOneWidget);
+  });
+
+  testWidgets('new entry keeps its draft and uses the color at submission', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final repository = _WidgetPaletteRepository();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [paletteRepositoryProvider.overrideWithValue(repository)],
+        child: const MaterialApp(home: Scaffold(body: PalettesView())),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('palette-add-selected')));
+    await tester.pump();
+    expect(find.text('詞條不可為空白'), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const ValueKey('palette-new-entry')),
+      '海霧',
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('palette-hex-rgb-FF0000')),
+      '#3A82BE',
+    );
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<AppTextField>(find.byKey(const ValueKey('palette-new-entry')))
+          .controller!
+          .text,
+      '海霧',
+    );
+    await tester.tap(find.byKey(const ValueKey('palette-new-entry')));
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(repository.userData, contains('rgb-3A82BE'));
+    expect(repository.userData, isNot(contains('rgb-FF0000')));
+    expect(find.text('海霧'), findsOneWidget);
+  });
+
+  testWidgets('range choices filter gray entries at narrow width', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final repository = _WidgetPaletteRepository()
+      ..userData =
+          '{"version":2,"slotEntryIds":{"rgb-888888":["near"],"rgb-A0A0A0":["far"]},"entries":{"near":{"text":"近灰"},"far":{"text":"遠灰"}}}';
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [paletteRepositoryProvider.overrideWithValue(repository)],
+        child: const MaterialApp(home: Scaffold(body: PalettesView())),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final hex = find.byKey(const ValueKey('palette-hex-rgb-FF0000'));
+    await tester.enterText(hex, '#808080');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(find.text('近灰'), findsOneWidget);
+    expect(find.text('遠灰'), findsNothing);
+    final broad = find.byKey(const ValueKey('palette-radius-0.2'));
+    await tester.ensureVisible(broad);
+    await tester.tap(broad);
+    await tester.pumpAndSettle();
+    expect(find.text('遠灰'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets("does not overwrite a corrupt user file", (

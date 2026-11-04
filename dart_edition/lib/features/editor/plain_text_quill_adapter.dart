@@ -12,6 +12,7 @@ import "package:flutter_quill/flutter_quill.dart";
 final class PlainTextQuillAdapter {
   const PlainTextQuillAdapter._();
 
+  static const implicitMentionAttribute = "monogatari-implicit-mention";
   static const _loaderMarkerAttribute = "plain-text-loader-marker";
   static const _loaderMarkerValues = <String>{"even", "odd"};
 
@@ -63,9 +64,12 @@ final class PlainTextQuillAdapter {
   }
 
   static bool _containsOnlyLoaderMarker(Map attributes) {
-    return attributes.length == 1 &&
-        attributes[_loaderMarkerAttribute] is String &&
-        _loaderMarkerValues.contains(attributes[_loaderMarkerAttribute]);
+    return attributes.entries.every(
+      (entry) =>
+          (entry.key == _loaderMarkerAttribute &&
+              _loaderMarkerValues.contains(entry.value)) ||
+          (entry.key == implicitMentionAttribute && entry.value == true),
+    );
   }
 
   static String _normalizeLineEndings(String value) {

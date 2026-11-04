@@ -29,6 +29,7 @@ import "../bin/ui_library.dart";
 import "../bin/settings_manager.dart";
 import "../data/p2p/p2p_secure_channel.dart";
 import "../data/p2p/p2p_snapshot_quarantine.dart";
+import "../features/name_generator/name_generator_data.dart";
 import "../domain/models/p2p_sync_models.dart";
 import "../domain/models/p2p_pairing_models.dart";
 import "../domain/models/p2p_revision_models.dart";
@@ -76,8 +77,6 @@ class WelcomeView extends ConsumerStatefulWidget {
 
 class _WelcomeViewState extends ConsumerState<WelcomeView> {
   static const String _didYouKnowAssetPath = "assets/jsons/didyouknow.json";
-  static const String _eastAsiaNameAssetPath =
-      "assets/jsons/name_eastAsia.json";
   static const _DidYouKnowData _fallbackDidYouKnowData = _DidYouKnowData(
     content: "中國最偉大、最永久的藝術，就是男人扮女人",
     source: "—— 魯迅（1881-1936）",
@@ -97,9 +96,9 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
   );
 
   static final Random _random = Random();
+  final NameGeneratorData _nameGenerator = NameGeneratorData();
 
   late Future<_DidYouKnowData> _didYouKnowFuture;
-  Map<String, dynamic>? _eastAsiaNameData;
   bool _isGeneratingNames = false;
   String _selectedLanguage = "JP";
   String _selectedGender = "female";
@@ -217,126 +216,18 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
     return null;
   }
 
-  Future<void> _ensureEastAsiaNameDataLoaded() async {
-    if (_eastAsiaNameData != null) {
-      return;
-    }
-
-    final String rawJson = await rootBundle.loadString(_eastAsiaNameAssetPath);
-    final dynamic decoded = jsonDecode(rawJson);
-    if (decoded is! Map<String, dynamic>) {
-      throw const FormatException("Invalid East Asia name JSON format");
-    }
-    _eastAsiaNameData = decoded;
-  }
-
-  List<String> _extractSurnamePool(String languageCode) {
-    if (_eastAsiaNameData == null) {
-      return const [];
-    }
-
-    if (languageCode == "ZH" || languageCode == "KR") {
-      final String key = languageCode == "ZH" ? "Surname_ZH" : "Surname_KR";
-      final dynamic raw = _eastAsiaNameData![key];
-      if (raw is List) {
-        return raw.whereType<String>().where((s) => s.isNotEmpty).toList();
-      }
-      return const [];
-    }
-
-    if (languageCode == "JP") {
-      final dynamic raw = _eastAsiaNameData!["Surname_JP"];
-      if (raw is! List || raw.isEmpty || raw.first is! Map<String, dynamic>) {
-        return const [];
-      }
-
-      final Map<String, dynamic> grouped = raw.first as Map<String, dynamic>;
-      final List<String> flattened = [];
-      for (final dynamic value in grouped.values) {
-        if (value is List) {
-          flattened.addAll(
-            value.whereType<String>().where((s) => s.isNotEmpty).toList(),
-          );
-        }
-      }
-      return flattened;
-    }
-
-    return const [];
-  }
-
-  List<String> _extractGivenNamePool(String languageCode, String genderCode) {
-    if (_eastAsiaNameData == null) {
-      return const [];
-    }
-
-    List<String> collectPoolByRootKey(String rootKey) {
-      final dynamic raw = _eastAsiaNameData![rootKey];
-      if (raw is! List || raw.isEmpty || raw.first is! Map<String, dynamic>) {
-        return const [];
-      }
-
-      final Map<String, dynamic> grouped = raw.first as Map<String, dynamic>;
-      final List<String> pool = [];
-
-      for (final dynamic value in grouped.values) {
-        if (value is! List ||
-            value.isEmpty ||
-            value.first is! Map<String, dynamic>) {
-          continue;
-        }
-
-        final Map<String, dynamic> namesByLanguage =
-            value.first as Map<String, dynamic>;
-        for (final MapEntry<String, dynamic> entry in namesByLanguage.entries) {
-          final dynamic languages = entry.value;
-          if (languages is List &&
-              languages.whereType<String>().contains(languageCode)) {
-            pool.add(entry.key);
-          }
-        }
-      }
-
-      return pool;
-    }
-
-    if (genderCode == "male") {
-      return collectPoolByRootKey("Name_Man");
-    }
-
-    if (genderCode == "all" || genderCode == "neutral") {
-      return <String>{
-        ...collectPoolByRootKey("Name_Lady"),
-        ...collectPoolByRootKey("Name_Man"),
-      }.toList();
-    }
-
-    return collectPoolByRootKey("Name_Lady");
-  }
-
   Future<void> _generateNames() async {
     setState(() {
       _isGeneratingNames = true;
     });
 
     try {
-      await _ensureEastAsiaNameDataLoaded();
-
-      final List<String> surnamePool = _extractSurnamePool(_selectedLanguage);
-      final List<String> givenNamePool = _extractGivenNamePool(
-        _selectedLanguage,
-        _selectedGender,
+      final List<String> results = await _nameGenerator.generate(
+        culture: _selectedLanguage,
+        gender: _selectedGender,
+        locale: Localizations.localeOf(context).languageCode,
+        count: _generateCount,
       );
-      if (surnamePool.isEmpty || givenNamePool.isEmpty) {
-        throw const FormatException("Name data pool is empty");
-      }
-
-      final List<String> results = List<String>.generate(_generateCount, (_) {
-        final String surname = surnamePool[_random.nextInt(surnamePool.length)];
-        final String given =
-            givenNamePool[_random.nextInt(givenNamePool.length)];
-        return "$surname$given";
-      });
 
       if (!mounted) {
         return;
@@ -1399,6 +1290,22 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                                   label: context.l10n.uiChinese,
                                 ),
                                 DropdownOption<String>(
+                                  value: "UK",
+                                  label: context.l10n.uiNameUnitedKingdom,
+                                ),
+                                DropdownOption<String>(
+                                  value: "US",
+                                  label: context.l10n.uiNameUnitedStates,
+                                ),
+                                DropdownOption<String>(
+                                  value: "CA",
+                                  label: context.l10n.uiNameCanada,
+                                ),
+                                DropdownOption<String>(
+                                  value: "AU",
+                                  label: context.l10n.uiNameAustralia,
+                                ),
+                                DropdownOption<String>(
                                   value: "KR",
                                   label: context.l10n.uiKorean,
                                 ),
@@ -1429,8 +1336,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                               options: [
                                 DropdownOption<String>(
                                   value: "all",
-                                  enabled: false,
-                                  label: context.l10n.uiAllUnavailable,
+                                  label: context.l10n.uiAll,
                                 ),
                                 DropdownOption<String>(
                                   value: "male",
@@ -1438,8 +1344,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                                 ),
                                 DropdownOption<String>(
                                   value: "neutral",
-                                  enabled: false,
-                                  label: context.l10n.uiNeutralUnavailable,
+                                  label: context.l10n.uiNeutral,
                                 ),
                                 DropdownOption<String>(
                                   value: "female",
@@ -1447,9 +1352,7 @@ class _WelcomeViewState extends ConsumerState<WelcomeView> {
                                 ),
                               ],
                               onChanged: (String? value) {
-                                if (value == null ||
-                                    value == "all" ||
-                                    value == "neutral") {
+                                if (value == null) {
                                   return;
                                 }
                                 setState(() {

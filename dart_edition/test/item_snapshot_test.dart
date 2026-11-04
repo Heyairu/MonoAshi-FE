@@ -165,7 +165,7 @@ void main() {
     final xml = FileService.generateProjectXMLWithoutLatestSaveUpdate(project);
     final result = FileService.parseProjectXMLWithMetadata(xml);
 
-    expect(result.projectVersion, "1.22");
+    expect(result.projectVersion, "1.24");
     expect(result.data.itemClasses[classId], itemClass);
     expect(result.data.itemInstances[instanceId], instance);
     expect(result.data.itemRelations, project.itemRelations);

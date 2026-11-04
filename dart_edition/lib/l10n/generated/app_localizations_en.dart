@@ -1932,6 +1932,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uiLanguage => 'Language';
 
   @override
+  String get uiEnglish => 'English';
+
+  @override
+  String get uiNameUnitedKingdom => 'United Kingdom';
+
+  @override
+  String get uiNameUnitedStates => 'United States';
+
+  @override
+  String get uiNameCanada => 'Canada';
+
+  @override
+  String get uiNameAustralia => 'Australia';
+
+  @override
   String get uiJapanese => 'Japanese';
 
   @override
@@ -1944,13 +1959,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uiGender => 'Gender';
 
   @override
-  String get uiAllUnavailable => 'All (unavailable)';
-
-  @override
   String get uiMale => 'Male';
 
   @override
-  String get uiNeutralUnavailable => 'Neutral (unavailable)';
+  String get uiNeutral => 'Neutral';
 
   @override
   String get uiFemale => 'Female';
@@ -8460,4 +8472,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get copilotErrorValidation =>
       'Check the current chapter, selected resources, and API URL before trying again.';
+
+  @override
+  String get uiImplicitMention => 'Implicit mention';
+
+  @override
+  String get paletteSearchRange => 'Search range';
+
+  @override
+  String get paletteRangePrecise => 'Precise';
+
+  @override
+  String get paletteRangeDefault => 'Moderate';
+
+  @override
+  String get paletteRangeBroad => 'Broad';
+
+  @override
+  String get paletteNoNearbyEntries => 'No entries within this range';
+
+  @override
+  String get paletteOutsideRange => 'Nearest entries (outside range)';
+
+  @override
+  String get paletteInvalidHex => 'Enter a six-digit HEX color';
 }

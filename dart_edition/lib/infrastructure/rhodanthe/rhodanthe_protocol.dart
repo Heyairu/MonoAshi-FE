@@ -2,6 +2,7 @@ import "dart:convert";
 
 const int rhodantheContractVersion = 1;
 const int rhodantheAbiVersion = 1;
+const String rhodantheImplicitAnnotationIdPrefix = "inline-implicit:";
 
 final class RhodantheCapabilities {
   final int abiVersion;

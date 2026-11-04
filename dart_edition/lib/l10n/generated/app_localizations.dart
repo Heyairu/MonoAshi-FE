@@ -1037,7 +1037,7 @@ abstract class AppLocalizations {
   /// **'取代'**
   String get uiReplace;
 
-  /// Application display copy. Source: lib/bin/findreplace.dart:3198, lib/features/revision_tracking/presentation/revision_tracking_panel.dart:286, lib/modules/character_relationship_graph_view.dart:444
+  /// Application display copy. Source: lib/modules/WelcomeView.dart:1348
   ///
   /// In zh, this message translates to:
   /// **'全部'**
@@ -3310,6 +3310,36 @@ abstract class AppLocalizations {
   /// **'語言'**
   String get uiLanguage;
 
+  /// English-style names
+  ///
+  /// In zh, this message translates to:
+  /// **'英式'**
+  String get uiEnglish;
+
+  /// Name generator country option
+  ///
+  /// In zh, this message translates to:
+  /// **'英國'**
+  String get uiNameUnitedKingdom;
+
+  /// Name generator country option
+  ///
+  /// In zh, this message translates to:
+  /// **'美國'**
+  String get uiNameUnitedStates;
+
+  /// Name generator country option
+  ///
+  /// In zh, this message translates to:
+  /// **'加拿大'**
+  String get uiNameCanada;
+
+  /// Name generator country option
+  ///
+  /// In zh, this message translates to:
+  /// **'澳洲'**
+  String get uiNameAustralia;
+
   /// Application display copy. Source: lib/modules/WelcomeView.dart:1310
   ///
   /// In zh, this message translates to:
@@ -3334,12 +3364,6 @@ abstract class AppLocalizations {
   /// **'性別'**
   String get uiGender;
 
-  /// Application display copy. Source: lib/modules/WelcomeView.dart:1348
-  ///
-  /// In zh, this message translates to:
-  /// **'全部（目前不可用）'**
-  String get uiAllUnavailable;
-
   /// Application display copy. Source: lib/modules/WelcomeView.dart:1352
   ///
   /// In zh, this message translates to:
@@ -3349,8 +3373,8 @@ abstract class AppLocalizations {
   /// Application display copy. Source: lib/modules/WelcomeView.dart:1357
   ///
   /// In zh, this message translates to:
-  /// **'中性（目前不可用）'**
-  String get uiNeutralUnavailable;
+  /// **'中性'**
+  String get uiNeutral;
 
   /// Application display copy. Source: lib/modules/WelcomeView.dart:1361
   ///
@@ -14391,6 +14415,54 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'請確認目前章節、所選資源及 API URL 設定後重試。'**
   String get copilotErrorValidation;
+
+  /// Label for implicit mentions in manuscript annotations.
+  ///
+  /// In zh, this message translates to:
+  /// **'隱式提及'**
+  String get uiImplicitMention;
+
+  /// Palette continuous color search interface
+  ///
+  /// In zh, this message translates to:
+  /// **'搜尋範圍'**
+  String get paletteSearchRange;
+
+  /// Palette continuous color search interface
+  ///
+  /// In zh, this message translates to:
+  /// **'較精確'**
+  String get paletteRangePrecise;
+
+  /// Palette continuous color search interface
+  ///
+  /// In zh, this message translates to:
+  /// **'適中'**
+  String get paletteRangeDefault;
+
+  /// Palette continuous color search interface
+  ///
+  /// In zh, this message translates to:
+  /// **'較寬鬆'**
+  String get paletteRangeBroad;
+
+  /// Palette continuous color search interface
+  ///
+  /// In zh, this message translates to:
+  /// **'範圍內沒有相近詞條'**
+  String get paletteNoNearbyEntries;
+
+  /// Palette continuous color search interface
+  ///
+  /// In zh, this message translates to:
+  /// **'最近的詞條（超出範圍）'**
+  String get paletteOutsideRange;
+
+  /// Palette continuous color search interface
+  ///
+  /// In zh, this message translates to:
+  /// **'請輸入六位 HEX 色碼'**
+  String get paletteInvalidHex;
 }
 
 class _AppLocalizationsDelegate

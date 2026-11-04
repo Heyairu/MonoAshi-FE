@@ -1,4 +1,4 @@
-/************************************************************
+/*
  * 
  * Copyright 2025-2026 Heyairu（部屋伊琉）
  *
@@ -21,7 +21,7 @@ import 'package:monogatari_assistant/l10n/app_localization.dart';
 import "dart:async";
 import "dart:convert";
 import "dart:io";
-import "dart:math" as math;
+import "../features/palettes/palette_color_picker.dart";
 
 import "package:file_picker/file_picker.dart";
 import "package:flutter/material.dart";
@@ -40,6 +40,8 @@ class PalettesView extends ConsumerStatefulWidget {
 
 class _PalettesViewState extends ConsumerState<PalettesView> {
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _newEntryController = TextEditingController();
+  String? _newEntryError;
   TextEditingController? _entryEditorController;
   FocusNode? _entryEditorFocusNode;
 
@@ -47,8 +49,8 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
   bool _hasLoaded = false;
   String? _loadError;
   String? _loadWarning;
-  int _selectedHue = 0;
-  String? _addingSlotId;
+  HSVColor _selectedColor = const HSVColor.fromAHSV(1, 0, 1, 1);
+  double _radius = 0.10;
   String? _editingEntryId;
   late final PaletteStateNotifier _notifier;
 
@@ -68,6 +70,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
   void dispose() {
     _searchController.removeListener(_handleSearchChanged);
     _searchController.dispose();
+    _newEntryController.dispose();
     if (_hasLoaded) {
       _commitActiveEditor(updateUi: false, showFeedback: false);
     }
@@ -128,7 +131,6 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
     final TextEditingController? controller = _entryEditorController;
     final FocusNode? focusNode = _entryEditorFocusNode;
     setState(() {
-      _addingSlotId = null;
       _editingEntryId = null;
       _entryEditorController = null;
       _entryEditorFocusNode = null;
@@ -140,26 +142,23 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
   }
 
   bool _prepareForAnotherEditor() {
-    if (_addingSlotId == null && _editingEntryId == null) {
+    if (_editingEntryId == null) {
       return true;
     }
     return _commitActiveEditor();
   }
 
-  void _beginAdd(String slotId) {
-    if (!_prepareForAnotherEditor()) {
+  void _addSelectedEntry() {
+    final result = _notifier.addEntry(
+      slotId: paletteExactColorId(_selectedColor.toColor()),
+      text: _newEntryController.text,
+    );
+    if (!result.changed) {
+      setState(() => _newEntryError = result.error);
       return;
     }
-    _disposeEntryEditor();
-    setState(() {
-      _addingSlotId = slotId;
-      _editingEntryId = null;
-      _entryEditorController = TextEditingController();
-      _entryEditorFocusNode = FocusNode();
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _entryEditorFocusNode?.requestFocus();
-    });
+    _newEntryController.clear();
+    setState(() => _newEntryError = null);
   }
 
   void _beginEdit(PaletteEntry entry) {
@@ -168,7 +167,6 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
     }
     _disposeEntryEditor();
     setState(() {
-      _addingSlotId = null;
       _editingEntryId = entry.id;
       _entryEditorController = TextEditingController(text: entry.text)
         ..selection = TextSelection.collapsed(offset: entry.text.length);
@@ -185,20 +183,11 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
       return true;
     }
 
-    PaletteMutationResult result;
-    if (_addingSlotId != null) {
-      result = _notifier.addEntry(
-        slotId: _addingSlotId!,
-        text: controller.text,
-      );
-    } else if (_editingEntryId != null) {
-      result = _notifier.renameEntry(
-        entryId: _editingEntryId!,
-        text: controller.text,
-      );
-    } else {
-      return true;
-    }
+    if (_editingEntryId == null) return true;
+    final result = _notifier.renameEntry(
+      entryId: _editingEntryId!,
+      text: controller.text,
+    );
 
     if (!result.changed) {
       if (showFeedback && mounted) {
@@ -215,15 +204,6 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
 
   void _cancelActiveEditor() {
     _finishEntryEditor();
-  }
-
-  void _selectHue(int hue) {
-    if (!_commitActiveEditor()) {
-      return;
-    }
-    setState(() {
-      _selectedHue = hue;
-    });
   }
 
   void _removeEntry(PaletteEntry entry) {
@@ -243,40 +223,6 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
         _notifier.restoreEntry(record);
       },
     );
-  }
-
-  Color _slotColor(PaletteSlotDefinition slot) {
-    final double hue = slot.hue == 360 ? 0 : slot.hue.toDouble();
-    return HSVColor.fromAHSV(
-      1,
-      hue,
-      slot.saturation / 100,
-      slot.value / 100,
-    ).toColor();
-  }
-
-  Color _contentColorFor(Color background) {
-    return ThemeData.estimateBrightnessForColor(background) == Brightness.dark
-        ? Colors.white
-        : Colors.black;
-  }
-
-  List<_PaletteSearchHit> _searchHits(PaletteStateData state) {
-    final String query = normalizePaletteTerm(_searchController.text);
-    if (query.isEmpty) {
-      return const <_PaletteSearchHit>[];
-    }
-    final List<_PaletteSearchHit> hits = <_PaletteSearchHit>[];
-    for (final PaletteSlotDefinition slot in allPaletteSlots) {
-      for (final String entryId
-          in state.slotEntryIds[slot.id] ?? const <String>[]) {
-        final PaletteEntry? entry = state.entryIndex[entryId];
-        if (entry != null && normalizePaletteTerm(entry.text).contains(query)) {
-          hits.add(_PaletteSearchHit(slot: slot, entry: entry));
-        }
-      }
-    }
-    return hits;
   }
 
   Future<void> _exportPalette() async {
@@ -424,8 +370,6 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
       );
     }
 
-    final String searchQuery = _searchController.text.trim();
-    final List<_PaletteSearchHit> hits = _searchHits(state);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.space20,
@@ -464,11 +408,7 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
             ),
           ],
           const SizedBox(height: 12),
-          Expanded(
-            child: searchQuery.isNotEmpty
-                ? _buildSearchResults(hits, searchQuery)
-                : _buildPaletteContent(state),
-          ),
+          Expanded(child: _buildPaletteContent(state)),
         ],
       ),
     );
@@ -544,362 +484,216 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
     );
   }
 
+  void _changeColor(HSVColor color) {
+    setState(() => _selectedColor = color);
+  }
+
   Widget _buildPaletteContent(PaletteStateData state) {
-    return CustomScrollView(
-      slivers: <Widget>[
-        SliverToBoxAdapter(child: _buildHuePicker()),
-        const SliverToBoxAdapter(child: SizedBox(height: 16)),
-        SliverToBoxAdapter(
-          child: Text(
-            "Hue $_selectedHue°",
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 8)),
-        SliverToBoxAdapter(
-          child: _buildSlotWrap(paletteSlotsForHue(_selectedHue), state),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 20)),
-        SliverToBoxAdapter(
-          child: Card(
-            clipBehavior: Clip.antiAlias,
-            child: ExpansionTile(
-              initiallyExpanded: true,
-              leading: const Icon(Icons.gradient_outlined),
-              title: Text(context.l10n.uiGrayscale),
-              subtitle: const Text("S 0% · V 0 / 20 / 50 / 80 / 100%"),
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.md,
-                    0,
-                    AppSpacing.md,
-                    AppSpacing.md,
+    final color = _selectedColor.toColor();
+    final slotId = paletteExactColorId(color);
+    final matches = paletteColorMatches(
+      state,
+      color,
+      query: _searchController.text,
+    );
+    final inRange = matches
+        .where((hit) => hit.distance <= _radius + 1e-9)
+        .toList();
+    final fallback = inRange.isEmpty
+        ? matches.take(5).toList()
+        : <PaletteColorMatch>[];
+    final picker = Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            PaletteColorPicker(value: _selectedColor, onChanged: _changeColor),
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: color,
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: _buildSlotWrap(paletteGraySlots, state),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    key: ValueKey('palette-hex-$slotId'),
+                    initialValue: '#${slotId.substring(4)}',
+                    decoration: const InputDecoration(labelText: 'HEX'),
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: (text) =>
+                        RegExp(
+                          r'^#?[0-9a-fA-F]{6}$',
+                        ).hasMatch(text?.trim() ?? '')
+                        ? null
+                        : context.l10n.paletteInvalidHex,
+                    onFieldSubmitted: (text) {
+                      final hex = text.trim().replaceFirst('#', '');
+                      if (!RegExp(r'^[0-9a-fA-F]{6}$').hasMatch(hex)) return;
+                      final hsv = HSVColor.fromColor(
+                        Color(0xff000000 | int.parse(hex, radix: 16)),
+                      );
+                      _changeColor(
+                        hsv.saturation == 0 || hsv.value == 0
+                            ? hsv.withHue(_selectedColor.hue)
+                            : hsv,
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
+            const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: AppTextField(
+                    key: const ValueKey('palette-new-entry'),
+                    controller: _newEntryController,
+                    hintText: context.l10n.uiEnterATerm,
+                    maxLength: paletteTermMaxLength,
+                    decoration: InputDecoration(
+                      counterText: '',
+                      errorText: _newEntryError,
+                    ),
+                    onChanged: (_) {
+                      if (_newEntryError != null) {
+                        setState(() => _newEntryError = null);
+                      }
+                    },
+                    onSubmitted: (_) => _addSelectedEntry(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                FilledButton(
+                  key: const ValueKey('palette-add-selected'),
+                  onPressed: _addSelectedEntry,
+                  child: Text(context.l10n.commonAdd),
+                ),
+              ],
+            ),
+            if (_editingEntryId != null) ...[
+              const SizedBox(height: 12),
+              _buildInlineEditor(key: 'edit-$_editingEntryId'),
+            ],
+          ],
+        ),
+      ),
+    );
+    final results = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          context.l10n.paletteSearchRange,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final option in [
+              (0.05, context.l10n.paletteRangePrecise),
+              (0.10, context.l10n.paletteRangeDefault),
+              (0.20, context.l10n.paletteRangeBroad),
+            ])
+              ChoiceChip(
+                key: ValueKey('palette-radius-${option.$1}'),
+                label: Text(option.$2),
+                selected: _radius == option.$1,
+                onSelected: (_) => setState(() => _radius = option.$1),
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (inRange.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Text(context.l10n.paletteNoNearbyEntries),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: SizedBox(height: 24 + MobileModuleInsets.bottomOf(context)),
-        ),
+        for (final hit in inRange) _buildMatch(hit),
+        if (fallback.isNotEmpty) ...[
+          const Divider(),
+          Text(
+            context.l10n.paletteOutsideRange,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          for (final hit in fallback) _buildMatch(hit),
+        ],
       ],
     );
-  }
-
-  Widget _buildHuePicker() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                final double availableWidth = constraints.maxWidth.isFinite
-                    ? constraints.maxWidth
-                    : 520;
-                final double diameter = math.min(availableWidth, 520);
-                return Center(
-                  child: SizedBox.square(
-                    dimension: diameter,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: <Widget>[
-                        Positioned.fill(
-                          child: IgnorePointer(
-                            child: CustomPaint(
-                              painter: const _HueRingPainter(),
-                            ),
-                          ),
-                        ),
-                        Center(
-                          child: Container(
-                            width: diameter * 0.28,
-                            height: diameter * 0.28,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainerLowest,
-                              border: Border.all(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.outlineVariant,
-                              ),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Text(
-                                  "Hue",
-                                  style: Theme.of(context).textTheme.labelMedium
-                                      ?.copyWith(
-                                        color: HSVColor.fromAHSV(
-                                          1,
-                                          _selectedHue.toDouble(),
-                                          0.6,
-                                          0.8,
-                                        ).toColor(),
-                                      ),
-                                ),
-                                Text(
-                                  "$_selectedHue°",
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(
-                                        color: HSVColor.fromAHSV(
-                                          1,
-                                          _selectedHue.toDouble(),
-                                          0.6,
-                                          0.8,
-                                        ).toColor(),
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        for (final int hue in paletteHueDegrees)
-                          ..._buildHueRingItems(hue, diameter),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildHueRingItems(int hue, double diameter) {
-    final bool selected = hue == _selectedHue;
-    final Color swatchColor = HSVColor.fromAHSV(
-      1,
-      hue.toDouble(),
-      0.8,
-      1,
-    ).toColor();
-    final Color foregroundColor = _contentColorFor(swatchColor);
-    final Color outlineColor = selected
-        ? Theme.of(context).colorScheme.onSurface
-        : foregroundColor.withAlpha(120);
-    final double angle = (hue - 90) * math.pi / 180;
-    final double center = diameter / 2;
-    final double buttonSize = diameter < 360 ? 40 : 48;
-    final double buttonRadius = diameter * 0.405;
-    final double labelRadius = diameter * 0.29;
-    final Offset direction = Offset(math.cos(angle), math.sin(angle));
-    final Offset buttonCenter =
-        Offset(center, center) + direction * buttonRadius;
-    final Offset labelCenter = Offset(center, center) + direction * labelRadius;
-
-    return <Widget>[
-      Positioned(
-        left: buttonCenter.dx - buttonSize / 2,
-        top: buttonCenter.dy - buttonSize / 2,
-        width: buttonSize,
-        height: buttonSize,
-        child: Semantics(
-          label: context.l10n.uiHueSaturationBrightness((hue).toString()),
-          button: true,
-          selected: selected,
-          child: IconButton(
-            key: ValueKey<String>("palette-hue-$hue"),
-            tooltip: "Hue $hue°",
-            onPressed: () => _selectHue(hue),
-            style: IconButton.styleFrom(
-              backgroundColor: swatchColor,
-              foregroundColor: foregroundColor,
-              side: BorderSide(color: outlineColor, width: selected ? 3 : 1),
-              shape: const CircleBorder(),
-              padding: EdgeInsets.zero,
-            ),
-            icon: Icon(
-              selected ? Icons.check : Icons.circle,
-              size: selected ? 22 : 8,
-            ),
-          ),
-        ),
-      ),
-      Positioned(
-        left: labelCenter.dx - 27,
-        top: labelCenter.dy - 12,
-        width: 54,
-        height: 24,
-        child: ExcludeSemantics(
-          child: Center(
-            child: Text(
-              "$hue°",
-              maxLines: 1,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                color: selected
-                    ? Colors.green
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        ),
-      ),
-    ];
-  }
-
-  Widget _buildSlotWrap(
-    List<PaletteSlotDefinition> slots,
-    PaletteStateData state,
-  ) {
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final double maxWidth = constraints.maxWidth;
-        final int columns = maxWidth >= 1160
-            ? 4
-            : maxWidth >= 820
-            ? 3
-            : maxWidth >= 540
-            ? 2
-            : 1;
-        const double gap = 10;
-        final double itemWidth = (maxWidth - (columns - 1) * gap) / columns;
-        return Wrap(
-          spacing: gap,
-          runSpacing: gap,
-          children: <Widget>[
-            for (final PaletteSlotDefinition slot in slots)
-              SizedBox(width: itemWidth, child: _buildSlotCard(slot, state)),
-          ],
-        );
-      },
+      builder: (context, constraints) => SingleChildScrollView(
+        padding: EdgeInsets.only(
+          bottom: 24 + MobileModuleInsets.bottomOf(context),
+        ),
+        child: constraints.maxWidth >= 820
+            ? Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(width: 400, child: picker),
+                  const SizedBox(width: 24),
+                  Expanded(child: results),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [picker, const SizedBox(height: 16), results],
+              ),
+      ),
     );
   }
 
-  String _slotSemantics(PaletteSlotDefinition slot) => slot.isGray
-      ? context.l10n.paletteGraySemantics(slot.value.toString())
-      : context.l10n.paletteColorSemantics(
-          slot.hue.toString(),
-          slot.saturation.toString(),
-          slot.value.toString(),
-        );
-
-  Widget _buildSlotCard(PaletteSlotDefinition slot, PaletteStateData state) {
-    final List<String> ids = state.slotEntryIds[slot.id] ?? const <String>[];
-    final List<PaletteEntry> entries = ids
-        .map((String id) => state.entryIndex[id])
-        .whereType<PaletteEntry>()
-        .toList(growable: false);
-    final Color pureColor = _slotColor(slot);
-    final Color cardColor = Color.alphaBlend(
-      pureColor.withAlpha(54),
-      Theme.of(context).colorScheme.surfaceContainerLow,
-    );
-    final Color chipColor = Color.alphaBlend(
-      pureColor.withAlpha(170),
-      Theme.of(context).colorScheme.surfaceContainerHighest,
-    );
-    final Color chipForeground = _contentColorFor(chipColor);
-    final String title = slot.isGray
-        ? "V ${slot.value}%"
-        : "S ${slot.saturation}% · V ${slot.value}%";
-
-    return Semantics(
-      container: true,
-      label: context.l10n.uiEntries2(
-        _slotSemantics(slot),
-        context.formats.integer(entries.length),
-      ),
-      child: Card(
-        key: ValueKey<String>("palette-slot-${slot.id}"),
-        color: cardColor,
-        clipBehavior: Clip.antiAlias,
-        margin: EdgeInsets.zero,
-        child: ExpansionTile(
-          initiallyExpanded: entries.isNotEmpty,
-          leading: Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: pureColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Theme.of(context).colorScheme.outline),
-            ),
-          ),
-          title: Text(title),
-          subtitle: Text(
-            context.l10n.uiEntries3(context.formats.integer(entries.length)),
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              PopupMenuButton<String>(
-                tooltip: context.l10n.uiColorCellActions,
-                onSelected: (String value) {
-                  if (value == "sort") {
-                    final bool changed = _notifier.sortSlotByText(slot.id);
-                    if (!changed) {
-                      AppFeedback.info(context, "目前不需要重新排序");
-                    }
-                  }
-                },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  PopupMenuItem<String>(
-                    value: "sort",
-                    child: Text(context.l10n.uiSortByText),
+  Widget _buildMatch(PaletteColorMatch hit) => Card(
+    child: Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: hit.slot.color,
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
                   ),
-                ],
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ),
-              const Icon(Icons.expand_more),
+              const SizedBox(width: 12),
+              Expanded(child: Text(hit.entry.text, softWrap: true)),
+              IconButton(
+                tooltip: context.l10n.uiEdit2(hit.entry.text),
+                onPressed: () => _beginEdit(hit.entry),
+                icon: const Icon(Icons.edit_outlined),
+              ),
+              IconButton(
+                tooltip: context.l10n.commonDelete,
+                onPressed: () => _removeEntry(hit.entry),
+                icon: const Icon(Icons.delete_outline),
+              ),
             ],
           ),
-          childrenPadding: const EdgeInsets.fromLTRB(
-            AppSpacing.md,
-            0,
-            AppSpacing.md,
-            AppSpacing.md,
+          Text(
+            '#${paletteExactColorId(hit.slot.color).substring(4)}',
+            style: Theme.of(context).textTheme.bodySmall,
           ),
-          children: <Widget>[
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Wrap(
-                spacing: 7,
-                runSpacing: 7,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: <Widget>[
-                  for (final PaletteEntry entry in entries)
-                    if (_editingEntryId == entry.id)
-                      _buildInlineEditor(key: "edit-${entry.id}")
-                    else
-                      InputChip(
-                        key: ValueKey<String>("palette-entry-${entry.id}"),
-                        label: Text(entry.text),
-                        tooltip: context.l10n.uiEdit2((entry.text).toString()),
-                        backgroundColor: chipColor,
-                        labelStyle: TextStyle(color: chipForeground),
-                        deleteIconColor: chipForeground,
-                        side: BorderSide(color: chipForeground.withAlpha(150)),
-                        onPressed: () => _beginEdit(entry),
-                        onDeleted: () => _removeEntry(entry),
-                      ),
-                  if (_addingSlotId == slot.id)
-                    _buildInlineEditor(key: "add-${slot.id}")
-                  else
-                    ActionChip(
-                      key: ValueKey<String>("palette-add-${slot.id}"),
-                      avatar: const Icon(Icons.add, size: 18),
-                      label: Text(context.l10n.uiAddEntry),
-                      onPressed: () => _beginAdd(slot.id),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
   Widget _buildInlineEditor({required String key}) {
     return ConstrainedBox(
@@ -935,83 +729,4 @@ class _PalettesViewState extends ConsumerState<PalettesView> {
       ),
     );
   }
-
-  Widget _buildSearchResults(List<_PaletteSearchHit> hits, String searchQuery) {
-    if (hits.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(
-              Icons.search_off,
-              size: 48,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-            const SizedBox(height: 12),
-            Text(context.l10n.uiNoEntriesContaining((searchQuery).toString())),
-          ],
-        ),
-      );
-    }
-    return ListView.separated(
-      padding: MobileModuleInsets.bottomOf(context) == 0
-          ? null
-          : MobileModuleInsets.scrollPaddingOf(context),
-      itemCount: hits.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
-      itemBuilder: (BuildContext context, int index) {
-        final _PaletteSearchHit hit = hits[index];
-        return ListTile(
-          leading: CircleAvatar(backgroundColor: _slotColor(hit.slot)),
-          title: Text(hit.entry.text),
-          subtitle: Text(_slotSemantics(hit.slot)),
-          trailing: const Icon(Icons.arrow_forward),
-          onTap: () {
-            if (!hit.slot.isGray) {
-              _selectedHue = hit.slot.hue;
-            }
-            _searchController.clear();
-          },
-        );
-      },
-    );
-  }
-}
-
-@immutable
-class _PaletteSearchHit {
-  final PaletteSlotDefinition slot;
-  final PaletteEntry entry;
-
-  const _PaletteSearchHit({required this.slot, required this.entry});
-}
-
-class _HueRingPainter extends CustomPainter {
-  const _HueRingPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Rect bounds = Offset.zero & size;
-    final Offset center = bounds.center;
-    final double radius = size.shortestSide * 0.405;
-    final Paint ringPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(8, size.shortestSide * 0.026)
-      ..shader = const SweepGradient(
-        colors: <Color>[
-          Color(0xFFFF3333),
-          Color(0xFFFFFF33),
-          Color(0xFF33FF33),
-          Color(0xFF33FFFF),
-          Color(0xFF3333FF),
-          Color(0xFFFF33FF),
-          Color(0xFFFF3333),
-        ],
-        transform: GradientRotation(-math.pi / 2),
-      ).createShader(bounds);
-    canvas.drawCircle(center, radius, ringPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _HueRingPainter oldDelegate) => false;
 }

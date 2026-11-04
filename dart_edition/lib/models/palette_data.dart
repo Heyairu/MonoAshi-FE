@@ -1,10 +1,12 @@
 import "dart:convert";
+import "dart:math" as math;
+import "package:flutter/painting.dart";
 
 import "package:characters/characters.dart";
 import "package:flutter/foundation.dart";
 import "package:yaml/yaml.dart";
 
-const int paletteDataVersion = 1;
+const int paletteDataVersion = 2;
 const int paletteTermMaxLength = 80;
 
 enum PaletteSlotKind { color, gray }
@@ -68,6 +70,16 @@ class PaletteSlotDefinition {
   final int saturation;
   final int value;
   final int sortOrder;
+  final Color? exactColor;
+
+  Color get color =>
+      exactColor ??
+      HSVColor.fromAHSV(
+        1,
+        hue % 360.0,
+        saturation / 100,
+        value / 100,
+      ).toColor();
 
   const PaletteSlotDefinition({
     required this.id,
@@ -76,6 +88,7 @@ class PaletteSlotDefinition {
     required this.saturation,
     required this.value,
     required this.sortOrder,
+    this.exactColor,
   });
 
   bool get isGray => kind == PaletteSlotKind.gray;
@@ -128,6 +141,106 @@ final Map<String, PaletteSlotDefinition> paletteSlotById =
         for (final PaletteSlotDefinition slot in allPaletteSlots) slot.id: slot,
       },
     );
+
+// v2 adds exact sRGB keys while retaining v1 HSV keys and their order.
+String paletteExactColorId(Color color) =>
+    "rgb-${(color.toARGB32() & 0xffffff).toRadixString(16).padLeft(6, '0').toUpperCase()}";
+
+PaletteSlotDefinition? resolvePaletteSlot(String id) {
+  final legacy = paletteSlotById[id];
+  if (legacy != null) return legacy;
+  if (!RegExp(r'^rgb-[0-9A-F]{6}$').hasMatch(id)) return null;
+  final color = Color(0xff000000 | int.parse(id.substring(4), radix: 16));
+  final hsv = HSVColor.fromColor(color);
+  return PaletteSlotDefinition(
+    id: id,
+    kind: hsv.saturation == 0 ? PaletteSlotKind.gray : PaletteSlotKind.color,
+    hue: hsv.hue.round() % 360,
+    saturation: (hsv.saturation * 100).round(),
+    value: (hsv.value * 100).round(),
+    sortOrder: 137,
+    exactColor: color,
+  );
+}
+
+Iterable<PaletteSlotDefinition> paletteDefinitions(
+  Iterable<String> keys,
+) sync* {
+  yield* allPaletteSlots;
+  for (final key in keys) {
+    if (!paletteSlotById.containsKey(key)) {
+      final slot = resolvePaletteSlot(key);
+      if (slot != null) yield slot;
+    }
+  }
+}
+
+/// OKLab coordinates use L in [0, 1]; distances are not multiplied by 100.
+List<double> paletteOklab(Color color) {
+  double linear(double v) =>
+      v <= 0.04045 ? v / 12.92 : math.pow((v + 0.055) / 1.055, 2.4).toDouble();
+  final r = linear(color.r), g = linear(color.g), b = linear(color.b);
+  final l = math
+      .pow(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b, 1 / 3)
+      .toDouble();
+  final m = math
+      .pow(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b, 1 / 3)
+      .toDouble();
+  final s = math
+      .pow(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b, 1 / 3)
+      .toDouble();
+  return [
+    0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s,
+  ];
+}
+
+double paletteColorDistance(Color first, Color second) {
+  final a = paletteOklab(first), b = paletteOklab(second);
+  return math.sqrt(
+    List.generate(
+      3,
+      (i) => math.pow(a[i] - b[i], 2).toDouble(),
+    ).reduce((x, y) => x + y),
+  );
+}
+
+class PaletteColorMatch {
+  final PaletteEntry entry;
+  final PaletteSlotDefinition slot;
+  final double distance;
+  const PaletteColorMatch(this.entry, this.slot, this.distance);
+}
+
+/// Each entry is returned once, using its closest color association.
+List<PaletteColorMatch> paletteColorMatches(
+  PaletteStateData state,
+  Color color, {
+  String query = '',
+}) {
+  final closest = <String, PaletteColorMatch>{};
+  final normalized = normalizePaletteTerm(query);
+  for (final placement in state.slotEntryIds.entries) {
+    final slot = resolvePaletteSlot(placement.key);
+    if (slot == null) continue;
+    final distance = paletteColorDistance(color, slot.color);
+    for (final id in placement.value) {
+      final entry = state.entryIndex[id];
+      if (entry == null ||
+          !normalizePaletteTerm(entry.text).contains(normalized)) {
+        continue;
+      }
+      if (!closest.containsKey(id) || distance < closest[id]!.distance) {
+        closest[id] = PaletteColorMatch(entry, slot, distance);
+      }
+    }
+  }
+  return closest.values.toList()..sort((a, b) {
+    final comparison = a.distance.compareTo(b.distance);
+    return comparison != 0 ? comparison : a.entry.id.compareTo(b.entry.id);
+  });
+}
 
 List<PaletteSlotDefinition> paletteSlotsForHue(int hue) {
   return allPaletteSlots
@@ -298,7 +411,9 @@ abstract final class PaletteDataCodec {
     final Map<String, List<String>> normalizedSlots = <String, List<String>>{};
     final Set<String> referencedIds = <String>{};
     if (rawSlots is Map<String, dynamic>) {
-      for (final PaletteSlotDefinition slot in allPaletteSlots) {
+      for (final PaletteSlotDefinition slot in paletteDefinitions(
+        rawSlots.keys,
+      )) {
         final dynamic rawIds = rawSlots[slot.id];
         if (rawIds == null) {
           continue;
@@ -324,7 +439,7 @@ abstract final class PaletteDataCodec {
         }
       }
       for (final String rawSlotId in rawSlots.keys) {
-        if (!paletteSlotById.containsKey(rawSlotId)) {
+        if (resolvePaletteSlot(rawSlotId) == null) {
           warnings.add("忽略未知的 slot：$rawSlotId");
         }
       }
@@ -350,7 +465,9 @@ abstract final class PaletteDataCodec {
   static String encode(PaletteStateData data) {
     final Map<String, dynamic> slots = <String, dynamic>{};
     final Set<String> referencedIds = <String>{};
-    for (final PaletteSlotDefinition slot in allPaletteSlots) {
+    for (final PaletteSlotDefinition slot in paletteDefinitions(
+      data.slotEntryIds.keys,
+    )) {
       final List<String> ids = data.slotEntryIds[slot.id] ?? const <String>[];
       final List<String> validIds = <String>[];
       final Set<String> seen = <String>{};
@@ -390,8 +507,7 @@ abstract final class PaletteDataCodec {
 
 /// YAML codec used by the palette import/export UI.
 ///
-/// The storage codec remains JSON so existing local palette files are not
-/// migrated as a side effect of exporting or importing a palette.
+/// v2 accepts legacy HSV slots and exact RGB placements in both formats.
 abstract final class PaletteYamlCodec {
   static PaletteDecodeResult decode(String raw, {DateTime? now}) {
     final dynamic decoded = _yamlToJsonCompatible(loadYaml(raw));
@@ -422,7 +538,9 @@ abstract final class PaletteYamlCodec {
     final Map<String, List<String>> slotEntryIds = <String, List<String>>{};
     final Map<String, PaletteEntry> entryIndex = <String, PaletteEntry>{};
 
-    for (final PaletteSlotDefinition slot in allPaletteSlots) {
+    for (final PaletteSlotDefinition slot in paletteDefinitions(
+      rawSlots.keys,
+    )) {
       final dynamic rawTerms = rawSlots[slot.id];
       if (rawTerms == null) {
         continue;
@@ -459,7 +577,7 @@ abstract final class PaletteYamlCodec {
       }
     }
     for (final String rawSlotId in rawSlots.keys) {
-      if (!paletteSlotById.containsKey(rawSlotId)) {
+      if (resolvePaletteSlot(rawSlotId) == null) {
         warnings.add("忽略未知的 slot：$rawSlotId");
       }
     }
@@ -478,7 +596,9 @@ abstract final class PaletteYamlCodec {
       ..writeln("version: $paletteDataVersion")
       ..writeln("slots:");
 
-    for (final PaletteSlotDefinition slot in allPaletteSlots) {
+    for (final PaletteSlotDefinition slot in paletteDefinitions(
+      data.slotEntryIds.keys,
+    )) {
       final List<String> terms = _validTerms(data, slot.id);
       output.write("  ${_yamlString(slot.id)}:");
       if (terms.isEmpty) {

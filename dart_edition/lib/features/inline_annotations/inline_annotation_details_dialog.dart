@@ -113,6 +113,7 @@ class _InlineAnnotationQuickEditorState
       final annotation = parsed.single;
       _rawSyntaxController.text = InlineAnnotationSyntax.format(
         kind: annotation.kind,
+        isImplicit: annotation.isImplicit,
         state: annotation.state,
         colors: annotation.colors,
         targetId: annotation.targetId,

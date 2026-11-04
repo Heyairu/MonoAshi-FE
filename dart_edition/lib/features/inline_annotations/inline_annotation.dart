@@ -50,6 +50,7 @@ final class InlineAnnotationColorCode {
 final class InlineAnnotation {
   final InlineAnnotationKind kind;
   final InlineAnnotationState state;
+  final bool isImplicit;
   final InlineAnnotationColorCode colors;
   final String? targetId;
   final InlineAnnotationTargetStatus targetStatus;
@@ -68,6 +69,7 @@ final class InlineAnnotation {
   const InlineAnnotation({
     required this.kind,
     required this.state,
+    this.isImplicit = false,
     required this.colors,
     required this.targetId,
     required this.targetStatus,

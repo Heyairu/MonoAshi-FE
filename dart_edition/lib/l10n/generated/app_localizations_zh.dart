@@ -1863,6 +1863,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get uiLanguage => '語言';
 
   @override
+  String get uiEnglish => '英式';
+
+  @override
+  String get uiNameUnitedKingdom => '英國';
+
+  @override
+  String get uiNameUnitedStates => '美國';
+
+  @override
+  String get uiNameCanada => '加拿大';
+
+  @override
+  String get uiNameAustralia => '澳洲';
+
+  @override
   String get uiJapanese => '日式';
 
   @override
@@ -1875,13 +1890,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get uiGender => '性別';
 
   @override
-  String get uiAllUnavailable => '全部（目前不可用）';
-
-  @override
   String get uiMale => '男性';
 
   @override
-  String get uiNeutralUnavailable => '中性（目前不可用）';
+  String get uiNeutral => '中性';
 
   @override
   String get uiFemale => '女性';
@@ -8163,6 +8175,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get copilotErrorValidation => '請確認目前章節、所選資源及 API URL 設定後重試。';
+
+  @override
+  String get uiImplicitMention => '隱式提及';
+
+  @override
+  String get paletteSearchRange => '搜尋範圍';
+
+  @override
+  String get paletteRangePrecise => '較精確';
+
+  @override
+  String get paletteRangeDefault => '適中';
+
+  @override
+  String get paletteRangeBroad => '較寬鬆';
+
+  @override
+  String get paletteNoNearbyEntries => '範圍內沒有相近詞條';
+
+  @override
+  String get paletteOutsideRange => '最近的詞條（超出範圍）';
+
+  @override
+  String get paletteInvalidHex => '請輸入六位 HEX 色碼';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).

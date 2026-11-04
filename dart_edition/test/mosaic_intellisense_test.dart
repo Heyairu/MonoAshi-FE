@@ -82,6 +82,7 @@ void main() {
       "小艾",
       "愛麗絲",
       "新增別名…",
+      "隱式提及",
       "輸入其他顯示文字…",
     ]);
     expect(
@@ -148,7 +149,7 @@ void main() {
     expect(searching?.candidates, hasLength(1));
     expect(searching?.candidates.single.label, "城門衝突");
     expect(
-      searching?.candidates.single.children.single.customDisplayText,
+      searching?.candidates.single.children.last.customDisplayText,
       isTrue,
     );
     expect(searching?.candidates.single.detail, contains("第一卷 › 王都篇"));

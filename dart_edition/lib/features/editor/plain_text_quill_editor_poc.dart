@@ -509,6 +509,7 @@ class PlainTextQuillEditorPoc extends StatefulWidget {
     this.selection,
     this.clipboardTextTransform,
     this.mentionMarkers = const <PlainTextQuillMentionMarker>[],
+    this.highContrast = false,
     this.placeholder,
     this.overwriteMode = false,
     this.tabSpaces = "\u3000\u3000",
@@ -568,6 +569,7 @@ class PlainTextQuillEditorPoc extends StatefulWidget {
   /// Optional display-to-reader-text transform used only for clipboard data.
   final String Function(String text)? clipboardTextTransform;
   final List<PlainTextQuillMentionMarker> mentionMarkers;
+  final bool highContrast;
   final String? placeholder;
   final bool overwriteMode;
   final String tabSpaces;
@@ -595,6 +597,8 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
   int _textRevision = 0;
   bool _isApplyingExternalContent = false;
   bool _nonTypingEdit = false;
+  bool _mentionStyleScheduled = false;
+  bool _hasMentionStyles = false;
   final _editorKey = GlobalKey<EditorState>();
   QuillRawEditorState? _inputState;
   TextEditingValue? _compositionBefore;
@@ -700,6 +704,7 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
       _compositionGeneration++;
       return;
     }
+    _scheduleMentionStyles();
     final before = _compositionBefore;
     if (before == null) return;
     final generation = ++_compositionGeneration;
@@ -843,6 +848,7 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
     _scrollController = ScrollController();
     _lastReportedSelection = _editableSelection;
     widget.commands?._attach(this);
+    _scheduleMentionStyles();
     widget.searchController
       ?.._attach(this)
       ..addListener(_handleSearchStateChanged);
@@ -860,6 +866,7 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
     } else if (oldWidget._hostSelection != widget._hostSelection) {
       _applyExternalSelection(widget._hostSelection);
     }
+    _scheduleMentionStyles();
     if (oldWidget.commands != widget.commands) {
       oldWidget.commands?._detach(this);
       widget.commands?._attach(this);
@@ -871,6 +878,94 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
       widget.searchController
         ?.._attach(this)
         ..addListener(_handleSearchStateChanged);
+    }
+  }
+
+  // This attribute exists only in Quill's in-memory document. It is removed
+  // at the plain-text boundary and never becomes part of the project text.
+  void _scheduleMentionStyles() {
+    if (_mentionStyleScheduled) return;
+    _mentionStyleScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _mentionStyleScheduled = false;
+      if (mounted) _syncMentionStyles();
+    });
+  }
+
+  void _syncMentionStyles() {
+    final composing = _inputState?.composingRange.value;
+    if (composing != null && composing.isValid && !composing.isCollapsed) {
+      return;
+    }
+    final key = PlainTextQuillAdapter.implicitMentionAttribute;
+    final ranges = <TextRange>[
+      for (final marker in widget.mentionMarkers)
+        if (marker.annotation.isImplicit)
+          TextRange(
+            start: _plainTextDocument.rawOffsetToDocumentOffset(
+              marker.offset + 1,
+            ),
+            end: _plainTextDocument.rawOffsetToDocumentOffset(
+              marker.offset + 1 + marker.annotation.displayText.length,
+            ),
+          ),
+    ];
+    if (ranges.isEmpty && !_hasMentionStyles) return;
+    ranges.sort((a, b) => a.start.compareTo(b.start));
+    var rangeIndex = 0;
+    final delta = Delta();
+    var offset = 0;
+    var changed = false;
+    for (final operation in _controller.document.toDelta().toList()) {
+      final value = operation.data;
+      if (value is! String) continue;
+      final existing = operation.attributes?[key] == true;
+      var start = 0;
+      while (start < value.length) {
+        final position = offset + start;
+        while (rangeIndex < ranges.length &&
+            ranges[rangeIndex].end <= position) {
+          rangeIndex++;
+        }
+        final range = rangeIndex < ranges.length ? ranges[rangeIndex] : null;
+        final wanted =
+            value.codeUnitAt(start) != 10 &&
+            range != null &&
+            position >= range.start &&
+            position < range.end;
+        var end = value.length;
+        if (range != null) {
+          final boundary = wanted ? range.end : range.start;
+          if (boundary > position && boundary - offset < end) {
+            end = boundary - offset;
+          }
+        }
+        final newline = value.indexOf('\n', start);
+        if (newline == start) {
+          end = start + 1;
+        } else if (newline >= 0 && newline < end) {
+          end = newline;
+        }
+        if (existing == wanted) {
+          delta.retain(end - start);
+        } else {
+          delta.retain(end - start, {key: wanted ? true : null});
+          changed = true;
+        }
+        start = end;
+      }
+      offset += value.length;
+    }
+    _hasMentionStyles = ranges.isNotEmpty;
+    if (!changed) return;
+    final document = _controller.document;
+    final ignoring = document.history.ignoreChange;
+    document.history.ignoreChange = true;
+    try {
+      document.compose(delta, ChangeSource.silent);
+      document.history.transform(delta);
+    } finally {
+      document.history.ignoreChange = ignoring;
     }
   }
 
@@ -928,6 +1023,7 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
     _isApplyingExternalContent = true;
     try {
       _plainTextDocument = nextDocument;
+      _hasMentionStyles = false;
       _lastEmittedText = PlainTextQuillAdapter.toPlainText(
         nextDocument.document,
       );
@@ -989,6 +1085,7 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
       _textRevision += 1;
       widget.searchController?._handleDocumentChanged();
       widget.onChanged(nextText);
+      _scheduleMentionStyles();
     }
     _reportLocalSelectionIfNeeded();
   }
@@ -1356,6 +1453,22 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
               expands: true,
               padding: widget.padding,
               placeholder: widget.placeholder ?? context.l10n.uiStartWriting,
+              customStyleBuilder: (attribute) {
+                if (attribute.key !=
+                        PlainTextQuillAdapter.implicitMentionAttribute ||
+                    attribute.value != true) {
+                  return const TextStyle();
+                }
+                final highContrast =
+                    widget.highContrast ||
+                    (MediaQuery.maybeOf(context)?.highContrast ?? false);
+                return TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(
+                    alpha: highContrast ? 1 : 0.6,
+                  ),
+                );
+              },
               customStyles: DefaultStyles(
                 paragraph: defaultParagraph.copyWith(
                   style: defaultParagraph.style.copyWith(height: 1.6),

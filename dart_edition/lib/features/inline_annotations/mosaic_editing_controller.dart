@@ -150,7 +150,25 @@ class MosaicEditingController extends CodeController {
         if (_displayTextRange(entry) case final range when !range.isCollapsed)
           MosaicStyleRange(
             range: range,
-            style: palette.styleFor(entry.annotation.colors),
+            style: entry.annotation.isImplicit
+                ? palette
+                      .styleFor(entry.annotation.colors)
+                      .copyWith(
+                        fontStyle: FontStyle.italic,
+                        color:
+                            (palette.styleFor(entry.annotation.colors).color ??
+                                    Theme.of(context).colorScheme.onSurface)
+                                .withValues(
+                                  alpha:
+                                      (MediaQuery.maybeOf(
+                                            context,
+                                          )?.highContrast ==
+                                          true)
+                                      ? 1
+                                      : 0.6,
+                                ),
+                      )
+                : palette.styleFor(entry.annotation.colors),
           ),
     ];
   }
@@ -418,6 +436,7 @@ class MosaicEditingController extends CodeController {
         try {
           replacementSyntax = InlineAnnotationSyntax.format(
             kind: replacement.kind,
+            isImplicit: replacement.isImplicit,
             state: replacement.state,
             colors: replacement.colors,
             targetId: replacement.targetId,
@@ -458,6 +477,7 @@ class MosaicEditingController extends CodeController {
       try {
         final source = InlineAnnotationSyntax.format(
           kind: annotation.kind,
+          isImplicit: annotation.isImplicit,
           state: annotation.state,
           colors: annotation.colors,
           targetId: targetId,

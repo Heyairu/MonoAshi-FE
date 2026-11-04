@@ -68,7 +68,7 @@ void main() {
     parents: <String>[baseRevision.revisionId],
   );
 
-  test('P2P merges independent word goals and explicit inheritance', () {
+  test("P2P merges independent word goals and explicit inheritance", () {
     final base = ProjectData.empty(projectUUID: _projectUuid)
       ..writingGoals = const ProjectWritingGoals(chapterWordGoal: 2000);
     final local = ProjectData.empty(projectUUID: _projectUuid)
@@ -79,7 +79,7 @@ void main() {
         totalWordGoal: 120000,
       );
     final plan = const P2pProjectMergeEngine().createPlan(
-      sessionId: 'goal-merge',
+      sessionId: "goal-merge",
       baseRevision: baseRevision,
       localRevision: localRevision,
       remoteRevision: remoteRevision,
@@ -94,14 +94,14 @@ void main() {
     );
   });
 
-  test('P2P reports conflicting chapter word goals', () {
+  test("P2P reports conflicting chapter word goals", () {
     final base = ProjectData.empty(projectUUID: _projectUuid);
     final local = ProjectData.empty(projectUUID: _projectUuid)
       ..writingGoals = const ProjectWritingGoals(chapterWordGoal: 3000);
     final remote = ProjectData.empty(projectUUID: _projectUuid)
       ..writingGoals = const ProjectWritingGoals(chapterWordGoal: 4000);
     final plan = const P2pProjectMergeEngine().createPlan(
-      sessionId: 'goal-conflict',
+      sessionId: "goal-conflict",
       baseRevision: baseRevision,
       localRevision: localRevision,
       remoteRevision: remoteRevision,
@@ -111,7 +111,7 @@ void main() {
     );
     expect(plan.conflicts, hasLength(1));
     final conflict = plan.conflicts.single;
-    expect(conflict.fieldPath, contains('每章字數目標'));
+    expect(conflict.fieldPath, contains("每章字數目標"));
     final merged = plan.apply(
       P2pConflictResolutionResult({
         conflict.conflictId: P2pConflictSide.remote,
@@ -120,18 +120,18 @@ void main() {
     expect(merged.writingGoals.chapterWordGoal, 4000);
   });
 
-  test('P2P merge keeps independent project phrase additions', () {
+  test("P2P merge keeps independent project phrase additions", () {
     final base = ProjectData.empty(projectUUID: _projectUuid);
     final local = ProjectData.empty(projectUUID: _projectUuid)
       ..phrases = [
-        _phrase('f61e1304-03bc-47c2-aa61-79a9ee67b5c0', 'local', '本機'),
+        _phrase("f61e1304-03bc-47c2-aa61-79a9ee67b5c0", "local", "本機"),
       ];
     final remote = ProjectData.empty(projectUUID: _projectUuid)
       ..phrases = [
-        _phrase('eb438a56-46bf-4c84-bb42-f41a0c8a0e5d', 'remote', '對方'),
+        _phrase("eb438a56-46bf-4c84-bb42-f41a0c8a0e5d", "remote", "對方"),
       ];
     final plan = const P2pProjectMergeEngine().createPlan(
-      sessionId: 'phrases-independent',
+      sessionId: "phrases-independent",
       baseRevision: baseRevision,
       localRevision: localRevision,
       remoteRevision: remoteRevision,
@@ -145,20 +145,20 @@ void main() {
           .apply(P2pConflictResolutionResult({}))
           .phrases
           .map((phrase) => phrase.shortcut),
-      containsAll(['local', 'remote']),
+      containsAll(["local", "remote"]),
     );
   });
 
-  test('P2P merge asks for concurrent edits of one phrase', () {
-    const id = 'f61e1304-03bc-47c2-aa61-79a9ee67b5c0';
+  test("P2P merge asks for concurrent edits of one phrase", () {
+    const id = "f61e1304-03bc-47c2-aa61-79a9ee67b5c0";
     final base = ProjectData.empty(projectUUID: _projectUuid)
-      ..phrases = [_phrase(id, 'intro', '原文')];
+      ..phrases = [_phrase(id, "intro", "原文")];
     final local = ProjectData.empty(projectUUID: _projectUuid)
-      ..phrases = [_phrase(id, 'intro', '本機修改')];
+      ..phrases = [_phrase(id, "intro", "本機修改")];
     final remote = ProjectData.empty(projectUUID: _projectUuid)
-      ..phrases = [_phrase(id, 'intro', '遠端修改')];
+      ..phrases = [_phrase(id, "intro", "遠端修改")];
     final plan = const P2pProjectMergeEngine().createPlan(
-      sessionId: 'phrases-conflict',
+      sessionId: "phrases-conflict",
       baseRevision: baseRevision,
       localRevision: localRevision,
       remoteRevision: remoteRevision,
@@ -167,22 +167,22 @@ void main() {
       remote: remote,
     );
     expect(plan.conflicts, hasLength(1));
-    expect(plan.conflicts.single.groupType, 'phrase');
+    expect(plan.conflicts.single.groupType, "phrase");
     final merged = plan.apply(
       P2pConflictResolutionResult({
         plan.conflicts.single.conflictId: P2pConflictSide.remote,
       }),
     );
-    expect(merged.phrases.single.body, '遠端修改');
+    expect(merged.phrases.single.body, "遠端修改");
   });
 
-  test('P2P merge preserves unreadable phrase recovery payload', () {
+  test("P2P merge preserves unreadable phrase recovery payload", () {
     final base = ProjectData.empty(projectUUID: _projectUuid);
     final local = ProjectData.empty(projectUUID: _projectUuid);
     final remote = ProjectData.empty(projectUUID: _projectUuid)
-      ..phrasesRecoveryPayload = 'future-payload';
+      ..phrasesRecoveryPayload = "future-payload";
     final plan = const P2pProjectMergeEngine().createPlan(
-      sessionId: 'phrase-recovery',
+      sessionId: "phrase-recovery",
       baseRevision: baseRevision,
       localRevision: localRevision,
       remoteRevision: remoteRevision,
@@ -193,30 +193,30 @@ void main() {
     expect(plan.conflicts, isEmpty);
     expect(
       plan.apply(P2pConflictResolutionResult({})).phrasesRecoveryPayload,
-      'future-payload',
+      "future-payload",
     );
   });
 
-  test('P2P merge resolves duplicate shortcuts across phrase IDs', () {
+  test("P2P merge resolves duplicate shortcuts across phrase IDs", () {
     final local = ProjectData.empty(projectUUID: _projectUuid)
       ..phrases = [
-        _phrase('f61e1304-03bc-47c2-aa61-79a9ee67b5c0', 'intro', '本機'),
+        _phrase("f61e1304-03bc-47c2-aa61-79a9ee67b5c0", "intro", "本機"),
       ];
     final remote = ProjectData.empty(projectUUID: _projectUuid)
       ..phrases = [
-        _phrase('eb438a56-46bf-4c84-bb42-f41a0c8a0e5d', 'INTRO', '對方'),
+        _phrase("eb438a56-46bf-4c84-bb42-f41a0c8a0e5d", "INTRO", "對方"),
       ];
     final plan = const P2pProjectMergeEngine().createPlanWithoutCommonAncestor(
-      sessionId: 'phrases-shortcut',
+      sessionId: "phrases-shortcut",
       localRevision: localRevision,
       remoteRevision: remoteRevision,
       local: local,
       remote: remote,
-      localRemainderSignature: 'same',
-      remoteRemainderSignature: 'same',
+      localRemainderSignature: "same",
+      remoteRemainderSignature: "same",
     );
     expect(plan.conflicts, hasLength(1));
-    expect(plan.conflicts.single.groupType, 'phraseLibrary');
+    expect(plan.conflicts.single.groupType, "phraseLibrary");
     expect(
       plan
           .apply(
@@ -227,23 +227,23 @@ void main() {
           .phrases
           .single
           .body,
-      '本機',
+      "本機",
     );
   });
 
-  test('verified XML P2P merge retains project phrases', () {
+  test("verified XML P2P merge retains project phrases", () {
     final base = ProjectData.empty(projectUUID: _projectUuid);
     final local = ProjectData.empty(projectUUID: _projectUuid)
       ..phrases = [
-        _phrase('f61e1304-03bc-47c2-aa61-79a9ee67b5c0', 'local', '本機'),
+        _phrase("f61e1304-03bc-47c2-aa61-79a9ee67b5c0", "local", "本機"),
       ];
     final remote = ProjectData.empty(projectUUID: _projectUuid)
       ..phrases = [
-        _phrase('eb438a56-46bf-4c84-bb42-f41a0c8a0e5d', 'remote', '對方'),
+        _phrase("eb438a56-46bf-4c84-bb42-f41a0c8a0e5d", "remote", "對方"),
       ];
     const service = P2pProjectMergeService();
     final plan = service.createPlanFromVerifiedXml(
-      sessionId: 'phrases-xml',
+      sessionId: "phrases-xml",
       baseRevision: baseRevision,
       localRevision: localRevision,
       remoteRevision: remoteRevision,
@@ -252,7 +252,7 @@ void main() {
       remoteXml: FileService.generateProjectXMLWithoutLatestSaveUpdate(remote),
     );
     expect(
-      plan.conflicts.where((conflict) => conflict.groupType == 'phrase'),
+      plan.conflicts.where((conflict) => conflict.groupType == "phrase"),
       isEmpty,
     );
     final xml = service.resolveToXml(
@@ -264,7 +264,7 @@ void main() {
     );
     expect(
       FileService.parseProjectXML(xml).phrases.map((phrase) => phrase.shortcut),
-      containsAll(['local', 'remote']),
+      containsAll(["local", "remote"]),
     );
   });
 

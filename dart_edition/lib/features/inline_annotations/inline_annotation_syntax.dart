@@ -23,6 +23,7 @@ final class InlineAnnotationSyntax {
   static String format({
     required InlineAnnotationKind kind,
     InlineAnnotationState state = InlineAnnotationState.none,
+    bool isImplicit = false,
     InlineAnnotationColorCode colors = const InlineAnnotationColorCode(
       background: "B",
       foreground: "0",
@@ -34,6 +35,9 @@ final class InlineAnnotationSyntax {
     if (kind == InlineAnnotationKind.emphasis &&
         state != InlineAnnotationState.none) {
       throw const FormatException("emphasis annotations cannot have a state");
+    }
+    if (isImplicit && kind == InlineAnnotationKind.emphasis) {
+      throw const FormatException("emphasis cannot be implicit");
     }
     final kindSymbol = switch (kind) {
       InlineAnnotationKind.character => "@",
@@ -60,7 +64,7 @@ final class InlineAnnotationSyntax {
         ? ""
         : "{${escape(note)}}";
     final source =
-        "//$kindSymbol$stateSymbol$colorSyntax<$content>$normalizedNote//";
+        "//$kindSymbol${isImplicit ? "~" : ""}$stateSymbol$colorSyntax<$content>$normalizedNote//";
     if (const InlineAnnotationParser().parse(source).length != 1) {
       throw const FormatException("values do not form a valid annotation");
     }

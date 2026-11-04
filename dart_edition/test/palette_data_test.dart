@@ -123,7 +123,7 @@ void main() {
       final String encoded = PaletteYamlCodec.encode(source);
       final PaletteDecodeResult decoded = PaletteYamlCodec.decode(encoded);
 
-      expect(encoded, startsWith("version: 1"));
+      expect(encoded, startsWith("version: 2"));
       expect(encoded, contains('  "h000-s100-v020":'));
       expect(encoded, contains('    - "焦灼"'));
       expect(encoded, contains('  "h018-s100-v020": []'));

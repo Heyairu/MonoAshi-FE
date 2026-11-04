@@ -132,6 +132,7 @@ final class PhraseInsertionService {
           targetExists(annotation.kind, targetId)
               ? InlineAnnotationSyntax.format(
                   kind: annotation.kind,
+                  isImplicit: annotation.isImplicit,
                   state: annotation.state,
                   colors: annotation.colors,
                   targetId: targetId,

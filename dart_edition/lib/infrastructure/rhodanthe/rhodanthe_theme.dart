@@ -3,9 +3,14 @@ import "package:flutter/material.dart";
 @immutable
 final class RhodantheTheme extends ThemeExtension<RhodantheTheme> {
   final Map<String, Color> colors;
+  final double implicitMentionOpacity;
+  final Color defaultForeground;
 
-  RhodantheTheme({required Map<String, Color> colors})
-    : colors = Map<String, Color>.unmodifiable(colors);
+  RhodantheTheme({
+    required Map<String, Color> colors,
+    this.implicitMentionOpacity = 0.6,
+    this.defaultForeground = Colors.black,
+  }) : colors = Map<String, Color>.unmodifiable(colors);
 
   factory RhodantheTheme.light() => RhodantheTheme(
     colors: const <String, Color>{
@@ -39,6 +44,7 @@ final class RhodantheTheme extends ThemeExtension<RhodantheTheme> {
   );
 
   factory RhodantheTheme.dark() => RhodantheTheme(
+    defaultForeground: Colors.white,
     colors: const <String, Color>{
       "search.current.foreground": Color(0xFFFFFFFF),
       "search.current.background": Color(0xFF8B1E1E),
@@ -73,6 +79,10 @@ final class RhodantheTheme extends ThemeExtension<RhodantheTheme> {
     Brightness brightness = Brightness.light,
   }) {
     return RhodantheTheme(
+      implicitMentionOpacity: 1,
+      defaultForeground: brightness == Brightness.dark
+          ? Colors.white
+          : Colors.black,
       colors: brightness == Brightness.dark
           ? const <String, Color>{
               "search.current.foreground": Color(0xFFFFFFFF),
@@ -113,7 +123,11 @@ final class RhodantheTheme extends ThemeExtension<RhodantheTheme> {
 
   factory RhodantheTheme.resolve(BuildContext context) {
     final configured = Theme.of(context).extension<RhodantheTheme>();
-    if (configured != null) return configured;
+    if (configured != null) {
+      return MediaQuery.maybeOf(context)?.highContrast == true
+          ? configured.copyWith(implicitMentionOpacity: 1)
+          : configured;
+    }
     final brightness = Theme.of(context).brightness;
     if (MediaQuery.maybeOf(context)?.highContrast ?? false) {
       return RhodantheTheme.highContrast(brightness: brightness);
@@ -123,11 +137,30 @@ final class RhodantheTheme extends ThemeExtension<RhodantheTheme> {
         : RhodantheTheme.light();
   }
 
-  Color? resolveColor(String token) => colors[token];
+  Color? resolveColor(String token, {Color? baseForeground}) {
+    const prefix = "annotation.implicit.";
+    if (token.startsWith(prefix)) {
+      final suffix = token.substring(prefix.length);
+      final color = suffix == "foreground"
+          ? baseForeground ?? defaultForeground
+          : colors["annotation.$suffix"];
+      return color?.withValues(alpha: implicitMentionOpacity);
+    }
+    return colors[token];
+  }
 
   @override
-  RhodantheTheme copyWith({Map<String, Color>? colors}) {
-    return RhodantheTheme(colors: colors ?? this.colors);
+  RhodantheTheme copyWith({
+    Map<String, Color>? colors,
+    double? implicitMentionOpacity,
+    Color? defaultForeground,
+  }) {
+    return RhodantheTheme(
+      colors: colors ?? this.colors,
+      implicitMentionOpacity:
+          implicitMentionOpacity ?? this.implicitMentionOpacity,
+      defaultForeground: defaultForeground ?? this.defaultForeground,
+    );
   }
 
   @override
@@ -135,6 +168,14 @@ final class RhodantheTheme extends ThemeExtension<RhodantheTheme> {
     if (other == null) return this;
     final tokens = <String>{...colors.keys, ...other.colors.keys};
     return RhodantheTheme(
+      implicitMentionOpacity:
+          implicitMentionOpacity +
+          (other.implicitMentionOpacity - implicitMentionOpacity) * t,
+      defaultForeground: Color.lerp(
+        defaultForeground,
+        other.defaultForeground,
+        t,
+      )!,
       colors: <String, Color>{
         for (final token in tokens)
           token:

@@ -73,13 +73,19 @@ void main() {
           ),
         ),
       );
+      expect(
+        find.ancestor(of: find.text("搜尋"), matching: find.byType(ChoiceChip)),
+        findsNothing,
+      );
+      await tester.tap(find.byTooltip("搜尋"));
+      await tester.pump();
+      expect(open, isTrue);
       final searchTab = find.ancestor(
         of: find.text("搜尋"),
         matching: find.byType(ChoiceChip),
       );
-      await tester.tap(searchTab);
-      await tester.pump();
-      expect(open, isTrue);
+      expect(searchTab, findsOneWidget);
+      expect(find.byTooltip("搜尋"), findsNothing);
       void expectVisibleStates() {
         if (mode == ToolbarMode.full) return;
         for (final option in FindReplaceOption.values) {
@@ -240,6 +246,19 @@ void main() {
           "search",
         );
         expect(find.byType(FilterChip), findsNothing);
+        await tester.tap(find.byTooltip("Close"));
+        await tester.pump();
+        expect(find.byType(FindReplaceBar), findsNothing);
+        expect(
+          find.ancestor(of: find.text("搜尋"), matching: find.byType(ChoiceChip)),
+          findsNothing,
+        );
+        expect(
+          tester
+              .widget<MaterialRibbon>(find.byType(MaterialRibbon))
+              .selectedTabId,
+          "home",
+        );
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pumpWidget(const SizedBox.shrink());
         container.dispose();

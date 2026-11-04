@@ -37,12 +37,12 @@ void main() {
     expect(loadResult.usedSeed, isTrue);
 
     final PaletteMutationResult added = notifier.addEntry(
-      slotId: "h000-s100-v020",
+      slotId: "rgb-123ABC",
       text: "焦灼",
     );
     expect(added.changed, isTrue);
     expect(
-      notifier.addEntry(slotId: "h000-s100-v020", text: " 焦灼 ").error,
+      notifier.addEntry(slotId: "rgb-123ABC", text: " 焦灼 ").error,
       "此色格已有相同詞條",
     );
 
@@ -66,14 +66,14 @@ void main() {
     await notifier.loadFromRepository();
 
     final String firstId = notifier
-        .addEntry(slotId: "h000-s100-v020", text: "B")
+        .addEntry(slotId: "rgb-123ABC", text: "B")
         .entryId!;
     final String secondId = notifier
-        .addEntry(slotId: "h000-s100-v020", text: "A")
+        .addEntry(slotId: "rgb-123ABC", text: "A")
         .entryId!;
-    expect(notifier.sortSlotByText("h000-s100-v020"), isTrue);
+    expect(notifier.sortSlotByText("rgb-123ABC"), isTrue);
     expect(
-      container.read(paletteStateProvider).slotEntryIds["h000-s100-v020"],
+      container.read(paletteStateProvider).slotEntryIds["rgb-123ABC"],
       <String>[secondId, firstId],
     );
 

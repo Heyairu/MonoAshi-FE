@@ -44,7 +44,7 @@ final class InlineAnnotationRhodantheAdapter {
           )
         : RhodantheRange(entry.labelRange.start, entry.labelRange.end);
     final annotationId =
-        "inline:$documentRevision:${annotation.sourceRange.start}:$index";
+        "${annotation.isImplicit ? rhodantheImplicitAnnotationIdPrefix : "inline:"}$documentRevision:${annotation.sourceRange.start}:$index";
     return RhodantheExternalAnnotation(
       annotationId: annotationId,
       source: "inlineMarkup",
@@ -52,12 +52,22 @@ final class InlineAnnotationRhodantheAdapter {
       ring: 4,
       range: displayRange,
       style: RhodantheStyleTokenSet(
-        foreground: _token(annotation.colors.foreground, "foreground"),
+        foreground: annotation.isImplicit
+            ? _implicitForegroundToken(annotation.colors.foreground)
+            : _token(annotation.colors.foreground, "foreground"),
+        slant: annotation.isImplicit ? "italic" : null,
         background: _token(annotation.colors.background, "background"),
         interaction: annotationId,
       ),
       payloadId: annotation.targetId,
     );
+  }
+
+  String _implicitForegroundToken(String code) {
+    final token = _token(code, "foreground");
+    return token == null
+        ? "annotation.implicit.foreground"
+        : token.replaceFirst("annotation.", "annotation.implicit.");
   }
 
   String? _token(String code, String channel) {

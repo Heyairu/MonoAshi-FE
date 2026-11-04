@@ -398,3 +398,53 @@ fn raw_ffi_rejects_null_handles_and_oversized_inputs_before_dereferencing() {
         rhodanthe_engine_free(handle);
     }
 }
+
+#[test]
+fn implicit_mention_style_survives_bridge_and_search_arbitration() {
+    let mut bridge = RhodantheBridge::new();
+    let opened: Value = serde_json::from_slice(
+        &bridge.dispatch_json(
+            &serde_json::to_vec(&envelope(
+                100,
+                "openDocument",
+                Some(json!({
+                    "documentId": "implicit", "revision": 1, "fullText": "（Alice）"
+                })),
+            ))
+            .unwrap(),
+        ),
+    )
+    .unwrap();
+    assert_eq!(opened["ok"], true);
+    let result: Value = serde_json::from_slice(&bridge.dispatch_json(
+        &serde_json::to_vec(&envelope(101, "analyze", Some(json!({
+            "documentId": "implicit", "revision": 1,
+            "search": {"query": "Alice", "queryRevision": 1, "activeMatchIndex": 0},
+            "externalAnnotations": [{
+                "annotationId": "inline-implicit:alice", "source": "inlineMarkup", "sourceOrder": 0,
+                "ring": 4, "range": {"start": 0, "end": 7},
+                "style": {"foreground": "annotation.implicit.foreground", "slant": "italic", "interaction": "inline-implicit:alice"}
+            }]
+        })))).unwrap(),
+    )).unwrap();
+    assert_eq!(result["ok"], true);
+    let plan = &result["result"]["renderPlan"]["plan"];
+    let search_run = plan["runs"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|run| run["range"] == json!({"start": 1, "end": 6}))
+        .expect("search run should be present");
+    assert!(search_run["annotationIds"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|id| id == "inline-implicit:alice"));
+    for style in plan["tokenSets"].as_array().unwrap() {
+        assert_eq!(style["slant"], "italic");
+        assert!(
+            style["foreground"] == "annotation.implicit.foreground"
+                || style["foreground"] == "search.current.foreground"
+        );
+    }
+}

@@ -232,6 +232,7 @@
   "@uiNavigation": {
     "description": "Application display copy. Source: lib/bin/appbar.dart:251"
   },
+
   "uiSidebar": "側邊欄",
   "@uiSidebar": {
     "description": "Application display copy. Source: lib/bin/appbar.dart:258"
@@ -2786,6 +2787,16 @@
   "@uiLanguage": {
     "description": "Application display copy. Source: lib/modules/WelcomeView.dart:1300"
   },
+  "uiEnglish": "英式",
+  "@uiEnglish": {"description": "English-style names"},
+  "uiNameUnitedKingdom": "英國",
+  "@uiNameUnitedKingdom": {"description": "Name generator country option"},
+  "uiNameUnitedStates": "美國",
+  "@uiNameUnitedStates": {"description": "Name generator country option"},
+  "uiNameCanada": "加拿大",
+  "@uiNameCanada": {"description": "Name generator country option"},
+  "uiNameAustralia": "澳洲",
+  "@uiNameAustralia": {"description": "Name generator country option"},
   "uiJapanese": "日式",
   "@uiJapanese": {
     "description": "Application display copy. Source: lib/modules/WelcomeView.dart:1310"
@@ -2802,16 +2813,16 @@
   "@uiGender": {
     "description": "Application display copy. Source: lib/modules/WelcomeView.dart:1337, lib/features/revision_tracking/application/revision_field_registry.dart:67"
   },
-  "uiAllUnavailable": "全部（目前不可用）",
-  "@uiAllUnavailable": {
+  "uiAll": "全部",
+  "@uiAll": {
     "description": "Application display copy. Source: lib/modules/WelcomeView.dart:1348"
   },
   "uiMale": "男性",
   "@uiMale": {
     "description": "Application display copy. Source: lib/modules/WelcomeView.dart:1352"
   },
-  "uiNeutralUnavailable": "中性（目前不可用）",
-  "@uiNeutralUnavailable": {
+  "uiNeutral": "中性",
+  "@uiNeutral": {
     "description": "Application display copy. Source: lib/modules/WelcomeView.dart:1357"
   },
   "uiFemale": "女性",
@@ -12126,5 +12137,23 @@
   "copilotErrorValidation": "請確認目前章節、所選資源及 API URL 設定後重試。",
   "@copilotErrorValidation": {
     "description": "Localized Copilot failure"
-  }
+  },
+  "uiImplicitMention": "隱式提及",
+  "@uiImplicitMention": {
+    "description": "Label for implicit mentions in manuscript annotations."
+  },
+  "paletteSearchRange": "搜尋範圍",
+  "@paletteSearchRange": {"description": "Palette continuous color search interface"},
+  "paletteRangePrecise": "較精確",
+  "@paletteRangePrecise": {"description": "Palette continuous color search interface"},
+  "paletteRangeDefault": "適中",
+  "@paletteRangeDefault": {"description": "Palette continuous color search interface"},
+  "paletteRangeBroad": "較寬鬆",
+  "@paletteRangeBroad": {"description": "Palette continuous color search interface"},
+  "paletteNoNearbyEntries": "範圍內沒有相近詞條",
+  "@paletteNoNearbyEntries": {"description": "Palette continuous color search interface"},
+  "paletteOutsideRange": "最近的詞條（超出範圍）",
+  "@paletteOutsideRange": {"description": "Palette continuous color search interface"},
+  "paletteInvalidHex": "請輸入六位 HEX 色碼",
+  "@paletteInvalidHex": {"description": "Palette continuous color search interface"}
 }

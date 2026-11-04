@@ -1,0 +1,1398 @@
+{
+    "UK": {
+        "Surname": [
+            "史密斯（Smith）",
+            "瓊斯（Jones）",
+            "泰勒（Taylor）",
+            "布朗（Brown）",
+            "威爾森（Wilson）"
+        ],
+        "Name_Lady": [
+            {
+                "Values": [
+                    {
+                        "葛蕾絲（Grace）": ["UK"],
+                        "荷普（Hope）": ["UK"],
+                        "費絲（Faith）": ["UK"],
+                        "維瑞蒂（Verity）": ["UK"],
+                        "查莉蒂（Charity）": ["UK"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "瑟蕾娜（Serena）": ["UK"],
+                        "菲莉希蒂（Felicity）": ["UK"],
+                        "喬伊（Joy）": ["UK"],
+                        "瑟蕾妮蒂（Serenity）": ["UK"],
+                        "哈莫妮（Harmony）": ["UK"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "蘿絲（Rose）": ["UK"],
+                        "莉莉（Lily）": ["UK"],
+                        "海柔（Hazel）": ["UK"],
+                        "薇洛（Willow）": ["UK"],
+                        "艾薇（Ivy）": ["UK"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "伊芙（Eve）": ["UK"],
+                        "艾佛莉（Everly）": ["UK"],
+                        "佛羅倫斯（Florence）": ["UK"],
+                        "艾特妮蒂（Eternity）": ["UK"],
+                        "康斯坦絲（Constance）": ["UK"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "愛波（April）": ["UK"],
+                        "梅（May）": ["UK"],
+                        "茱恩（June）": ["UK"],
+                        "薩默（Summer）": ["UK"],
+                        "奧特姆（Autumn）": ["UK"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "黛絲蒂妮（Destiny）": ["UK"],
+                        "黛絲瑞（Desiree）": ["UK"],
+                        "溫妮弗蕾德（Winifred）": ["UK"],
+                        "碧翠絲（Beatrice）": ["UK"],
+                        "維多利亞（Victoria）": ["UK"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "派珀（Piper）": ["UK"],
+                        "喬妮（Journey）": ["UK"],
+                        "史考特（Scout）": ["UK"],
+                        "瑞文（Raven）": ["UK"],
+                        "韋弗利（Waverly）": ["UK"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "艾莉諾（Eleanor）": ["UK"],
+                        "瑪蒂達（Matilda）": ["UK"],
+                        "維多利亞（Victoria）": ["UK"],
+                        "伊莉莎白（Elizabeth）": ["UK"],
+                        "凱薩琳（Catherine）": ["UK"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "美樂蒂（Melody）": ["UK"],
+                        "萊拉（Lyra）": ["UK"],
+                        "艾莉亞（Aria）": ["UK"],
+                        "凱登絲（Cadence）": ["UK"],
+                        "卡蘿（Carol）": ["UK"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "荷普（Hope）": ["UK"],
+                        "葛蕾絲（Grace）": ["UK"],
+                        "費絲（Faith）": ["UK"],
+                        "哈莫妮（Harmony）": ["UK"],
+                        "黛絲蒂妮（Destiny）": ["UK"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "切爾西（Chelsea）": ["UK"],
+                        "雪梨（Sydney）": ["UK"],
+                        "薩凡納（Savannah）": ["UK"],
+                        "阿德萊德（Adelaide）": ["UK"],
+                        "布魯克林（Brooklyn）": ["UK"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "艾蜜莉亞（Amelia）": ["UK"],
+                        "艾拉（Isla）": ["UK"],
+                        "波比（Poppy）": ["UK"],
+                        "芙蕾雅（Freya）": ["UK"],
+                        "佛羅倫斯（Florence）": ["UK"]
+                    }
+                ]
+            }
+        ],
+        "Name_Man": [
+            {
+                "Values": [
+                    {
+                        "賈斯提斯（Justice）": ["UK"],
+                        "諾布爾（Noble）": ["UK"],
+                        "歐尼斯特（Ernest）": ["UK"],
+                        "維克多（Victor）": ["UK"],
+                        "瓦洛（Valor）": ["UK"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "克萊門特（Clement）": ["UK"],
+                        "帕克斯（Pax）": ["UK"],
+                        "所羅門（Solomon）": ["UK"],
+                        "杜魯門（Truman）": ["UK"],
+                        "諾艾爾（Noel）": ["UK"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "佛瑞斯特（Forrest）": ["UK"],
+                        "瑞弗（River）": ["UK"],
+                        "羅文（Rowan）": ["UK"],
+                        "賈斯珀（Jasper）": ["UK"],
+                        "里德（Reed）": ["UK"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "艾佛瑞特（Everett）": ["UK"],
+                        "奧古斯丁（Augustine）": ["UK"],
+                        "康斯坦特（Constant）": ["UK"],
+                        "邁爾斯（Miles）": ["UK"],
+                        "伯納德（Bernard）": ["UK"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "奧古斯特（August）": ["UK"],
+                        "朱利安（Julian）": ["UK"],
+                        "朱利葉斯（Julius）": ["UK"],
+                        "瓦倫泰（Valentine）": ["UK"],
+                        "諾艾爾（Noel）": ["UK"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "菲力克斯（Felix）": ["UK"],
+                        "班奈狄克（Benedict）": ["UK"],
+                        "維克多（Victor）": ["UK"],
+                        "亞瑟（Asher）": ["UK"],
+                        "艾德蒙（Edmund）": ["UK"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "沃克（Walker）": ["UK"],
+                        "蔡斯（Chase）": ["UK"],
+                        "韓特（Hunter）": ["UK"],
+                        "萊德（Ryder）": ["UK"],
+                        "阿徹（Archer）": ["UK"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "亞瑟（Arthur）": ["UK"],
+                        "阿爾弗雷德（Alfred）": ["UK"],
+                        "愛德華（Edward）": ["UK"],
+                        "威廉（William）": ["UK"],
+                        "亨利（Henry）": ["UK"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "里德（Reed）": ["UK"],
+                        "哈珀（Harper）": ["UK"],
+                        "貝爾（Bell）": ["UK"],
+                        "派珀（Piper）": ["UK"],
+                        "莉瑞克（Lyric）": ["UK"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "賈斯提斯（Justice）": ["UK"],
+                        "錢斯（Chance）": ["UK"],
+                        "福瓊（Fortune）": ["UK"],
+                        "諾布爾（Noble）": ["UK"],
+                        "雷傑德（Legend）": ["UK"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "奧斯汀（Austin）": ["UK"],
+                        "達拉斯（Dallas）": ["UK"],
+                        "哈德森（Hudson）": ["UK"],
+                        "林肯（Lincoln）": ["UK"],
+                        "肯特（Kent）": ["UK"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "喬治（George）": ["UK"],
+                        "艾爾菲（Alfie）": ["UK"],
+                        "哈利（Harry）": ["UK"],
+                        "亞瑟（Arthur）": ["UK"],
+                        "弗雷迪（Freddie）": ["UK"]
+                    }
+                ]
+            }
+        ],
+        "Name_Neutral": [
+            {
+                "Values": [
+                    {
+                        "賈斯提斯（Justice）": ["UK"],
+                        "楚（True）": ["UK"],
+                        "奧娜（Honor）": ["UK"],
+                        "賽吉（Sage）": ["UK"],
+                        "梅里特（Merit）": ["UK"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "瑟蕾妮蒂（Serenity）": ["UK"],
+                        "皮斯（Peace）": ["UK"],
+                        "海文（Haven）": ["UK"],
+                        "桑妮（Sunny）": ["UK"],
+                        "卡姆（Calm）": ["UK"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "瑞弗（River）": ["UK"],
+                        "羅文（Rowan）": ["UK"],
+                        "艾許（Ash）": ["UK"],
+                        "史凱（Sky）": ["UK"],
+                        "羅賓（Robin）": ["UK"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "艾弗（Ever）": ["UK"],
+                        "菲尼克斯（Phoenix）": ["UK"],
+                        "溫特（Winter）": ["UK"],
+                        "索爾斯蒂斯（Solstice）": ["UK"],
+                        "艾特妮蒂（Eternity）": ["UK"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "奧古斯特（August）": ["UK"],
+                        "溫特（Winter）": ["UK"],
+                        "奧特姆（Autumn）": ["UK"],
+                        "薩默（Summer）": ["UK"],
+                        "珍紐瑞（January）": ["UK"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "荷普（Hope）": ["UK"],
+                        "布莉絲（Bliss）": ["UK"],
+                        "錢斯（Chance）": ["UK"],
+                        "福瓊（Fortune）": ["UK"],
+                        "黛絲蒂妮（Destiny）": ["UK"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "史考特（Scout）": ["UK"],
+                        "喬妮（Journey）": ["UK"],
+                        "蔡斯（Chase）": ["UK"],
+                        "懷爾德（Wilder）": ["UK"],
+                        "賽勒（Sailor）": ["UK"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "艾力克斯（Alex）": ["UK"],
+                        "摩根（Morgan）": ["UK"],
+                        "喬丹（Jordan）": ["UK"],
+                        "法蘭西斯（Francis）": ["UK"],
+                        "雪梨（Sidney）": ["UK"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "莉瑞克（Lyric）": ["UK"],
+                        "哈珀（Harper）": ["UK"],
+                        "貝爾（Bell）": ["UK"],
+                        "哈莫妮（Harmony）": ["UK"],
+                        "艾莉亞（Aria）": ["UK"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "賽吉（Sage）": ["UK"],
+                        "楚（True）": ["UK"],
+                        "海文（Haven）": ["UK"],
+                        "賈斯提斯（Justice）": ["UK"],
+                        "菲尼克斯（Phoenix）": ["UK"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "雪梨（Sydney）": ["UK"],
+                        "倫敦（London）": ["UK"],
+                        "達科塔（Dakota）": ["UK"],
+                        "德文（Devon）": ["UK"],
+                        "達拉斯（Dallas）": ["UK"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "查理（Charlie）": ["UK"],
+                        "山姆（Sam）": ["UK"],
+                        "傑米（Jamie）": ["UK"],
+                        "羅賓（Robin）": ["UK"],
+                        "艾力克斯（Alex）": ["UK"]
+                    }
+                ]
+            }
+        ],
+        "_l10n": {
+            "reviewRequired": true,
+            "reason": "姓名讀音及譯名可能因人而異"
+        }
+    },
+    "US": {
+        "Surname": [
+            "史密斯（Smith）",
+            "強森（Johnson）",
+            "威廉斯（Williams）",
+            "布朗（Brown）",
+            "瓊斯（Jones）"
+        ],
+        "Name_Lady": [
+            {
+                "Values": [
+                    {
+                        "葛蕾絲（Grace）": ["US"],
+                        "荷普（Hope）": ["US"],
+                        "費絲（Faith）": ["US"],
+                        "維瑞蒂（Verity）": ["US"],
+                        "查莉蒂（Charity）": ["US"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "瑟蕾娜（Serena）": ["US"],
+                        "菲莉希蒂（Felicity）": ["US"],
+                        "喬伊（Joy）": ["US"],
+                        "瑟蕾妮蒂（Serenity）": ["US"],
+                        "哈莫妮（Harmony）": ["US"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "蘿絲（Rose）": ["US"],
+                        "莉莉（Lily）": ["US"],
+                        "海柔（Hazel）": ["US"],
+                        "薇洛（Willow）": ["US"],
+                        "艾薇（Ivy）": ["US"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "伊芙（Eve）": ["US"],
+                        "艾佛莉（Everly）": ["US"],
+                        "佛羅倫斯（Florence）": ["US"],
+                        "艾特妮蒂（Eternity）": ["US"],
+                        "康斯坦絲（Constance）": ["US"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "愛波（April）": ["US"],
+                        "梅（May）": ["US"],
+                        "茱恩（June）": ["US"],
+                        "薩默（Summer）": ["US"],
+                        "奧特姆（Autumn）": ["US"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "黛絲蒂妮（Destiny）": ["US"],
+                        "黛絲瑞（Desiree）": ["US"],
+                        "溫妮弗蕾德（Winifred）": ["US"],
+                        "碧翠絲（Beatrice）": ["US"],
+                        "維多利亞（Victoria）": ["US"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "派珀（Piper）": ["US"],
+                        "喬妮（Journey）": ["US"],
+                        "史考特（Scout）": ["US"],
+                        "瑞文（Raven）": ["US"],
+                        "韋弗利（Waverly）": ["US"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "艾莉諾（Eleanor）": ["US"],
+                        "瑪蒂達（Matilda）": ["US"],
+                        "維多利亞（Victoria）": ["US"],
+                        "伊莉莎白（Elizabeth）": ["US"],
+                        "凱薩琳（Catherine）": ["US"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "美樂蒂（Melody）": ["US"],
+                        "萊拉（Lyra）": ["US"],
+                        "艾莉亞（Aria）": ["US"],
+                        "凱登絲（Cadence）": ["US"],
+                        "卡蘿（Carol）": ["US"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "荷普（Hope）": ["US"],
+                        "葛蕾絲（Grace）": ["US"],
+                        "費絲（Faith）": ["US"],
+                        "哈莫妮（Harmony）": ["US"],
+                        "黛絲蒂妮（Destiny）": ["US"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "切爾西（Chelsea）": ["US"],
+                        "雪梨（Sydney）": ["US"],
+                        "薩凡納（Savannah）": ["US"],
+                        "阿德萊德（Adelaide）": ["US"],
+                        "布魯克林（Brooklyn）": ["US"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "奧莉薇亞（Olivia）": ["US"],
+                        "艾瑪（Emma）": ["US"],
+                        "艾娃（Ava）": ["US"],
+                        "蘇菲亞（Sophia）": ["US"],
+                        "伊莎貝拉（Isabella）": ["US"]
+                    }
+                ]
+            }
+        ],
+        "Name_Man": [
+            {
+                "Values": [
+                    {
+                        "賈斯提斯（Justice）": ["US"],
+                        "諾布爾（Noble）": ["US"],
+                        "歐尼斯特（Ernest）": ["US"],
+                        "維克多（Victor）": ["US"],
+                        "瓦洛（Valor）": ["US"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "克萊門特（Clement）": ["US"],
+                        "帕克斯（Pax）": ["US"],
+                        "所羅門（Solomon）": ["US"],
+                        "杜魯門（Truman）": ["US"],
+                        "諾艾爾（Noel）": ["US"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "佛瑞斯特（Forrest）": ["US"],
+                        "瑞弗（River）": ["US"],
+                        "羅文（Rowan）": ["US"],
+                        "賈斯珀（Jasper）": ["US"],
+                        "里德（Reed）": ["US"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "艾佛瑞特（Everett）": ["US"],
+                        "奧古斯丁（Augustine）": ["US"],
+                        "康斯坦特（Constant）": ["US"],
+                        "邁爾斯（Miles）": ["US"],
+                        "伯納德（Bernard）": ["US"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "奧古斯特（August）": ["US"],
+                        "朱利安（Julian）": ["US"],
+                        "朱利葉斯（Julius）": ["US"],
+                        "瓦倫泰（Valentine）": ["US"],
+                        "諾艾爾（Noel）": ["US"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "菲力克斯（Felix）": ["US"],
+                        "班奈狄克（Benedict）": ["US"],
+                        "維克多（Victor）": ["US"],
+                        "亞瑟（Asher）": ["US"],
+                        "艾德蒙（Edmund）": ["US"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "沃克（Walker）": ["US"],
+                        "蔡斯（Chase）": ["US"],
+                        "韓特（Hunter）": ["US"],
+                        "萊德（Ryder）": ["US"],
+                        "阿徹（Archer）": ["US"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "亞瑟（Arthur）": ["US"],
+                        "阿爾弗雷德（Alfred）": ["US"],
+                        "愛德華（Edward）": ["US"],
+                        "威廉（William）": ["US"],
+                        "亨利（Henry）": ["US"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "里德（Reed）": ["US"],
+                        "哈珀（Harper）": ["US"],
+                        "貝爾（Bell）": ["US"],
+                        "派珀（Piper）": ["US"],
+                        "莉瑞克（Lyric）": ["US"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "賈斯提斯（Justice）": ["US"],
+                        "錢斯（Chance）": ["US"],
+                        "福瓊（Fortune）": ["US"],
+                        "諾布爾（Noble）": ["US"],
+                        "雷傑德（Legend）": ["US"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "奧斯汀（Austin）": ["US"],
+                        "達拉斯（Dallas）": ["US"],
+                        "哈德森（Hudson）": ["US"],
+                        "林肯（Lincoln）": ["US"],
+                        "肯特（Kent）": ["US"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "連恩（Liam）": ["US"],
+                        "諾亞（Noah）": ["US"],
+                        "以利亞（Elijah）": ["US"],
+                        "詹姆斯（James）": ["US"],
+                        "班傑明（Benjamin）": ["US"]
+                    }
+                ]
+            }
+        ],
+        "Name_Neutral": [
+            {
+                "Values": [
+                    {
+                        "賈斯提斯（Justice）": ["US"],
+                        "楚（True）": ["US"],
+                        "奧娜（Honor）": ["US"],
+                        "賽吉（Sage）": ["US"],
+                        "梅里特（Merit）": ["US"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "瑟蕾妮蒂（Serenity）": ["US"],
+                        "皮斯（Peace）": ["US"],
+                        "海文（Haven）": ["US"],
+                        "桑妮（Sunny）": ["US"],
+                        "卡姆（Calm）": ["US"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "瑞弗（River）": ["US"],
+                        "羅文（Rowan）": ["US"],
+                        "艾許（Ash）": ["US"],
+                        "史凱（Sky）": ["US"],
+                        "羅賓（Robin）": ["US"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "艾弗（Ever）": ["US"],
+                        "菲尼克斯（Phoenix）": ["US"],
+                        "溫特（Winter）": ["US"],
+                        "索爾斯蒂斯（Solstice）": ["US"],
+                        "艾特妮蒂（Eternity）": ["US"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "奧古斯特（August）": ["US"],
+                        "溫特（Winter）": ["US"],
+                        "奧特姆（Autumn）": ["US"],
+                        "薩默（Summer）": ["US"],
+                        "珍紐瑞（January）": ["US"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "荷普（Hope）": ["US"],
+                        "布莉絲（Bliss）": ["US"],
+                        "錢斯（Chance）": ["US"],
+                        "福瓊（Fortune）": ["US"],
+                        "黛絲蒂妮（Destiny）": ["US"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "史考特（Scout）": ["US"],
+                        "喬妮（Journey）": ["US"],
+                        "蔡斯（Chase）": ["US"],
+                        "懷爾德（Wilder）": ["US"],
+                        "賽勒（Sailor）": ["US"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "艾力克斯（Alex）": ["US"],
+                        "摩根（Morgan）": ["US"],
+                        "喬丹（Jordan）": ["US"],
+                        "法蘭西斯（Francis）": ["US"],
+                        "雪梨（Sidney）": ["US"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "莉瑞克（Lyric）": ["US"],
+                        "哈珀（Harper）": ["US"],
+                        "貝爾（Bell）": ["US"],
+                        "哈莫妮（Harmony）": ["US"],
+                        "艾莉亞（Aria）": ["US"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "賽吉（Sage）": ["US"],
+                        "楚（True）": ["US"],
+                        "海文（Haven）": ["US"],
+                        "賈斯提斯（Justice）": ["US"],
+                        "菲尼克斯（Phoenix）": ["US"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "雪梨（Sydney）": ["US"],
+                        "倫敦（London）": ["US"],
+                        "達科塔（Dakota）": ["US"],
+                        "德文（Devon）": ["US"],
+                        "達拉斯（Dallas）": ["US"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "喬丹（Jordan）": ["US"],
+                        "泰勒（Taylor）": ["US"],
+                        "凱西（Casey）": ["US"],
+                        "艾維里（Avery）": ["US"],
+                        "萊利（Riley）": ["US"]
+                    }
+                ]
+            }
+        ],
+        "_l10n": {
+            "reviewRequired": true,
+            "reason": "姓名讀音及譯名可能因人而異"
+        }
+    },
+    "CA": {
+        "Surname": [
+            "史密斯（Smith）",
+            "布朗（Brown）",
+            "特朗布萊（Tremblay）",
+            "馬丁（Martin）",
+            "羅伊（Roy）"
+        ],
+        "Name_Lady": [
+            {
+                "Values": [
+                    {
+                        "葛蕾絲（Grace）": ["CA"],
+                        "荷普（Hope）": ["CA"],
+                        "費絲（Faith）": ["CA"],
+                        "維瑞蒂（Verity）": ["CA"],
+                        "查莉蒂（Charity）": ["CA"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "瑟蕾娜（Serena）": ["CA"],
+                        "菲莉希蒂（Felicity）": ["CA"],
+                        "喬伊（Joy）": ["CA"],
+                        "瑟蕾妮蒂（Serenity）": ["CA"],
+                        "哈莫妮（Harmony）": ["CA"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "蘿絲（Rose）": ["CA"],
+                        "莉莉（Lily）": ["CA"],
+                        "海柔（Hazel）": ["CA"],
+                        "薇洛（Willow）": ["CA"],
+                        "艾薇（Ivy）": ["CA"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "伊芙（Eve）": ["CA"],
+                        "艾佛莉（Everly）": ["CA"],
+                        "佛羅倫斯（Florence）": ["CA"],
+                        "艾特妮蒂（Eternity）": ["CA"],
+                        "康斯坦絲（Constance）": ["CA"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "愛波（April）": ["CA"],
+                        "梅（May）": ["CA"],
+                        "茱恩（June）": ["CA"],
+                        "薩默（Summer）": ["CA"],
+                        "奧特姆（Autumn）": ["CA"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "黛絲蒂妮（Destiny）": ["CA"],
+                        "黛絲瑞（Desiree）": ["CA"],
+                        "溫妮弗蕾德（Winifred）": ["CA"],
+                        "碧翠絲（Beatrice）": ["CA"],
+                        "維多利亞（Victoria）": ["CA"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "派珀（Piper）": ["CA"],
+                        "喬妮（Journey）": ["CA"],
+                        "史考特（Scout）": ["CA"],
+                        "瑞文（Raven）": ["CA"],
+                        "韋弗利（Waverly）": ["CA"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "艾莉諾（Eleanor）": ["CA"],
+                        "瑪蒂達（Matilda）": ["CA"],
+                        "維多利亞（Victoria）": ["CA"],
+                        "伊莉莎白（Elizabeth）": ["CA"],
+                        "凱薩琳（Catherine）": ["CA"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "美樂蒂（Melody）": ["CA"],
+                        "萊拉（Lyra）": ["CA"],
+                        "艾莉亞（Aria）": ["CA"],
+                        "凱登絲（Cadence）": ["CA"],
+                        "卡蘿（Carol）": ["CA"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "荷普（Hope）": ["CA"],
+                        "葛蕾絲（Grace）": ["CA"],
+                        "費絲（Faith）": ["CA"],
+                        "哈莫妮（Harmony）": ["CA"],
+                        "黛絲蒂妮（Destiny）": ["CA"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "切爾西（Chelsea）": ["CA"],
+                        "雪梨（Sydney）": ["CA"],
+                        "薩凡納（Savannah）": ["CA"],
+                        "阿德萊德（Adelaide）": ["CA"],
+                        "布魯克林（Brooklyn）": ["CA"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "奧莉薇亞（Olivia）": ["CA"],
+                        "艾瑪（Emma）": ["CA"],
+                        "夏綠蒂（Charlotte）": ["CA"],
+                        "艾蜜莉亞（Amelia）": ["CA"],
+                        "蘇菲亞（Sophia）": ["CA"]
+                    }
+                ]
+            }
+        ],
+        "Name_Man": [
+            {
+                "Values": [
+                    {
+                        "賈斯提斯（Justice）": ["CA"],
+                        "諾布爾（Noble）": ["CA"],
+                        "歐尼斯特（Ernest）": ["CA"],
+                        "維克多（Victor）": ["CA"],
+                        "瓦洛（Valor）": ["CA"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "克萊門特（Clement）": ["CA"],
+                        "帕克斯（Pax）": ["CA"],
+                        "所羅門（Solomon）": ["CA"],
+                        "杜魯門（Truman）": ["CA"],
+                        "諾艾爾（Noel）": ["CA"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "佛瑞斯特（Forrest）": ["CA"],
+                        "瑞弗（River）": ["CA"],
+                        "羅文（Rowan）": ["CA"],
+                        "賈斯珀（Jasper）": ["CA"],
+                        "里德（Reed）": ["CA"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "艾佛瑞特（Everett）": ["CA"],
+                        "奧古斯丁（Augustine）": ["CA"],
+                        "康斯坦特（Constant）": ["CA"],
+                        "邁爾斯（Miles）": ["CA"],
+                        "伯納德（Bernard）": ["CA"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "奧古斯特（August）": ["CA"],
+                        "朱利安（Julian）": ["CA"],
+                        "朱利葉斯（Julius）": ["CA"],
+                        "瓦倫泰（Valentine）": ["CA"],
+                        "諾艾爾（Noel）": ["CA"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "菲力克斯（Felix）": ["CA"],
+                        "班奈狄克（Benedict）": ["CA"],
+                        "維克多（Victor）": ["CA"],
+                        "亞瑟（Asher）": ["CA"],
+                        "艾德蒙（Edmund）": ["CA"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "沃克（Walker）": ["CA"],
+                        "蔡斯（Chase）": ["CA"],
+                        "韓特（Hunter）": ["CA"],
+                        "萊德（Ryder）": ["CA"],
+                        "阿徹（Archer）": ["CA"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "亞瑟（Arthur）": ["CA"],
+                        "阿爾弗雷德（Alfred）": ["CA"],
+                        "愛德華（Edward）": ["CA"],
+                        "威廉（William）": ["CA"],
+                        "亨利（Henry）": ["CA"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "里德（Reed）": ["CA"],
+                        "哈珀（Harper）": ["CA"],
+                        "貝爾（Bell）": ["CA"],
+                        "派珀（Piper）": ["CA"],
+                        "莉瑞克（Lyric）": ["CA"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "賈斯提斯（Justice）": ["CA"],
+                        "錢斯（Chance）": ["CA"],
+                        "福瓊（Fortune）": ["CA"],
+                        "諾布爾（Noble）": ["CA"],
+                        "雷傑德（Legend）": ["CA"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "奧斯汀（Austin）": ["CA"],
+                        "達拉斯（Dallas）": ["CA"],
+                        "哈德森（Hudson）": ["CA"],
+                        "林肯（Lincoln）": ["CA"],
+                        "肯特（Kent）": ["CA"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "連恩（Liam）": ["CA"],
+                        "諾亞（Noah）": ["CA"],
+                        "奧利佛（Oliver）": ["CA"],
+                        "威廉（William）": ["CA"],
+                        "傑克（Jack）": ["CA"]
+                    }
+                ]
+            }
+        ],
+        "Name_Neutral": [
+            {
+                "Values": [
+                    {
+                        "賈斯提斯（Justice）": ["CA"],
+                        "楚（True）": ["CA"],
+                        "奧娜（Honor）": ["CA"],
+                        "賽吉（Sage）": ["CA"],
+                        "梅里特（Merit）": ["CA"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "瑟蕾妮蒂（Serenity）": ["CA"],
+                        "皮斯（Peace）": ["CA"],
+                        "海文（Haven）": ["CA"],
+                        "桑妮（Sunny）": ["CA"],
+                        "卡姆（Calm）": ["CA"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "瑞弗（River）": ["CA"],
+                        "羅文（Rowan）": ["CA"],
+                        "艾許（Ash）": ["CA"],
+                        "史凱（Sky）": ["CA"],
+                        "羅賓（Robin）": ["CA"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "艾弗（Ever）": ["CA"],
+                        "菲尼克斯（Phoenix）": ["CA"],
+                        "溫特（Winter）": ["CA"],
+                        "索爾斯蒂斯（Solstice）": ["CA"],
+                        "艾特妮蒂（Eternity）": ["CA"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "奧古斯特（August）": ["CA"],
+                        "溫特（Winter）": ["CA"],
+                        "奧特姆（Autumn）": ["CA"],
+                        "薩默（Summer）": ["CA"],
+                        "珍紐瑞（January）": ["CA"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "荷普（Hope）": ["CA"],
+                        "布莉絲（Bliss）": ["CA"],
+                        "錢斯（Chance）": ["CA"],
+                        "福瓊（Fortune）": ["CA"],
+                        "黛絲蒂妮（Destiny）": ["CA"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "史考特（Scout）": ["CA"],
+                        "喬妮（Journey）": ["CA"],
+                        "蔡斯（Chase）": ["CA"],
+                        "懷爾德（Wilder）": ["CA"],
+                        "賽勒（Sailor）": ["CA"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "艾力克斯（Alex）": ["CA"],
+                        "摩根（Morgan）": ["CA"],
+                        "喬丹（Jordan）": ["CA"],
+                        "法蘭西斯（Francis）": ["CA"],
+                        "雪梨（Sidney）": ["CA"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "莉瑞克（Lyric）": ["CA"],
+                        "哈珀（Harper）": ["CA"],
+                        "貝爾（Bell）": ["CA"],
+                        "哈莫妮（Harmony）": ["CA"],
+                        "艾莉亞（Aria）": ["CA"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "賽吉（Sage）": ["CA"],
+                        "楚（True）": ["CA"],
+                        "海文（Haven）": ["CA"],
+                        "賈斯提斯（Justice）": ["CA"],
+                        "菲尼克斯（Phoenix）": ["CA"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "雪梨（Sydney）": ["CA"],
+                        "倫敦（London）": ["CA"],
+                        "達科塔（Dakota）": ["CA"],
+                        "德文（Devon）": ["CA"],
+                        "達拉斯（Dallas）": ["CA"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "昆恩（Quinn）": ["CA"],
+                        "艾維里（Avery）": ["CA"],
+                        "萊利（Riley）": ["CA"],
+                        "卡麥隆（Cameron）": ["CA"],
+                        "摩根（Morgan）": ["CA"]
+                    }
+                ]
+            }
+        ],
+        "_l10n": {
+            "reviewRequired": true,
+            "reason": "姓名讀音及譯名可能因人而異"
+        }
+    },
+    "AU": {
+        "Surname": [
+            "史密斯（Smith）",
+            "瓊斯（Jones）",
+            "威廉斯（Williams）",
+            "布朗（Brown）",
+            "威爾森（Wilson）"
+        ],
+        "Name_Lady": [
+            {
+                "Values": [
+                    {
+                        "葛蕾絲（Grace）": ["AU"],
+                        "荷普（Hope）": ["AU"],
+                        "費絲（Faith）": ["AU"],
+                        "維瑞蒂（Verity）": ["AU"],
+                        "查莉蒂（Charity）": ["AU"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "瑟蕾娜（Serena）": ["AU"],
+                        "菲莉希蒂（Felicity）": ["AU"],
+                        "喬伊（Joy）": ["AU"],
+                        "瑟蕾妮蒂（Serenity）": ["AU"],
+                        "哈莫妮（Harmony）": ["AU"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "蘿絲（Rose）": ["AU"],
+                        "莉莉（Lily）": ["AU"],
+                        "海柔（Hazel）": ["AU"],
+                        "薇洛（Willow）": ["AU"],
+                        "艾薇（Ivy）": ["AU"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "伊芙（Eve）": ["AU"],
+                        "艾佛莉（Everly）": ["AU"],
+                        "佛羅倫斯（Florence）": ["AU"],
+                        "艾特妮蒂（Eternity）": ["AU"],
+                        "康斯坦絲（Constance）": ["AU"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "愛波（April）": ["AU"],
+                        "梅（May）": ["AU"],
+                        "茱恩（June）": ["AU"],
+                        "薩默（Summer）": ["AU"],
+                        "奧特姆（Autumn）": ["AU"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "黛絲蒂妮（Destiny）": ["AU"],
+                        "黛絲瑞（Desiree）": ["AU"],
+                        "溫妮弗蕾德（Winifred）": ["AU"],
+                        "碧翠絲（Beatrice）": ["AU"],
+                        "維多利亞（Victoria）": ["AU"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "派珀（Piper）": ["AU"],
+                        "喬妮（Journey）": ["AU"],
+                        "史考特（Scout）": ["AU"],
+                        "瑞文（Raven）": ["AU"],
+                        "韋弗利（Waverly）": ["AU"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "艾莉諾（Eleanor）": ["AU"],
+                        "瑪蒂達（Matilda）": ["AU"],
+                        "維多利亞（Victoria）": ["AU"],
+                        "伊莉莎白（Elizabeth）": ["AU"],
+                        "凱薩琳（Catherine）": ["AU"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "美樂蒂（Melody）": ["AU"],
+                        "萊拉（Lyra）": ["AU"],
+                        "艾莉亞（Aria）": ["AU"],
+                        "凱登絲（Cadence）": ["AU"],
+                        "卡蘿（Carol）": ["AU"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "荷普（Hope）": ["AU"],
+                        "葛蕾絲（Grace）": ["AU"],
+                        "費絲（Faith）": ["AU"],
+                        "哈莫妮（Harmony）": ["AU"],
+                        "黛絲蒂妮（Destiny）": ["AU"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "切爾西（Chelsea）": ["AU"],
+                        "雪梨（Sydney）": ["AU"],
+                        "薩凡納（Savannah）": ["AU"],
+                        "阿德萊德（Adelaide）": ["AU"],
+                        "布魯克林（Brooklyn）": ["AU"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "夏綠蒂（Charlotte）": ["AU"],
+                        "艾蜜莉亞（Amelia）": ["AU"],
+                        "奧莉薇亞（Olivia）": ["AU"],
+                        "艾拉（Isla）": ["AU"],
+                        "米婭（Mia）": ["AU"]
+                    }
+                ]
+            }
+        ],
+        "Name_Man": [
+            {
+                "Values": [
+                    {
+                        "賈斯提斯（Justice）": ["AU"],
+                        "諾布爾（Noble）": ["AU"],
+                        "歐尼斯特（Ernest）": ["AU"],
+                        "維克多（Victor）": ["AU"],
+                        "瓦洛（Valor）": ["AU"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "克萊門特（Clement）": ["AU"],
+                        "帕克斯（Pax）": ["AU"],
+                        "所羅門（Solomon）": ["AU"],
+                        "杜魯門（Truman）": ["AU"],
+                        "諾艾爾（Noel）": ["AU"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "佛瑞斯特（Forrest）": ["AU"],
+                        "瑞弗（River）": ["AU"],
+                        "羅文（Rowan）": ["AU"],
+                        "賈斯珀（Jasper）": ["AU"],
+                        "里德（Reed）": ["AU"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "艾佛瑞特（Everett）": ["AU"],
+                        "奧古斯丁（Augustine）": ["AU"],
+                        "康斯坦特（Constant）": ["AU"],
+                        "邁爾斯（Miles）": ["AU"],
+                        "伯納德（Bernard）": ["AU"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "奧古斯特（August）": ["AU"],
+                        "朱利安（Julian）": ["AU"],
+                        "朱利葉斯（Julius）": ["AU"],
+                        "瓦倫泰（Valentine）": ["AU"],
+                        "諾艾爾（Noel）": ["AU"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "菲力克斯（Felix）": ["AU"],
+                        "班奈狄克（Benedict）": ["AU"],
+                        "維克多（Victor）": ["AU"],
+                        "亞瑟（Asher）": ["AU"],
+                        "艾德蒙（Edmund）": ["AU"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "沃克（Walker）": ["AU"],
+                        "蔡斯（Chase）": ["AU"],
+                        "韓特（Hunter）": ["AU"],
+                        "萊德（Ryder）": ["AU"],
+                        "阿徹（Archer）": ["AU"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "亞瑟（Arthur）": ["AU"],
+                        "阿爾弗雷德（Alfred）": ["AU"],
+                        "愛德華（Edward）": ["AU"],
+                        "威廉（William）": ["AU"],
+                        "亨利（Henry）": ["AU"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "里德（Reed）": ["AU"],
+                        "哈珀（Harper）": ["AU"],
+                        "貝爾（Bell）": ["AU"],
+                        "派珀（Piper）": ["AU"],
+                        "莉瑞克（Lyric）": ["AU"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "賈斯提斯（Justice）": ["AU"],
+                        "錢斯（Chance）": ["AU"],
+                        "福瓊（Fortune）": ["AU"],
+                        "諾布爾（Noble）": ["AU"],
+                        "雷傑德（Legend）": ["AU"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "奧斯汀（Austin）": ["AU"],
+                        "達拉斯（Dallas）": ["AU"],
+                        "哈德森（Hudson）": ["AU"],
+                        "林肯（Lincoln）": ["AU"],
+                        "肯特（Kent）": ["AU"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "奧利佛（Oliver）": ["AU"],
+                        "諾亞（Noah）": ["AU"],
+                        "傑克（Jack）": ["AU"],
+                        "威廉（William）": ["AU"],
+                        "湯瑪斯（Thomas）": ["AU"]
+                    }
+                ]
+            }
+        ],
+        "Name_Neutral": [
+            {
+                "Values": [
+                    {
+                        "賈斯提斯（Justice）": ["AU"],
+                        "楚（True）": ["AU"],
+                        "奧娜（Honor）": ["AU"],
+                        "賽吉（Sage）": ["AU"],
+                        "梅里特（Merit）": ["AU"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "瑟蕾妮蒂（Serenity）": ["AU"],
+                        "皮斯（Peace）": ["AU"],
+                        "海文（Haven）": ["AU"],
+                        "桑妮（Sunny）": ["AU"],
+                        "卡姆（Calm）": ["AU"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "瑞弗（River）": ["AU"],
+                        "羅文（Rowan）": ["AU"],
+                        "艾許（Ash）": ["AU"],
+                        "史凱（Sky）": ["AU"],
+                        "羅賓（Robin）": ["AU"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "艾弗（Ever）": ["AU"],
+                        "菲尼克斯（Phoenix）": ["AU"],
+                        "溫特（Winter）": ["AU"],
+                        "索爾斯蒂斯（Solstice）": ["AU"],
+                        "艾特妮蒂（Eternity）": ["AU"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "奧古斯特（August）": ["AU"],
+                        "溫特（Winter）": ["AU"],
+                        "奧特姆（Autumn）": ["AU"],
+                        "薩默（Summer）": ["AU"],
+                        "珍紐瑞（January）": ["AU"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "荷普（Hope）": ["AU"],
+                        "布莉絲（Bliss）": ["AU"],
+                        "錢斯（Chance）": ["AU"],
+                        "福瓊（Fortune）": ["AU"],
+                        "黛絲蒂妮（Destiny）": ["AU"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "史考特（Scout）": ["AU"],
+                        "喬妮（Journey）": ["AU"],
+                        "蔡斯（Chase）": ["AU"],
+                        "懷爾德（Wilder）": ["AU"],
+                        "賽勒（Sailor）": ["AU"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "艾力克斯（Alex）": ["AU"],
+                        "摩根（Morgan）": ["AU"],
+                        "喬丹（Jordan）": ["AU"],
+                        "法蘭西斯（Francis）": ["AU"],
+                        "雪梨（Sidney）": ["AU"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "莉瑞克（Lyric）": ["AU"],
+                        "哈珀（Harper）": ["AU"],
+                        "貝爾（Bell）": ["AU"],
+                        "哈莫妮（Harmony）": ["AU"],
+                        "艾莉亞（Aria）": ["AU"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "賽吉（Sage）": ["AU"],
+                        "楚（True）": ["AU"],
+                        "海文（Haven）": ["AU"],
+                        "賈斯提斯（Justice）": ["AU"],
+                        "菲尼克斯（Phoenix）": ["AU"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "雪梨（Sydney）": ["AU"],
+                        "倫敦（London）": ["AU"],
+                        "達科塔（Dakota）": ["AU"],
+                        "德文（Devon）": ["AU"],
+                        "達拉斯（Dallas）": ["AU"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "萊利（Riley）": ["AU"],
+                        "查理（Charlie）": ["AU"],
+                        "貝利（Bailey）": ["AU"],
+                        "達西（Darcy）": ["AU"],
+                        "泰勒（Taylor）": ["AU"]
+                    }
+                ]
+            }
+        ],
+        "_l10n": {
+            "reviewRequired": true,
+            "reason": "姓名讀音及譯名可能因人而異"
+        }
+    }
+}

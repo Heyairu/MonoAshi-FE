@@ -829,13 +829,13 @@
         {
           "heading": "Organize descriptive vocabulary by color",
           "paragraphs": [
-            "Text Palettes puts terms in color cells to help find color-related descriptions. For example, collect “indigo” or “sea mist” in a blue cell. It organizes vocabulary; selecting a cell does not apply a text color to your manuscript."
+            "Text Palettes associates terms such as “indigo” or “sea mist” with any precise color. Select a color to find terms ranked by OKLab distance. It is a writing reference; choosing a color does not change manuscript text colors."
           ],
           "steps": [
-            "Choose a hue or grayscale, then find the desired color cell.",
-            "Use “Add Entry” to enter and save a description.",
-            "Select an existing term to edit it, or use “Sort by Text” in the cell's actions.",
-            "Search for a term and return to its cell from the results."
+            "Drag the outer ring to choose hue and the triangle to mix pure color, black, and white. You can also adjust H/S/V or enter a six-digit HEX value and press Enter.",
+            "Enter a description in the term field, then press Add or Enter to bind it to the currently selected color.",
+            "Use the edit or delete button beside a term. Deletion can be undone.",
+            "Choose Precise, Moderate, or Broad, and optionally filter by text. Grayscale uses the same distance formula. If the range contains no results, up to five nearest entries are listed separately as outside the range."
           ]
         },
         {

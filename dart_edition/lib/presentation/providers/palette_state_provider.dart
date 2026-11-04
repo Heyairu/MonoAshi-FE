@@ -123,7 +123,7 @@ class PaletteStateNotifier extends Notifier<PaletteStateData> {
     required String slotId,
     required String text,
   }) {
-    if (!paletteSlotById.containsKey(slotId)) {
+    if (resolvePaletteSlot(slotId) == null) {
       return const PaletteMutationResult.failure("找不到指定的調色盤格位");
     }
     final String? validationError = validatePaletteTerm(text);
@@ -238,7 +238,7 @@ class PaletteStateNotifier extends Notifier<PaletteStateData> {
     }
     final Map<String, List<String>> nextSlots = _copySlots();
     for (final MapEntry<String, int> placement in record.slotIndexes.entries) {
-      if (!paletteSlotById.containsKey(placement.key)) {
+      if (resolvePaletteSlot(placement.key) == null) {
         continue;
       }
       final List<String> ids = nextSlots.putIfAbsent(
@@ -286,7 +286,9 @@ class PaletteStateNotifier extends Notifier<PaletteStateData> {
     var addedPlacements = 0;
     var skippedDuplicates = 0;
 
-    for (final PaletteSlotDefinition slot in allPaletteSlots) {
+    for (final PaletteSlotDefinition slot in paletteDefinitions(
+      imported.slotEntryIds.keys,
+    )) {
       final List<String> incomingIds =
           imported.slotEntryIds[slot.id] ?? const <String>[];
       if (incomingIds.isEmpty) {

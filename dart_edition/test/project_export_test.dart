@@ -36,18 +36,18 @@ ProjectData manuscriptFixture() => ProjectData.empty()
       ],
       childSegments: [
         SegmentData(
-          segmentUUID: 'sub',
-          segmentName: '子卷',
+          segmentUUID: "sub",
+          segmentName: "子卷",
           chapters: [
             ChapterData(
-              chapterUUID: 'b',
-              chapterName: '文稿B',
-              chapterContent: 'B',
+              chapterUUID: "b",
+              chapterName: "文稿B",
+              chapterContent: "B",
             ),
           ],
         ),
       ],
-      childNodeOrder: ['a', 'sub', 'c'],
+      childNodeOrder: ["a', 'sub', 'c"],
     ),
   ];
 
@@ -74,7 +74,7 @@ ExportRequest exchange(
 );
 
 void main() {
-  test('empty reference modules cannot export header-only files or ZIPs', () {
+  test("empty reference modules cannot export header-only files or ZIPs", () {
     for (final packaging in ExportPackaging.values) {
       final request = ExportRequest(
         purpose: ExportPurpose.reference,
@@ -92,10 +92,10 @@ void main() {
     }
   });
 
-  test('mixed reference ZIP skips empty modules and reports the omission', () {
+  test("mixed reference ZIP skips empty modules and reports the omission", () {
     final data = ProjectData.empty()
       ..baseInfoData = ProjectData.empty().baseInfoData.copyWith(
-        bookName: '作品',
+        bookName: "作品",
       );
     final output = service.prepare(
       data,
@@ -109,14 +109,14 @@ void main() {
         },
       ),
     );
-    expect(output.documents.single.path, endsWith('BaseInfo.md'));
-    expect(output.warnings, contains('角色設定與快照沒有可閱讀內容，已略過。'));
+    expect(output.documents.single.path, endsWith("BaseInfo.md"));
+    expect(output.warnings, contains("角色設定與快照沒有可閱讀內容，已略過。"));
     final archive = ZipDecoder().decodeBytes(output.bytes);
-    expect(archive.files.where((f) => f.name.endsWith('.md')), hasLength(1));
+    expect(archive.files.where((f) => f.name.endsWith(".md")), hasLength(1));
   });
 
   test(
-    'isolate preparation accepts the same snapshot and request used by the UI',
+    "isolate preparation accepts the same snapshot and request used by the UI",
     () async {
       final result = await compute(prepareProjectExport, (
         manuscriptFixture(),
@@ -126,22 +126,22 @@ void main() {
         FileService.parseProjectXML(
           utf8.decode(result.bytes),
         ).segmentsData.single.segmentUUID,
-        'root',
+        "root",
       );
     },
   );
-  test('TXT follows mixed order and repeats distinct same-name headings', () {
+  test("TXT follows mixed order and repeats distinct same-name headings", () {
     final text = utf8.decode(
       service.prepare(manuscriptFixture(), reader()).bytes,
     );
-    expect(text.indexOf('\nA\n'), lessThan(text.indexOf('\nB\n')));
-    expect(text.indexOf('\nB\n'), lessThan(text.indexOf('\nC\n')));
-    expect('同名'.allMatches(text).length, 2);
-    expect(text, isNot(contains('#')));
+    expect(text.indexOf("\nA\n"), lessThan(text.indexOf("\nB\n")));
+    expect(text.indexOf("\nB\n"), lessThan(text.indexOf("\nC\n")));
+    expect("同名".allMatches(text).length, 2);
+    expect(text, isNot(contains("#")));
   });
 
   test(
-    'reader projection hides annotation syntax and markdown escapes text',
+    "reader projection hides annotation syntax and markdown escapes text",
     () {
       const id = '4e251fc2-1e2b-4f78-93da-91f8c76d9a92';
       final data = manuscriptFixture()

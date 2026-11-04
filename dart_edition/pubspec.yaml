@@ -93,6 +93,11 @@ flutter:
     - assets/jsons/glossary.json
     - assets/jsons/palettes.json
     - assets/jsons/name_eastAsia.json
+    - assets/jsons/name_eastAsia_en.json
+    - assets/jsons/name_eastAsia_ja.json
+    - assets/jsons/name_Anglosphere_en.json
+    - assets/jsons/name_Anglosphere_ja.json
+    - assets/jsons/name_Anglosphere_zh_TW.json
   
   fonts:
     - family: NotoSans

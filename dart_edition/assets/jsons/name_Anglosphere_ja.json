@@ -1,0 +1,1398 @@
+{
+    "UK": {
+        "Surname": [
+            "スミス（Smith）",
+            "ジョーンズ（Jones）",
+            "テイラー（Taylor）",
+            "ブラウン（Brown）",
+            "ウィルソン（Wilson）"
+        ],
+        "Name_Lady": [
+            {
+                "Values": [
+                    {
+                        "グレース（Grace）": ["UK"],
+                        "ホープ（Hope）": ["UK"],
+                        "フェイス（Faith）": ["UK"],
+                        "ヴェリティ（Verity）": ["UK"],
+                        "チャリティー（Charity）": ["UK"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "セリーナ（Serena）": ["UK"],
+                        "フェリシティ（Felicity）": ["UK"],
+                        "ジョイ（Joy）": ["UK"],
+                        "セレニティ（Serenity）": ["UK"],
+                        "ハーモニー（Harmony）": ["UK"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "ローズ（Rose）": ["UK"],
+                        "リリー（Lily）": ["UK"],
+                        "ヘイゼル（Hazel）": ["UK"],
+                        "ウィロー（Willow）": ["UK"],
+                        "アイビー（Ivy）": ["UK"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "イヴ（Eve）": ["UK"],
+                        "エヴァリー（Everly）": ["UK"],
+                        "フローレンス（Florence）": ["UK"],
+                        "エタニティ（Eternity）": ["UK"],
+                        "コンスタンス（Constance）": ["UK"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "エイプリル（April）": ["UK"],
+                        "メイ（May）": ["UK"],
+                        "ジューン（June）": ["UK"],
+                        "サマー（Summer）": ["UK"],
+                        "オータム（Autumn）": ["UK"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "デスティニー（Destiny）": ["UK"],
+                        "デジレ（Desiree）": ["UK"],
+                        "ウィニフレッド（Winifred）": ["UK"],
+                        "ベアトリス（Beatrice）": ["UK"],
+                        "ビクトリア（Victoria）": ["UK"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "パイパー（Piper）": ["UK"],
+                        "ジャーニー（Journey）": ["UK"],
+                        "スカウト（Scout）": ["UK"],
+                        "レイヴン（Raven）": ["UK"],
+                        "ウェイバリー（Waverly）": ["UK"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "エレノア（Eleanor）": ["UK"],
+                        "マチルダ（Matilda）": ["UK"],
+                        "ビクトリア（Victoria）": ["UK"],
+                        "エリザベス（Elizabeth）": ["UK"],
+                        "キャサリン（Catherine）": ["UK"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "メロディー（Melody）": ["UK"],
+                        "ライラ（Lyra）": ["UK"],
+                        "アリア（Aria）": ["UK"],
+                        "ケイデンス（Cadence）": ["UK"],
+                        "キャロル（Carol）": ["UK"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "ホープ（Hope）": ["UK"],
+                        "グレース（Grace）": ["UK"],
+                        "フェイス（Faith）": ["UK"],
+                        "ハーモニー（Harmony）": ["UK"],
+                        "デスティニー（Destiny）": ["UK"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "チェルシー（Chelsea）": ["UK"],
+                        "シドニー（Sydney）": ["UK"],
+                        "サバンナ（Savannah）": ["UK"],
+                        "アデレード（Adelaide）": ["UK"],
+                        "ブルックリン（Brooklyn）": ["UK"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "アメリア（Amelia）": ["UK"],
+                        "アイラ（Isla）": ["UK"],
+                        "ポピー（Poppy）": ["UK"],
+                        "フレイヤ（Freya）": ["UK"],
+                        "フローレンス（Florence）": ["UK"]
+                    }
+                ]
+            }
+        ],
+        "Name_Man": [
+            {
+                "Values": [
+                    {
+                        "ジャスティス（Justice）": ["UK"],
+                        "ノーブル（Noble）": ["UK"],
+                        "アーネスト（Ernest）": ["UK"],
+                        "ビクター（Victor）": ["UK"],
+                        "バラー（Valor）": ["UK"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "クレメント（Clement）": ["UK"],
+                        "パックス（Pax）": ["UK"],
+                        "ソロモン（Solomon）": ["UK"],
+                        "トルーマン（Truman）": ["UK"],
+                        "ノエル（Noel）": ["UK"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "フォレスト（Forrest）": ["UK"],
+                        "リバー（River）": ["UK"],
+                        "ローワン（Rowan）": ["UK"],
+                        "ジャスパー（Jasper）": ["UK"],
+                        "リード（Reed）": ["UK"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "エベレット（Everett）": ["UK"],
+                        "オーガスティン（Augustine）": ["UK"],
+                        "コンスタント（Constant）": ["UK"],
+                        "マイルズ（Miles）": ["UK"],
+                        "バーナード（Bernard）": ["UK"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "オーガスト（August）": ["UK"],
+                        "ジュリアン（Julian）": ["UK"],
+                        "ジュリアス（Julius）": ["UK"],
+                        "バレンタイン（Valentine）": ["UK"],
+                        "ノエル（Noel）": ["UK"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "フェリックス（Felix）": ["UK"],
+                        "ベネディクト（Benedict）": ["UK"],
+                        "ビクター（Victor）": ["UK"],
+                        "アッシャー（Asher）": ["UK"],
+                        "エドマンド（Edmund）": ["UK"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "ウォーカー（Walker）": ["UK"],
+                        "チェイス（Chase）": ["UK"],
+                        "ハンター（Hunter）": ["UK"],
+                        "ライダー（Ryder）": ["UK"],
+                        "アーチャー（Archer）": ["UK"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "アーサー（Arthur）": ["UK"],
+                        "アルフレッド（Alfred）": ["UK"],
+                        "エドワード（Edward）": ["UK"],
+                        "ウィリアム（William）": ["UK"],
+                        "ヘンリー（Henry）": ["UK"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "リード（Reed）": ["UK"],
+                        "ハーパー（Harper）": ["UK"],
+                        "ベル（Bell）": ["UK"],
+                        "パイパー（Piper）": ["UK"],
+                        "リリック（Lyric）": ["UK"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "ジャスティス（Justice）": ["UK"],
+                        "チャンス（Chance）": ["UK"],
+                        "フォーチュン（Fortune）": ["UK"],
+                        "ノーブル（Noble）": ["UK"],
+                        "レジェンド（Legend）": ["UK"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "オースティン（Austin）": ["UK"],
+                        "ダラス（Dallas）": ["UK"],
+                        "ハドソン（Hudson）": ["UK"],
+                        "リンカーン（Lincoln）": ["UK"],
+                        "ケント（Kent）": ["UK"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "ジョージ（George）": ["UK"],
+                        "アルフィー（Alfie）": ["UK"],
+                        "ハリー（Harry）": ["UK"],
+                        "アーサー（Arthur）": ["UK"],
+                        "フレディ（Freddie）": ["UK"]
+                    }
+                ]
+            }
+        ],
+        "Name_Neutral": [
+            {
+                "Values": [
+                    {
+                        "ジャスティス（Justice）": ["UK"],
+                        "トゥルー（True）": ["UK"],
+                        "オナー（Honor）": ["UK"],
+                        "セージ（Sage）": ["UK"],
+                        "メリット（Merit）": ["UK"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "セレニティ（Serenity）": ["UK"],
+                        "ピース（Peace）": ["UK"],
+                        "ヘイヴン（Haven）": ["UK"],
+                        "サニー（Sunny）": ["UK"],
+                        "カーム（Calm）": ["UK"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "リバー（River）": ["UK"],
+                        "ローワン（Rowan）": ["UK"],
+                        "アッシュ（Ash）": ["UK"],
+                        "スカイ（Sky）": ["UK"],
+                        "ロビン（Robin）": ["UK"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "エヴァー（Ever）": ["UK"],
+                        "フェニックス（Phoenix）": ["UK"],
+                        "ウィンター（Winter）": ["UK"],
+                        "ソルスティス（Solstice）": ["UK"],
+                        "エタニティ（Eternity）": ["UK"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "オーガスト（August）": ["UK"],
+                        "ウィンター（Winter）": ["UK"],
+                        "オータム（Autumn）": ["UK"],
+                        "サマー（Summer）": ["UK"],
+                        "ジャニュアリー（January）": ["UK"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "ホープ（Hope）": ["UK"],
+                        "ブリス（Bliss）": ["UK"],
+                        "チャンス（Chance）": ["UK"],
+                        "フォーチュン（Fortune）": ["UK"],
+                        "デスティニー（Destiny）": ["UK"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "スカウト（Scout）": ["UK"],
+                        "ジャーニー（Journey）": ["UK"],
+                        "チェイス（Chase）": ["UK"],
+                        "ワイルダー（Wilder）": ["UK"],
+                        "セイラー（Sailor）": ["UK"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "アレックス（Alex）": ["UK"],
+                        "モーガン（Morgan）": ["UK"],
+                        "ジョーダン（Jordan）": ["UK"],
+                        "フランシス（Francis）": ["UK"],
+                        "シドニー（Sidney）": ["UK"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "リリック（Lyric）": ["UK"],
+                        "ハーパー（Harper）": ["UK"],
+                        "ベル（Bell）": ["UK"],
+                        "ハーモニー（Harmony）": ["UK"],
+                        "アリア（Aria）": ["UK"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "セージ（Sage）": ["UK"],
+                        "トゥルー（True）": ["UK"],
+                        "ヘイヴン（Haven）": ["UK"],
+                        "ジャスティス（Justice）": ["UK"],
+                        "フェニックス（Phoenix）": ["UK"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "シドニー（Sydney）": ["UK"],
+                        "ロンドン（London）": ["UK"],
+                        "ダコタ（Dakota）": ["UK"],
+                        "デヴォン（Devon）": ["UK"],
+                        "ダラス（Dallas）": ["UK"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "チャーリー（Charlie）": ["UK"],
+                        "サム（Sam）": ["UK"],
+                        "ジェイミー（Jamie）": ["UK"],
+                        "ロビン（Robin）": ["UK"],
+                        "アレックス（Alex）": ["UK"]
+                    }
+                ]
+            }
+        ],
+        "_l10n": {
+            "reviewRequired": true,
+            "reason": "姓名讀音及譯名可能因人而異"
+        }
+    },
+    "US": {
+        "Surname": [
+            "スミス（Smith）",
+            "ジョンソン（Johnson）",
+            "ウィリアムズ（Williams）",
+            "ブラウン（Brown）",
+            "ジョーンズ（Jones）"
+        ],
+        "Name_Lady": [
+            {
+                "Values": [
+                    {
+                        "グレース（Grace）": ["US"],
+                        "ホープ（Hope）": ["US"],
+                        "フェイス（Faith）": ["US"],
+                        "ヴェリティ（Verity）": ["US"],
+                        "チャリティー（Charity）": ["US"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "セリーナ（Serena）": ["US"],
+                        "フェリシティ（Felicity）": ["US"],
+                        "ジョイ（Joy）": ["US"],
+                        "セレニティ（Serenity）": ["US"],
+                        "ハーモニー（Harmony）": ["US"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "ローズ（Rose）": ["US"],
+                        "リリー（Lily）": ["US"],
+                        "ヘイゼル（Hazel）": ["US"],
+                        "ウィロー（Willow）": ["US"],
+                        "アイビー（Ivy）": ["US"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "イヴ（Eve）": ["US"],
+                        "エヴァリー（Everly）": ["US"],
+                        "フローレンス（Florence）": ["US"],
+                        "エタニティ（Eternity）": ["US"],
+                        "コンスタンス（Constance）": ["US"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "エイプリル（April）": ["US"],
+                        "メイ（May）": ["US"],
+                        "ジューン（June）": ["US"],
+                        "サマー（Summer）": ["US"],
+                        "オータム（Autumn）": ["US"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "デスティニー（Destiny）": ["US"],
+                        "デジレ（Desiree）": ["US"],
+                        "ウィニフレッド（Winifred）": ["US"],
+                        "ベアトリス（Beatrice）": ["US"],
+                        "ビクトリア（Victoria）": ["US"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "パイパー（Piper）": ["US"],
+                        "ジャーニー（Journey）": ["US"],
+                        "スカウト（Scout）": ["US"],
+                        "レイヴン（Raven）": ["US"],
+                        "ウェイバリー（Waverly）": ["US"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "エレノア（Eleanor）": ["US"],
+                        "マチルダ（Matilda）": ["US"],
+                        "ビクトリア（Victoria）": ["US"],
+                        "エリザベス（Elizabeth）": ["US"],
+                        "キャサリン（Catherine）": ["US"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "メロディー（Melody）": ["US"],
+                        "ライラ（Lyra）": ["US"],
+                        "アリア（Aria）": ["US"],
+                        "ケイデンス（Cadence）": ["US"],
+                        "キャロル（Carol）": ["US"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "ホープ（Hope）": ["US"],
+                        "グレース（Grace）": ["US"],
+                        "フェイス（Faith）": ["US"],
+                        "ハーモニー（Harmony）": ["US"],
+                        "デスティニー（Destiny）": ["US"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "チェルシー（Chelsea）": ["US"],
+                        "シドニー（Sydney）": ["US"],
+                        "サバンナ（Savannah）": ["US"],
+                        "アデレード（Adelaide）": ["US"],
+                        "ブルックリン（Brooklyn）": ["US"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "オリビア（Olivia）": ["US"],
+                        "エマ（Emma）": ["US"],
+                        "エイヴァ（Ava）": ["US"],
+                        "ソフィア（Sophia）": ["US"],
+                        "イザベラ（Isabella）": ["US"]
+                    }
+                ]
+            }
+        ],
+        "Name_Man": [
+            {
+                "Values": [
+                    {
+                        "ジャスティス（Justice）": ["US"],
+                        "ノーブル（Noble）": ["US"],
+                        "アーネスト（Ernest）": ["US"],
+                        "ビクター（Victor）": ["US"],
+                        "バラー（Valor）": ["US"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "クレメント（Clement）": ["US"],
+                        "パックス（Pax）": ["US"],
+                        "ソロモン（Solomon）": ["US"],
+                        "トルーマン（Truman）": ["US"],
+                        "ノエル（Noel）": ["US"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "フォレスト（Forrest）": ["US"],
+                        "リバー（River）": ["US"],
+                        "ローワン（Rowan）": ["US"],
+                        "ジャスパー（Jasper）": ["US"],
+                        "リード（Reed）": ["US"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "エベレット（Everett）": ["US"],
+                        "オーガスティン（Augustine）": ["US"],
+                        "コンスタント（Constant）": ["US"],
+                        "マイルズ（Miles）": ["US"],
+                        "バーナード（Bernard）": ["US"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "オーガスト（August）": ["US"],
+                        "ジュリアン（Julian）": ["US"],
+                        "ジュリアス（Julius）": ["US"],
+                        "バレンタイン（Valentine）": ["US"],
+                        "ノエル（Noel）": ["US"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "フェリックス（Felix）": ["US"],
+                        "ベネディクト（Benedict）": ["US"],
+                        "ビクター（Victor）": ["US"],
+                        "アッシャー（Asher）": ["US"],
+                        "エドマンド（Edmund）": ["US"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "ウォーカー（Walker）": ["US"],
+                        "チェイス（Chase）": ["US"],
+                        "ハンター（Hunter）": ["US"],
+                        "ライダー（Ryder）": ["US"],
+                        "アーチャー（Archer）": ["US"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "アーサー（Arthur）": ["US"],
+                        "アルフレッド（Alfred）": ["US"],
+                        "エドワード（Edward）": ["US"],
+                        "ウィリアム（William）": ["US"],
+                        "ヘンリー（Henry）": ["US"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "リード（Reed）": ["US"],
+                        "ハーパー（Harper）": ["US"],
+                        "ベル（Bell）": ["US"],
+                        "パイパー（Piper）": ["US"],
+                        "リリック（Lyric）": ["US"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "ジャスティス（Justice）": ["US"],
+                        "チャンス（Chance）": ["US"],
+                        "フォーチュン（Fortune）": ["US"],
+                        "ノーブル（Noble）": ["US"],
+                        "レジェンド（Legend）": ["US"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "オースティン（Austin）": ["US"],
+                        "ダラス（Dallas）": ["US"],
+                        "ハドソン（Hudson）": ["US"],
+                        "リンカーン（Lincoln）": ["US"],
+                        "ケント（Kent）": ["US"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "リアム（Liam）": ["US"],
+                        "ノア（Noah）": ["US"],
+                        "イライジャ（Elijah）": ["US"],
+                        "ジェームズ（James）": ["US"],
+                        "ベンジャミン（Benjamin）": ["US"]
+                    }
+                ]
+            }
+        ],
+        "Name_Neutral": [
+            {
+                "Values": [
+                    {
+                        "ジャスティス（Justice）": ["US"],
+                        "トゥルー（True）": ["US"],
+                        "オナー（Honor）": ["US"],
+                        "セージ（Sage）": ["US"],
+                        "メリット（Merit）": ["US"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "セレニティ（Serenity）": ["US"],
+                        "ピース（Peace）": ["US"],
+                        "ヘイヴン（Haven）": ["US"],
+                        "サニー（Sunny）": ["US"],
+                        "カーム（Calm）": ["US"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "リバー（River）": ["US"],
+                        "ローワン（Rowan）": ["US"],
+                        "アッシュ（Ash）": ["US"],
+                        "スカイ（Sky）": ["US"],
+                        "ロビン（Robin）": ["US"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "エヴァー（Ever）": ["US"],
+                        "フェニックス（Phoenix）": ["US"],
+                        "ウィンター（Winter）": ["US"],
+                        "ソルスティス（Solstice）": ["US"],
+                        "エタニティ（Eternity）": ["US"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "オーガスト（August）": ["US"],
+                        "ウィンター（Winter）": ["US"],
+                        "オータム（Autumn）": ["US"],
+                        "サマー（Summer）": ["US"],
+                        "ジャニュアリー（January）": ["US"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "ホープ（Hope）": ["US"],
+                        "ブリス（Bliss）": ["US"],
+                        "チャンス（Chance）": ["US"],
+                        "フォーチュン（Fortune）": ["US"],
+                        "デスティニー（Destiny）": ["US"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "スカウト（Scout）": ["US"],
+                        "ジャーニー（Journey）": ["US"],
+                        "チェイス（Chase）": ["US"],
+                        "ワイルダー（Wilder）": ["US"],
+                        "セイラー（Sailor）": ["US"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "アレックス（Alex）": ["US"],
+                        "モーガン（Morgan）": ["US"],
+                        "ジョーダン（Jordan）": ["US"],
+                        "フランシス（Francis）": ["US"],
+                        "シドニー（Sidney）": ["US"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "リリック（Lyric）": ["US"],
+                        "ハーパー（Harper）": ["US"],
+                        "ベル（Bell）": ["US"],
+                        "ハーモニー（Harmony）": ["US"],
+                        "アリア（Aria）": ["US"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "セージ（Sage）": ["US"],
+                        "トゥルー（True）": ["US"],
+                        "ヘイヴン（Haven）": ["US"],
+                        "ジャスティス（Justice）": ["US"],
+                        "フェニックス（Phoenix）": ["US"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "シドニー（Sydney）": ["US"],
+                        "ロンドン（London）": ["US"],
+                        "ダコタ（Dakota）": ["US"],
+                        "デヴォン（Devon）": ["US"],
+                        "ダラス（Dallas）": ["US"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "ジョーダン（Jordan）": ["US"],
+                        "テイラー（Taylor）": ["US"],
+                        "ケイシー（Casey）": ["US"],
+                        "エイブリー（Avery）": ["US"],
+                        "ライリー（Riley）": ["US"]
+                    }
+                ]
+            }
+        ],
+        "_l10n": {
+            "reviewRequired": true,
+            "reason": "姓名讀音及譯名可能因人而異"
+        }
+    },
+    "CA": {
+        "Surname": [
+            "スミス（Smith）",
+            "ブラウン（Brown）",
+            "トランブレ（Tremblay）",
+            "マーティン（Martin）",
+            "ロイ（Roy）"
+        ],
+        "Name_Lady": [
+            {
+                "Values": [
+                    {
+                        "グレース（Grace）": ["CA"],
+                        "ホープ（Hope）": ["CA"],
+                        "フェイス（Faith）": ["CA"],
+                        "ヴェリティ（Verity）": ["CA"],
+                        "チャリティー（Charity）": ["CA"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "セリーナ（Serena）": ["CA"],
+                        "フェリシティ（Felicity）": ["CA"],
+                        "ジョイ（Joy）": ["CA"],
+                        "セレニティ（Serenity）": ["CA"],
+                        "ハーモニー（Harmony）": ["CA"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "ローズ（Rose）": ["CA"],
+                        "リリー（Lily）": ["CA"],
+                        "ヘイゼル（Hazel）": ["CA"],
+                        "ウィロー（Willow）": ["CA"],
+                        "アイビー（Ivy）": ["CA"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "イヴ（Eve）": ["CA"],
+                        "エヴァリー（Everly）": ["CA"],
+                        "フローレンス（Florence）": ["CA"],
+                        "エタニティ（Eternity）": ["CA"],
+                        "コンスタンス（Constance）": ["CA"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "エイプリル（April）": ["CA"],
+                        "メイ（May）": ["CA"],
+                        "ジューン（June）": ["CA"],
+                        "サマー（Summer）": ["CA"],
+                        "オータム（Autumn）": ["CA"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "デスティニー（Destiny）": ["CA"],
+                        "デジレ（Desiree）": ["CA"],
+                        "ウィニフレッド（Winifred）": ["CA"],
+                        "ベアトリス（Beatrice）": ["CA"],
+                        "ビクトリア（Victoria）": ["CA"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "パイパー（Piper）": ["CA"],
+                        "ジャーニー（Journey）": ["CA"],
+                        "スカウト（Scout）": ["CA"],
+                        "レイヴン（Raven）": ["CA"],
+                        "ウェイバリー（Waverly）": ["CA"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "エレノア（Eleanor）": ["CA"],
+                        "マチルダ（Matilda）": ["CA"],
+                        "ビクトリア（Victoria）": ["CA"],
+                        "エリザベス（Elizabeth）": ["CA"],
+                        "キャサリン（Catherine）": ["CA"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "メロディー（Melody）": ["CA"],
+                        "ライラ（Lyra）": ["CA"],
+                        "アリア（Aria）": ["CA"],
+                        "ケイデンス（Cadence）": ["CA"],
+                        "キャロル（Carol）": ["CA"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "ホープ（Hope）": ["CA"],
+                        "グレース（Grace）": ["CA"],
+                        "フェイス（Faith）": ["CA"],
+                        "ハーモニー（Harmony）": ["CA"],
+                        "デスティニー（Destiny）": ["CA"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "チェルシー（Chelsea）": ["CA"],
+                        "シドニー（Sydney）": ["CA"],
+                        "サバンナ（Savannah）": ["CA"],
+                        "アデレード（Adelaide）": ["CA"],
+                        "ブルックリン（Brooklyn）": ["CA"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "オリビア（Olivia）": ["CA"],
+                        "エマ（Emma）": ["CA"],
+                        "シャーロット（Charlotte）": ["CA"],
+                        "アメリア（Amelia）": ["CA"],
+                        "ソフィア（Sophia）": ["CA"]
+                    }
+                ]
+            }
+        ],
+        "Name_Man": [
+            {
+                "Values": [
+                    {
+                        "ジャスティス（Justice）": ["CA"],
+                        "ノーブル（Noble）": ["CA"],
+                        "アーネスト（Ernest）": ["CA"],
+                        "ビクター（Victor）": ["CA"],
+                        "バラー（Valor）": ["CA"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "クレメント（Clement）": ["CA"],
+                        "パックス（Pax）": ["CA"],
+                        "ソロモン（Solomon）": ["CA"],
+                        "トルーマン（Truman）": ["CA"],
+                        "ノエル（Noel）": ["CA"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "フォレスト（Forrest）": ["CA"],
+                        "リバー（River）": ["CA"],
+                        "ローワン（Rowan）": ["CA"],
+                        "ジャスパー（Jasper）": ["CA"],
+                        "リード（Reed）": ["CA"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "エベレット（Everett）": ["CA"],
+                        "オーガスティン（Augustine）": ["CA"],
+                        "コンスタント（Constant）": ["CA"],
+                        "マイルズ（Miles）": ["CA"],
+                        "バーナード（Bernard）": ["CA"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "オーガスト（August）": ["CA"],
+                        "ジュリアン（Julian）": ["CA"],
+                        "ジュリアス（Julius）": ["CA"],
+                        "バレンタイン（Valentine）": ["CA"],
+                        "ノエル（Noel）": ["CA"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "フェリックス（Felix）": ["CA"],
+                        "ベネディクト（Benedict）": ["CA"],
+                        "ビクター（Victor）": ["CA"],
+                        "アッシャー（Asher）": ["CA"],
+                        "エドマンド（Edmund）": ["CA"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "ウォーカー（Walker）": ["CA"],
+                        "チェイス（Chase）": ["CA"],
+                        "ハンター（Hunter）": ["CA"],
+                        "ライダー（Ryder）": ["CA"],
+                        "アーチャー（Archer）": ["CA"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "アーサー（Arthur）": ["CA"],
+                        "アルフレッド（Alfred）": ["CA"],
+                        "エドワード（Edward）": ["CA"],
+                        "ウィリアム（William）": ["CA"],
+                        "ヘンリー（Henry）": ["CA"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "リード（Reed）": ["CA"],
+                        "ハーパー（Harper）": ["CA"],
+                        "ベル（Bell）": ["CA"],
+                        "パイパー（Piper）": ["CA"],
+                        "リリック（Lyric）": ["CA"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "ジャスティス（Justice）": ["CA"],
+                        "チャンス（Chance）": ["CA"],
+                        "フォーチュン（Fortune）": ["CA"],
+                        "ノーブル（Noble）": ["CA"],
+                        "レジェンド（Legend）": ["CA"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "オースティン（Austin）": ["CA"],
+                        "ダラス（Dallas）": ["CA"],
+                        "ハドソン（Hudson）": ["CA"],
+                        "リンカーン（Lincoln）": ["CA"],
+                        "ケント（Kent）": ["CA"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "リアム（Liam）": ["CA"],
+                        "ノア（Noah）": ["CA"],
+                        "オリバー（Oliver）": ["CA"],
+                        "ウィリアム（William）": ["CA"],
+                        "ジャック（Jack）": ["CA"]
+                    }
+                ]
+            }
+        ],
+        "Name_Neutral": [
+            {
+                "Values": [
+                    {
+                        "ジャスティス（Justice）": ["CA"],
+                        "トゥルー（True）": ["CA"],
+                        "オナー（Honor）": ["CA"],
+                        "セージ（Sage）": ["CA"],
+                        "メリット（Merit）": ["CA"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "セレニティ（Serenity）": ["CA"],
+                        "ピース（Peace）": ["CA"],
+                        "ヘイヴン（Haven）": ["CA"],
+                        "サニー（Sunny）": ["CA"],
+                        "カーム（Calm）": ["CA"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "リバー（River）": ["CA"],
+                        "ローワン（Rowan）": ["CA"],
+                        "アッシュ（Ash）": ["CA"],
+                        "スカイ（Sky）": ["CA"],
+                        "ロビン（Robin）": ["CA"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "エヴァー（Ever）": ["CA"],
+                        "フェニックス（Phoenix）": ["CA"],
+                        "ウィンター（Winter）": ["CA"],
+                        "ソルスティス（Solstice）": ["CA"],
+                        "エタニティ（Eternity）": ["CA"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "オーガスト（August）": ["CA"],
+                        "ウィンター（Winter）": ["CA"],
+                        "オータム（Autumn）": ["CA"],
+                        "サマー（Summer）": ["CA"],
+                        "ジャニュアリー（January）": ["CA"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "ホープ（Hope）": ["CA"],
+                        "ブリス（Bliss）": ["CA"],
+                        "チャンス（Chance）": ["CA"],
+                        "フォーチュン（Fortune）": ["CA"],
+                        "デスティニー（Destiny）": ["CA"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "スカウト（Scout）": ["CA"],
+                        "ジャーニー（Journey）": ["CA"],
+                        "チェイス（Chase）": ["CA"],
+                        "ワイルダー（Wilder）": ["CA"],
+                        "セイラー（Sailor）": ["CA"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "アレックス（Alex）": ["CA"],
+                        "モーガン（Morgan）": ["CA"],
+                        "ジョーダン（Jordan）": ["CA"],
+                        "フランシス（Francis）": ["CA"],
+                        "シドニー（Sidney）": ["CA"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "リリック（Lyric）": ["CA"],
+                        "ハーパー（Harper）": ["CA"],
+                        "ベル（Bell）": ["CA"],
+                        "ハーモニー（Harmony）": ["CA"],
+                        "アリア（Aria）": ["CA"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "セージ（Sage）": ["CA"],
+                        "トゥルー（True）": ["CA"],
+                        "ヘイヴン（Haven）": ["CA"],
+                        "ジャスティス（Justice）": ["CA"],
+                        "フェニックス（Phoenix）": ["CA"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "シドニー（Sydney）": ["CA"],
+                        "ロンドン（London）": ["CA"],
+                        "ダコタ（Dakota）": ["CA"],
+                        "デヴォン（Devon）": ["CA"],
+                        "ダラス（Dallas）": ["CA"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "クイン（Quinn）": ["CA"],
+                        "エイブリー（Avery）": ["CA"],
+                        "ライリー（Riley）": ["CA"],
+                        "キャメロン（Cameron）": ["CA"],
+                        "モーガン（Morgan）": ["CA"]
+                    }
+                ]
+            }
+        ],
+        "_l10n": {
+            "reviewRequired": true,
+            "reason": "姓名讀音及譯名可能因人而異"
+        }
+    },
+    "AU": {
+        "Surname": [
+            "スミス（Smith）",
+            "ジョーンズ（Jones）",
+            "ウィリアムズ（Williams）",
+            "ブラウン（Brown）",
+            "ウィルソン（Wilson）"
+        ],
+        "Name_Lady": [
+            {
+                "Values": [
+                    {
+                        "グレース（Grace）": ["AU"],
+                        "ホープ（Hope）": ["AU"],
+                        "フェイス（Faith）": ["AU"],
+                        "ヴェリティ（Verity）": ["AU"],
+                        "チャリティー（Charity）": ["AU"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "セリーナ（Serena）": ["AU"],
+                        "フェリシティ（Felicity）": ["AU"],
+                        "ジョイ（Joy）": ["AU"],
+                        "セレニティ（Serenity）": ["AU"],
+                        "ハーモニー（Harmony）": ["AU"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "ローズ（Rose）": ["AU"],
+                        "リリー（Lily）": ["AU"],
+                        "ヘイゼル（Hazel）": ["AU"],
+                        "ウィロー（Willow）": ["AU"],
+                        "アイビー（Ivy）": ["AU"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "イヴ（Eve）": ["AU"],
+                        "エヴァリー（Everly）": ["AU"],
+                        "フローレンス（Florence）": ["AU"],
+                        "エタニティ（Eternity）": ["AU"],
+                        "コンスタンス（Constance）": ["AU"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "エイプリル（April）": ["AU"],
+                        "メイ（May）": ["AU"],
+                        "ジューン（June）": ["AU"],
+                        "サマー（Summer）": ["AU"],
+                        "オータム（Autumn）": ["AU"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "デスティニー（Destiny）": ["AU"],
+                        "デジレ（Desiree）": ["AU"],
+                        "ウィニフレッド（Winifred）": ["AU"],
+                        "ベアトリス（Beatrice）": ["AU"],
+                        "ビクトリア（Victoria）": ["AU"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "パイパー（Piper）": ["AU"],
+                        "ジャーニー（Journey）": ["AU"],
+                        "スカウト（Scout）": ["AU"],
+                        "レイヴン（Raven）": ["AU"],
+                        "ウェイバリー（Waverly）": ["AU"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "エレノア（Eleanor）": ["AU"],
+                        "マチルダ（Matilda）": ["AU"],
+                        "ビクトリア（Victoria）": ["AU"],
+                        "エリザベス（Elizabeth）": ["AU"],
+                        "キャサリン（Catherine）": ["AU"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "メロディー（Melody）": ["AU"],
+                        "ライラ（Lyra）": ["AU"],
+                        "アリア（Aria）": ["AU"],
+                        "ケイデンス（Cadence）": ["AU"],
+                        "キャロル（Carol）": ["AU"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "ホープ（Hope）": ["AU"],
+                        "グレース（Grace）": ["AU"],
+                        "フェイス（Faith）": ["AU"],
+                        "ハーモニー（Harmony）": ["AU"],
+                        "デスティニー（Destiny）": ["AU"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "チェルシー（Chelsea）": ["AU"],
+                        "シドニー（Sydney）": ["AU"],
+                        "サバンナ（Savannah）": ["AU"],
+                        "アデレード（Adelaide）": ["AU"],
+                        "ブルックリン（Brooklyn）": ["AU"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "シャーロット（Charlotte）": ["AU"],
+                        "アメリア（Amelia）": ["AU"],
+                        "オリビア（Olivia）": ["AU"],
+                        "アイラ（Isla）": ["AU"],
+                        "ミア（Mia）": ["AU"]
+                    }
+                ]
+            }
+        ],
+        "Name_Man": [
+            {
+                "Values": [
+                    {
+                        "ジャスティス（Justice）": ["AU"],
+                        "ノーブル（Noble）": ["AU"],
+                        "アーネスト（Ernest）": ["AU"],
+                        "ビクター（Victor）": ["AU"],
+                        "バラー（Valor）": ["AU"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "クレメント（Clement）": ["AU"],
+                        "パックス（Pax）": ["AU"],
+                        "ソロモン（Solomon）": ["AU"],
+                        "トルーマン（Truman）": ["AU"],
+                        "ノエル（Noel）": ["AU"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "フォレスト（Forrest）": ["AU"],
+                        "リバー（River）": ["AU"],
+                        "ローワン（Rowan）": ["AU"],
+                        "ジャスパー（Jasper）": ["AU"],
+                        "リード（Reed）": ["AU"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "エベレット（Everett）": ["AU"],
+                        "オーガスティン（Augustine）": ["AU"],
+                        "コンスタント（Constant）": ["AU"],
+                        "マイルズ（Miles）": ["AU"],
+                        "バーナード（Bernard）": ["AU"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "オーガスト（August）": ["AU"],
+                        "ジュリアン（Julian）": ["AU"],
+                        "ジュリアス（Julius）": ["AU"],
+                        "バレンタイン（Valentine）": ["AU"],
+                        "ノエル（Noel）": ["AU"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "フェリックス（Felix）": ["AU"],
+                        "ベネディクト（Benedict）": ["AU"],
+                        "ビクター（Victor）": ["AU"],
+                        "アッシャー（Asher）": ["AU"],
+                        "エドマンド（Edmund）": ["AU"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "ウォーカー（Walker）": ["AU"],
+                        "チェイス（Chase）": ["AU"],
+                        "ハンター（Hunter）": ["AU"],
+                        "ライダー（Ryder）": ["AU"],
+                        "アーチャー（Archer）": ["AU"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "アーサー（Arthur）": ["AU"],
+                        "アルフレッド（Alfred）": ["AU"],
+                        "エドワード（Edward）": ["AU"],
+                        "ウィリアム（William）": ["AU"],
+                        "ヘンリー（Henry）": ["AU"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "リード（Reed）": ["AU"],
+                        "ハーパー（Harper）": ["AU"],
+                        "ベル（Bell）": ["AU"],
+                        "パイパー（Piper）": ["AU"],
+                        "リリック（Lyric）": ["AU"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "ジャスティス（Justice）": ["AU"],
+                        "チャンス（Chance）": ["AU"],
+                        "フォーチュン（Fortune）": ["AU"],
+                        "ノーブル（Noble）": ["AU"],
+                        "レジェンド（Legend）": ["AU"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "オースティン（Austin）": ["AU"],
+                        "ダラス（Dallas）": ["AU"],
+                        "ハドソン（Hudson）": ["AU"],
+                        "リンカーン（Lincoln）": ["AU"],
+                        "ケント（Kent）": ["AU"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "オリバー（Oliver）": ["AU"],
+                        "ノア（Noah）": ["AU"],
+                        "ジャック（Jack）": ["AU"],
+                        "ウィリアム（William）": ["AU"],
+                        "トーマス（Thomas）": ["AU"]
+                    }
+                ]
+            }
+        ],
+        "Name_Neutral": [
+            {
+                "Values": [
+                    {
+                        "ジャスティス（Justice）": ["AU"],
+                        "トゥルー（True）": ["AU"],
+                        "オナー（Honor）": ["AU"],
+                        "セージ（Sage）": ["AU"],
+                        "メリット（Merit）": ["AU"]
+                    }
+                ],
+                "Mood": [
+                    {
+                        "セレニティ（Serenity）": ["AU"],
+                        "ピース（Peace）": ["AU"],
+                        "ヘイヴン（Haven）": ["AU"],
+                        "サニー（Sunny）": ["AU"],
+                        "カーム（Calm）": ["AU"]
+                    }
+                ],
+                "Nature": [
+                    {
+                        "リバー（River）": ["AU"],
+                        "ローワン（Rowan）": ["AU"],
+                        "アッシュ（Ash）": ["AU"],
+                        "スカイ（Sky）": ["AU"],
+                        "ロビン（Robin）": ["AU"]
+                    }
+                ],
+                "Time_Long": [
+                    {
+                        "エヴァー（Ever）": ["AU"],
+                        "フェニックス（Phoenix）": ["AU"],
+                        "ウィンター（Winter）": ["AU"],
+                        "ソルスティス（Solstice）": ["AU"],
+                        "エタニティ（Eternity）": ["AU"]
+                    }
+                ],
+                "Time_Short": [
+                    {
+                        "オーガスト（August）": ["AU"],
+                        "ウィンター（Winter）": ["AU"],
+                        "オータム（Autumn）": ["AU"],
+                        "サマー（Summer）": ["AU"],
+                        "ジャニュアリー（January）": ["AU"]
+                    }
+                ],
+                "Wishes": [
+                    {
+                        "ホープ（Hope）": ["AU"],
+                        "ブリス（Bliss）": ["AU"],
+                        "チャンス（Chance）": ["AU"],
+                        "フォーチュン（Fortune）": ["AU"],
+                        "デスティニー（Destiny）": ["AU"]
+                    }
+                ],
+                "Dynamic": [
+                    {
+                        "スカウト（Scout）": ["AU"],
+                        "ジャーニー（Journey）": ["AU"],
+                        "チェイス（Chase）": ["AU"],
+                        "ワイルダー（Wilder）": ["AU"],
+                        "セイラー（Sailor）": ["AU"]
+                    }
+                ],
+                "Historical": [
+                    {
+                        "アレックス（Alex）": ["AU"],
+                        "モーガン（Morgan）": ["AU"],
+                        "ジョーダン（Jordan）": ["AU"],
+                        "フランシス（Francis）": ["AU"],
+                        "シドニー（Sidney）": ["AU"]
+                    }
+                ],
+                "Sound": [
+                    {
+                        "リリック（Lyric）": ["AU"],
+                        "ハーパー（Harper）": ["AU"],
+                        "ベル（Bell）": ["AU"],
+                        "ハーモニー（Harmony）": ["AU"],
+                        "アリア（Aria）": ["AU"]
+                    }
+                ],
+                "Abstract": [
+                    {
+                        "セージ（Sage）": ["AU"],
+                        "トゥルー（True）": ["AU"],
+                        "ヘイヴン（Haven）": ["AU"],
+                        "ジャスティス（Justice）": ["AU"],
+                        "フェニックス（Phoenix）": ["AU"]
+                    }
+                ],
+                "Location": [
+                    {
+                        "シドニー（Sydney）": ["AU"],
+                        "ロンドン（London）": ["AU"],
+                        "ダコタ（Dakota）": ["AU"],
+                        "デヴォン（Devon）": ["AU"],
+                        "ダラス（Dallas）": ["AU"]
+                    }
+                ],
+                "Undifined": [
+                    {
+                        "ライリー（Riley）": ["AU"],
+                        "チャーリー（Charlie）": ["AU"],
+                        "ベイリー（Bailey）": ["AU"],
+                        "ダーシー（Darcy）": ["AU"],
+                        "テイラー（Taylor）": ["AU"]
+                    }
+                ]
+            }
+        ],
+        "_l10n": {
+            "reviewRequired": true,
+            "reason": "姓名讀音及譯名可能因人而異"
+        }
+    }
+}

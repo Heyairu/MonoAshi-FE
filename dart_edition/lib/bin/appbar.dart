@@ -105,7 +105,10 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
   void dismissKeyTips() => _keyTips.hide();
 
   void selectRelativeTab(int delta) {
-    final ids = _tabs(_commands).map((tab) => tab.id).toList();
+    final ids = _tabs(_commands)
+        .where((tab) => tab.visibleFor(_ribbonContext))
+        .map((tab) => tab.id)
+        .toList();
     final id = ids[(ids.indexOf(_selectedTabId) + delta) % ids.length];
     selectTabForNavigation(id);
   }
@@ -119,6 +122,7 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
   final _scrollController = ScrollController();
   bool _menuOpen = false;
   String _selectedTabId = "home";
+  String _lastNonSearchTabId = "home";
   final _defaultSearchOptions = FindReplaceOptions();
 
   @override
@@ -132,6 +136,10 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
     super.didUpdateWidget(oldWidget);
     if (!oldWidget.showFindReplaceWindow && widget.showFindReplaceWindow) {
       _selectTab("search");
+    } else if (oldWidget.showFindReplaceWindow &&
+        !widget.showFindReplaceWindow &&
+        _selectedTabId == "search") {
+      _selectTab(_lastNonSearchTabId);
     }
   }
 
@@ -461,12 +469,8 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
       id: "search",
       label: context.l10n.uiSearch,
       keyTip: "S",
+      isVisible: (_) => widget.showFindReplaceWindow,
       groups: [
-        RibbonGroup(
-          id: "search-panel",
-          label: context.l10n.uiFindAndReplace,
-          commands: [commands["find"]!],
-        ),
         RibbonGroup(
           id: "search-match",
           label: context.l10n.uiMatchOptions,
@@ -499,7 +503,10 @@ class MonogatariTopAppBarState extends State<MonogatariTopAppBar> {
 
   void _selectTab(String id, {bool openSearch = true}) {
     if (_selectedTabId == id) return;
-    setState(() => _selectedTabId = id);
+    setState(() {
+      _selectedTabId = id;
+      if (id != "search") _lastNonSearchTabId = id;
+    });
     if (_scrollController.hasClients) _scrollController.jumpTo(0);
     if (openSearch && id == "search" && !widget.showFindReplaceWindow) {
       widget.onToggleFindReplaceWindow();

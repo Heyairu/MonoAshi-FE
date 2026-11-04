@@ -682,7 +682,7 @@ final class MosaicIntelliSenseEngine {
         includeHierarchy &&
         (kind == InlineAnnotationKind.location ||
             (kind == InlineAnnotationKind.event && depth <= 1));
-    final childLimit = maxCandidatesPerLevel - (hasCreateAction ? 1 : 0) - 1;
+    final childLimit = maxCandidatesPerLevel - (hasCreateAction ? 1 : 0) - 2;
     final children = kind == InlineAnnotationKind.character
         ? <MosaicCompletionCandidate>[
             MosaicCompletionCandidate(
@@ -700,7 +700,7 @@ final class MosaicIntelliSenseEngine {
             for (
               var aliasIndex = 0;
               aliasIndex < target.aliases.length &&
-                  aliasIndex < maxCandidatesPerLevel - 3;
+                  aliasIndex < maxCandidatesPerLevel - 4;
               aliasIndex++
             )
               MosaicCompletionCandidate(
@@ -740,6 +740,19 @@ final class MosaicIntelliSenseEngine {
         : const <MosaicCompletionCandidate>[];
     final hierarchicalChildren = <MosaicCompletionCandidate>[
       ...children,
+      MosaicCompletionCandidate(
+        id: "${target.id}:implicit",
+        label: l10n.uiImplicitMention,
+        detail: "（${target.primaryName}）",
+        insertText: InlineAnnotationSyntax.format(
+          kind: kind,
+          state: state,
+          colors: colors,
+          targetId: target.id,
+          isImplicit: true,
+          displayText: "（${target.primaryName}）",
+        ),
+      ),
       MosaicCompletionCandidate(
         id: "${target.id}:custom-text",
         label: l10n.uiEnterOtherDisplayText,

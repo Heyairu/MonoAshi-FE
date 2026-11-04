@@ -58,6 +58,7 @@ import "../presentation/providers/revision_tracking_provider.dart";
 import "../features/editor/editor_input_rules.dart";
 import "../features/editor/plain_text_quill_mention_overlay.dart";
 import "../ui_library/forms.dart";
+import "../ui_library/theme_palette.dart";
 import "../ui_library/mobile_editor_insets.dart";
 
 /// Defaults to the plain-text Quill editor. Set
@@ -1520,6 +1521,12 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
                       searchController: widget.quillSearchController,
                       revisionRanges: revisionRanges,
                       revisionMarkers: revisionMarkers,
+                      highContrast:
+                          ref
+                              .watch(themeStateProvider)
+                              .valueOrNull
+                              ?.themePreset ==
+                          AppThemePreset.highContrast,
                       mentionMarkers: mosaicController == null
                           ? const <PlainTextQuillMentionMarker>[]
                           : <PlainTextQuillMentionMarker>[

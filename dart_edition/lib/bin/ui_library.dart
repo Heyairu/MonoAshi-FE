@@ -23,6 +23,7 @@ import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
+import "../infrastructure/rhodanthe/rhodanthe_theme.dart";
 import "../ui_library/spacing.dart";
 import "../ui_library/theme_palette.dart";
 import "../ui_library/control_shape.dart";
@@ -197,6 +198,9 @@ class AppTheme {
         ? const Color(0xFF757575)
         : const Color(0xFF858585);
     return base.copyWith(
+      extensions: base.extensions.values.followedBy([
+        RhodantheTheme.highContrast(brightness: base.brightness),
+      ]),
       progressIndicatorTheme: base.progressIndicatorTheme.copyWith(
         circularTrackColor: progressTrack,
         linearTrackColor: progressTrack,

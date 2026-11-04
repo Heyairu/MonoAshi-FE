@@ -94,7 +94,7 @@ final class RhodantheTextSpanAdapter {
     try {
       final tokenStyles = <TextStyle>[
         for (var index = 0; index < plan.tokenSets.length; index++)
-          _tokenStyle(plan.tokenSets[index], theme, index),
+          _tokenStyle(plan.tokenSets[index], theme, index, baseStyle?.color),
       ];
       _validateRuns(text, plan);
       final effectiveComposing = _effectiveComposing(
@@ -106,6 +106,7 @@ final class RhodantheTextSpanAdapter {
         text: text,
         plan: plan,
         tokenStyles: tokenStyles,
+        theme: theme,
         baseStyle: baseStyle,
         composing: effectiveComposing,
         composingStyle: composingStyle,
@@ -183,11 +184,13 @@ TextStyle _tokenStyle(
   RhodantheStyleTokenSet tokenSet,
   RhodantheTheme theme,
   int index,
+  Color? baseForeground,
 ) {
   final foreground = _resolveColor(
     tokenSet.foreground,
     theme,
     "tokenSets[$index].foreground",
+    baseForeground: baseForeground,
   );
   final background = _resolveColor(
     tokenSet.background,
@@ -268,9 +271,14 @@ TextStyle _tokenStyle(
   );
 }
 
-Color? _resolveColor(String? token, RhodantheTheme theme, String field) {
+Color? _resolveColor(
+  String? token,
+  RhodantheTheme theme,
+  String field, {
+  Color? baseForeground,
+}) {
   if (token == null) return null;
-  final color = theme.resolveColor(token);
+  final color = theme.resolveColor(token, baseForeground: baseForeground);
   if (color == null) {
     throw _SpanAdapterException(
       RhodantheSpanBuildStatus.invalidThemeToken,
@@ -301,6 +309,7 @@ TextSpan _buildSpan({
   required String text,
   required RhodantheRenderPlan plan,
   required List<TextStyle> tokenStyles,
+  required RhodantheTheme theme,
   required TextStyle? baseStyle,
   required TextRange composing,
   required TextStyle composingStyle,
@@ -334,6 +343,15 @@ TextSpan _buildSpan({
       final run = plan.runs[runIndex];
       if (run.range.start <= start && end <= run.range.end) {
         style = tokenStyles[run.styleTokenSetId];
+        if (run.annotationIds.any(
+          (id) => id.startsWith(rhodantheImplicitAnnotationIdPrefix),
+        )) {
+          final foreground =
+              style.color ?? baseStyle?.color ?? theme.defaultForeground;
+          style = style.copyWith(
+            color: foreground.withValues(alpha: theme.implicitMentionOpacity),
+          );
+        }
         semanticsIdentifier = plan.tokenSets[run.styleTokenSetId].interaction;
       }
     }

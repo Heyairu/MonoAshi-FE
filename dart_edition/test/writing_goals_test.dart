@@ -67,7 +67,7 @@ void main() {
     expect(parsed.wasMigrated, isTrue);
     expect(parsed.data.writingGoals, const ProjectWritingGoals());
     final xml = FileService.generateProjectXML(parsed.data);
-    expect(xml, contains('<ver>1.22</ver>'));
+    expect(xml, contains('<ver>1.24</ver>'));
     expect(xml, isNot(contains('<Name>WritingGoals</Name>')));
   });
 

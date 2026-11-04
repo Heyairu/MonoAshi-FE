@@ -65,6 +65,12 @@ final class InlineAnnotationParser {
       return null;
     }
 
+    final isImplicit =
+        parsedKind != InlineAnnotationKind.emphasis &&
+        cursor < source.length &&
+        source.codeUnitAt(cursor) == 0x7e;
+    if (isImplicit) cursor++;
+
     var state = InlineAnnotationState.none;
     if (parsedKind != InlineAnnotationKind.emphasis && cursor < source.length) {
       final stateUnit = source.codeUnitAt(cursor);
@@ -170,6 +176,7 @@ final class InlineAnnotationParser {
     return InlineAnnotation(
       kind: parsedKind,
       state: state,
+      isImplicit: isImplicit,
       colors: colors,
       targetId: targetId,
       targetStatus: targetStatus,

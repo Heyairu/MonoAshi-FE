@@ -49,7 +49,7 @@ void main() {
         }
         var oldXml = FileService.generateProjectXMLWithoutLatestSaveUpdate(
           source,
-        ).replaceFirst('<ver>1.22</ver>', '<ver>$version</ver>');
+        ).replaceFirst('<ver>1.24</ver>', '<ver>$version</ver>');
         for (final entry in roles.entries) {
           oldXml = oldXml.replaceAll(
             '<CharacterType>${entry.value}</CharacterType>',
@@ -70,7 +70,7 @@ void main() {
         final saved = FileService.generateProjectXMLWithoutLatestSaveUpdate(
           parsed.data,
         );
-        expect(saved, contains('<ver>1.22</ver>'));
+        expect(saved, contains('<ver>1.24</ver>'));
         final reopened = FileService.parseProjectXMLWithMetadata(saved);
         expect(reopened.wasMigrated, isFalse);
         expect(reopened.data.characterData, parsed.data.characterData);
