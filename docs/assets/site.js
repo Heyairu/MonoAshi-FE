@@ -9,13 +9,23 @@
   };
   const [lightLabel, darkLabel, closeMenuLabel, openMenuLabel] = labels[root.lang] || labels.en;
 
-  document.querySelectorAll('.language-options a').forEach((link) => {
+  const languageMenu = document.querySelector('.language-menu');
+  languageMenu.querySelectorAll('a').forEach((link) => {
     link.hash = window.location.hash;
     link.addEventListener('click', (event) => {
       if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
       link.hash = window.location.hash;
       try { localStorage.setItem('monoashi-site-language', link.hreflang); } catch { /* The link still works. */ }
     });
+  });
+  document.addEventListener('click', (event) => {
+    if (!languageMenu.contains(event.target)) languageMenu.open = false;
+  });
+  languageMenu.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && languageMenu.open) {
+      languageMenu.open = false;
+      languageMenu.querySelector('summary').focus();
+    }
   });
   const themeToggle = document.querySelector('.theme-toggle');
   const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
