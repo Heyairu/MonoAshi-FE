@@ -129,6 +129,36 @@ void main() {
     }
   });
 
+  test("Mention trailing caret maps past the complete raw annotation", () {
+    const raw = "//@<$uuid|Chino>{主角}//";
+    final projection = InlineAnnotationProjection.build(raw);
+    final entry = projection.projectedAnnotations.single;
+    final caret = TextSelection.collapsed(offset: entry.displayRange.end);
+
+    expect(projection.displaySelectionToRaw(caret).extentOffset, raw.length);
+    expect(
+      projection.displayRangeToRaw(TextRange.collapsed(caret.extentOffset)),
+      TextRange.collapsed(raw.length),
+    );
+    expect(projection.annotationAtDisplayOffset(caret.extentOffset), isNull);
+    expect(
+      projection.annotationAtDisplayOffset(entry.displayRange.end - 1),
+      same(entry),
+    );
+  });
+
+  test("adjacent Mention boundary belongs to the following badge", () {
+    final projection = InlineAnnotationProjection.build("//^<甲>////^<乙>//");
+    final first = projection.projectedAnnotations.first;
+    final second = projection.projectedAnnotations.last;
+
+    expect(first.displayRange.end, second.displayRange.start);
+    expect(
+      projection.annotationAtDisplayOffset(first.displayRange.end),
+      same(second),
+    );
+  });
+
   test("partial display range maps only to display text", () {
     const raw = "//^<ABC>//";
     final projection = InlineAnnotationProjection.build(raw);

@@ -62,6 +62,30 @@ void main() {
     expect(controller.presentationRevision, 0);
   });
 
+  test("IME commit after a Mention keeps the new text outside its syntax", () {
+    const raw = "//@<4e251fc2-1e2b-4f78-93da-91f8c76d9a92|Chino>{主角}//";
+    final controller = MosaicEditingController(rawText: raw);
+    addTearDown(controller.dispose);
+    final base = controller.displayText;
+    controller.selection = TextSelection.collapsed(offset: base.length);
+    controller.value = TextEditingValue(
+      text: '${base}ni',
+      selection: TextSelection.collapsed(offset: base.length + 2),
+      composing: TextRange(start: base.length, end: base.length + 2),
+    );
+    controller.value = TextEditingValue(
+      text: '$base你',
+      selection: TextSelection.collapsed(offset: base.length + 1),
+    );
+
+    expect(controller.rawText, '$raw你');
+    expect(controller.annotations.single.displayText, 'Chino');
+    expect(
+      controller.projection.projectedAnnotations.single.displayRange.end,
+      base.length,
+    );
+  });
+
   test("projection cache only rebuilds when raw text changes", () {
     final controller = MosaicEditingController(rawText: "前//^<重點>//後");
     addTearDown(controller.dispose);

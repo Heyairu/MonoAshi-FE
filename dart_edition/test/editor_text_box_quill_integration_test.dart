@@ -117,6 +117,68 @@ void main() {
     expect(quillControllerOf(tester).selection.baseOffset, 2);
   });
 
+  for (final implicit in [false, true]) {
+    for (final suffix in ['', '後']) {
+      testWidgets(
+        "Mention trailing input stays outside, implicit=$implicit, suffix=$suffix",
+        (tester) async {
+          final mention =
+              "//@${implicit ? '~' : ''}<4e251fc2-1e2b-4f78-93da-91f8c76d9a92|Chino>{主角}//";
+          final controller = HighlightTextEditingController(
+            text: '$mention$suffix',
+          );
+          final focusNode = FocusNode();
+          addTearDown(controller.dispose);
+          addTearDown(focusNode.dispose);
+          await tester.pumpWidget(
+            buildEditor(controller: controller, focusNode: focusNode),
+          );
+          focusNode.requestFocus();
+          final quill = quillControllerOf(tester);
+          final end = controller
+              .projection
+              .projectedAnnotations
+              .single
+              .displayRange
+              .end;
+          quill.updateSelection(
+            TextSelection.collapsed(offset: end),
+            ChangeSource.local,
+          );
+          await tester.pump();
+
+          final base = PlainTextQuillAdapter.toPlainText(quill.document);
+          tester.testTextInput.updateEditingValue(
+            TextEditingValue(
+              text: '${base.replaceRange(end, end, '　')}\n',
+              selection: TextSelection.collapsed(offset: end + 1),
+            ),
+          );
+          await tester.pump();
+          expect(controller.rawText, '$mention　$suffix');
+          expect(controller.annotations.single.displayText, 'Chino');
+          expect(controller.projection.annotationAtDisplayOffset(end), isNull);
+
+          final withSpace = PlainTextQuillAdapter.toPlainText(quill.document);
+          tester.testTextInput.updateEditingValue(
+            TextEditingValue(
+              text: '${withSpace.replaceRange(end + 1, end + 1, '文字')}\n',
+              selection: TextSelection.collapsed(offset: end + 3),
+            ),
+          );
+          await tester.pump();
+          expect(controller.rawText, '$mention　文字$suffix');
+          expect(controller.annotations.single.displayText, 'Chino');
+          expect(
+            controller.projection.projectedAnnotations.single.displayRange.end,
+            end,
+          );
+          expect(quill.selection.extentOffset, end + 3);
+        },
+      );
+    }
+  }
+
   testWidgets("Quill arrows skip entire Mosaic mentions in both directions", (
     tester,
   ) async {

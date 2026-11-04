@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import "package:flutter/services.dart";
 
 import "../inline_annotations/inline_annotation.dart";
+import "../inline_annotations/inline_annotation_parser.dart";
 import "../inline_annotations/inline_annotation_syntax.dart";
 import "../inline_annotations/inline_annotation_target_resolver.dart";
 import "../phrases/phrase_search_index.dart";
@@ -160,6 +161,15 @@ final class MosaicIntelliSenseEngine {
     PhraseSearchIndex? phraseIndex,
     MosaicPhraseTargetExists? phraseTargetExists,
   ) {
+    if (!prefix.endsWith('/') && !prefix.endsWith(r'\')) return null;
+    final annotations = const InlineAnnotationParser().parse(prefix);
+    if (annotations.isNotEmpty) {
+      // Closing syntax belongs to the completed mention. Only newly typed
+      // slashes/backslashes after it may trigger another completion.
+      prefix = prefix.substring(annotations.last.sourceRange.end);
+      if (prefix.isEmpty) return null;
+    }
+    final prefixEnd = prefix.length;
     if (prefix.endsWith(r"\//")) {
       return _manualSession(
         caret,
@@ -178,9 +188,12 @@ final class MosaicIntelliSenseEngine {
         replacementStart: caret - 2,
       );
     }
-    final last = prefix.codeUnitAt(caret - 1);
+    final last = prefix.codeUnitAt(prefixEnd - 1);
     if (last == 0x2f) {
-      final precedingBackslashes = _precedingBackslashCount(prefix, caret - 1);
+      final precedingBackslashes = _precedingBackslashCount(
+        prefix,
+        prefixEnd - 1,
+      );
       // A slash immediately following a backslash belongs to literal input.
       // This remains true when an escaped backslash pair is projected into a
       // single visible backslash; the hidden raw unit must not turn the slash
@@ -194,8 +207,10 @@ final class MosaicIntelliSenseEngine {
       );
     }
     if (last == 0x5c) {
-      if (caret >= 2 && prefix.codeUnitAt(caret - 2) == 0x2f) return null;
-      if (_precedingBackslashCount(prefix, caret).isEven) return null;
+      if (prefixEnd >= 2 && prefix.codeUnitAt(prefixEnd - 2) == 0x2f) {
+        return null;
+      }
+      if (_precedingBackslashCount(prefix, prefixEnd).isEven) return null;
       return _manualSession(
         caret,
         loadTargets,
@@ -678,6 +693,11 @@ final class MosaicIntelliSenseEngine {
     required bool includeHierarchy,
     int depth = 0,
   }) {
+    final implicitDisplayText = switch (state) {
+      InlineAnnotationState.none => "（${target.primaryName}）",
+      InlineAnnotationState.start => "（${target.primaryName}：${l10n.uiStart}）",
+      InlineAnnotationState.end => "（${target.primaryName}：${l10n.uiEnd}）",
+    };
     final hasCreateAction =
         includeHierarchy &&
         (kind == InlineAnnotationKind.location ||
@@ -743,14 +763,14 @@ final class MosaicIntelliSenseEngine {
       MosaicCompletionCandidate(
         id: "${target.id}:implicit",
         label: l10n.uiImplicitMention,
-        detail: "（${target.primaryName}）",
+        detail: implicitDisplayText,
         insertText: InlineAnnotationSyntax.format(
           kind: kind,
           state: state,
           colors: colors,
           targetId: target.id,
           isImplicit: true,
-          displayText: "（${target.primaryName}）",
+          displayText: implicitDisplayText,
         ),
       ),
       MosaicCompletionCandidate(

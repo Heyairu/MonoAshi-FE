@@ -1,4 +1,5 @@
 import "package:flutter/services.dart";
+import "package:flutter/widgets.dart" show Locale;
 import "package:flutter_test/flutter_test.dart";
 import "package:monogatari_assistant/features/inline_annotations/inline_annotation.dart";
 import "package:monogatari_assistant/features/inline_annotations/inline_annotation_parser.dart";
@@ -6,6 +7,7 @@ import "package:monogatari_assistant/features/inline_annotations/inline_annotati
 import "package:monogatari_assistant/features/inline_annotations/mosaic_editing_controller.dart";
 import "package:monogatari_assistant/features/inline_annotations/inline_annotation_projection.dart";
 import "package:monogatari_assistant/features/poppin/poppin.dart";
+import "package:monogatari_assistant/l10n/app_localization.dart";
 import "package:monogatari_assistant/models/character_data.dart";
 import "package:monogatari_assistant/models/item_data.dart";
 import "package:monogatari_assistant/models/outline_data.dart";
@@ -668,6 +670,86 @@ void main() {
     }
   });
 
+  test(
+    "implicit mentions display start and end in preview and inserted text",
+    () {
+      const target = InlineAnnotationTargetInfo(
+        id: uuid,
+        primaryName: "艾莉絲",
+        displayName: "艾莉絲",
+        displayNameIsAlias: false,
+      );
+      const labels = {'': '（艾莉絲）', '+': '（艾莉絲：開始）', '-': '（艾莉絲：結束）'};
+      for (final symbol in ['@', '!', '#', '?', '&', '*']) {
+        for (final entry in labels.entries) {
+          for (final raw in ['$symbol${entry.key}', '//$symbol${entry.key}<']) {
+            final session = engine.build(
+              rawText: raw,
+              rawCaret: raw.length,
+              loadTargets: (_) => const [target],
+            )!;
+            final candidate = session.candidates
+                .firstWhere((item) => item.id == uuid)
+                .children
+                .firstWhere((item) => item.id == '$uuid:implicit');
+            final annotation = const InlineAnnotationParser()
+                .parse(candidate.insertText)
+                .single;
+            expect(candidate.detail, entry.value, reason: raw);
+            expect(annotation.displayText, entry.value, reason: raw);
+            expect(annotation.isImplicit, isTrue, reason: raw);
+            expect(annotation.targetId, uuid, reason: raw);
+            expect(annotation.state, switch (entry.key) {
+              '+' => InlineAnnotationState.start,
+              '-' => InlineAnnotationState.end,
+              _ => InlineAnnotationState.none,
+            }, reason: raw);
+            expect(
+              InlineAnnotationProjection.readerTextFromRaw(
+                candidate.insertText,
+              ),
+              entry.value,
+              reason: raw,
+            );
+          }
+        }
+      }
+    },
+  );
+
+  test("implicit mention state uses the active language", () {
+    final englishEngine = MosaicIntelliSenseEngine(
+      localizations: lookupAppLocalizations(const Locale('en')),
+    );
+    for (final state in {'+': 'Start', '-': 'End'}.entries) {
+      final raw = '@${state.key}';
+      final session = englishEngine.build(
+        rawText: raw,
+        rawCaret: raw.length,
+        loadTargets: (_) => const [
+          InlineAnnotationTargetInfo(
+            id: uuid,
+            primaryName: 'Alice',
+            displayName: 'Alice',
+            displayNameIsAlias: false,
+          ),
+        ],
+      )!;
+      final implicit = session.candidates
+          .firstWhere((item) => item.id == uuid)
+          .children
+          .firstWhere((item) => item.id == '$uuid:implicit');
+      expect(implicit.detail, '（Alice：${state.value}）');
+      expect(
+        const InlineAnnotationParser()
+            .parse(implicit.insertText)
+            .single
+            .displayText,
+        implicit.detail,
+      );
+    }
+  });
+
   test("state markers are only accepted immediately after the category", () {
     final session = engine.build(
       rawText: "正文@艾+",
@@ -676,6 +758,42 @@ void main() {
     );
 
     expect(session, isNull);
+  });
+
+  test("completed Mention closing slashes do not reopen completion", () {
+    for (final source in [
+      '//@<$uuid|艾莉絲>//',
+      '//@~+<$uuid|（艾莉絲：開始）>//',
+      '//^<重點>//',
+    ]) {
+      expect(
+        engine.build(
+          rawText: source,
+          rawCaret: source.length,
+          loadTargets: (_) => const [],
+        ),
+        isNull,
+        reason: source,
+      );
+    }
+  });
+
+  test("new manual trigger after a Mention preserves its closing syntax", () {
+    const source = '//@<$uuid|艾莉絲>//';
+    for (final trigger in ['/', '//', r'\', r'\//']) {
+      final raw = '$source$trigger';
+      final session = engine.build(
+        rawText: raw,
+        rawCaret: raw.length,
+        loadTargets: (_) => const [],
+      );
+      expect(session?.kind, MosaicCompletionKind.literal, reason: trigger);
+      expect(
+        session?.rawReplacementRange,
+        TextRange(start: source.length, end: raw.length),
+        reason: trigger,
+      );
+    }
   });
 
   test("direct target query closes at prose boundaries", () {

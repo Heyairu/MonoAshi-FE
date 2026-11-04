@@ -250,7 +250,9 @@ final class InlineAnnotationProjection {
           break;
         }
         if (displayOffset == entry.displayRange.end) {
-          rawOffset = entry.annotation.displayTextSourceRange.end;
+          // A caret after the label inserts after the hidden closing syntax.
+          // Explicit label edits can still use the upstream range mapping.
+          rawOffset = entry.annotation.sourceRange.end;
           break;
         }
       }
@@ -350,7 +352,7 @@ final class InlineAnnotationProjection {
   ProjectedInlineAnnotation? annotationAtDisplayOffset(int offset) {
     for (final entry in projectedAnnotations) {
       if (offset >= entry.displayRange.start &&
-          offset <= entry.displayRange.end) {
+          offset < entry.displayRange.end) {
         return entry;
       }
     }
