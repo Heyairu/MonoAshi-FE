@@ -54,6 +54,17 @@ Future<void> mountNavigation(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  testWidgets("editor destination is only shown in modal navigation", (
+    tester,
+  ) async {
+    await mountNavigation(tester);
+    expect(destination(17), findsNothing);
+    await mountNavigation(tester, modal: true);
+    await tester.tap(find.byKey(const Key("navigation-launcher")));
+    await tester.pumpAndSettle();
+    expect(destination(17), findsOneWidget);
+  });
+
   for (final style in NavigationStyle.values) {
     testWidgets("${style.name}: home and footer stay fixed while scrolling", (
       tester,
@@ -433,5 +444,29 @@ void main() {
       (await SharedPreferences.getInstance()).getString("navigation_style"),
       "railTooltip",
     );
+  });
+
+  testWidgets("navigation style setting follows workspace width", (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    await container.read(settingsStateProvider.future);
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 844);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(home: SettingView()),
+      ),
+    );
+    await tester.pump();
+    expect(find.byKey(const Key("navigation-style-setting")), findsNothing);
+    tester.view.physicalSize = const Size(1000, 844);
+    await tester.pump();
+    expect(find.byKey(const Key("navigation-style-setting")), findsOneWidget);
   });
 }

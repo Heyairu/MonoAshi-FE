@@ -1,7 +1,5 @@
 [CmdletBinding()]
 param(
-    [ValidateSet("default", "ask", "internal")]
-    [string]$Variant = "internal",
     [string]$FlutterCommand = "flutter",
     [switch]$SkipFullTests,
     [switch]$SkipBuild,
@@ -106,31 +104,10 @@ try {
         }
     }
 
-    $defines = switch ($Variant) {
-        "default" {
-            @(
-                "--dart-define=COPILOT_ASK_ENABLED=false",
-                "--dart-define=COPILOT_PLAN_ENABLED=false"
-            )
-        }
-        "ask" {
-            @(
-                "--dart-define=COPILOT_ASK_ENABLED=true",
-                "--dart-define=COPILOT_PLAN_ENABLED=false"
-            )
-        }
-        "internal" {
-            @(
-                "--dart-define=COPILOT_ASK_ENABLED=true",
-                "--dart-define=COPILOT_PLAN_ENABLED=true"
-            )
-        }
-    }
-
     $buildRan = -not $SkipBuild
     if ($buildRan) {
-        Invoke-CheckedCommand "Build Windows $Variant release" {
-            & $FlutterCommand build windows --release @defines
+        Invoke-CheckedCommand "Build Windows release" {
+            & $FlutterCommand build windows --release
         }
     }
     if (-not (Test-Path -LiteralPath $releaseRoot -PathType Container)) {
@@ -190,12 +167,10 @@ try {
 
     New-Item -ItemType Directory -Path $evidenceRoot -Force | Out-Null
     $timestamp = [DateTime]::UtcNow.ToString("yyyyMMddTHHmmssZ")
-    $evidencePath = Join-Path $evidenceRoot "copilot-$Variant-$timestamp.json"
+    $evidencePath = Join-Path $evidenceRoot "copilot-$timestamp.json"
     $evidence = [ordered]@{
         schemaVersion = 1
         generatedAtUtc = [DateTime]::UtcNow.ToString("o")
-        variant = $Variant
-        dartDefines = $defines
         gitCommit = $gitCommit
         dirtyWorktree = $isDirty
         releaseEligible = (-not $isDirty) -and $fullTestsRan -and $buildRan
@@ -212,7 +187,6 @@ try {
     $evidence | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $evidencePath -Encoding utf8
 
     Write-Host "`nCopilot release check passed." -ForegroundColor Green
-    Write-Host "Variant: $Variant"
     Write-Host "Release eligible: $($evidence.releaseEligible)"
     Write-Host "Dart AOT SHA-256: $($appSo.sha256)"
     Write-Host "Evidence: $evidencePath"

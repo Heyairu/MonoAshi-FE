@@ -29,8 +29,6 @@ void main() {
     expect(transportSource, contains("followRedirects = false"));
     expect(transportSource, contains("activeClient.close()"));
     expect(source, contains("CopilotSettingsStore"));
-    expect(source, contains("COPILOT_ASK_ENABLED"));
-    expect(source, contains("COPILOT_PLAN_ENABLED"));
     expect(source, contains("_cancelActiveRequest"));
     expect(source, contains("CopilotAskResponse.tryParse"));
     expect(source, contains("_describeCopilotError"));

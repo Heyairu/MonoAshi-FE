@@ -113,6 +113,21 @@ void main() {
 
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
+  testWidgets("mobile setup omits desktop navigation choices", (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 844);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+    await _mountGate(tester);
+    await _advance(tester);
+    expect(
+      find.byKey(const Key("settings-mode-oobe-navigation-railTooltip")),
+      findsNothing,
+    );
+    await _advance(tester, 4);
+    expect(find.textContaining("導覽："), findsNothing);
+  });
+
   testWidgets(
     "first use plays the intro before revealing setup without completing it",
     (tester) async {

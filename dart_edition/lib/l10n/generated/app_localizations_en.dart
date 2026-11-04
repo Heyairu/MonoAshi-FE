@@ -3501,7 +3501,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uiAskPlanBetaAreControlledByFeatureFlags =>
-      'Ask/Plan Beta are controlled by feature flags and read the current chapter without modifying the project. Agent is unavailable.';
+      'Ask/Plan Beta read the current chapter without modifying the project. Agent is unavailable.';
 
   @override
   String get uiModelSelection => 'Model Selection';

@@ -986,7 +986,7 @@
   "uiClearKey": "キーを削除",
   "uiAPIKeyRemovedFromThisDevice": "この端末から API キーを削除しました。",
   "uiCouldNotRemoveTheAPIKeyTryAgain": "API キーを削除できませんでした。しばらくしてからお試しください。",
-  "uiAskPlanBetaAreControlledByFeatureFlags": "Ask／Plan Beta は機能フラグで制御され、現在の章を読み取るだけでプロジェクトを変更しません。Agent は利用できません。",
+  "uiAskPlanBetaAreControlledByFeatureFlags": "Ask／Plan Beta は現在の章を読み取り、プロジェクトを変更しません。Agent は利用できません。",
   "uiModelSelection": "モデル選択",
   "uiCustom": "カスタム",
   "uiProvider": "プロバイダー",

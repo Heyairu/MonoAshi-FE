@@ -986,7 +986,7 @@
   "uiClearKey": "Clear Key",
   "uiAPIKeyRemovedFromThisDevice": "API key removed from this device.",
   "uiCouldNotRemoveTheAPIKeyTryAgain": "Could not remove the API key. Try again later.",
-  "uiAskPlanBetaAreControlledByFeatureFlags": "Ask/Plan Beta are controlled by feature flags and read the current chapter without modifying the project. Agent is unavailable.",
+  "uiAskPlanBetaAreControlledByFeatureFlags": "Ask/Plan Beta read the current chapter without modifying the project. Agent is unavailable.",
   "uiModelSelection": "Model Selection",
   "uiCustom": "Custom",
   "uiProvider": "Provider",

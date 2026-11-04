@@ -121,8 +121,7 @@ void main() {
 
   Future<void> pumpCopilot(
     WidgetTester tester, {
-    required bool askEnabled,
-    required bool planEnabled,
+
     CopilotSettingsStore? settingsStore,
     CopilotHttpTransport? transport,
     CopilotConversationBuffer? conversationBuffer,
@@ -134,8 +133,6 @@ void main() {
       ProviderScope(
         child: MaterialApp(
           home: CopilotView(
-            askEnabled: askEnabled,
-            planEnabled: planEnabled,
             settingsStore:
                 settingsStore ??
                 CopilotSettingsStore(secureStore: _MemorySecureStore()),
@@ -149,32 +146,33 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets("feature flags control Ask and Plan while Agent stays disabled", (
-    tester,
-  ) async {
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    await pumpCopilot(tester, askEnabled: false, planEnabled: false);
+  testWidgets(
+    "Ask and Plan are available by default while Agent stays disabled",
+    (tester) async {
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await pumpCopilot(tester);
 
-    final selector = tester.widget<AppDropdownField<CopilotMode>>(
-      find.byKey(const ValueKey<String>("copilot-mode-selector")),
-    );
-    final enabledByMode = <CopilotMode, bool>{
-      for (final option in selector.options) option.value: option.enabled,
-    };
+      final selector = tester.widget<AppDropdownField<CopilotMode>>(
+        find.byKey(const ValueKey<String>("copilot-mode-selector")),
+      );
+      final enabledByMode = <CopilotMode, bool>{
+        for (final option in selector.options) option.value: option.enabled,
+      };
 
-    expect(enabledByMode[CopilotMode.chat], isTrue);
-    expect(enabledByMode[CopilotMode.ask], isFalse);
-    expect(enabledByMode[CopilotMode.plan], isFalse);
-    expect(enabledByMode[CopilotMode.agent], isFalse);
-  });
+      expect(enabledByMode[CopilotMode.chat], isTrue);
+      expect(enabledByMode[CopilotMode.ask], isTrue);
+      expect(enabledByMode[CopilotMode.plan], isTrue);
+      expect(enabledByMode[CopilotMode.agent], isFalse);
+    },
+  );
 
   testWidgets("enabled Ask and Plan update composer policy and hints", (
     tester,
   ) async {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await pumpCopilot(tester, askEnabled: true, planEnabled: true);
+    await pumpCopilot(tester);
 
     AppDropdownField<CopilotMode> selector() =>
         tester.widget<AppDropdownField<CopilotMode>>(
@@ -221,8 +219,7 @@ void main() {
       ..values[CopilotSettingsStore.secureApiKey] = "stored-secret";
     await pumpCopilot(
       tester,
-      askEnabled: true,
-      planEnabled: true,
+
       settingsStore: CopilotSettingsStore(secureStore: secureStore),
     );
 
@@ -270,8 +267,7 @@ void main() {
       ..deleteError = StateError("secure storage unavailable");
     await pumpCopilot(
       tester,
-      askEnabled: true,
-      planEnabled: true,
+
       settingsStore: CopilotSettingsStore(secureStore: secureStore),
     );
 
@@ -336,12 +332,7 @@ void main() {
       maxRequestBytes: 256 * 1024,
       clientFactory: () => client,
     );
-    await pumpCopilot(
-      tester,
-      askEnabled: false,
-      planEnabled: false,
-      transport: transport,
-    );
+    await pumpCopilot(tester, transport: transport);
 
     final messageField = find.descendant(
       of: find.byKey(const ValueKey<String>("copilot-message-field")),
@@ -383,12 +374,7 @@ void main() {
           return MockClient((request) async => http.Response("{}", 200));
         },
       );
-      await pumpCopilot(
-        tester,
-        askEnabled: false,
-        planEnabled: false,
-        transport: transport,
-      );
+      await pumpCopilot(tester, transport: transport);
 
       final composerFinder = find.byKey(
         const ValueKey<String>("copilot-message-field"),
@@ -448,12 +434,7 @@ void main() {
         );
       }),
     );
-    await pumpCopilot(
-      tester,
-      askEnabled: false,
-      planEnabled: false,
-      transport: transport,
-    );
+    await pumpCopilot(tester, transport: transport);
 
     final composerFinder = find.byKey(
       const ValueKey<String>("copilot-message-field"),
@@ -511,8 +492,7 @@ void main() {
     );
     await pumpCopilot(
       tester,
-      askEnabled: false,
-      planEnabled: false,
+
       settingsStore: CopilotSettingsStore(secureStore: secureStore),
       transport: transport,
     );
@@ -582,8 +562,7 @@ void main() {
     );
     await pumpCopilot(
       tester,
-      askEnabled: false,
-      planEnabled: false,
+
       settingsStore: CopilotSettingsStore(secureStore: secureStore),
       transport: transport,
     );
@@ -614,7 +593,7 @@ void main() {
   ) async {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await pumpCopilot(tester, askEnabled: true, planEnabled: true);
+    await pumpCopilot(tester);
 
     final modeSelector = tester.widget<AppDropdownField<CopilotMode>>(
       find.byKey(const ValueKey<String>("copilot-mode-selector")),
@@ -713,12 +692,7 @@ void main() {
             ),
           );
 
-    await pumpCopilot(
-      tester,
-      askEnabled: true,
-      planEnabled: true,
-      conversationBuffer: buffer,
-    );
+    await pumpCopilot(tester, conversationBuffer: buffer);
 
     expect(find.text("檢查伏筆"), findsOneWidget);
     expect(find.textContaining("1. 檢查開場對話"), findsOneWidget);
@@ -812,8 +786,6 @@ void main() {
       ProviderScope(
         child: MaterialApp(
           home: CopilotView(
-            askEnabled: true,
-            planEnabled: true,
             settingsStore: CopilotSettingsStore(
               secureStore: _MemorySecureStore(),
             ),
@@ -852,12 +824,7 @@ void main() {
       ),
       growable: false,
     );
-    await pumpCopilot(
-      tester,
-      askEnabled: true,
-      planEnabled: true,
-      selectableResources: resources,
-    );
+    await pumpCopilot(tester, selectableResources: resources);
     final modeSelector = tester.widget<AppDropdownField<CopilotMode>>(
       find.byKey(const ValueKey<String>("copilot-mode-selector")),
     );
@@ -908,12 +875,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text("選擇補充資源（12/12）"), findsOneWidget);
 
-    await pumpCopilot(
-      tester,
-      askEnabled: true,
-      planEnabled: true,
-      selectableResources: resources.sublist(1),
-    );
+    await pumpCopilot(tester, selectableResources: resources.sublist(1));
     await tester.tap(find.text("選擇補充資源（12/12）"));
     await tester.pumpAndSettle();
     expect(find.text("已選 11/12；只會傳送勾選項目的內容。"), findsOneWidget);

@@ -447,7 +447,7 @@ class _MonogatariNavigationLayoutState
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     for (final index in _scrollingModuleIndexes)
-                      if (!widget.modal || index != 17) destination(index),
+                      if (index != 17) destination(index),
                   ],
                 ),
               ),

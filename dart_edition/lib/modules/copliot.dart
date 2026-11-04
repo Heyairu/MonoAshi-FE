@@ -86,8 +86,6 @@ class _SendCopilotMessageIntent extends Intent {
 class CopilotView extends ConsumerStatefulWidget {
   final ValueChanged<String>? onOpenChapter;
   final void Function(String resourceType, String resourceId)? onOpenResource;
-  final bool askEnabled;
-  final bool planEnabled;
   final CopilotSettingsStore settingsStore;
   final CopilotHttpTransport? transport;
   final CopilotConversationBuffer? conversationBuffer;
@@ -97,14 +95,6 @@ class CopilotView extends ConsumerStatefulWidget {
     super.key,
     this.onOpenChapter,
     this.onOpenResource,
-    this.askEnabled = const bool.fromEnvironment(
-      "COPILOT_ASK_ENABLED",
-      defaultValue: false,
-    ),
-    this.planEnabled = const bool.fromEnvironment(
-      "COPILOT_PLAN_ENABLED",
-      defaultValue: false,
-    ),
     this.settingsStore = const CopilotSettingsStore(),
     this.transport,
     this.conversationBuffer,
@@ -1754,12 +1744,10 @@ class _CopilotViewState extends ConsumerState<CopilotView> {
           DropdownOption<CopilotMode>(
             value: CopilotMode.ask,
             label: "Ask (Beta)",
-            enabled: widget.askEnabled,
           ),
           DropdownOption<CopilotMode>(
             value: CopilotMode.plan,
             label: "Plan (Beta)",
-            enabled: widget.planEnabled,
           ),
           DropdownOption<CopilotMode>(
             value: CopilotMode.agent,

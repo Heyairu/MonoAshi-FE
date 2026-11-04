@@ -3426,7 +3426,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get uiAskPlanBetaAreControlledByFeatureFlags =>
-      'Ask／Plan Beta は機能フラグで制御され、現在の章を読み取るだけでプロジェクトを変更しません。Agent は利用できません。';
+      'Ask／Plan Beta は現在の章を読み取り、プロジェクトを変更しません。Agent は利用できません。';
 
   @override
   String get uiModelSelection => 'モデル選択';

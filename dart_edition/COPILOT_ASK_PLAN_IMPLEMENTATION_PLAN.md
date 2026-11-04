@@ -1,3 +1,5 @@
+> 歷史實作計畫：Ask／Plan 編譯旗標已移除，現行發布方式請參考 `COPILOT_ASK_PLAN_RELEASE_RUNBOOK.md`。
+
 # Copilot Ask／Plan 模式詳細設計與實作計畫
 
 日期：2026-09-18（最後更新：2026-09-19）  

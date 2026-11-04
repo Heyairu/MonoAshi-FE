@@ -3190,7 +3190,9 @@ class _ContentViewState extends ConsumerState<ContentView>
                     NavigationStyle.railLabel,
               ),
             ),
-            selectedIndex: _getNavigationIndex(),
+            selectedIndex: _currentModule.id == AppModuleId.editor
+                ? _lastFunctionModule.navigationIndex
+                : _getNavigationIndex(),
             onDestinationSelected: (index) {
               _selectModule(AppModule.forNavigation(index));
             },

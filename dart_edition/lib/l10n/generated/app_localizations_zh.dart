@@ -3372,7 +3372,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get uiAskPlanBetaAreControlledByFeatureFlags =>
-      'Ask／Plan Beta 已納入功能旗標，只讀取目前章節且不會修改專案；Agent 模式暫不可用。';
+      'Ask／Plan Beta 會讀取目前章節，不會修改專案；Agent 模式暫不可用。';
 
   @override
   String get uiModelSelection => '模型選擇';

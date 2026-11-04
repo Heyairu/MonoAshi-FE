@@ -233,7 +233,8 @@ class _SettingViewState extends ConsumerState<SettingView>
               initiallyExpanded: true,
               children: [
                 _buildThemeModeSetting(),
-                _buildNavigationStyleSetting(),
+                if (MediaQuery.sizeOf(context).width >= 800)
+                  _buildNavigationStyleSetting(),
                 HelpTarget(
                   topicId: HelpTopicId.toolbarMode,
                   child: _buildToolbarModeSetting(),

@@ -6030,7 +6030,7 @@ abstract class AppLocalizations {
   /// Application display copy. Source: lib/modules/copliot.dart:942
   ///
   /// In zh, this message translates to:
-  /// **'Ask／Plan Beta 已納入功能旗標，只讀取目前章節且不會修改專案；Agent 模式暫不可用。'**
+  /// **'Ask／Plan Beta 會讀取目前章節，不會修改專案；Agent 模式暫不可用。'**
   String get uiAskPlanBetaAreControlledByFeatureFlags;
 
   /// Application display copy. Source: lib/modules/copliot.dart:958

@@ -4943,7 +4943,7 @@
   "@uiCouldNotRemoveTheAPIKeyTryAgain": {
     "description": "Application display copy. Source: lib/modules/copliot.dart:925"
   },
-  "uiAskPlanBetaAreControlledByFeatureFlags": "Ask／Plan Beta 已納入功能旗標，只讀取目前章節且不會修改專案；Agent 模式暫不可用。",
+  "uiAskPlanBetaAreControlledByFeatureFlags": "Ask／Plan Beta 會讀取目前章節，不會修改專案；Agent 模式暫不可用。",
   "@uiAskPlanBetaAreControlledByFeatureFlags": {
     "description": "Application display copy. Source: lib/modules/copliot.dart:942"
   },

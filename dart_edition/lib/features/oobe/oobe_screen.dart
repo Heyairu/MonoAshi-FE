@@ -434,32 +434,34 @@ class _OobeScreenState extends State<OobeScreen> {
       ),
       const SizedBox(height: 24),
       _colorAndFontSettings(),
-      const SizedBox(height: 24),
-      _label(context.l10n.uiSideNavigation),
-      SettingsModePicker(
-        options: [
-          for (final (index, style) in NavigationStyle.values.indexed)
-            SettingsModeOption(
-              id: "oobe-navigation-${style.name}",
-              label: context.l10n.legacyLabel(
-                ["僅圖示", "圖示與文字", "按鈕展開", "懸停展開"][index],
-              ),
-              description: context.l10n.legacyLabel(style.description),
-              preview: SettingsModePreview(
-                accent: _preferences.themePreset.accent(
-                  _preferences.themeColor,
+      if (MediaQuery.sizeOf(context).width >= 800) ...[
+        const SizedBox(height: 24),
+        _label(context.l10n.uiSideNavigation),
+        SettingsModePicker(
+          options: [
+            for (final (index, style) in NavigationStyle.values.indexed)
+              SettingsModeOption(
+                id: "oobe-navigation-${style.name}",
+                label: context.l10n.legacyLabel(
+                  ["僅圖示", "圖示與文字", "按鈕展開", "懸停展開"][index],
                 ),
-                navigationStyle: style,
-              ),
-              selected: _preferences.navigationStyle == style,
-              onSelected: () => setState(
-                () => _preferences = _preferences.copyWith(
+                description: context.l10n.legacyLabel(style.description),
+                preview: SettingsModePreview(
+                  accent: _preferences.themePreset.accent(
+                    _preferences.themeColor,
+                  ),
                   navigationStyle: style,
                 ),
+                selected: _preferences.navigationStyle == style,
+                onSelected: () => setState(
+                  () => _preferences = _preferences.copyWith(
+                    navigationStyle: style,
+                  ),
+                ),
               ),
-            ),
-        ],
-      ),
+          ],
+        ),
+      ],
       const SizedBox(height: 24),
       _ribbonModeSetting(),
     ],
@@ -662,18 +664,19 @@ class _OobeScreenState extends State<OobeScreen> {
                   (_preferences.fontSize.toInt()).toString(),
                 ),
               ),
-              _paragraph(
-                context.l10n.uiNavigation2(
-                  context.l10n.legacyLabel(
-                    [
-                      "僅圖示",
-                      "圖示與文字",
-                      "按鈕展開",
-                      "懸停展開",
-                    ][_preferences.navigationStyle.index],
+              if (MediaQuery.sizeOf(context).width >= 800)
+                _paragraph(
+                  context.l10n.uiNavigation2(
+                    context.l10n.legacyLabel(
+                      [
+                        "僅圖示",
+                        "圖示與文字",
+                        "按鈕展開",
+                        "懸停展開",
+                      ][_preferences.navigationStyle.index],
+                    ),
                   ),
                 ),
-              ),
               _paragraph(
                 context.l10n.uiRibbonMode(
                   (_preferences.toolbarMode?.label ??
