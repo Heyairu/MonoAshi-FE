@@ -1,28 +1,30 @@
 # Monogatari Assistant FE
 
-![Monogatari Assistant title](Title.png "Title")
+[繁體中文](README.zhhant.md) · **English** · [日本語](README.ja.md)
 
-> 一款為故事創作者設計的跨平台寫作助手，集中整理正文、章節、大綱、角色、世界觀、物品與時間軸。
+![Monogatari Assistant](Title.png "Monogatari Assistant")
+
+> A cross-platform writing assistant for storytellers. Keep your manuscript, chapters, outline, characters, worldbuilding, items, and timelines in one place.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.md)
 [![Dart](https://img.shields.io/badge/Dart-%5E3.12.1-0175C2?logo=dart)](dart_edition/pubspec.yaml)
 [![Flutter](https://img.shields.io/badge/Flutter-Material%203-02569B?logo=flutter)](dart_edition/pubspec.yaml)
 
-## 文件
+## Documentation
 
-[宣傳網站原始檔](docs/index.html) · [GitHub Pages 發佈與維護](docs/WEBSITE.md)
+[Promotional website source](docs/index.html) · [Publishing and maintaining the GitHub Pages site](docs/WEBSITE.md)
 
-| 文件 | 內容 |
+| Document | Contents |
 | --- | --- |
-| [統一說明文件](docs/GUIDE.md) | 功能、使用流程、保存與備份、開發環境、架構及發布 |
-| [統一 API 文件](docs/API.md) | MCP、專案檔案、Rhodanthe、Copilot adapter、P2P 與協作介面 |
-| [文件中心](docs/README.md) | 文件分工、版本依據與維護規範 |
-| [參考文件索引](docs/SOURCES.md) | 保留的專題規格、使用指南、設計與發布驗收文件 |
+| [User and developer guide](docs/GUIDE.md) | Features, workflows, saving and backups, development setup, architecture, and releases |
+| [API reference](docs/API.md) | MCP, project files, Rhodanthe, the Copilot adapter, P2P, and collaboration interfaces |
+| [Documentation hub](docs/README.md) | Document scope, version sources, and maintenance guidelines |
+| [Reference index](docs/SOURCES.md) | Archived project specifications, user guides, design documents, and release acceptance documents |
 
-## 畫面預覽
+## App Preview
 
 <details>
-<summary><h2>App Preview</h2></summary>
+<summary>App Preview</summary>
 <table>
 <tr>
 <td><img src="AppPreview/1.png" width="220" alt="App preview 1"></td>
@@ -38,19 +40,20 @@
 </tr>
 </table>
 </details>
-## 功能概覽
 
-- 章節與正文編輯、大綱、故事設定、角色與關係圖、世界觀及術語。
-- 物品管理、Scene 狀態快照、主時間軸與微型時間軸。
-- 搜尋與取代、正文標記、專案短語庫、校稿與修訂追蹤。
-- 本機專案、匯入匯出、自動備份、內網 P2P 同步與即時協作。
-- Copilot 與本機 MCP 唯讀整合；Ask／Plan 依 build 旗標開放，Plan 只提供提案與驗證。
+## Features
 
-目前 App 版本為 `0.9.31`，專案 XML 格式為 `1.22`。各功能的限制與平台驗收狀態見[說明文件](docs/GUIDE.md)。
+- Chapter and manuscript editing, outlines, story settings, characters and relationship diagrams, worldbuilding, and terminology.
+- Item management, scene state snapshots, a main timeline, and micro-timelines.
+- Find and replace, manuscript annotations, a project phrase library, proofreading, and revision tracking.
+- Local projects, import and export, automatic backups, P2P sync over a local network, and real-time collaboration.
+- Read-only integration with Copilot and local MCP. Build flags control availability of Ask and Plan. Plan is limited to proposals and validation.
 
-## 快速啟動
+The current app version is `0.9.31`, and the project XML format version is `1.22`. See the [guide](docs/GUIDE.md) for feature limitations and platform validation status.
 
-主要 Flutter 專案位於 `dart_edition/`。目前要求 Dart `^3.12.1`；`pubspec.yaml` 的 Flutter Quill 相依註記要求 Flutter 3.44 以上。原生 Rhodanthe 另需 Rust／Cargo，工具鏈以 `dart_edition/rust/rust-toolchain.toml` 為準。
+## Quick Start
+
+The main Flutter project is in `dart_edition/` and requires Dart `^3.12.1`. The Flutter Quill dependency note in `pubspec.yaml` specifies Flutter 3.44 or later. Native Rhodanthe also requires Rust and Cargo. See `dart_edition/rust/rust-toolchain.toml` for the toolchain.
 
 ```powershell
 cd dart_edition
@@ -58,23 +61,23 @@ flutter pub get
 flutter run
 ```
 
-常用檢查：
+Common checks
 
 ```powershell
 flutter analyze
 flutter test
 ```
 
-修改 Freezed 或 Riverpod annotation 後：
+After changing Freezed or Riverpod annotations, regenerate the code with the following command.
 
 ```powershell
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-更多格式、政策、Rust 與發布檢查見[開發與驗證說明](docs/GUIDE.md#10-驗證建置與發布)。
+See the [development and verification guide](docs/GUIDE.md#10-驗證建置與發布) for additional formatting, policy, Rust, and release checks.
 
-## 授權與致謝
+## License and Acknowledgments
 
-原始碼採 [Apache License 2.0](LICENSE.md)，另見 [NOTICE](NOTICE.md) 與[商標說明](TRADEMARKS.md)。Monogatari Assistant™ 與其標誌是 Heyairu（部屋伊琉）的商標。
+The source code is licensed under the [Apache License 2.0](LICENSE.md). See also [NOTICE](NOTICE.md) and the [trademark policy](TRADEMARKS.md). Monogatari Assistant™ and its logo are trademarks of Heyairu (部屋伊琉).
 
-Logo 靈感來源於 ProgrammingVTuberLogos / GitHub@Aikoyori。
+The logo was inspired by ProgrammingVTuberLogos by Aikoyori on GitHub.
