@@ -2,6 +2,7 @@ import "package:flutter_localizations/flutter_localizations.dart";
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
 import "package:flutter/gestures.dart";
+import "package:flutter/services.dart";
 import "package:flutter_quill/flutter_quill.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_test/flutter_test.dart";
@@ -114,6 +115,133 @@ void main() {
     await tester.pump();
 
     expect(quillControllerOf(tester).selection.baseOffset, 2);
+  });
+
+  testWidgets("Quill arrows skip entire Mosaic mentions in both directions", (
+    tester,
+  ) async {
+    const source = "前//@<4e251fc2-1e2b-4f78-93da-91f8c76d9a92|艾莉絲>//後";
+    final controller = HighlightTextEditingController(text: source);
+    final focusNode = FocusNode();
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      buildEditor(controller: controller, focusNode: focusNode),
+    );
+    focusNode.requestFocus();
+    final quill = quillControllerOf(tester);
+    quill.updateSelection(
+      const TextSelection.collapsed(offset: 1),
+      ChangeSource.local,
+    );
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    expect(quill.selection.extentOffset, 5);
+    expect(controller.selection.extentOffset, 5);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    expect(quill.selection.extentOffset, 6);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    expect(quill.selection.extentOffset, 5);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    expect(quill.selection.extentOffset, 1);
+    expect(controller.rawText, source);
+  });
+
+  for (final key in [LogicalKeyboardKey.backspace, LogicalKeyboardKey.delete]) {
+    testWidgets("Quill ${key.keyLabel} removes a complete Mosaic mention", (
+      tester,
+    ) async {
+      const source = "前//@<4e251fc2-1e2b-4f78-93da-91f8c76d9a92|艾莉絲>{登場}//後";
+      final controller = HighlightTextEditingController(text: source);
+      final focusNode = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(
+        buildEditor(controller: controller, focusNode: focusNode),
+      );
+      focusNode.requestFocus();
+      final quill = quillControllerOf(tester);
+      quill.updateSelection(
+        TextSelection.collapsed(
+          offset: key == LogicalKeyboardKey.backspace ? 5 : 1,
+        ),
+        ChangeSource.local,
+      );
+      await tester.pump();
+      await tester.sendKeyEvent(key);
+      await tester.pump();
+      expect(controller.rawText, "前後");
+      expect(PlainTextQuillAdapter.toPlainText(quill.document), "前後");
+      expect(quill.selection.extentOffset, 1);
+      expect(controller.selection.extentOffset, 1);
+    });
+  }
+
+  for (final implicit in [false, true]) {
+    for (var offset = 1; offset < 5; offset++) {
+      testWidgets(
+        "deleting mention character $offset removes all raw syntax, implicit=$implicit",
+        (tester) async {
+          final source =
+              "前//@${implicit ? '~' : ''}<4e251fc2-1e2b-4f78-93da-91f8c76d9a92|艾莉絲>{登場}//後";
+          final controller = HighlightTextEditingController(text: source);
+          final focusNode = FocusNode();
+          addTearDown(controller.dispose);
+          addTearDown(focusNode.dispose);
+          await tester.pumpWidget(
+            buildEditor(controller: controller, focusNode: focusNode),
+          );
+          focusNode.requestFocus();
+          final quill = quillControllerOf(tester);
+          // Also covers platform/IME deletion paths that replace text directly.
+          quill.replaceText(
+            offset,
+            1,
+            "",
+            TextSelection.collapsed(offset: offset),
+          );
+          await tester.pump();
+          expect(controller.rawText, "前後");
+          expect(controller.annotations, isEmpty);
+          expect(PlainTextQuillAdapter.toPlainText(quill.document), "前後");
+          expect(quill.selection.extentOffset, 1);
+        },
+      );
+    }
+  }
+
+  testWidgets("platform partial deletion removes the complete Mosaic mention", (
+    tester,
+  ) async {
+    const source = "前//@<4e251fc2-1e2b-4f78-93da-91f8c76d9a92|艾莉絲>//後";
+    final controller = HighlightTextEditingController(text: source);
+    final focusNode = FocusNode();
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      buildEditor(controller: controller, focusNode: focusNode),
+    );
+    focusNode.requestFocus();
+    final quill = quillControllerOf(tester);
+    quill.updateSelection(
+      const TextSelection(baseOffset: 2, extentOffset: 3),
+      ChangeSource.local,
+    );
+    await tester.pump();
+    tester.testTextInput.updateEditingValue(
+      const TextEditingValue(
+        text: "前\u2003莉絲後\n",
+        selection: TextSelection.collapsed(offset: 2),
+      ),
+    );
+    await tester.pump();
+    expect(controller.rawText, "前後");
+    expect(PlainTextQuillAdapter.toPlainText(quill.document), "前後");
+    expect(quill.selection.extentOffset, 1);
   });
 
   testWidgets("host FindReplace ranges select and highlight the Quill text", (

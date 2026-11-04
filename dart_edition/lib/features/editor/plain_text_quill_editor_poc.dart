@@ -489,10 +489,8 @@ String _canonicalizeLineEndings(String text) =>
 /// This widget does not read or write Riverpod state, project files, history,
 /// or collaboration messages. Its [onChanged] callback is the only output and
 /// always carries canonical LF plain text without Quill's final newline.
-/// Mosaic annotations deliberately remain visible source syntax here. The
-/// existing CodeField-only projection uses placeholder offsets and cannot be
-/// introduced into this plain-text Quill document without a separate,
-/// render-only mapping layer.
+/// The host supplies projected Mosaic labels and render-only mention markers.
+/// Those ranges behave atomically without introducing embeds into the document.
 class PlainTextQuillEditorPoc extends StatefulWidget {
   const PlainTextQuillEditorPoc({
     super.key,
@@ -597,6 +595,7 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
   int _textRevision = 0;
   bool _isApplyingExternalContent = false;
   bool _nonTypingEdit = false;
+  bool _replacingAtomicMention = false;
   bool _mentionStyleScheduled = false;
   bool _hasMentionStyles = false;
   final _editorKey = GlobalKey<EditorState>();
@@ -738,6 +737,26 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
 
   bool _handleReplaceText(int index, int length, Object? data) {
     _attachCompositionListener();
+    if (!_isApplyingExternalContent &&
+        !_replacingAtomicMention &&
+        length > 0 &&
+        data is String) {
+      final range = _atomicReplacementRange(index, length);
+      if (range.start != index || range.end != index + length) {
+        _replacingAtomicMention = true;
+        try {
+          _controller.replaceText(
+            range.start,
+            range.end - range.start,
+            data,
+            TextSelection.collapsed(offset: range.start + data.length),
+          );
+        } finally {
+          _replacingAtomicMention = false;
+        }
+        return false;
+      }
+    }
     if (_nonTypingEdit ||
         _isApplyingExternalContent ||
         _compositionBefore != null ||
@@ -811,13 +830,14 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
   }
 
   void _replacePlainNewline(int index, int length) {
+    final range = _atomicReplacementRange(index, length);
     final change = Delta()
-      ..retain(index)
+      ..retain(range.start)
       ..insert("\n")
-      ..delete(length);
+      ..delete(range.end - range.start);
     _controller.document.compose(change, ChangeSource.local);
     _controller.updateSelection(
-      TextSelection.collapsed(offset: index + 1),
+      TextSelection.collapsed(offset: range.start + 1),
       ChangeSource.local,
     );
   }
@@ -1075,6 +1095,7 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
   void _handleControllerChanged() {
     if (_isApplyingExternalContent) return;
     final nextText = PlainTextQuillAdapter.toPlainText(_controller.document);
+    if (_lastEmittedText == nextText && _snapCaretOutsideMention()) return;
     if (_lastEmittedText != nextText) {
       _resetTapSequence();
       _interactionTimer?.cancel();
@@ -1088,6 +1109,71 @@ class _PlainTextQuillEditorPocState extends State<PlainTextQuillEditorPoc> {
       _scheduleMentionStyles();
     }
     _reportLocalSelectionIfNeeded();
+  }
+
+  /// Markers refer to the host snapshot, which can lag behind several local
+  /// edits until the next build. Map intact mentions into the current document
+  /// so fast typing/deletion cannot act on stale ranges.
+  Iterable<TextRange> get _atomicMentionRanges sync* {
+    if (widget.mentionMarkers.isEmpty) return;
+    final source = _canonicalizeLineEndings(widget.content);
+    final current = _plainText;
+    final change = source == current
+        ? null
+        : (Delta()..insert(source)).diff(Delta()..insert(current));
+    for (final marker in widget.mentionMarkers) {
+      final hostEnd = marker.offset + 1 + marker.annotation.displayText.length;
+      if (marker.offset < 0 || hostEnd > widget.content.length) continue;
+      final start = _canonicalizeLineEndings(
+        widget.content.substring(0, marker.offset),
+      ).length;
+      final end = _canonicalizeLineEndings(
+        widget.content.substring(0, hostEnd),
+      ).length;
+      final mappedStart = change?.transformPosition(start) ?? start;
+      final mappedEnd = change?.transformPosition(end, force: false) ?? end;
+      if (mappedStart < mappedEnd &&
+          mappedEnd <= current.length &&
+          current.substring(mappedStart, mappedEnd) ==
+              source.substring(start, end)) {
+        yield TextRange(start: mappedStart, end: mappedEnd);
+      }
+    }
+  }
+
+  TextRange _atomicReplacementRange(int index, int length) {
+    var start = index;
+    var end = index + length;
+    if (length > 0) {
+      for (final range in _atomicMentionRanges) {
+        if (index < range.end && index + length > range.start) {
+          if (range.start < start) start = range.start;
+          if (range.end > end) end = range.end;
+        }
+      }
+    }
+    return TextRange(start: start, end: end);
+  }
+
+  bool _snapCaretOutsideMention() {
+    final selection = _editableSelection;
+    final composing = _inputState?.composingRange.value;
+    if (!selection.isCollapsed ||
+        composing != null && composing.isValid && !composing.isCollapsed) {
+      return false;
+    }
+    for (final range in _atomicMentionRanges) {
+      final offset = selection.extentOffset;
+      if (offset <= range.start || offset >= range.end) continue;
+      final previous = _lastReportedSelection.extentOffset;
+      final target = offset < previous ? range.start : range.end;
+      _controller.updateSelection(
+        TextSelection.collapsed(offset: target, affinity: selection.affinity),
+        ChangeSource.local,
+      );
+      return true;
+    }
+    return false;
   }
 
   void _requestFocus() {
