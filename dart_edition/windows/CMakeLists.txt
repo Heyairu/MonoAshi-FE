@@ -67,8 +67,9 @@ if(RHODANTHE_NATIVE)
     HINTS "$ENV{USERPROFILE}/.cargo/bin")
   if(CARGO_EXECUTABLE)
     add_custom_target(rhodanthe_native ALL
-      COMMAND "${CARGO_EXECUTABLE}" build --release -p rhodanthe-bridge
+      COMMAND "${CARGO_EXECUTABLE}" build --locked --release -p rhodanthe-bridge
         --manifest-path "${RHODANTHE_MANIFEST}"
+        --target-dir "${CMAKE_CURRENT_SOURCE_DIR}/../rust/target"
       BYPRODUCTS "${RHODANTHE_LIBRARY}"
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../rust"
       COMMENT "Building MonoAshi Rhodanthe native bridge"

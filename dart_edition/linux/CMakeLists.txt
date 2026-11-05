@@ -82,11 +82,18 @@ option(RHODANTHE_NATIVE "Build and package the Rhodanthe Rust bridge" ON)
 set(RHODANTHE_MANIFEST "${CMAKE_CURRENT_SOURCE_DIR}/../rust/Cargo.toml")
 set(RHODANTHE_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/../rust/target/release/librhodanthe_bridge.so")
 if(RHODANTHE_NATIVE)
-  find_program(CARGO_EXECUTABLE NAMES cargo HINTS "$ENV{HOME}/.cargo/bin")
+  if(DEFINED ENV{CARGO_BIN} AND NOT "$ENV{CARGO_BIN}" STREQUAL "")
+    # An explicit executable also overrides a path cached by a previous build.
+    set(CARGO_EXECUTABLE "$ENV{CARGO_BIN}")
+  else()
+    find_program(CARGO_EXECUTABLE NAMES cargo
+      HINTS "$ENV{CARGO_HOME}/bin" "$ENV{HOME}/.cargo/bin")
+  endif()
   if(CARGO_EXECUTABLE)
     add_custom_target(rhodanthe_native ALL
-      COMMAND "${CARGO_EXECUTABLE}" build --release -p rhodanthe-bridge
+      COMMAND "${CARGO_EXECUTABLE}" build --locked --release -p rhodanthe-bridge
         --manifest-path "${RHODANTHE_MANIFEST}"
+        --target-dir "${CMAKE_CURRENT_SOURCE_DIR}/../rust/target"
       BYPRODUCTS "${RHODANTHE_LIBRARY}"
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../rust"
       COMMENT "Building MonoAshi Rhodanthe native bridge"
@@ -95,6 +102,9 @@ if(RHODANTHE_NATIVE)
   else()
     message(WARNING "Cargo was not found; Rhodanthe will use the Dart fallback")
   endif()
+endif()
+if("$ENV{RHODANTHE_REQUIRE_NATIVE}" STREQUAL "1" AND NOT TARGET rhodanthe_native)
+  message(FATAL_ERROR "This package requires Rhodanthe. Enable RHODANTHE_NATIVE and provide Cargo via PATH or CARGO_BIN.")
 endif()
 
 

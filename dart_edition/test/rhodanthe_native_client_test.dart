@@ -1,12 +1,11 @@
-import "dart:io";
-
 import "package:flutter_test/flutter_test.dart";
-import "package:path/path.dart" as path;
 import "package:monogatari_assistant/infrastructure/rhodanthe/rhodanthe_native_client.dart";
 import "package:monogatari_assistant/infrastructure/rhodanthe/rhodanthe_protocol.dart";
 
+import "support/rhodanthe_native_library.dart";
+
 void main() {
-  final libraryPath = _developmentLibraryPath();
+  final libraryPath = developmentRhodantheLibraryPath();
 
   test(
     "Dart FFI client executes the native document lifecycle",
@@ -86,16 +85,4 @@ void main() {
         ? "Build rust/rhodanthe-bridge in release mode first"
         : false,
   );
-}
-
-String? _developmentLibraryPath() {
-  if (!Platform.isWindows) return null;
-  final candidate = path.join(
-    Directory.current.path,
-    "rust",
-    "target",
-    "release",
-    "rhodanthe_bridge.dll",
-  );
-  return File(candidate).existsSync() ? candidate : null;
 }

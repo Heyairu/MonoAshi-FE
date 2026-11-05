@@ -320,9 +320,11 @@ dart run build_runner build --delete-conflicting-outputs
 
 ```powershell
 cargo fmt --all --check
-cargo clippy --workspace --all-targets -- -D warnings
-cargo test --workspace
+cargo clippy --locked --workspace --all-targets -- -D warnings
+cargo test --locked --workspace
 ```
+
+工具鏈安裝、原生編譯、跨平台驗證與後續實作順序見 [Rust 實作與工具鏈規劃](../dart_edition/rust/IMPLEMENTATION_PLAN.md)。
 
 Windows 範例：
 

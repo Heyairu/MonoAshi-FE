@@ -1,0 +1,83 @@
+name: Rhodanthe native
+
+on:
+  pull_request:
+    paths:
+      - "dart_edition/rust/**"
+      - "dart_edition/lib/infrastructure/rhodanthe/**"
+      - "dart_edition/test/rhodanthe_*"
+      - "dart_edition/test/support/rhodanthe_native_library.dart"
+      - "dart_edition/tool/build_rhodanthe_native.dart"
+      - "dart_edition/tool/build_linux_appimage.sh"
+      - "dart_edition/tool/test_build_linux_appimage.sh"
+      - "dart_edition/linux/CMakeLists.txt"
+      - "dart_edition/windows/CMakeLists.txt"
+      - ".github/workflows/rhodanthe-native.yml"
+  push:
+    branches: [main, master]
+    paths:
+      - "dart_edition/rust/**"
+      - "dart_edition/lib/infrastructure/rhodanthe/**"
+      - "dart_edition/test/rhodanthe_*"
+      - "dart_edition/test/support/rhodanthe_native_library.dart"
+      - "dart_edition/tool/build_rhodanthe_native.dart"
+      - "dart_edition/tool/build_linux_appimage.sh"
+      - "dart_edition/tool/test_build_linux_appimage.sh"
+      - "dart_edition/linux/CMakeLists.txt"
+      - "dart_edition/windows/CMakeLists.txt"
+      - ".github/workflows/rhodanthe-native.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rhodanthe-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    name: Rust (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: dart_edition/rust
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select pinned toolchain
+        run: |
+          cargo --version
+          rustc --version
+          rustup show active-toolchain
+      - name: Format
+        run: cargo fmt --all --check
+      - name: Clippy
+        run: cargo clippy --locked --workspace --all-targets -- -D warnings
+      - name: Test
+        run: cargo test --locked --workspace
+      - name: Build shared and static bridge
+        run: cargo build --locked --release -p rhodanthe-bridge
+      - name: Test Linux AppImage packaging script
+        if: runner.os == 'Linux'
+        working-directory: dart_edition
+        run: sh tool/test_build_linux_appimage.sh
+      - name: Set up Flutter for Linux FFI verification
+        if: runner.os == 'Linux'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Verify Dart FFI and persistent worker against the built library
+        if: runner.os == 'Linux'
+        working-directory: dart_edition
+        env:
+          RHODANTHE_NATIVE_LIBRARY: ${{ github.workspace }}/dart_edition/rust/target/release/librhodanthe_bridge.so
+        run: |
+          flutter pub get
+          dart run tool/build_rhodanthe_native.dart --platform linux
+          flutter test test/rhodanthe_native_client_test.dart test/rhodanthe_worker_executor_test.dart

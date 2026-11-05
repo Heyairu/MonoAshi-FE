@@ -6,6 +6,9 @@ Dart worker, editor session, and validated render-plan adapter. See the
 [unified API reference](../../docs/API.md#4-rhodanthe-原生-api) and
 [Dart infrastructure guide](../lib/infrastructure/rhodanthe/README.md).
 
+For toolchain setup, build commands, and the staged implementation roadmap, see
+[Rust 實作與工具鏈規劃](IMPLEMENTATION_PLAN.md).
+
 ## Implemented
 
 - Contract version 1 and Ring 0/2/4/6/8 decoding.
@@ -34,19 +37,27 @@ Dart worker, editor session, and validated render-plan adapter. See the
 ```powershell
 cd dart_edition/rust
 cargo fmt --all --check
-cargo clippy --workspace --all-targets -- -D warnings
-cargo test --workspace
+cargo clippy --locked --workspace --all-targets -- -D warnings
+cargo test --locked --workspace
 ```
 
 The pinned minimal toolchain is declared in `rust-toolchain.toml`.
 
 ## Verification status
 
-Verified on 2026-08-26 with Rust/Cargo 1.75.0:
+Verified on 2026-11-05 on Linux x86_64 with Rust/Cargo 1.75.0:
 
 - `cargo fmt --all --check`: passed.
-- `cargo test --workspace`: 53 passed, 0 failed.
-- `cargo clippy --workspace --all-targets -- -D warnings`: passed with zero warnings.
+- `cargo test --locked --offline --workspace`: 55 passed, 0 failed.
+- `cargo clippy --locked --offline --workspace --all-targets -- -D warnings`: passed with zero warnings.
+- Release bridge build and Dart staging: passed.
+- Dart native-client and persistent-worker tests against the Release library: 4 passed, none skipped.
+- Full Linux AppImage build: passed. The library extracted from the AppImage
+  matches the Rust Release artifact and passes ABI, handshake, UTF-16 search,
+  and open/edit/analyze/close lifecycle checks.
+
+Windows and macOS host validation are configured in the native CI workflow;
+they were not executed in this local Linux verification.
 
 The regular-expression syntax is Rust `regex` syntax. Look-around and
 backreferences are intentionally unsupported. Logical deadlines and stale-result

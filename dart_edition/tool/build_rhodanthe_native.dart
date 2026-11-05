@@ -3,31 +3,56 @@ import "dart:io";
 import "package:path/path.dart" as path;
 
 Future<void> main(List<String> arguments) async {
+  try {
+    await _build(arguments);
+  } on FormatException catch (error) {
+    stderr.writeln("${error.message}\n\n$_usage");
+    exitCode = 64;
+  } on ProcessException catch (error) {
+    stderr.writeln("Unable to run Cargo: $error");
+    stderr.writeln("Install rustup and add its bin directory to PATH.");
+    exitCode = 69;
+  } on FileSystemException catch (error) {
+    stderr.writeln("Unable to stage the native library: $error");
+    exitCode = 74;
+  }
+}
+
+Future<void> _build(List<String> arguments) async {
   if (arguments.contains("--help") || arguments.contains("-h")) {
     stdout.writeln(_usage);
     return;
   }
 
   final options = _BuildOptions.parse(arguments);
-  final projectRoot = Directory.current.absolute.path;
+  final projectRoot = File.fromUri(Platform.script).parent.parent.path;
   final manifest = path.join(projectRoot, "rust", "Cargo.toml");
   if (!File(manifest).existsSync()) {
-    stderr.writeln("Run this tool from the dart_edition directory.");
+    stderr.writeln("Rust workspace not found beside this tool: $manifest");
     exitCode = 64;
     return;
   }
 
   final cargo = options.cargo ?? "cargo";
+  // Use one known artifact location even when CARGO_TARGET_DIR is set.
+  final targetDirectory = path.join(projectRoot, "rust", "target");
   final command = <String>[
     "build",
+    "--locked",
     "--manifest-path",
     manifest,
+    "--target-dir",
+    targetDirectory,
     "-p",
     "rhodanthe-bridge",
     if (options.release) "--release",
     if (options.target != null) ...<String>["--target", options.target!],
   ];
   stdout.writeln("$cargo ${command.join(' ')}");
+  if (options.dryRun) {
+    stdout.writeln("Stage in: ${options.outputDirectory(projectRoot)}");
+    return;
+  }
   final result = await Process.run(
     cargo,
     command,
@@ -70,6 +95,7 @@ final class _BuildOptions {
   final String? cargo;
   final String? output;
   final bool release;
+  final bool dryRun;
 
   const _BuildOptions({
     required this.platform,
@@ -77,29 +103,57 @@ final class _BuildOptions {
     required this.cargo,
     required this.output,
     required this.release,
+    required this.dryRun,
   });
 
   factory _BuildOptions.parse(List<String> arguments) {
-    String? valueAfter(String option) {
-      final index = arguments.indexOf(option);
-      if (index < 0) return null;
-      if (index + 1 >= arguments.length) {
+    final values = <String, String>{};
+    final flags = <String>{};
+    for (var index = 0; index < arguments.length; index++) {
+      final option = arguments[index];
+      if (option == "--debug" || option == "--dry-run") {
+        flags.add(option);
+        continue;
+      }
+      if (!const <String>{
+        "--platform",
+        "--target",
+        "--cargo",
+        "--out",
+      }.contains(option)) {
+        throw FormatException("Unknown option: $option");
+      }
+      if (values.containsKey(option)) {
+        throw FormatException("Duplicate option: $option");
+      }
+      if (index + 1 >= arguments.length ||
+          arguments[index + 1].startsWith("--") ||
+          arguments[index + 1].trim().isEmpty) {
         throw FormatException("$option requires a value");
       }
-      return arguments[index + 1];
+      values[option] = arguments[++index];
     }
 
-    final platform = valueAfter("--platform") ?? _hostPlatform;
+    final platform = values["--platform"] ?? _hostPlatform;
     final known = _platforms[platform];
     if (known == null) {
       throw FormatException("Unsupported platform $platform");
     }
+    if (known.target == null &&
+        platform != _hostPlatform &&
+        values["--target"] == null) {
+      throw FormatException(
+        "Building $platform on $_hostPlatform requires an explicit --target "
+        "and a configured cross-linker",
+      );
+    }
     return _BuildOptions(
       platform: platform,
-      target: valueAfter("--target") ?? known.target,
-      cargo: valueAfter("--cargo"),
-      output: valueAfter("--out"),
-      release: !arguments.contains("--debug"),
+      target: values["--target"] ?? known.target,
+      cargo: values["--cargo"],
+      output: values["--out"],
+      release: !flags.contains("--debug"),
+      dryRun: flags.contains("--dry-run"),
     );
   }
 
@@ -191,6 +245,11 @@ dart run tool/build_rhodanthe_native.dart [options]
   --cargo <path>          Override the Cargo executable.
   --out <directory>       Override the staging directory.
   --debug                 Build the debug profile instead of release.
+  --dry-run               Print the build and staging plan without running Cargo.
+
+Uses the workspace's rust-toolchain.toml and Cargo.lock. Output is built under
+rust/target regardless of CARGO_TARGET_DIR. Relative --out paths use the caller's
+working directory. Desktop cross-builds require --target and a cross-linker.
 
 Android cross-builds require an NDK linker configured for Cargo. Apple static
 libraries must be linked by the Xcode target so DynamicLibrary.process() can

@@ -1,12 +1,12 @@
-import "dart:io";
-
 import "package:flutter_test/flutter_test.dart";
 import "package:monogatari_assistant/infrastructure/rhodanthe/rhodanthe_protocol.dart";
 import "package:monogatari_assistant/infrastructure/rhodanthe/rhodanthe_worker_executor.dart";
 import "package:path/path.dart" as path;
 
+import "support/rhodanthe_native_library.dart";
+
 void main() {
-  final libraryPath = _developmentLibraryPath();
+  final libraryPath = developmentRhodantheLibraryPath();
 
   test(
     "persistent worker owns the native engine and preserves command order",
@@ -100,14 +100,9 @@ void main() {
   );
 
   test("worker startup reports a bad native library path", () async {
-    if (!Platform.isWindows) return;
     await expectLater(
       RhodantheWorkerExecutor.start(
-        libraryPath: path.join(
-          Directory.current.path,
-          "does-not-exist",
-          "rhodanthe_bridge.dll",
-        ),
+        libraryPath: path.join("does-not-exist", "rhodanthe_bridge.dll"),
         startupTimeout: const Duration(seconds: 2),
       ),
       throwsA(
@@ -119,16 +114,4 @@ void main() {
       ),
     );
   });
-}
-
-String? _developmentLibraryPath() {
-  if (!Platform.isWindows) return null;
-  final candidate = path.join(
-    Directory.current.path,
-    "rust",
-    "target",
-    "release",
-    "rhodanthe_bridge.dll",
-  );
-  return File(candidate).existsSync() ? candidate : null;
 }
