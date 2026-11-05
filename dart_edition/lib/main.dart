@@ -167,7 +167,18 @@ void main(List<String> arguments) async {
     await _DesktopSplashWindowController.prepare();
   }
 
-  runApp(ProviderScope(child: MainApp(startupArguments: arguments)));
+  runApp(
+    ProviderScope(
+      overrides: [
+        initialProjectDefaultsProvider.overrideWith(
+          (ref) => lookupAppLocalizations(
+            ref.read(resolvedAppLocaleProvider),
+          ).projectDefaults,
+        ),
+      ],
+      child: MainApp(startupArguments: arguments),
+    ),
+  );
 }
 
 bool get _isDesktopPlatform =>

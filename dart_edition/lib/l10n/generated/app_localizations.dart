@@ -14463,6 +14463,42 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'請輸入六位 HEX 色碼'**
   String get paletteInvalidHex;
+
+  /// Initial project seed value, used only when creating missing data.
+  ///
+  /// In zh, this message translates to:
+  /// **'序章'**
+  String get projectDefaultStorylineName;
+
+  /// Initial project seed value, used only when creating missing data.
+  ///
+  /// In zh, this message translates to:
+  /// **'開場'**
+  String get projectDefaultStorylineType;
+
+  /// Initial project seed value, used only when creating missing data.
+  ///
+  /// In zh, this message translates to:
+  /// **'主要場景'**
+  String get projectDefaultLocationName;
+
+  /// Initial project seed value, used only when creating missing data.
+  ///
+  /// In zh, this message translates to:
+  /// **'時間軸 1'**
+  String get projectDefaultTimelineTrackName;
+
+  /// Initial project seed value, used only when creating missing data.
+  ///
+  /// In zh, this message translates to:
+  /// **'故事開始'**
+  String get projectDefaultTimelineOriginLabel;
+
+  /// Initial project seed value, used only when creating missing data.
+  ///
+  /// In zh, this message translates to:
+  /// **'未命名軌道'**
+  String get projectDefaultUntitledTrackName;
 }
 
 class _AppLocalizationsDelegate

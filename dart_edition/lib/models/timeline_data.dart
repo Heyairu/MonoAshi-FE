@@ -203,10 +203,14 @@ class TimelineDocumentData with _$TimelineDocumentData {
     @Default(<TimelinePlacementData>[]) List<TimelinePlacementData> placements,
   }) = _TimelineDocumentData;
 
-  factory TimelineDocumentData.initial() {
-    return const TimelineDocumentData(
+  factory TimelineDocumentData.initial({
+    String trackName = '時間軸 1',
+    String originLabel = '故事開始',
+  }) {
+    return TimelineDocumentData(
+      grid: TimelineGridConfig(originLabel: originLabel),
       tracks: <TimelineTrackData>[
-        TimelineTrackData(trackUUID: "timeline-track-default", name: "時間軸 1"),
+        TimelineTrackData(trackUUID: "timeline-track-default", name: trackName),
       ],
     );
   }

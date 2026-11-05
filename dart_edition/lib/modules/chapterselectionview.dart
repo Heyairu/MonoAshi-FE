@@ -528,15 +528,15 @@ class _ChapterSelectionViewState extends ConsumerState<ChapterSelectionView> {
     if (_segments.isEmpty) {
       _appendSegment(
         SegmentData(
-          segmentName: "Folder 1",
-          chapters: [ChapterData(chapterName: "Chapter 1", chapterContent: "")],
+          segmentName: context.l10n.uiFolder('1'),
+          chapters: [ChapterData(chapterName: "Chapter1", chapterContent: "")],
         ),
       );
     } else if (_totalChaptersCount == 0) {
       final firstFolder = ChapterTree.foldersDepthFirst(_segments).first;
       _appendChapterToSegment(
         firstFolder.segmentUUID,
-        ChapterData(chapterName: "Untitled", chapterContent: ""),
+        ChapterData(chapterName: "Chapter1", chapterContent: ""),
       );
     }
   }

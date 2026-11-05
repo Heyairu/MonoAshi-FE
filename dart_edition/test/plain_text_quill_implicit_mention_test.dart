@@ -9,7 +9,7 @@ import 'package:monogatari_assistant/features/inline_annotations/inline_annotati
 void main() {
   const raw = '//@<4e251fc2-1e2b-4f78-93da-91f8c76d9a92|>//';
   final annotation = const InlineAnnotationParser().parse(raw).single;
-  const content = '前\u2003（隱式提及）後';
+  const content = '前\u2003（艾莉絲）後';
   Widget editor({
     bool contrast = false,
     List<PlainTextQuillMentionMarker>? markers,
@@ -22,7 +22,13 @@ void main() {
         highContrast: contrast,
         mentionMarkers:
             markers ??
-            [PlainTextQuillMentionMarker(offset: 1, annotation: annotation)],
+            [
+              PlainTextQuillMentionMarker(
+                offset: 1,
+                annotation: annotation,
+                displayText: '（艾莉絲）',
+              ),
+            ],
       ),
     ),
   );
@@ -44,7 +50,7 @@ void main() {
                 as Map?)?[PlainTextQuillAdapter.implicitMentionAttribute] ==
             true,
       );
-      expect(styled['insert'], '（隱式提及）');
+      expect(styled['insert'], '（艾莉絲）');
       final style = widget.config.customStyleBuilder!(
         const Attribute(
           PlainTextQuillAdapter.implicitMentionAttribute,

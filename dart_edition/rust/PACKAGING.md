@@ -8,6 +8,12 @@ From `dart_edition`, run:
 bash tool/build_macos_rhodanthe.sh
 ```
 
+When the project disables SwiftPM, the script first removes obsolete top-level
+SwiftPM plugin modules from the Release products directory. These modules can
+shadow CocoaPods frameworks and cause errors such as `Unable to find module
+dependency: 'video_player_avfoundation_objc'`. Cleanup preserves framework
+contents, Rust build caches, and previously packaged apps.
+
 The default is a Universal Release app containing both Intel and Apple Silicon
 code, including the Rhodanthe library. For separate apps, run:
 

@@ -35,6 +35,7 @@ import "../modules/planview.dart" as PlanModule;
 import "../modules/worldsettingsview.dart";
 import "../modules/characterview.dart";
 import "../models/project_data.dart";
+import '../models/project_defaults.dart';
 import "../models/project_file.dart";
 import "../models/project_operation_error.dart";
 import "../models/project_migrator.dart";
@@ -559,18 +560,25 @@ class ProjectManager {
   }
 
   /// 從XML載入專案
-  static Future<ProjectData> loadProjectFromXML(ProjectFile projectFile) async {
-    final result = await loadProjectParseResultFromXML(projectFile);
+  static Future<ProjectData> loadProjectFromXML(
+    ProjectFile projectFile, {
+    ProjectDefaults defaults = const ProjectDefaults(),
+  }) async {
+    final result = await loadProjectParseResultFromXML(
+      projectFile,
+      defaults: defaults,
+    );
     return result.data;
   }
 
   /// 從XML載入專案，並回傳同一次解析取得的檔案版本
   static Future<ProjectParseResult> loadProjectParseResultFromXML(
-    ProjectFile projectFile,
-  ) async {
+    ProjectFile projectFile, {
+    ProjectDefaults defaults = const ProjectDefaults(),
+  }) async {
     try {
       final content = projectFile.takeContent();
-      return await compute(FileService.parseProjectXMLWithMetadata, content);
+      return await compute(_parseProjectWithDefaults, (content, defaults));
     } catch (e) {
       throw FileException("解析專案檔案失敗：${e.toString()}", cause: e);
     }
@@ -744,6 +752,7 @@ class ProjectManager {
     required Function(ProjectFile, ProjectData) onProjectLoaded,
     required Function() onSave,
   }) async {
+    final labels = context.l10n;
     if (hasUnsavedChanges) {
       final shouldProceed = await showSaveConfirmDialog(
         context,
@@ -759,7 +768,8 @@ class ProjectManager {
     try {
       setLoading(true);
       final newProject = await FileService.createNewProject();
-      final newData = ProjectData.empty();
+      final newData = ProjectData.empty(defaults: labels.projectDefaults);
+      newProject.fileName = labels.uiUntitled2;
       onProjectLoaded(newProject, newData);
       setLoading(false);
       onSuccess(context.l10n.uiProjectCreated);
@@ -780,6 +790,7 @@ class ProjectManager {
     required Function(ProjectFile, ProjectData) onProjectLoaded,
     required Function() onSave,
   }) async {
+    final labels = context.l10n;
     if (hasUnsavedChanges) {
       final shouldProceed = await showSaveConfirmDialog(
         context,
@@ -795,7 +806,10 @@ class ProjectManager {
       setLoading(true);
       final projectFile = await FileService.openProject();
       if (projectFile != null) {
-        final parseResult = await loadProjectParseResultFromXML(projectFile);
+        final parseResult = await loadProjectParseResultFromXML(
+          projectFile,
+          defaults: labels.projectDefaults,
+        );
         final openedVersion = parseResult.projectVersion;
         final hasNewerVersion = FileService.isProjectVersionNewerThanSupported(
           openedVersion,
@@ -846,6 +860,7 @@ class ProjectManager {
     required Function(ProjectFile, ProjectData) onProjectLoaded,
     required Function() onSave,
   }) async {
+    final labels = context.l10n;
     if (hasUnsavedChanges) {
       final shouldProceed = await showSaveConfirmDialog(
         context,
@@ -863,7 +878,10 @@ class ProjectManager {
         filePath,
         accessToken: accessToken,
       );
-      final parseResult = await loadProjectParseResultFromXML(projectFile);
+      final parseResult = await loadProjectParseResultFromXML(
+        projectFile,
+        defaults: labels.projectDefaults,
+      );
       final openedVersion = parseResult.projectVersion;
       final hasNewerVersion = FileService.isProjectVersionNewerThanSupported(
         openedVersion,
@@ -995,12 +1013,18 @@ class _AutoBackupFileEntry {
   });
 }
 
+ProjectParseResult _parseProjectWithDefaults((String, ProjectDefaults) input) =>
+    FileService.parseProjectXMLWithMetadata(input.$1, defaults: input.$2);
+
 // MARK: - 5. Parsing (解析)
 /// 負責將 XML 字串解析為資料結構
 class _ProjectParser {
-  static ProjectParseResult parseProjectXMLWithMetadata(String xmlContent) {
+  static ProjectParseResult parseProjectXMLWithMetadata(
+    String xmlContent, {
+    ProjectDefaults defaults = const ProjectDefaults(),
+  }) {
     // 準備載入的數據 - 使用 ProjectData.empty() 作為預設值
-    final defaultData = ProjectData.empty();
+    final defaultData = ProjectData.empty(defaults: defaults);
     String? projectVersion;
     String? projectUUID;
     String? revisionTrackingJson;
@@ -1152,7 +1176,10 @@ class _ProjectParser {
               break;
 
             case "Timeline":
-              loadedTimeline ??= TimelineCodec.loadElement(element);
+              loadedTimeline ??= TimelineCodec.loadElement(
+                element,
+                defaults: defaults,
+              );
               break;
             case "ItemClasses":
               loadedItemClasses ??= ItemCodec.loadClasses(element);
@@ -1321,8 +1348,11 @@ class _ProjectParser {
     );
   }
 
-  static ProjectData parseProjectXML(String xmlContent) {
-    return parseProjectXMLWithMetadata(xmlContent).data;
+  static ProjectData parseProjectXML(
+    String xmlContent, {
+    ProjectDefaults defaults = const ProjectDefaults(),
+  }) {
+    return parseProjectXMLWithMetadata(xmlContent, defaults: defaults).data;
   }
 }
 
@@ -1679,8 +1709,12 @@ class FileService {
   // --- 專案生命週期 ---
 
   /// 創建新專案
-  static Future<ProjectFile> createNewProject() async {
-    return ProjectFile(fileName: defaultFileName, filePath: null, content: "");
+  static Future<ProjectFile> createNewProject({String? fileName}) async {
+    return ProjectFile(
+      fileName: fileName ?? defaultFileName,
+      filePath: null,
+      content: "",
+    );
   }
 
   /// 開啟專案檔案
@@ -2426,11 +2460,20 @@ class FileService {
   }
 
   /// 解析專案XML內容 (Parser)
-  static ProjectData parseProjectXML(String xmlContent) {
-    return _ProjectParser.parseProjectXML(xmlContent);
+  static ProjectData parseProjectXML(
+    String xmlContent, {
+    ProjectDefaults defaults = const ProjectDefaults(),
+  }) {
+    return _ProjectParser.parseProjectXML(xmlContent, defaults: defaults);
   }
 
-  static ProjectParseResult parseProjectXMLWithMetadata(String xmlContent) {
-    return _ProjectParser.parseProjectXMLWithMetadata(xmlContent);
+  static ProjectParseResult parseProjectXMLWithMetadata(
+    String xmlContent, {
+    ProjectDefaults defaults = const ProjectDefaults(),
+  }) {
+    return _ProjectParser.parseProjectXMLWithMetadata(
+      xmlContent,
+      defaults: defaults,
+    );
   }
 }

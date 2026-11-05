@@ -8331,4 +8331,22 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get paletteInvalidHex => '6桁のHEXカラーを入力してください';
+
+  @override
+  String get projectDefaultStorylineName => '序章';
+
+  @override
+  String get projectDefaultStorylineType => '導入';
+
+  @override
+  String get projectDefaultLocationName => '主な舞台';
+
+  @override
+  String get projectDefaultTimelineTrackName => 'タイムライン 1';
+
+  @override
+  String get projectDefaultTimelineOriginLabel => '物語の始まり';
+
+  @override
+  String get projectDefaultUntitledTrackName => '無題のトラック';
 }

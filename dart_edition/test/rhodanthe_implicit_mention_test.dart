@@ -14,7 +14,10 @@ void main() {
     RhodantheTheme theme, {
     Color? baseColor,
   }) {
-    final projection = InlineAnnotationProjection.build(source);
+    final projection = InlineAnnotationProjection.build(
+      source,
+      implicitLabel: (_) => '（艾莉絲）',
+    );
     final annotation = const InlineAnnotationRhodantheAdapter()
         .build(projection: projection, documentRevision: 1)
         .single;
@@ -51,7 +54,7 @@ void main() {
     );
     expect(result.applied, isTrue);
     final span = result.span.children!.cast<TextSpan>().singleWhere(
-      (s) => s.text == '（隱式提及）',
+      (s) => s.text == '（艾莉絲）',
     );
     expect(span.style!.fontStyle, FontStyle.italic);
     expect(span.style!.color, base.withValues(alpha: .6));
@@ -68,7 +71,7 @@ void main() {
       ]) {
         final result = render('//@^CE<$id|>//', theme);
         final span = result.span.children!.cast<TextSpan>().singleWhere(
-          (s) => s.text == '（隱式提及）',
+          (s) => s.text == '（艾莉絲）',
         );
         expect(result.applied, isTrue);
         expect(
@@ -95,7 +98,10 @@ void main() {
     expect(style.foreground, isNull);
   });
   test('search foreground keeps implicit opacity after arbitration', () {
-    final projection = InlineAnnotationProjection.build('//@<$id|>//');
+    final projection = InlineAnnotationProjection.build(
+      '//@<$id|>//',
+      implicitLabel: (_) => '（艾莉絲）',
+    );
     final annotation = const InlineAnnotationRhodantheAdapter()
         .build(projection: projection, documentRevision: 1)
         .single;
@@ -127,7 +133,7 @@ void main() {
       ),
     );
     final span = result.span.children!.cast<TextSpan>().singleWhere(
-      (s) => s.text == '（隱式提及）',
+      (s) => s.text == '（艾莉絲）',
     );
     expect(
       span.style!.color,

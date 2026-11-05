@@ -87,6 +87,7 @@ for architecture in "${architectures[@]}"; do
 done
 
 cd "$project_dir"
+bash "$project_dir/tool/prepare_macos_cocoapods.sh" "$project_dir"
 printf '\nBuilding Flutter for %s...\n' "$arch"
 # Flutter forwards FLUTTER_XCODE_* values to xcodebuild without changing the
 # user's persistent Flutter configuration or Xcode project.

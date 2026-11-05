@@ -2385,5 +2385,11 @@
   "paletteRangeBroad": "Broad",
   "paletteNoNearbyEntries": "No entries within this range",
   "paletteOutsideRange": "Nearest entries (outside range)",
-  "paletteInvalidHex": "Enter a six-digit HEX color"
+  "paletteInvalidHex": "Enter a six-digit HEX color",
+  "projectDefaultStorylineName": "Prologue",
+  "projectDefaultStorylineType": "Opening",
+  "projectDefaultLocationName": "Main setting",
+  "projectDefaultTimelineTrackName": "Timeline 1",
+  "projectDefaultTimelineOriginLabel": "Story begins",
+  "projectDefaultUntitledTrackName": "Untitled track"
 }

@@ -1,4 +1,5 @@
 import "package:xml/xml.dart" as xml;
+import '../../l10n/project_defaults.dart';
 
 import "../../models/item_data.dart";
 import "../../models/project_data.dart";
@@ -133,11 +134,16 @@ class SelectiveProjectImportManifest {
         SelectiveProjectModule.chapters =>
           target.segmentsData.isNotEmpty &&
               !(target.segmentsData.length == 1 &&
-                  target.segmentsData.first.segmentName == "Folder 1" &&
+                  supportedProjectDefaults.any(
+                    (defaults) =>
+                        defaults.folderName ==
+                        target.segmentsData.first.segmentName,
+                  ) &&
                   target.segmentsData.first.childSegments.isEmpty &&
                   target.segmentsData.first.chapters.length == 1 &&
-                  target.segmentsData.first.chapters.first.chapterName ==
-                      "Chapter 1" &&
+                  const {'Chapter 1', 'Chapter1'}.contains(
+                    target.segmentsData.first.chapters.first.chapterName,
+                  ) &&
                   target
                       .segmentsData
                       .first
@@ -153,8 +159,11 @@ class SelectiveProjectImportManifest {
                     l.conflictPoint.isNotEmpty ||
                     l.people.isNotEmpty ||
                     l.item.isNotEmpty ||
-                    l.storylineType != "開場" ||
-                    l.storylineName != "序章",
+                    !supportedProjectDefaults.any(
+                      (defaults) =>
+                          l.storylineType == defaults.storylineType &&
+                          l.storylineName == defaults.storylineName,
+                    ),
               ) ||
               target.outlineData.length > 1,
         SelectiveProjectModule.worldSettings =>
@@ -165,7 +174,9 @@ class SelectiveProjectImportManifest {
                     l.note.isNotEmpty ||
                     l.localType.isNotEmpty ||
                     l.nodeType != WorldNodeType.location ||
-                    l.localName != "主要場景",
+                    !supportedProjectDefaults.any(
+                      (defaults) => l.localName == defaults.locationName,
+                    ),
               ) ||
               target.worldSettingsData.length > 1,
         SelectiveProjectModule.items =>

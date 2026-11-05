@@ -1,6 +1,7 @@
 import "package:xml/xml.dart" as xml;
 
 import "../timeline_data.dart";
+import '../project_defaults.dart';
 
 abstract final class TimelineCodec {
   static const int schemaVersion = 1;
@@ -105,13 +106,19 @@ abstract final class TimelineCodec {
     return builder.buildDocument().rootElement.toXmlString(pretty: true);
   }
 
-  static TimelineProjectData? loadElement(xml.XmlElement typeElement) {
+  static TimelineProjectData? loadElement(
+    xml.XmlElement typeElement, {
+    ProjectDefaults defaults = const ProjectDefaults(),
+  }) {
     final name = typeElement.getElement("Name")?.innerText.trim();
     if (name != "Timeline") return null;
     final timeline = typeElement.getElement("Timeline");
     if (timeline == null) return null;
 
-    final defaultDocument = TimelineDocumentData.initial();
+    final defaultDocument = TimelineDocumentData.initial(
+      trackName: defaults.timelineTrackName,
+      originLabel: defaults.timelineOriginLabel,
+    );
     final gridElement = timeline.getElement("Grid");
     final defaultGrid = defaultDocument.grid;
     final tickUnit = _enumByName(
@@ -153,7 +160,7 @@ abstract final class TimelineCodec {
       tracks.add(
         TimelineTrackData(
           trackUUID: uuid,
-          name: node.getAttribute("Name") ?? "未命名軌道",
+          name: node.getAttribute("Name") ?? defaults.untitledTrackName,
           order: int.tryParse(node.getAttribute("Order") ?? "") ?? 0,
           colorToken: node.getAttribute("ColorToken"),
           isCollapsed: node.getAttribute("Collapsed") == "true",

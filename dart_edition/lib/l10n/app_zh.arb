@@ -12155,5 +12155,17 @@
   "paletteOutsideRange": "最近的詞條（超出範圍）",
   "@paletteOutsideRange": {"description": "Palette continuous color search interface"},
   "paletteInvalidHex": "請輸入六位 HEX 色碼",
-  "@paletteInvalidHex": {"description": "Palette continuous color search interface"}
+  "@paletteInvalidHex": {"description": "Palette continuous color search interface"},
+  "projectDefaultStorylineName": "序章",
+  "@projectDefaultStorylineName": {"description": "Initial project seed value, used only when creating missing data."},
+  "projectDefaultStorylineType": "開場",
+  "@projectDefaultStorylineType": {"description": "Initial project seed value, used only when creating missing data."},
+  "projectDefaultLocationName": "主要場景",
+  "@projectDefaultLocationName": {"description": "Initial project seed value, used only when creating missing data."},
+  "projectDefaultTimelineTrackName": "時間軸 1",
+  "@projectDefaultTimelineTrackName": {"description": "Initial project seed value, used only when creating missing data."},
+  "projectDefaultTimelineOriginLabel": "故事開始",
+  "@projectDefaultTimelineOriginLabel": {"description": "Initial project seed value, used only when creating missing data."},
+  "projectDefaultUntitledTrackName": "未命名軌道",
+  "@projectDefaultUntitledTrackName": {"description": "Initial project seed value, used only when creating missing data."}
 }

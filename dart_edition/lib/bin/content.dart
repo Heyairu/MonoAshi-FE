@@ -343,13 +343,6 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
     super.didChangeDependencies();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (widget.controller case final MosaicEditingController controller) {
-        controller.configureImplicitLabels(
-          implicit: context.l10n.uiImplicitMention,
-          start: context.l10n.uiStart,
-          end: context.l10n.uiEnd,
-        );
-      }
       _refreshCompletion();
     });
   }
@@ -1676,6 +1669,46 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
     );
   }
 
+  void _scheduleImplicitLabelSync(MosaicEditingController controller) {
+    final implicit = controller.annotations
+        .where((annotation) => annotation.isImplicit)
+        .toList();
+    if (implicit.isEmpty) return;
+    final names = <(InlineAnnotationKind, String), String>{};
+    final characters = ref.watch(characterDataProvider);
+    final locations = ref.watch(worldSettingsDataProvider);
+    final outline = ref.watch(outlineDataProvider);
+    final foreshadows = ref.watch(foreshadowDataProvider);
+    final plans = ref.watch(updatePlanDataProvider);
+    final items = ref.watch(itemWorkspaceProvider).itemClasses;
+    for (final annotation in implicit) {
+      final target = _targetResolver.resolve(
+        annotation: annotation,
+        characters: characters,
+        locations: locations,
+        outline: outline,
+        foreshadows: foreshadows,
+        plans: plans,
+        itemClasses: items,
+      );
+      if (target != null) {
+        names[(annotation.kind, target.id)] = target.primaryName.trim().isEmpty
+            ? context.l10n.uiUntitled
+            : target.primaryName;
+      }
+    }
+    final l10n = context.l10n;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !identical(widget.controller, controller)) return;
+      controller.configureImplicitLabels(
+        targetNames: names,
+        missingTarget: l10n.uiMissingTarget,
+        start: l10n.uiStart,
+        end: l10n.uiEnd,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<List<PhraseEntry>>(availablePhrasesProvider, (_, __) {
@@ -1685,6 +1718,7 @@ class EditorTextBoxState extends ConsumerState<EditorTextBox> {
     });
     final overwrite = ref.watch(editorEffectiveOverwriteProvider);
     if (widget.controller case final MosaicEditingController controller) {
+      _scheduleImplicitLabelSync(controller);
       controller.overwriteEnabled = overwrite && !_usesPlainTextQuillEditor;
       controller.autoIndentLineStart =
           (ref.watch(settingsStateProvider).valueOrNull?.autoIndentLineStart ??

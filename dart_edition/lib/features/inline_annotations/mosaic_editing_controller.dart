@@ -5,6 +5,7 @@
  ************************************************************/
 
 import "package:code_text_field/code_text_field.dart";
+import "package:flutter/foundation.dart" show mapEquals;
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
@@ -48,22 +49,27 @@ class MosaicEditingController extends CodeController {
   InlineAnnotationProjection? _compositionBaseProjection;
   String? _compositionBaseRawText;
   int _rawRevision = 0;
-  String _implicitLabel = '隱式提及';
+  Map<(InlineAnnotationKind, String), String> _implicitTargetNames = const {};
+  String _missingTargetLabel = '遺失對象';
   String _startLabel = '開始';
   String _endLabel = '結束';
 
   void configureImplicitLabels({
-    required String implicit,
+    required Map<(InlineAnnotationKind, String), String> targetNames,
+    String missingTarget = '遺失對象',
     required String start,
     required String end,
   }) {
-    if (_implicitLabel == implicit &&
+    if (mapEquals(_implicitTargetNames, targetNames) &&
+        _missingTargetLabel == missingTarget &&
         _startLabel == start &&
         _endLabel == end) {
       return;
     }
+    if (_hasActiveComposition(value)) return;
     final rawSelection = _projection.displaySelectionToRaw(selection);
-    _implicitLabel = implicit;
+    _implicitTargetNames = Map.unmodifiable(targetNames);
+    _missingTargetLabel = missingTarget;
     _startLabel = start;
     _endLabel = end;
     _rebuildProjection();
@@ -793,10 +799,10 @@ class MosaicEditingController extends CodeController {
       parser: _parser,
       composingRawRange: composingRawRange,
       implicitLabel: (annotation) =>
-          '（${switch (annotation.state) {
-            InlineAnnotationState.none => _implicitLabel,
-            InlineAnnotationState.start => _startLabel,
-            InlineAnnotationState.end => _endLabel,
+          '（${_implicitTargetNames[(annotation.kind, annotation.targetId)] ?? _missingTargetLabel}${switch (annotation.state) {
+            InlineAnnotationState.none => '',
+            InlineAnnotationState.start => '：$_startLabel',
+            InlineAnnotationState.end => '：$_endLabel',
           }}）',
     );
   }

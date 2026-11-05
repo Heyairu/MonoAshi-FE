@@ -150,7 +150,7 @@ void main() {
     expect(controller.updateAnnotationDisplayText(0, ""), isTrue);
     expect(controller.rawText, "//@<$uuid|>//");
     expect(controller.annotations.single.isImplicit, isTrue);
-    expect(controller.displayText, "$inlineAnnotationPlaceholder（隱式提及）");
+    expect(controller.displayText, "$inlineAnnotationPlaceholder（遺失對象）");
   });
 
   testWidgets("click popup only edits display text and stays by its anchor", (

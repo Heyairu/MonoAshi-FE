@@ -1,4 +1,6 @@
 import "dart:convert";
+import '../../l10n/app_localization.dart';
+import 'locale_providers.dart';
 import "../../application/project_export/export_models.dart";
 import "../../application/project_export/export_service.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -160,7 +162,10 @@ class ProjectIoController extends AsyncNotifier<ProjectIoStatus> {
     try {
       final useCase = ref.read(projectFileUseCaseProvider);
       final projectFile = await useCase.createNewProject();
-      final data = snapshotProjectData(ProjectData.empty());
+      final labels = lookupAppLocalizations(
+        ref.read(resolvedAppLocaleProvider),
+      ).projectDefaults;
+      final data = snapshotProjectData(ProjectData.empty(defaults: labels));
       final profile = await ref.read(userProfileProvider.future);
       data.baseInfoData = data.baseInfoData.copyWith(
         author: profile.defaultPenName,

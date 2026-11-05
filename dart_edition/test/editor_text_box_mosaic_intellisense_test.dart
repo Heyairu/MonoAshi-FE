@@ -825,6 +825,65 @@ void main() {
     expect(find.byKey(const ValueKey("mosaic-completion-panel")), findsNothing);
   });
 
+  for (final quill in [false, true]) {
+    testWidgets('choose colors before a mention, Quill=$quill', (tester) async {
+      const id = '4e251fc2-1e2b-4f78-93da-91f8c76d9a92';
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      container.read(characterDataProvider.notifier).setCharacterData(const {
+        id: CharacterEntryData(characterId: id, displayName: '艾莉絲'),
+      });
+      final controller = HighlightTextEditingController(text: '前^');
+      final focus = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focus.dispose);
+      controller.selection = TextSelection.collapsed(
+        offset: controller.text.length,
+      );
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: Scaffold(
+              body: EditorTextBox(
+                controller: controller,
+                focusNode: focus,
+                usePlainTextQuillEditor: quill,
+              ),
+            ),
+          ),
+        ),
+      );
+      focus.requestFocus();
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey('mosaic-completion-expand-highlight-C')),
+      );
+      await tester.pump();
+      for (var i = 0; i < 5; i++) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      }
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(controller.rawText, '前//^CE<');
+      tester.testTextInput.updateEditingValue(
+        TextEditingValue(
+          // Quill includes its required terminal newline in platform input.
+          text: quill ? '前//^CE<@\n' : '前//^CE<@',
+          selection: const TextSelection.collapsed(offset: 8),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('mosaic-completion-$id')));
+      await tester.pumpAndSettle();
+      expect(controller.rawText, '前//@^CE<$id|艾莉絲>//');
+      expect(controller.annotations, hasLength(1));
+      expect(controller.annotations.single.colors.value, 'CE');
+      expect(controller.projection.readerText, '前艾莉絲');
+      expect(controller.selection.extentOffset, controller.text.length);
+    });
+  }
+
   testWidgets("highlight submenu writes background and foreground colors", (
     tester,
   ) async {

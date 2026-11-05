@@ -30,11 +30,43 @@ void main() {
     expect(parser.parse('//^<>//').single.isImplicit, isFalse);
   });
 
-  for (final state in {'+': '（開始）', '-': '（結束）'}.entries) {
+  test(
+    'implicit original names are mapped by kind and UUID without changing source',
+    () {
+      final controller = MosaicEditingController(
+        rawText: '//@<$id|>// //!<$id|>//',
+      );
+      addTearDown(controller.dispose);
+      controller.configureImplicitLabels(
+        targetNames: const {
+          (InlineAnnotationKind.character, id): 'Chino',
+          (InlineAnnotationKind.location, id): '木造小鎮',
+        },
+        start: '開始',
+        end: '結束',
+      );
+      expect(controller.displayText, '\uFFFC（Chino） \uFFFC（木造小鎮）');
+      expect(controller.rawText, '//@<$id|>// //!<$id|>//');
+      expect(
+        controller.annotations.every(
+          (annotation) => annotation.displayText.isEmpty,
+        ),
+        isTrue,
+      );
+      expect(controller.rawRevision, 0);
+    },
+  );
+
+  for (final state in {'+': '（艾莉絲：開始）', '-': '（艾莉絲：結束）'}.entries) {
     test('implicit ${state.key} hint has no persisted or public text', () {
       final source = '前//@${state.key}<$id|>{note}//後';
       final controller = MosaicEditingController(rawText: source);
       addTearDown(controller.dispose);
+      controller.configureImplicitLabels(
+        targetNames: const {(InlineAnnotationKind.character, id): '艾莉絲'},
+        start: '開始',
+        end: '結束',
+      );
       final entry = controller.projection.projectedAnnotations.single;
       expect(
         controller.displayText,
@@ -53,14 +85,14 @@ void main() {
         '//@${state.key}<$id|>{note}//',
       );
       controller.configureImplicitLabels(
-        implicit: 'Implicit mention',
+        targetNames: const {(InlineAnnotationKind.character, id): 'Alice'},
         start: 'Start',
         end: 'End',
       );
       expect(controller.rawText, source);
       expect(
         controller.projection.projectedAnnotations.single.label,
-        state.key == '+' ? '（Start）' : '（End）',
+        state.key == '+' ? '（Alice：Start）' : '（Alice：End）',
       );
       expect(controller.rawRevision, 0);
     });

@@ -1,4 +1,5 @@
 import "../../bin/file.dart";
+import '../../models/project_defaults.dart';
 import "../../domain/repositories/file_repository.dart";
 
 export "../../domain/repositories/file_repository.dart";
@@ -10,7 +11,9 @@ class DefaultFileRepository implements FileRepository {
   final AppLocalizations Function()? localizations;
   @override
   Future<ProjectFile> createNewProject() {
-    return FileService.createNewProject();
+    return FileService.createNewProject(
+      fileName: localizations?.call().uiUntitled2,
+    );
   }
 
   @override
@@ -154,13 +157,21 @@ class DefaultFileRepository implements FileRepository {
 
   @override
   Future<ProjectData> loadProjectFromXml(ProjectFile projectFile) {
-    return ProjectManager.loadProjectFromXML(projectFile);
+    return ProjectManager.loadProjectFromXML(
+      projectFile,
+      defaults:
+          localizations?.call().projectDefaults ?? const ProjectDefaults(),
+    );
   }
 
   @override
   Future<ProjectParseResult> loadProjectParseResultFromXml(
     ProjectFile projectFile,
   ) {
-    return ProjectManager.loadProjectParseResultFromXML(projectFile);
+    return ProjectManager.loadProjectParseResultFromXML(
+      projectFile,
+      defaults:
+          localizations?.call().projectDefaults ?? const ProjectDefaults(),
+    );
   }
 }

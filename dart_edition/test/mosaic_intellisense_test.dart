@@ -679,7 +679,7 @@ void main() {
         displayName: "艾莉絲",
         displayNameIsAlias: false,
       );
-      const labels = {'': '（隱式提及）', '+': '（開始）', '-': '（結束）'};
+      const labels = {'': '（艾莉絲）', '+': '（艾莉絲：開始）', '-': '（艾莉絲：結束）'};
       for (final symbol in ['@', '!', '#', '?', '&', '*']) {
         for (final entry in labels.entries) {
           for (final raw in ['$symbol${entry.key}', '//$symbol${entry.key}<']) {
@@ -740,7 +740,7 @@ void main() {
           .firstWhere((item) => item.id == uuid)
           .children
           .firstWhere((item) => item.id == '$uuid:implicit');
-      expect(implicit.detail, '（${state.value}）');
+      expect(implicit.detail, '（Alice：${state.value}）');
       expect(
         const InlineAnnotationParser()
             .parse(implicit.insertText)
@@ -847,6 +847,74 @@ void main() {
         loadTargets: (_) => const [],
       );
       expect(session, isNull, reason: symbol);
+    }
+  });
+
+  test('color-first drafts replace the whole syntax and preserve colors', () {
+    const target = InlineAnnotationTargetInfo(
+      id: uuid,
+      primaryName: '艾莉絲',
+      displayName: '艾莉絲',
+      displayNameIsAlias: false,
+    );
+    for (final code in ['', 'C', 'CE']) {
+      for (final symbol in ['@', '!', '#', '?', '&', '*']) {
+        for (final state in ['', '+', '-']) {
+          final raw = '前//^$code<$symbol$state艾';
+          final session = engine.build(
+            rawText: raw,
+            rawCaret: raw.length,
+            loadTargets: (_) => const [target],
+          )!;
+          expect(
+            session.rawReplacementRange,
+            TextRange(start: 1, end: raw.length),
+          );
+          final candidate = session.candidates.firstWhere(
+            (item) => item.id == uuid,
+          );
+          for (final choice in [
+            candidate,
+            candidate.children.firstWhere(
+              (item) => item.id == '$uuid:implicit',
+            ),
+          ]) {
+            final result = raw.replaceRange(
+              session.rawReplacementRange.start,
+              session.rawReplacementRange.end,
+              choice.insertText,
+            );
+            final annotation = const InlineAnnotationParser()
+                .parse(result)
+                .single;
+            expect(annotation.sourceRange.start, 1);
+            expect(annotation.sourceRange.end, result.length);
+            expect(annotation.colors.background, code.isEmpty ? 'B' : 'C');
+            expect(annotation.colors.foreground, code == 'CE' ? 'E' : '0');
+            expect(annotation.state, switch (state) {
+              '+' => InlineAnnotationState.start,
+              '-' => InlineAnnotationState.end,
+              _ => InlineAnnotationState.none,
+            });
+          }
+        }
+      }
+      final raw = '前//^$code<';
+      final session = engine.build(
+        rawText: raw,
+        rawCaret: raw.length,
+        loadTargets: (_) => const [target],
+      )!;
+      expect(session.rawReplacementRange, TextRange(start: 1, end: raw.length));
+      final candidate = session.candidates
+          .firstWhere((item) => item.id == 'object-character')
+          .children
+          .first;
+      final annotation = const InlineAnnotationParser()
+          .parse(candidate.insertText)
+          .single;
+      expect(annotation.colors.background, code.isEmpty ? 'B' : 'C');
+      expect(annotation.colors.foreground, code == 'CE' ? 'E' : '0');
     }
   });
 }

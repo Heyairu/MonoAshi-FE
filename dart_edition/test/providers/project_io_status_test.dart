@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'package:flutter/widgets.dart';
+import 'package:monogatari_assistant/l10n/app_localization.dart';
+import 'package:monogatari_assistant/presentation/providers/locale_providers.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,6 +23,43 @@ import 'package:monogatari_assistant/presentation/providers/project_state_provid
 import 'package:monogatari_assistant/presentation/providers/global_state_providers.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  for (final locale in [const Locale('en'), const Locale('ja')]) {
+    test('new project action uses current locale $locale', () async {
+      final container = ProviderContainer(
+        overrides: [
+          resolvedAppLocaleProvider.overrideWithValue(locale),
+          fileRepositoryProvider.overrideWithValue(_BlockingFileRepository()),
+          userProfileRepositoryProvider.overrideWithValue(
+            _ProfileRepository(const UserProfile()),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      final result = await container
+          .read(projectIoControllerProvider.notifier)
+          .createNewProject();
+      final defaults = lookupAppLocalizations(locale).projectDefaults;
+      expect(result.data.segmentsData.single.segmentName, defaults.folderName);
+      expect(
+        result.data.segmentsData.single.chapters.single.chapterName,
+        'Chapter1',
+      );
+      expect(
+        result.data.outlineData.single.storylineName,
+        defaults.storylineName,
+      );
+      expect(
+        result.data.worldSettingsData.single.localName,
+        defaults.locationName,
+      );
+      expect(
+        result.data.timelineDocument.tracks.single.name,
+        defaults.timelineTrackName,
+      );
+    });
+  }
+
   test(
     'error states release gates even when Riverpod retains a busy value',
     () {

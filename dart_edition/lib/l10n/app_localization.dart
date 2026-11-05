@@ -12,6 +12,7 @@ export 'app_formatters.dart';
 export 'app_fonts.dart';
 export 'model_labels.dart';
 export 'project_error_localizations.dart';
+export 'project_defaults.dart';
 export 'copilot_error_localizations.dart';
 export 'generated/app_localizations.dart';
 

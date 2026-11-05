@@ -3,6 +3,7 @@ import "package:uuid/uuid.dart";
 import "../features/phrases/phrase_entry.dart";
 
 import "base_info_data.dart";
+import 'project_defaults.dart';
 import "writing_goal_data.dart";
 import "chapter_selection_data.dart";
 import "character_data.dart";
@@ -93,27 +94,35 @@ class ProjectData {
     return _uuidPattern.hasMatch(value.trim());
   }
 
-  factory ProjectData.empty({String? projectUUID}) {
+  factory ProjectData.empty({
+    String? projectUUID,
+    ProjectDefaults defaults = const ProjectDefaults(),
+  }) {
     return ProjectData(
       projectUUID: projectUUID,
       baseInfoData: BaseInfoData(),
       segmentsData: [
         SegmentData(
-          segmentName: "Folder 1",
-          chapters: [ChapterData(chapterName: "Chapter 1", chapterContent: "")],
+          segmentName: defaults.folderName,
+          chapters: [
+            ChapterData(
+              chapterName: ProjectDefaults.chapterName,
+              chapterContent: "",
+            ),
+          ],
         ),
       ],
       outlineData: [
         StorylineData(
-          storylineName: "序章",
-          storylineType: "開場",
+          storylineName: defaults.storylineName,
+          storylineType: defaults.storylineType,
           scenes: [],
           memo: "",
         ),
       ],
       foreshadowData: [],
       updatePlanData: [],
-      worldSettingsData: [LocationData(localName: "主要場景")],
+      worldSettingsData: [LocationData(localName: defaults.locationName)],
       itemClasses: const <String, ItemClassData>{},
       itemInstances: const <String, ItemInstanceData>{},
       itemRelations: const <ItemRelationData>[],
@@ -124,7 +133,10 @@ class ProjectData {
       characterStates: const <CharacterState>[],
       characterStateBaselines: const <String, CharacterStateBaseline>{},
       characterStateChanges: const <CharacterStateChange>[],
-      timelineDocument: TimelineDocumentData.initial(),
+      timelineDocument: TimelineDocumentData.initial(
+        trackName: defaults.timelineTrackName,
+        originLabel: defaults.timelineOriginLabel,
+      ),
       outlineChapterLinks: const <OutlineChapterLinkData>[],
     );
   }

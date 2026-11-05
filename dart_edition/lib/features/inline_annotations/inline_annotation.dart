@@ -88,8 +88,8 @@ final class InlineAnnotation {
   String get editorLabel => !isImplicit
       ? displayText
       : switch (state) {
-          InlineAnnotationState.none => '（隱式提及）',
-          InlineAnnotationState.start => '（開始）',
-          InlineAnnotationState.end => '（結束）',
+          InlineAnnotationState.none => '（遺失對象）',
+          InlineAnnotationState.start => '（遺失對象：開始）',
+          InlineAnnotationState.end => '（遺失對象：結束）',
         };
 }

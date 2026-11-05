@@ -2385,5 +2385,11 @@
   "paletteRangeBroad": "広い",
   "paletteNoNearbyEntries": "範囲内に近い項目はありません",
   "paletteOutsideRange": "最も近い項目（範囲外）",
-  "paletteInvalidHex": "6桁のHEXカラーを入力してください"
+  "paletteInvalidHex": "6桁のHEXカラーを入力してください",
+  "projectDefaultStorylineName": "序章",
+  "projectDefaultStorylineType": "導入",
+  "projectDefaultLocationName": "主な舞台",
+  "projectDefaultTimelineTrackName": "タイムライン 1",
+  "projectDefaultTimelineOriginLabel": "物語の始まり",
+  "projectDefaultUntitledTrackName": "無題のトラック"
 }

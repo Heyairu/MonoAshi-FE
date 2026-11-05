@@ -8199,6 +8199,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get paletteInvalidHex => '請輸入六位 HEX 色碼';
+
+  @override
+  String get projectDefaultStorylineName => '序章';
+
+  @override
+  String get projectDefaultStorylineType => '開場';
+
+  @override
+  String get projectDefaultLocationName => '主要場景';
+
+  @override
+  String get projectDefaultTimelineTrackName => '時間軸 1';
+
+  @override
+  String get projectDefaultTimelineOriginLabel => '故事開始';
+
+  @override
+  String get projectDefaultUntitledTrackName => '未命名軌道';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).

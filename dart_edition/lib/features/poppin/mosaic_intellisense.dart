@@ -91,6 +91,13 @@ final class MosaicIntelliSenseEngine {
     final annotationStart = prefix.lastIndexOf("//");
     if (annotationStart >= 0 && _hasOpenAnnotationDelimiter(prefix)) {
       final draft = prefix.substring(annotationStart);
+      final colorFirst = _colorFirstSession(
+        draft,
+        annotationStart,
+        caret,
+        loadTargets,
+      );
+      if (colorFirst != null) return colorFirst;
       final target = _targetSession(draft, annotationStart, caret, loadTargets);
       if (target != null) return target;
       final color = _colorSession(draft, caret);
@@ -232,8 +239,13 @@ final class MosaicIntelliSenseEngine {
 
   MosaicCompletionSession _objectBrowserSession(
     int caret,
-    MosaicTargetCandidateLoader loadTargets,
-  ) {
+    MosaicTargetCandidateLoader loadTargets, {
+    int? replacementStart,
+    InlineAnnotationColorCode colors = const InlineAnnotationColorCode(
+      background: 'B',
+      foreground: '0',
+    ),
+  }) {
     MosaicCompletionCandidate category(
       InlineAnnotationKind kind,
       String symbol,
@@ -246,10 +258,7 @@ final class MosaicIntelliSenseEngine {
         children: _targetCandidates(
           kind: kind,
           state: InlineAnnotationState.none,
-          colors: const InlineAnnotationColorCode(
-            background: "B",
-            foreground: "0",
-          ),
+          colors: colors,
           query: "",
           loadTargets: loadTargets,
         ),
@@ -259,7 +268,10 @@ final class MosaicIntelliSenseEngine {
 
     return MosaicCompletionSession(
       kind: MosaicCompletionKind.target,
-      rawReplacementRange: TextRange(start: caret - 1, end: caret),
+      rawReplacementRange: TextRange(
+        start: replacementStart ?? caret - 1,
+        end: caret,
+      ),
       candidates: [
         category(InlineAnnotationKind.character, "@"),
         category(InlineAnnotationKind.location, "!"),
@@ -694,9 +706,9 @@ final class MosaicIntelliSenseEngine {
     int depth = 0,
   }) {
     final implicitDisplayText = switch (state) {
-      InlineAnnotationState.none => "（${l10n.uiImplicitMention}）",
-      InlineAnnotationState.start => "（${l10n.uiStart}）",
-      InlineAnnotationState.end => "（${l10n.uiEnd}）",
+      InlineAnnotationState.none => "（${target.primaryName}）",
+      InlineAnnotationState.start => "（${target.primaryName}：${l10n.uiStart}）",
+      InlineAnnotationState.end => "（${target.primaryName}：${l10n.uiEnd}）",
     };
     final hasCreateAction =
         includeHierarchy &&
@@ -911,6 +923,50 @@ final class MosaicIntelliSenseEngine {
       displayText: l10n.uiAnnotation3,
     ),
   );
+
+  MosaicCompletionSession? _colorFirstSession(
+    String draft,
+    int start,
+    int caret,
+    MosaicTargetCandidateLoader loadTargets,
+  ) {
+    final match = RegExp(
+      r'^//\^([A-F0]{0,2})<([@!#?&*])?([+-])?<?([^|<>]*)$',
+    ).firstMatch(draft);
+    if (match == null) return null;
+    final code = match.group(1)!;
+    final colors = InlineAnnotationColorCode(
+      background: code.isEmpty ? 'B' : code[0],
+      foreground: code.length < 2 ? '0' : code[1],
+    );
+    final symbol = match.group(2);
+    if (symbol == null) {
+      if ((match.group(3) ?? '').isNotEmpty || match.group(4)!.isNotEmpty) {
+        return null;
+      }
+      return _objectBrowserSession(
+        caret,
+        loadTargets,
+        replacementStart: start,
+        colors: colors,
+      );
+    }
+    return MosaicCompletionSession(
+      kind: MosaicCompletionKind.target,
+      rawReplacementRange: TextRange(start: start, end: caret),
+      candidates: _targetCandidates(
+        kind: _kind(symbol),
+        state: switch (match.group(3)) {
+          '+' => InlineAnnotationState.start,
+          '-' => InlineAnnotationState.end,
+          _ => InlineAnnotationState.none,
+        },
+        colors: colors,
+        query: match.group(4)!.trim().toLowerCase(),
+        loadTargets: loadTargets,
+      ),
+    );
+  }
 
   MosaicCompletionSession? _colorSession(String draft, int caret) {
     final match = RegExp(

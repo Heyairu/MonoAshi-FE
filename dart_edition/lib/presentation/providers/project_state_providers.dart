@@ -15,6 +15,7 @@ import "../../models/chapter_selection_data.dart" as chapter_module;
 import "../../models/outline_data.dart" as outline_module;
 import "../../models/plan_data.dart" as plan_module;
 import "../../models/project_data.dart";
+import "../../models/project_defaults.dart";
 import "../../models/writing_goal_data.dart";
 import "../../features/phrases/phrase_entry.dart";
 import "../../models/project_file.dart";
@@ -25,6 +26,12 @@ import "../../models/item_snapshot_data.dart";
 import "../../models/location_snapshot_data.dart";
 import "../../application/snapshots/project_story_state_index.dart";
 import "project_snapshot_utils.dart";
+
+/// Seed values are read once when each project state is first created.
+/// The app supplies its startup locale; changing UI language preserves names.
+final initialProjectDefaultsProvider = Provider<ProjectDefaults>(
+  (ref) => const ProjectDefaults(),
+);
 
 const Object _editorSelectionUnset = Object();
 
@@ -308,7 +315,11 @@ class SegmentsDataNotifier extends Notifier<List<chapter_module.SegmentData>> {
 
   @override
   List<chapter_module.SegmentData> build() {
-    return _createSnapshot(ProjectData.empty().segmentsData);
+    return _createSnapshot(
+      ProjectData.empty(
+        defaults: ref.read(initialProjectDefaultsProvider),
+      ).segmentsData,
+    );
   }
 
   void setSegmentsData(List<chapter_module.SegmentData> value) {
@@ -810,7 +821,11 @@ class OutlineDataNotifier extends Notifier<List<outline_module.StorylineData>> {
 
   @override
   List<outline_module.StorylineData> build() {
-    return _createSnapshot(ProjectData.empty().outlineData);
+    return _createSnapshot(
+      ProjectData.empty(
+        defaults: ref.read(initialProjectDefaultsProvider),
+      ).outlineData,
+    );
   }
 
   void setOutlineData(
@@ -850,7 +865,13 @@ final outlineDataProvider =
 class TimelineDocumentNotifier extends Notifier<TimelineDocumentData> {
   @override
   TimelineDocumentData build() {
-    return snapshotTimelineDocument(TimelineDocumentData.initial());
+    final defaults = ref.read(initialProjectDefaultsProvider);
+    return snapshotTimelineDocument(
+      TimelineDocumentData.initial(
+        trackName: defaults.timelineTrackName,
+        originLabel: defaults.timelineOriginLabel,
+      ),
+    );
   }
 
   void setDocument(
@@ -1067,7 +1088,11 @@ class WorldSettingsDataNotifier extends Notifier<List<LocationData>> {
 
   @override
   List<LocationData> build() {
-    return _createSnapshot(ProjectData.empty().worldSettingsData);
+    return _createSnapshot(
+      ProjectData.empty(
+        defaults: ref.read(initialProjectDefaultsProvider),
+      ).worldSettingsData,
+    );
   }
 
   void setWorldSettingsData(List<LocationData> value) {

@@ -8496,4 +8496,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paletteInvalidHex => 'Enter a six-digit HEX color';
+
+  @override
+  String get projectDefaultStorylineName => 'Prologue';
+
+  @override
+  String get projectDefaultStorylineType => 'Opening';
+
+  @override
+  String get projectDefaultLocationName => 'Main setting';
+
+  @override
+  String get projectDefaultTimelineTrackName => 'Timeline 1';
+
+  @override
+  String get projectDefaultTimelineOriginLabel => 'Story begins';
+
+  @override
+  String get projectDefaultUntitledTrackName => 'Untitled track';
 }
