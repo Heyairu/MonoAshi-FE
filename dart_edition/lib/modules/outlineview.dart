@@ -779,6 +779,31 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
 
   void _scheduleOutlineDraft() {
     if (_isSyncingControllers) return;
+    // Controller listeners also fire for preedit/selection-only changes.
+    // Publishing a preedit snapshot causes provider rebuilds to echo it back
+    // into the Windows IME as committed text.
+    if ([
+      storylineNameController,
+      storylineTypeController,
+      storylineConflictController,
+      storylineMemoController,
+      eventNameController,
+      eventConflictController,
+      eventMemoController,
+      sceneNameController,
+      sceneTimeController,
+      sceneLocationController,
+      sceneFocusController,
+      sceneConflictController,
+      sceneMemoController,
+    ].any((controller) {
+      final composing = controller.value.composing;
+      return composing.isValid && !composing.isCollapsed;
+    })) {
+      _outlineDraftTimer?.cancel();
+      _outlineDraftTimer = null;
+      return;
+    }
     final storylineId = selectedStorylineID;
     if (storylineId == null) return;
     final eventId = selectedEventID;
@@ -1276,6 +1301,42 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
     } finally {
       _isSyncingControllers = false;
     }
+  }
+
+  void _scheduleOutlineFieldSync(
+    TextEditingController controller,
+    String text,
+  ) {
+    final value = controller.value;
+    if (value.text == text ||
+        _pendingOutlineDraftCommit != null ||
+        (value.composing.isValid && !value.composing.isCollapsed)) {
+      return;
+    }
+    final owner = (selectedStorylineID, selectedEventID, selectedSceneID);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted ||
+          owner != (selectedStorylineID, selectedEventID, selectedSceneID) ||
+          controller.value != value ||
+          _pendingOutlineDraftCommit != null) {
+        return;
+      }
+      // Provider updates may refresh an idle field, but must never overwrite
+      // a newer local draft or a composition started after build.
+      _isSyncingControllers = true;
+      try {
+        controller.value = TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(
+            offset: value.selection.isValid
+                ? value.selection.extentOffset.clamp(0, text.length)
+                : text.length,
+          ),
+        );
+      } finally {
+        _isSyncingControllers = false;
+      }
+    });
   }
 
   void _syncAllControllersFromSelection() {
@@ -2498,11 +2559,10 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
 
             Builder(
               builder: (context) {
-                if (eventNameController.text != event.storyEvent) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    eventNameController.text = event.storyEvent;
-                  });
-                }
+                _scheduleOutlineFieldSync(
+                  eventNameController,
+                  event.storyEvent,
+                );
                 return _buildCollaborativeOutlineField(
                   controller: eventNameController,
                   documentId: ProjectCollaborativeTextCodec.outlineEventFieldId(
@@ -2521,11 +2581,10 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
 
             Builder(
               builder: (context) {
-                if (eventConflictController.text != event.conflictPoint) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    eventConflictController.text = event.conflictPoint;
-                  });
-                }
+                _scheduleOutlineFieldSync(
+                  eventConflictController,
+                  event.conflictPoint,
+                );
                 return _buildCollaborativeOutlineField(
                   controller: eventConflictController,
                   documentId: ProjectCollaborativeTextCodec.outlineEventFieldId(
@@ -2680,12 +2739,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
             const SizedBox(height: 8),
             Builder(
               builder: (context) {
-                // 當選中的事件改變時，同步控制器內容
-                if (eventMemoController.text != event.memo) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    eventMemoController.text = event.memo;
-                  });
-                }
+                _scheduleOutlineFieldSync(eventMemoController, event.memo);
                 return _buildCollaborativeOutlineField(
                   controller: eventMemoController,
                   documentId: ProjectCollaborativeTextCodec.outlineEventFieldId(
@@ -3536,11 +3590,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
 
             Builder(
               builder: (context) {
-                if (sceneNameController.text != scene.sceneName) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    sceneNameController.text = scene.sceneName;
-                  });
-                }
+                _scheduleOutlineFieldSync(sceneNameController, scene.sceneName);
                 return _buildCollaborativeOutlineField(
                   controller: sceneNameController,
                   documentId: ProjectCollaborativeTextCodec.outlineSceneFieldId(
@@ -3562,11 +3612,10 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                 Expanded(
                   child: Builder(
                     builder: (context) {
-                      if (sceneTimeController.text != scene.time) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          sceneTimeController.text = scene.time;
-                        });
-                      }
+                      _scheduleOutlineFieldSync(
+                        sceneTimeController,
+                        scene.time,
+                      );
                       return _buildCollaborativeOutlineField(
                         controller: sceneTimeController,
                         documentId:
@@ -3586,11 +3635,10 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                 Expanded(
                   child: Builder(
                     builder: (context) {
-                      if (sceneLocationController.text != scene.location) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          sceneLocationController.text = scene.location;
-                        });
-                      }
+                      _scheduleOutlineFieldSync(
+                        sceneLocationController,
+                        scene.location,
+                      );
                       return _buildCollaborativeOutlineField(
                         controller: sceneLocationController,
                         documentId:
@@ -3616,11 +3664,10 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                 Expanded(
                   child: Builder(
                     builder: (context) {
-                      if (sceneFocusController.text != scene.focusPoint) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          sceneFocusController.text = scene.focusPoint;
-                        });
-                      }
+                      _scheduleOutlineFieldSync(
+                        sceneFocusController,
+                        scene.focusPoint,
+                      );
                       return _buildCollaborativeOutlineField(
                         controller: sceneFocusController,
                         documentId:
@@ -3640,11 +3687,10 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
                 Expanded(
                   child: Builder(
                     builder: (context) {
-                      if (sceneConflictController.text != scene.conflictPoint) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          sceneConflictController.text = scene.conflictPoint;
-                        });
-                      }
+                      _scheduleOutlineFieldSync(
+                        sceneConflictController,
+                        scene.conflictPoint,
+                      );
                       return _buildCollaborativeOutlineField(
                         controller: sceneConflictController,
                         documentId:
@@ -3756,12 +3802,7 @@ class _OutlineAdjustViewState extends ConsumerState<OutlineAdjustView> {
             const SizedBox(height: 8),
             Builder(
               builder: (context) {
-                // 當選中的場景改變時，同步控制器內容
-                if (sceneMemoController.text != scene.memo) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    sceneMemoController.text = scene.memo;
-                  });
-                }
+                _scheduleOutlineFieldSync(sceneMemoController, scene.memo);
                 return _buildCollaborativeOutlineField(
                   controller: sceneMemoController,
                   documentId: ProjectCollaborativeTextCodec.outlineSceneFieldId(

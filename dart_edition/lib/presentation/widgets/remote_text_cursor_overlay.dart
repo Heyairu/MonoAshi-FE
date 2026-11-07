@@ -301,6 +301,7 @@ class _CollaborativeProjectTextFieldRegionState
   final GlobalKey<RemoteTextCursorOverlayState> _overlayKey =
       GlobalKey<RemoteTextCursorOverlayState>();
   bool _textSyncScheduled = false;
+  bool _textSyncDeferred = false;
   bool _applyingCollaborativeText = false;
   late final CollaborationNotifier _collaborationNotifier;
   late String _lastPublishedText;
@@ -324,6 +325,11 @@ class _CollaborativeProjectTextFieldRegionState
     covariant CollaborativeProjectTextFieldRegion oldWidget,
   ) {
     super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.controller, widget.controller) ||
+        oldWidget.crdtDocumentId != widget.crdtDocumentId) {
+      _textSyncScheduled = false;
+      _textSyncDeferred = false;
+    }
     if (!identical(oldWidget.controller, widget.controller)) {
       oldWidget.controller.removeListener(_handleControllerChanged);
       _lastPublishedText = widget.controller.text;
@@ -386,6 +392,20 @@ class _CollaborativeProjectTextFieldRegionState
       _lastPublishedText = current.text;
     }
     _publishSelection(delta);
+    if (!isComposing && _textSyncDeferred) {
+      _textSyncDeferred = false;
+      final documentId = widget.crdtDocumentId;
+      if (documentId != null) {
+        final text = ref.read(collaborativeTextValueProvider(documentId));
+        if (text != null) {
+          _scheduleCollaborativeTextSync(
+            documentId,
+            text,
+            ref.read(collaborationProvider).localSelectionRebase,
+          );
+        }
+      }
+    }
   }
 
   void _publishSelection([CollaborativeTextDelta? textDelta]) {
@@ -434,6 +454,11 @@ class _CollaborativeProjectTextFieldRegionState
     String text,
     LocalTextSelectionRebase? rebase,
   ) {
+    final composing = widget.controller.value.composing;
+    if (composing.isValid && !composing.isCollapsed) {
+      _textSyncDeferred = true;
+      return;
+    }
     final shouldApplyRebase =
         rebase?.documentId == documentId && rebase?.expectedText == text;
     if (_textSyncScheduled ||
@@ -441,9 +466,23 @@ class _CollaborativeProjectTextFieldRegionState
       return;
     }
     _textSyncScheduled = true;
+    final controller = widget.controller;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _textSyncScheduled = false;
-      if (!mounted || widget.crdtDocumentId != documentId) return;
+      if (!mounted ||
+          widget.crdtDocumentId != documentId ||
+          !identical(widget.controller, controller)) {
+        return;
+      }
+      // Re-read at application time: a newer local edit or remote revision
+      // may have arrived after this frame was scheduled.
+      final text = ref.read(collaborativeTextValueProvider(documentId));
+      if (text == null) return;
+      final composing = controller.value.composing;
+      if (composing.isValid && !composing.isCollapsed) {
+        _textSyncDeferred = true;
+        return;
+      }
       final activeRebase = ref.read(collaborationProvider).localSelectionRebase;
       final useRebase =
           activeRebase?.documentId == documentId &&

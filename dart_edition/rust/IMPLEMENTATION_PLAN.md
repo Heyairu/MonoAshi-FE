@@ -46,13 +46,13 @@ cargo build --locked --release -p rhodanthe-bridge
 cd dart_edition
 
 # 先檢視命令，不執行 Cargo 或建立輸出目錄。
-dart run tool/build_rhodanthe_native.dart --dry-run
+dart --disable-dart-dev tool/build_rhodanthe_native.dart --dry-run
 
 # 預設為目前桌面平台、Release；可用 --debug 改為 Debug。
-dart run tool/build_rhodanthe_native.dart
+dart --disable-dart-dev tool/build_rhodanthe_native.dart
 
 # 指定交叉目標；需事先安裝 target 並設定 linker／SDK。
-dart run tool/build_rhodanthe_native.dart --platform android-arm64 --dry-run
+dart --disable-dart-dev tool/build_rhodanthe_native.dart --platform android-arm64 --ndk <NDK-directory> --dry-run
 
 # 編譯後驗證真實 FFI 與長駐 worker。
 flutter test test/rhodanthe_native_client_test.dart test/rhodanthe_worker_executor_test.dart

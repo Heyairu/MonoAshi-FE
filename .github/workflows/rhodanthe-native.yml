@@ -8,6 +8,11 @@ on:
       - "dart_edition/test/rhodanthe_*"
       - "dart_edition/test/support/rhodanthe_native_library.dart"
       - "dart_edition/tool/build_rhodanthe_native.dart"
+      - "dart_edition/tool/test_build_rhodanthe_native.dart"
+      - "dart_edition/tool/generate_android_plugin_registrant.dart"
+      - "dart_edition/test/android_plugin_registrant_test.dart"
+      - "dart_edition/android/**"
+      - "dart_edition/integration_test/rhodanthe_android_ffi_test.dart"
       - "dart_edition/tool/build_linux_appimage.sh"
       - "dart_edition/tool/test_build_linux_appimage.sh"
       - "dart_edition/linux/CMakeLists.txt"
@@ -21,6 +26,11 @@ on:
       - "dart_edition/test/rhodanthe_*"
       - "dart_edition/test/support/rhodanthe_native_library.dart"
       - "dart_edition/tool/build_rhodanthe_native.dart"
+      - "dart_edition/tool/test_build_rhodanthe_native.dart"
+      - "dart_edition/tool/generate_android_plugin_registrant.dart"
+      - "dart_edition/test/android_plugin_registrant_test.dart"
+      - "dart_edition/android/**"
+      - "dart_edition/integration_test/rhodanthe_android_ffi_test.dart"
       - "dart_edition/tool/build_linux_appimage.sh"
       - "dart_edition/tool/test_build_linux_appimage.sh"
       - "dart_edition/linux/CMakeLists.txt"
@@ -36,6 +46,68 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  android:
+    name: Android ${{ matrix.mode }} APK FFI packaging
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [debug, release]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: dart_edition
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - uses: android-actions/setup-android@v3
+      - name: Install NDK and pinned Rust targets
+        working-directory: dart_edition/rust
+        run: |
+          sdkmanager "ndk;28.2.13676358"
+          rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+      - name: Test native staging CLI
+        run: |
+          flutter pub get
+          flutter test test/android_plugin_registrant_test.dart
+          flutter build apk --${{ matrix.mode }} --config-only
+          dart --disable-dart-dev tool/test_build_rhodanthe_native.dart
+      - name: Build APK with all Flutter Android ABIs
+        run: flutter build apk --${{ matrix.mode }} --target-platform=android-arm,android-arm64,android-x64
+      - name: Rebuild after shared plugin registration is regenerated for Debug
+        run: |
+          flutter pub get
+          flutter build apk --${{ matrix.mode }} --no-pub --target-platform=android-arm,android-arm64,android-x64
+      - name: Verify packaged symbols and 16 KB ELF alignment
+        shell: bash
+        run: |
+          set -euo pipefail
+          build_mode="${{ matrix.mode }}"
+          registrant="build/app/generated/java/generate${build_mode^}PluginRegistrant/io/flutter/plugins/GeneratedPluginRegistrant.java"
+          test -s "$registrant"
+          if [[ "$build_mode" == "release" ]] && grep -q integration_test "$registrant"; then
+            echo "Release plugin registration contains integration_test"
+            exit 1
+          fi
+          readelf="$ANDROID_HOME/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf"
+          for abi in armeabi-v7a arm64-v8a x86_64; do
+            library="$RUNNER_TEMP/rhodanthe-$abi.so"
+            unzip -p build/app/outputs/flutter-apk/app-${{ matrix.mode }}.apk "lib/$abi/librhodanthe_bridge.so" > "$library"
+            for symbol in rhodanthe_abi_version rhodanthe_engine_new rhodanthe_engine_request rhodanthe_engine_free rhodanthe_buffer_free; do
+              "$readelf" --dyn-symbols "$library" | grep -w "$symbol"
+            done
+            while read -r alignment; do
+              (( alignment >= 16384 )) || exit 1
+            done < <("$readelf" --program-headers "$library" | awk '/LOAD/ {print $NF}')
+          done
+
   native:
     name: Rust (${{ matrix.os }})
     strategy:
@@ -79,5 +151,5 @@ jobs:
           RHODANTHE_NATIVE_LIBRARY: ${{ github.workspace }}/dart_edition/rust/target/release/librhodanthe_bridge.so
         run: |
           flutter pub get
-          dart run tool/build_rhodanthe_native.dart --platform linux
+          dart --disable-dart-dev tool/build_rhodanthe_native.dart --platform linux
           flutter test test/rhodanthe_native_client_test.dart test/rhodanthe_worker_executor_test.dart

@@ -50,7 +50,9 @@ off the input path and leave the existing Dart highlighter active.
 Desktop builds invoke Cargo and install the resulting native library beside the
 application (`windows/CMakeLists.txt`) or in the bundle `lib` directory
 (`linux/CMakeLists.txt`). `tool/build_rhodanthe_native.dart` provides explicit
-staging for CI, Android, and Apple targets; see `rust/PACKAGING.md`.
+staging for CI and Apple targets. Android Gradle builds compile the selected
+ABIs with NDK Clang and package the generated JNI libraries automatically;
+see `rust/PACKAGING.md`.
 
 Startup performs an ABI/contract/capability preflight. Three consecutive
 analysis failures open a 30-second circuit breaker; the editor immediately

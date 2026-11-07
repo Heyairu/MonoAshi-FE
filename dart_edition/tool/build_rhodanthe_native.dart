@@ -34,10 +34,31 @@ Future<void> _build(List<String> arguments) async {
   }
 
   final cargo = options.cargo ?? "cargo";
+  final android = options.platform.startsWith("android-");
+  final ndk = android ? _androidNdk(options.ndk) : null;
+  final hostTag = Platform.isWindows
+      ? "windows-x86_64"
+      : Platform.isMacOS
+      ? "darwin-x86_64"
+      : "linux-x86_64";
+  final clang = ndk == null
+      ? null
+      : path.join(
+          ndk,
+          "toolchains",
+          "llvm",
+          "prebuilt",
+          hostTag,
+          "bin",
+          Platform.isWindows ? "clang.exe" : "clang",
+        );
+  if (clang != null && !File(clang).existsSync()) {
+    throw FormatException("Android NDK Clang not found: $clang");
+  }
   // Use one known artifact location even when CARGO_TARGET_DIR is set.
   final targetDirectory = path.join(projectRoot, "rust", "target");
   final command = <String>[
-    "build",
+    android ? "rustc" : "build",
     "--locked",
     "--manifest-path",
     manifest,
@@ -45,8 +66,22 @@ Future<void> _build(List<String> arguments) async {
     targetDirectory,
     "-p",
     "rhodanthe-bridge",
+    if (android) "--lib",
     if (options.release) "--release",
     if (options.target != null) ...<String>["--target", options.target!],
+    if (android) ...<String>[
+      // Apply these to the final bridge without overriding the caller's
+      // RUSTFLAGS or trying to execute Windows NDK .cmd linker wrappers.
+      "--",
+      "-C",
+      "linker=$clang",
+      "-C",
+      "link-arg=--target=${options.androidClangTarget}${options.androidApi}",
+      "-C",
+      "link-arg=-Wl,-z,max-page-size=16384",
+      "-C",
+      "link-arg=-Wl,-z,common-page-size=16384",
+    ],
   ];
   stdout.writeln("$cargo ${command.join(' ')}");
   if (options.dryRun) {
@@ -94,6 +129,8 @@ final class _BuildOptions {
   final String? target;
   final String? cargo;
   final String? output;
+  final String? ndk;
+  final int androidApi;
   final bool release;
   final bool dryRun;
 
@@ -102,6 +139,8 @@ final class _BuildOptions {
     required this.target,
     required this.cargo,
     required this.output,
+    required this.ndk,
+    required this.androidApi,
     required this.release,
     required this.dryRun,
   });
@@ -120,6 +159,8 @@ final class _BuildOptions {
         "--target",
         "--cargo",
         "--out",
+        "--ndk",
+        "--android-api",
       }.contains(option)) {
         throw FormatException("Unknown option: $option");
       }
@@ -139,6 +180,20 @@ final class _BuildOptions {
     if (known == null) {
       throw FormatException("Unsupported platform $platform");
     }
+    final android = platform.startsWith("android-");
+    final androidApi = int.tryParse(values["--android-api"] ?? "21");
+    if (androidApi == null || androidApi < 21) {
+      throw const FormatException("--android-api must be an integer >= 21");
+    }
+    if (!android &&
+        (values.containsKey("--ndk") || values.containsKey("--android-api"))) {
+      throw const FormatException("--ndk and --android-api require Android");
+    }
+    if (android &&
+        values["--target"] != null &&
+        values["--target"] != known.target) {
+      throw FormatException("$platform requires Rust target ${known.target}");
+    }
     if (known.target == null &&
         platform != _hostPlatform &&
         values["--target"] == null) {
@@ -152,6 +207,8 @@ final class _BuildOptions {
       target: values["--target"] ?? known.target,
       cargo: values["--cargo"],
       output: values["--out"],
+      ndk: values["--ndk"],
+      androidApi: androidApi,
       release: !flags.contains("--debug"),
       dryRun: flags.contains("--dry-run"),
     );
@@ -161,33 +218,35 @@ final class _BuildOptions {
 
   String get artifactName => _build.artifactName;
 
+  String get androidClangTarget => switch (platform) {
+    "android-arm" => "armv7a-linux-androideabi",
+    _ => target!,
+  };
+
   String outputDirectory(String root) {
     if (output != null) return path.absolute(output!);
     return switch (platform) {
       "android-arm64" => path.join(
         root,
-        "android",
-        "app",
-        "src",
-        "main",
+        "build",
+        "rhodanthe",
+        platform,
         "jniLibs",
         "arm64-v8a",
       ),
       "android-arm" => path.join(
         root,
-        "android",
-        "app",
-        "src",
-        "main",
+        "build",
+        "rhodanthe",
+        platform,
         "jniLibs",
         "armeabi-v7a",
       ),
       "android-x64" => path.join(
         root,
-        "android",
-        "app",
-        "src",
-        "main",
+        "build",
+        "rhodanthe",
+        platform,
         "jniLibs",
         "x86_64",
       ),
@@ -196,6 +255,20 @@ final class _BuildOptions {
       _ => path.join(root, "build", "rhodanthe", platform),
     };
   }
+}
+
+String _androidNdk(String? explicit) {
+  final directory =
+      explicit ??
+      Platform.environment["ANDROID_NDK_HOME"] ??
+      Platform.environment["ANDROID_NDK_ROOT"];
+  if (directory == null || directory.trim().isEmpty) {
+    throw const FormatException(
+      "Android builds require --ndk <directory> or ANDROID_NDK_HOME. "
+      "Flutter/Gradle builds select the configured NDK automatically.",
+    );
+  }
+  return path.absolute(directory);
 }
 
 final class _PlatformBuild {
@@ -238,12 +311,14 @@ const Map<String, _PlatformBuild> _platforms = <String, _PlatformBuild>{
 const String _usage = """
 Build and stage the MonoAshi Rhodanthe native bridge.
 
-dart run tool/build_rhodanthe_native.dart [options]
+dart --disable-dart-dev tool/build_rhodanthe_native.dart [options]
 
   --platform <windows|linux|macos|android-arm64|android-arm|android-x64|ios-arm64|ios-simulator>
   --target <rust-target>   Override the platform's Rust target.
   --cargo <path>          Override the Cargo executable.
   --out <directory>       Override the staging directory.
+  --ndk <directory>       Android NDK root (or set ANDROID_NDK_HOME).
+  --android-api <level>   Android minimum API level, >= 21 (default: 21).
   --debug                 Build the debug profile instead of release.
   --dry-run               Print the build and staging plan without running Cargo.
 
@@ -251,7 +326,10 @@ Uses the workspace's rust-toolchain.toml and Cargo.lock. Output is built under
 rust/target regardless of CARGO_TARGET_DIR. Relative --out paths use the caller's
 working directory. Desktop cross-builds require --target and a cross-linker.
 
-Android cross-builds require an NDK linker configured for Cargo. Apple static
-libraries must be linked by the Xcode target so DynamicLibrary.process() can
+Android cross-builds select NDK Clang and enable 16 KB ELF page alignment.
+Run this pure Dart tool directly with --disable-dart-dev to avoid package build
+hooks rewriting Flutter's Release plugin registrant with test-only plugins.
+Install the platform's Rust target with rustup target add before building.
+Apple static libraries must be linked by the Xcode target so DynamicLibrary.process() can
 resolve the exported C ABI.
 """;

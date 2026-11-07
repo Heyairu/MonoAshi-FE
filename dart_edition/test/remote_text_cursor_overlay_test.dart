@@ -9,6 +9,157 @@ import "package:monogatari_assistant/presentation/providers/collaboration_provid
 import "package:monogatari_assistant/presentation/widgets/remote_text_cursor_overlay.dart";
 
 void main() {
+  testWidgets(
+    "project text sync preserves and publishes a committed IME word",
+    (tester) async {
+      const documentId = "projectText:worldNode:world-1:note";
+      final notifier = _ImeCollaborationNotifier(documentId);
+      final container = ProviderContainer(
+        overrides: [collaborationProvider.overrideWith(() => notifier)],
+      );
+      final controller = TextEditingController(text: "班");
+      final focusNode = FocusNode();
+      addTearDown(container.dispose);
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: Scaffold(
+              body: CollaborativeProjectTextFieldRegion(
+                fieldId: documentId,
+                crdtDocumentId: documentId,
+                controller: controller,
+                focusNode: focusNode,
+                child: TextField(controller: controller, focusNode: focusNode),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.showKeyboard(find.byType(TextField));
+      for (final text in ["班ㄐ", "班ㄐㄧ", "班級"]) {
+        final value = TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: text.length),
+          composing: TextRange(start: 1, end: text.length),
+        );
+        tester.testTextInput.updateEditingValue(value);
+        container.invalidate(collaborativeTextValueProvider(documentId));
+        await tester.pump();
+        expect(controller.value, value);
+        expect(notifier.edits, isEmpty);
+        expect(container.read(collaborativeTextValueProvider(documentId)), "班");
+      }
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: "班級",
+          selection: TextSelection.collapsed(offset: 2),
+        ),
+      );
+      await tester.pump();
+      expect(controller.text, "班級");
+      expect(controller.value.composing, TextRange.empty);
+      expect(notifier.edits, hasLength(1));
+      expect(notifier.edits.single.replacementText, "級");
+      expect(container.read(collaborativeTextValueProvider(documentId)), "班級");
+    },
+  );
+
+  testWidgets("queued project text sync reads the latest remote revision", (
+    tester,
+  ) async {
+    const documentId = "projectText:worldNode:world-1:note";
+    final notifier = _ImeCollaborationNotifier(documentId);
+    final container = ProviderContainer(
+      overrides: [collaborationProvider.overrideWith(() => notifier)],
+    );
+    final controller = TextEditingController(text: "班");
+    final focusNode = FocusNode();
+    addTearDown(container.dispose);
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: Scaffold(
+            body: CollaborativeProjectTextFieldRegion(
+              fieldId: documentId,
+              crdtDocumentId: documentId,
+              controller: controller,
+              focusNode: focusNode,
+              child: TextField(controller: controller, focusNode: focusNode),
+            ),
+          ),
+        ),
+      ),
+    );
+    notifier.receiveText("舊資料");
+    // Runs after the region builds but before its queued sync callback.
+    tester.binding.addPostFrameCallback((_) => notifier.receiveText("最新資料"));
+    await tester.pump();
+    expect(controller.text, "最新資料");
+    expect(notifier.edits, isEmpty);
+    await tester.pump();
+  });
+
+  testWidgets("a queued sync waits for an IME started later in the frame", (
+    tester,
+  ) async {
+    const documentId = "projectText:worldNode:world-1:note";
+    final notifier = _ImeCollaborationNotifier(documentId);
+    final container = ProviderContainer(
+      overrides: [collaborationProvider.overrideWith(() => notifier)],
+    );
+    final controller = TextEditingController(text: "班");
+    final focusNode = FocusNode();
+    addTearDown(container.dispose);
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: Scaffold(
+            body: CollaborativeProjectTextFieldRegion(
+              fieldId: documentId,
+              crdtDocumentId: documentId,
+              controller: controller,
+              focusNode: focusNode,
+              child: TextField(controller: controller, focusNode: focusNode),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.showKeyboard(find.byType(TextField));
+    notifier.receiveText("隔壁班");
+    const preedit = TextEditingValue(
+      text: "班ㄐ",
+      selection: TextSelection.collapsed(offset: 2),
+      composing: TextRange(start: 1, end: 2),
+    );
+    tester.binding.addPostFrameCallback((_) {
+      tester.testTextInput.updateEditingValue(preedit);
+    });
+    await tester.pump();
+    expect(controller.value, preedit);
+    expect(notifier.edits, isEmpty);
+    // Cancel the preedit. The deferred remote text must still be applied,
+    // even though its provider did not change again.
+    tester.testTextInput.updateEditingValue(
+      const TextEditingValue(
+        text: "班",
+        selection: TextSelection.collapsed(offset: 1),
+      ),
+    );
+    await tester.pump();
+    expect(controller.text, "隔壁班");
+    expect(notifier.edits, isEmpty);
+  });
+
   testWidgets("Mosaic remote cursors avoid hidden UUID and note syntax", (
     tester,
   ) async {
@@ -368,6 +519,59 @@ final class _CursorOnlyCollaborationNotifier extends CollaborationNotifier {
   }) {
     cursorUpdates += 1;
   }
+
+  @override
+  void clearLocalProjectTextCursor(String documentId) {}
+}
+
+final class _ImeCollaborationNotifier extends CollaborationNotifier {
+  final String documentId;
+  final edits = <CollaborativeTextDelta>[];
+
+  _ImeCollaborationNotifier(this.documentId);
+
+  @override
+  CollaborationState build() => CollaborationState(
+    document: CollaborationDocument.seeded(
+      projectUuid: "11111111-1111-4111-8111-111111111111",
+      replicaId: "local",
+      chapterTexts: const <String, String>{},
+      projectTexts: <String, String>{documentId: "班"},
+    ),
+  );
+
+  void receiveText(String text) {
+    final document = state.document!;
+    state = state.copyWith(
+      document: document.createLocalTextDelta(
+        documentId: documentId,
+        delta: CollaborativeTextDelta.between(document.text(documentId)!, text),
+      ),
+    );
+  }
+
+  @override
+  void recordLocalProjectTextEdit({
+    required String documentId,
+    required CollaborativeTextDelta delta,
+    required int anchorOffset,
+    required int focusOffset,
+  }) {
+    edits.add(delta);
+    state = state.copyWith(
+      document: state.document!.createLocalTextDelta(
+        documentId: documentId,
+        delta: delta,
+      ),
+    );
+  }
+
+  @override
+  void updateLocalProjectTextCursor({
+    required String documentId,
+    required int anchorOffset,
+    required int focusOffset,
+  }) {}
 
   @override
   void clearLocalProjectTextCursor(String documentId) {}

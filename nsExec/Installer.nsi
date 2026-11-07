@@ -4,7 +4,7 @@
 !define APP_SOURCE_DIR "Release"
 !define APP_EXE "dart_edition.exe"
 !define APP_NAME "Monogatari Assistant"
-!define APP_VERSION "0.8.93 Beta 7"
+!define APP_VERSION "0.9.63 RC1"
 !define UNINSTALL_REG_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\MonogatariAssistant"
 !define PROJECT_FILE_EXTENSION ".mnproj"
 !define PROJECT_FILE_PROGID "MonogatariAssistant.Project"

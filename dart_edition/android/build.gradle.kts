@@ -1,4 +1,13 @@
 allprojects {
+    // Kotlin's incremental path converter cannot relativize plugin sources on
+    // another Windows drive (for example C: Pub cache and an E: checkout).
+    // Keep incremental compilation for the app and projects on the same drive.
+    if (System.getProperty("os.name").startsWith("Windows") &&
+        projectDir.toPath().root != rootProject.projectDir.toPath().root
+    ) {
+        extensions.extraProperties.set("kotlin.incremental", "false")
+    }
+
     repositories {
         google()
         mavenCentral()

@@ -3,7 +3,7 @@
 Build the release bridge, then measure raw FFI and worker-isolate round trips:
 
 ```text
-dart run tool/build_rhodanthe_native.dart --platform windows
+dart --disable-dart-dev tool/build_rhodanthe_native.dart --platform windows
 dart run benchmark/rhodanthe_native_benchmark.dart
 dart run benchmark/rhodanthe_native_benchmark.dart --gate
 ```

@@ -176,6 +176,11 @@ final class RhodantheNativeClient {
 DynamicLibrary _openLibrary(String? explicitPath) {
   if (explicitPath != null) return DynamicLibrary.open(explicitPath);
   if (Platform.isIOS) return DynamicLibrary.process();
+  // Android's linker resolves the packaged library for the current ABI,
+  // including libraries loaded directly from an APK without extraction.
+  if (Platform.isAndroid) {
+    return DynamicLibrary.open("librhodanthe_bridge.so");
+  }
 
   final fileName = switch (Platform.operatingSystem) {
     "windows" => "rhodanthe_bridge.dll",
